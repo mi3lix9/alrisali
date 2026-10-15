@@ -8,6 +8,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Domain classifier tests with recorded keypoint fixtures
-- [ ] Physical-device run detects Positions
-- [ ] Camera only while screen open
+- [x] Domain classifier tests with recorded keypoint fixtures (real MoveNet f16 outputs of the CC BY-SA "Намоз" photo series, `pose-fixtures.ts`; both engines, plus a recorded Fajr through the rak'ah machine)
+- [ ] Physical-device run detects Positions — pending device verification (frame worklet, front-camera orientation/mirroring, in-loop latency, Android resizer)
+- [x] Camera only while screen open (sensor mounted only while praying in Camera/Head Height mode; `isActive` follows the app foreground; session released on close; preview hidden unless "Show the camera")

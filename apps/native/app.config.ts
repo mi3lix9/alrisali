@@ -42,6 +42,12 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: true,
     bundleIdentifier: APP_ID,
     usesAppleSignIn: true,
+    infoPlist: {
+      // The Prayer Assistant's Camera and Head Height modes (VisionCamera has
+      // no config plugin of its own).
+      NSCameraUsageDescription:
+        "يرى الرسالي وضعيتك أثناء الصلاة ليتابع أركانها، والمعاينة مخفية فلا ترى نفسك، ولا يُحفظ شيء من الصور. Al-Risali watches your posture during Salah to follow its Positions; the preview stays hidden so you don't watch yourself, and no image is kept.",
+    },
   },
   android: {
     adaptiveIcon: {
@@ -52,9 +58,13 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     },
     predictiveBackGestureEnabled: false,
     package: APP_ID,
-    // Reminders fire at the Prayer Time itself; without it Android may
-    // deliver them minutes late (features/reminders asks for it).
-    permissions: ["android.permission.SCHEDULE_EXACT_ALARM"],
+    permissions: [
+      // Reminders fire at the Prayer Time itself; without it Android may
+      // deliver them minutes late (features/reminders asks for it).
+      "android.permission.SCHEDULE_EXACT_ALARM",
+      // The Prayer Assistant's Camera and Head Height modes see the Believer.
+      "android.permission.CAMERA",
+    ],
     config: googleMapsAndroid(),
   },
   web: {
@@ -100,6 +110,10 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     // Gatherings' venue maps: Apple Maps on iOS, Google Maps on Android. No
     // location permission: the maps show venues, never the Believer.
     "expo-maps",
+    // VisionCamera's GPU Resizer needs Android 8 (API 26). It also compiles a
+    // Metal shader on iOS: every Mac that builds needs Xcode's Metal
+    // Toolchain (`xcodebuild -downloadComponent MetalToolchain`).
+    ["expo-build-properties", { android: { minSdkVersion: 26 } }],
     ["@hot-updater/expo", { channel: OTA_CHANNEL }],
     [
       "@sentry/react-native/expo",
