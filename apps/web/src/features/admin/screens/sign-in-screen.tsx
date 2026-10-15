@@ -7,6 +7,8 @@ import { orpc } from "@/shared/lib/orpc";
 import { Button } from "@/shared/ui/button";
 import Loader from "@/shared/ui/loader";
 
+import { EmailPasswordForm } from "../components/email-password-form";
+
 const PROVIDER_LABELS: Record<WebSignInProvider, string> = {
   apple: "Sign in with Apple",
   google: "Sign in with Google",
@@ -16,10 +18,11 @@ const PROVIDER_LABELS: Record<WebSignInProvider, string> = {
  * Admins sign in with the Apple or Google account they use in the app: the
  * same account, on the phone and the web. Only an account given the Admin
  * role (`bun run admin:grant <email>` in apps/server) gets past the admin
- * pages. A button shows for each provider the server has web credentials for.
+ * pages. A button shows for each provider the server has web credentials for;
+ * in local development, email and password too.
  */
 export const SignInScreen = () => {
-  const providers = useQuery(orpc.account.webSignInProviders.queryOptions());
+  const options = useQuery(orpc.account.signInOptions.queryOptions());
   const signIn = useMutation({
     mutationFn: async (provider: WebSignInProvider) => {
       const { origin } = window.location;
@@ -43,18 +46,18 @@ export const SignInScreen = () => {
       <p className="text-muted-foreground text-center">
         Use the Apple or Google account you sign in to the app with.
       </p>
-      {providers.isPending ? <Loader /> : null}
-      {providers.isError ? (
+      {options.isPending ? <Loader /> : null}
+      {options.isError ? (
         <p className="text-destructive">
-          Could not reach the server: {providers.error.message}
+          Could not reach the server: {options.error.message}
         </p>
       ) : null}
-      {providers.data?.providers.length === 0 ? (
+      {options.data?.providers.length === 0 && !options.data.emailPassword ? (
         <p className="text-muted-foreground text-center">
           No sign-in provider is configured on the server.
         </p>
       ) : null}
-      {providers.data?.providers.map((provider) => (
+      {options.data?.providers.map((provider) => (
         <Button
           key={provider}
           className="w-full"
@@ -64,6 +67,7 @@ export const SignInScreen = () => {
           {PROVIDER_LABELS[provider]}
         </Button>
       ))}
+      {options.data?.emailPassword ? <EmailPasswordForm /> : null}
     </main>
   );
 };

@@ -36,6 +36,9 @@ export interface AuthConfig {
   APPLE_TEAM_ID?: string | undefined;
   APPLE_KEY_ID?: string | undefined;
   APPLE_PRIVATE_KEY?: string | undefined;
+  NODE_ENV?: string | undefined;
+  /** Email and password sign-in for local development; see below. */
+  AUTH_DEV_EMAIL_PASSWORD?: boolean | undefined;
 }
 
 export const WEB_SIGN_IN_PROVIDERS = ["apple", "google"] as const;
@@ -53,6 +56,35 @@ export const webSignInProviders = (env: AuthConfig): WebSignInProvider[] =>
           env.APPLE_PRIVATE_KEY
         )
   );
+
+/**
+ * Email and password sign-in and sign-up, for local development only: on by
+ * default outside production, always off in production. Turning it on in
+ * production stops the server from starting.
+ */
+export const devEmailPasswordEnabled = ({
+  NODE_ENV,
+  AUTH_DEV_EMAIL_PASSWORD,
+}: Pick<AuthConfig, "NODE_ENV" | "AUTH_DEV_EMAIL_PASSWORD">): boolean => {
+  const production = NODE_ENV === "production";
+  if (production && AUTH_DEV_EMAIL_PASSWORD === true) {
+    throw new Error(
+      "AUTH_DEV_EMAIL_PASSWORD must not be true in production: email and password sign-in is for local development only"
+    );
+  }
+  return AUTH_DEV_EMAIL_PASSWORD ?? !production;
+};
+
+/** How clients may sign in, as `account.signInOptions` tells them. */
+export interface SignInOptions {
+  providers: readonly WebSignInProvider[];
+  emailPassword: boolean;
+}
+
+export const signInOptions = (env: AuthConfig): SignInOptions => ({
+  providers: webSignInProviders(env),
+  emailPassword: devEmailPasswordEnabled(env),
+});
 
 /**
  * Checks a provider's ID token signature and claims. Only tests replace the
@@ -128,7 +160,9 @@ export const createAuth = (
     ],
     // Believers use the native Apple and Google sheets, which hand the server
     // an ID token; Admins sign in to the web with the same providers (OAuth
-    // redirect), so an Admin has one account on the phone and the web.
+    // redirect), so an Admin has one account on the phone and the web. Email
+    // and password exists for local development only.
+    emailAndPassword: { enabled: devEmailPasswordEnabled(env) },
     socialProviders: {
       apple,
       google: {

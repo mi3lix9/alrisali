@@ -1,6 +1,10 @@
 import { generateKeyPairSync } from "node:crypto";
 
-import { createAuth, webSignInProviders } from "@alrisali/auth";
+import {
+  createAuth,
+  devEmailPasswordEnabled,
+  webSignInProviders,
+} from "@alrisali/auth";
 import type { AuthConfig } from "@alrisali/auth";
 import { createDb } from "@alrisali/db-server";
 import { migrateDb } from "@alrisali/db-server/migrate";
@@ -110,17 +114,68 @@ describe("Admin web sign-in", () => {
       "CLIENT_ID_AND_SECRET_REQUIRED"
     );
   });
+});
 
-  it("has no email and password sign-up", async () => {
-    const auth = await authFor(WEB);
+const ADMIN = {
+  email: "admin@example.com",
+  password: "password-123",
+  name: "Admin",
+};
+
+describe(devEmailPasswordEnabled, () => {
+  it("is on outside production unless turned off", () => {
+    expect(devEmailPasswordEnabled({ NODE_ENV: "development" })).toBeTruthy();
+    expect(devEmailPasswordEnabled({ NODE_ENV: "test" })).toBeTruthy();
+    expect(
+      devEmailPasswordEnabled({
+        NODE_ENV: "development",
+        AUTH_DEV_EMAIL_PASSWORD: false,
+      })
+    ).toBeFalsy();
+  });
+
+  it("is off in production", () => {
+    expect(devEmailPasswordEnabled({ NODE_ENV: "production" })).toBeFalsy();
+    expect(
+      devEmailPasswordEnabled({
+        NODE_ENV: "production",
+        AUTH_DEV_EMAIL_PASSWORD: false,
+      })
+    ).toBeFalsy();
+  });
+
+  it("refuses to start production with it turned on", () => {
+    expect(() =>
+      createAuth(
+        { ...WEB, NODE_ENV: "production", AUTH_DEV_EMAIL_PASSWORD: true },
+        createDb({ DATABASE_URL: ":memory:", DATABASE_AUTH_TOKEN: "" })
+      )
+    ).toThrow("AUTH_DEV_EMAIL_PASSWORD");
+  });
+});
+
+describe("email and password sign-in", () => {
+  it("signs up and in during local development", async () => {
+    const auth = await authFor({ ...WEB, NODE_ENV: "development" });
+
+    await auth.api.signUpEmail({ body: ADMIN });
 
     await expect(
-      auth.api.signUpEmail({
-        body: {
-          email: "admin@example.com",
-          password: "password-123",
-          name: "Admin",
-        },
+      auth.api.signInEmail({
+        body: { email: ADMIN.email, password: ADMIN.password },
+      })
+    ).resolves.toMatchObject({ user: { email: ADMIN.email } });
+  });
+
+  it("does not exist in production", async () => {
+    const auth = await authFor({ ...WEB, NODE_ENV: "production" });
+
+    await expect(auth.api.signUpEmail({ body: ADMIN })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    await expect(
+      auth.api.signInEmail({
+        body: { email: ADMIN.email, password: ADMIN.password },
       })
     ).rejects.toMatchObject({ statusCode: 400 });
   });

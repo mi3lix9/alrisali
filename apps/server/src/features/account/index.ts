@@ -1,14 +1,14 @@
 import { deleteAccount } from "./delete-account";
 import { privateData } from "./private-data";
+import { signInOptions } from "./sign-in-options";
 import { ensureUserDatabase, userDatabaseToken } from "./user-database";
-import { webSignInProviders } from "./web-sign-in-providers";
 
 export const accountRouter = {
   privateData,
   ensureUserDatabase,
   userDatabaseToken,
   deleteAccount,
-  webSignInProviders,
+  signInOptions,
 };
 
 export { createAppleRevokerFromEnv } from "./apple-sign-in";

@@ -8,6 +8,16 @@ export const ar = {
     google: "المتابعة باستخدام Google",
     failed: "تعذّر تسجيل الدخول. حاول مرة أخرى.",
   },
+  emailSignIn: {
+    title: "للتطوير: البريد الإلكتروني وكلمة المرور",
+    name: "الاسم",
+    email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    signIn: "تسجيل الدخول",
+    signUp: "إنشاء حساب",
+    needAccount: "ليس لديك حساب؟ أنشئ حسابًا",
+    haveAccount: "لديك حساب؟ سجّل الدخول",
+  },
   believer: {
     signedInAs: "مسجّل الدخول باسم",
   },

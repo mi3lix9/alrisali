@@ -12,6 +12,16 @@ export const en: Catalog<typeof ar> = {
     google: "Continue with Google",
     failed: "Couldn't sign in. Please try again.",
   },
+  emailSignIn: {
+    title: "Development: email and password",
+    name: "Name",
+    email: "Email",
+    password: "Password",
+    signIn: "Sign in",
+    signUp: "Create account",
+    needAccount: "No account? Create one",
+    haveAccount: "Have an account? Sign in",
+  },
   believer: {
     signedInAs: "Signed in as",
   },

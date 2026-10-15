@@ -72,13 +72,16 @@ The server reports unexpected errors only; oRPC errors below 500 (`UNAUTHORIZED`
 
 ## Sign-in
 
-Believers sign in with the native Apple (iOS) and Google sheets; the app sends the sheet's ID token to better-auth (`authClient.signIn.social({ provider, idToken })`) and keeps the session in SecureStore. Admins sign in to the web with the same providers through the OAuth redirect, so an Admin has one account on the phone and the web; the sign-in page shows a button for each provider the server has web credentials for (`account.webSignInProviders`). There is no email and password sign-in.
+Believers sign in with the native Apple (iOS) and Google sheets; the app sends the sheet's ID token to better-auth (`authClient.signIn.social({ provider, idToken })`) and keeps the session in SecureStore. Admins sign in to the web with the same providers through the OAuth redirect, so an Admin has one account on the phone and the web; the sign-in page shows a button for each provider the server has web credentials for (`account.signInOptions`).
+
+For local development and test accounts, email and password sign-in and sign-up sit under the Apple and Google buttons on the app's account screen and the admin web sign-in page. `AUTH_DEV_EMAIL_PASSWORD` turns it on; unset, it is on outside production and off in production, and the server refuses to start with it set to true in production. The app shows the form in development builds, or when the server reports it on.
 
 Deleting an account revokes the Believer's Sign in with Apple (Apple's REST `auth/revoke`): the app shows Apple's sheet once more for a fresh authorization code, which the server exchanges for the token it revokes. Without the Apple key the server skips the revocation and logs a warning.
 
 | Variable | Where | Value |
 | --- | --- | --- |
 | `GOOGLE_CLIENT_IDS` | server | Comma-separated Google OAuth client IDs whose ID tokens are accepted: the web client ID first (the Admin web uses it), then the iOS and Android ones |
+| `AUTH_DEV_EMAIL_PASSWORD` | server | Email and password sign-in for local development (default: on outside production; never in production) |
 | `GOOGLE_CLIENT_SECRET` | server | The web client's secret; turns on the Admin web's Google sign-in |
 | `APPLE_BUNDLE_IDS` | server | The app's bundle IDs (defaults to `com.alrisali.app,com.alrisali.app.dev`) |
 | `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | server | The Sign in with Apple key (.p8): token revocation on account deletion, and the Admin web's Apple sign-in |
