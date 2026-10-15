@@ -13,6 +13,13 @@ export const en: Catalog<typeof ar> = {
   },
   settings: "Settings",
   account: "Account",
+  search: {
+    label: "Search",
+    noResults: "No results.",
+  },
+  library: {
+    searchPlaceholder: "Search Surahs, supplications and materials",
+  },
   notFound: {
     title: "Page not found",
     goHome: "Back to Home",

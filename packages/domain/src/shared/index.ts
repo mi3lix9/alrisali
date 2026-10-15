@@ -121,3 +121,4 @@ export type {
   MoodCheckInSource,
   TasbihLabel,
 } from "./insights-sources";
+export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
