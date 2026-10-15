@@ -64,7 +64,9 @@ export type ReaderAction =
   | { type: "next-surah" }
   | { type: "previous-surah" }
   | { type: "switch-mode"; mode: ReaderMode }
-  | { type: "set-page-nav"; pageNav: PageNav };
+  | { type: "set-page-nav"; pageNav: PageNav }
+  /** The Believer marked an ayah as where they stopped (the ayah sheet). */
+  | { type: "set-last-read"; ayah: AyahKey };
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -166,6 +168,10 @@ export const readerReducer = (
     case "set-page-nav": {
       return { ...state, pageNav: action.pageNav };
     }
+    case "set-last-read": {
+      const ayah = findAyah(action.ayah);
+      return ayah ? { ...state, lastReadAyah: ayah.key } : state;
+    }
     default: {
       return state;
     }
@@ -183,10 +189,17 @@ export interface OpenReaderOptions {
   page?: number;
   /** Open at this surah (Surah Mode), when no ayah is given. */
   surah?: number;
+  /**
+   * Where the Believer stopped. With no target it is where the reader opens,
+   * in either mode.
+   */
   lastReadAyah?: AyahKey | null;
 }
 
-/** The reader as it opens; out-of-range targets fall back to the start. */
+/**
+ * The reader as it opens: at the target, else the Last-Read Ayah, else the
+ * start. Out-of-range targets are ignored.
+ */
 export const openReader = ({
   settings,
   ayah,
@@ -198,7 +211,10 @@ export const openReader = ({
   const target =
     known ??
     (page !== undefined && isPage(page) ? firstAyahOfPage(page) : undefined) ??
-    (surah !== undefined && isSurah(surah) ? ayatOfSurah(surah)[0] : undefined);
+    (surah !== undefined && isSurah(surah)
+      ? ayatOfSurah(surah)[0]
+      : undefined) ??
+    (lastReadAyah ? findAyah(lastReadAyah) : undefined);
   return {
     mode: settings.mode,
     pageNav: settings.pageNav,

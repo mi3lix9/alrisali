@@ -12,3 +12,14 @@ export const quranReaderSettings = sqliteTable("quran_reader_settings", {
     .notNull()
     .default(DEFAULT_QURAN_READER_SETTINGS.surahFontSize),
 });
+
+/**
+ * Where the Believer stopped reading, one row: the Last-Read Ayah as
+ * `surah:ayah`, shared by Page Mode and Surah Mode.
+ */
+export const quranLastRead = sqliteTable("quran_last_read", {
+  id: text("id").primaryKey(),
+  ayah: text("ayah").notNull(),
+  /** ISO instant. */
+  setAt: text("set_at").notNull(),
+});
