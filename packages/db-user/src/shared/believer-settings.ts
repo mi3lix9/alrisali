@@ -1,6 +1,8 @@
 import {
   calculationMethodSchema,
   DEFAULT_CALCULATION_METHOD,
+  DEFAULT_HIJRI_ADJUSTMENT,
+  hijriAdjustmentSchema,
   locationSchema,
 } from "@alrisali/domain/shared";
 import type { CalculationMethod, Location } from "@alrisali/domain/shared";
@@ -13,6 +15,8 @@ import type { UserDb } from "./user-database";
 export interface BelieverSettings {
   calculationMethod: CalculationMethod;
   location: Location | null;
+  /** The Believer's own Hijri Adjustment, added to the Admins'. */
+  hijriAdjustment: number;
 }
 
 /** The settings to change; anything left out keeps its saved value. */
@@ -30,12 +34,14 @@ const ROW_ID = "believer";
 const changeSchema = z.object({
   calculationMethod: calculationMethodSchema.optional(),
   location: locationSchema.nullable().optional(),
+  hijriAdjustment: hijriAdjustmentSchema.optional(),
 });
 
 type Row = typeof believerSettings.$inferSelect;
 
 const toSettings = (row: Row | undefined): BelieverSettings => {
   const method = calculationMethodSchema.safeParse(row?.calculationMethod);
+  const adjustment = hijriAdjustmentSchema.safeParse(row?.hijriAdjustment);
   const latitude = row?.locationLatitude ?? null;
   const longitude = row?.locationLongitude ?? null;
   return {
@@ -47,14 +53,22 @@ const toSettings = (row: Row | undefined): BelieverSettings => {
       latitude === null || longitude === null
         ? null
         : { latitude, longitude, name: row?.locationName ?? null },
+    hijriAdjustment: adjustment.success
+      ? adjustment.data
+      : DEFAULT_HIJRI_ADJUSTMENT,
   };
 };
 
-const toColumns = ({ calculationMethod, location }: BelieverSettings) => ({
+const toColumns = ({
+  calculationMethod,
+  location,
+  hijriAdjustment,
+}: BelieverSettings) => ({
   calculationMethod,
   locationLatitude: location?.latitude ?? null,
   locationLongitude: location?.longitude ?? null,
   locationName: location?.name ?? null,
+  hijriAdjustment,
 });
 
 export const createBelieverSettingsRepository = (
@@ -78,6 +92,7 @@ export const createBelieverSettingsRepository = (
       calculationMethod: parsed.calculationMethod ?? current.calculationMethod,
       location:
         parsed.location === undefined ? current.location : parsed.location,
+      hijriAdjustment: parsed.hijriAdjustment ?? current.hijriAdjustment,
     };
     const columns = toColumns(next);
     await db

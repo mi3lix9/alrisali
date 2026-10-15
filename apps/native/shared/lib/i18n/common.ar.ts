@@ -15,4 +15,23 @@ export const ar = {
     title: "الصفحة غير موجودة",
     goHome: "العودة إلى الرئيسية",
   },
+  // Hijri Dates appear across features, so their wording is the shell's.
+  hijri: {
+    date: "{{day}} {{month}} {{year}} هـ",
+    monthYear: "{{month}} {{year}} هـ",
+    months: {
+      muharram: "محرّم",
+      safar: "صفر",
+      rabiAlAwwal: "ربيع الأول",
+      rabiAlThani: "ربيع الآخر",
+      jumadaAlUla: "جمادى الأولى",
+      jumadaAlAkhirah: "جمادى الآخرة",
+      rajab: "رجب",
+      shaban: "شعبان",
+      ramadan: "رمضان",
+      shawwal: "شوّال",
+      dhuAlQadah: "ذو القعدة",
+      dhuAlHijjah: "ذو الحجة",
+    },
+  },
 };

@@ -9,4 +9,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190433_hijri_adjustment",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
+    ],
+  },
 ];

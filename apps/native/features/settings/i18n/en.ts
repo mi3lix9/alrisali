@@ -35,6 +35,17 @@ export const en: Catalog<typeof ar> = {
     hanafi: "Hanafi",
     ibadi: "Ibadi",
   },
+  hijriAdjustment: {
+    title: "Hijri Adjustment",
+    description:
+      "Move the Hijri Date up to two days back or ahead to match the moon sighting you follow. It applies to every Hijri Date in the app.",
+    today: "Today: {{date}}",
+    minus2: "2 days back",
+    minus1: "1 day back",
+    none: "No adjustment",
+    plus1: "1 day ahead",
+    plus2: "2 days ahead",
+  },
   textSize: {
     title: "Text size",
     small: "Small",
