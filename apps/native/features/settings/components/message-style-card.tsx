@@ -1,3 +1,4 @@
+import "../i18n";
 import { MESSAGE_STYLES } from "@alrisali/domain/shared";
 import { Card, RadioGroup } from "panelui-native";
 import { useTranslation } from "react-i18next";
