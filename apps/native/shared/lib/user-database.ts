@@ -156,7 +156,11 @@ const syncReportingErrors = (): Promise<void> => {
 
 // Sign-in creates the Believer's cloud database (first time only) and pushes
 // everything they recorded as a Guest; a second device receives their data.
-events.on("SignedIn", syncReportingErrors);
+// Requests still in flight from before sign-in are dropped first.
+events.on("SignedIn", () => {
+  disconnectCloudDatabase();
+  return syncReportingErrors();
+});
 
 /** Opens the database at launch and syncs on launch and on every foreground. */
 export const useUserDataSync = (): void => {
