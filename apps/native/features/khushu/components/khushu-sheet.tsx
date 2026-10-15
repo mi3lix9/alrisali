@@ -22,6 +22,7 @@ import {
 } from "../data/khushu";
 import { useKhushuSheet } from "../hooks/use-khushu-sheet";
 import type { KhushuTarget } from "../hooks/use-khushu-sheet";
+import { listenForUnloggedSalah } from "../utils/unlogged-salah";
 
 interface KhushuFormProps {
   target: KhushuTarget;
@@ -152,11 +153,12 @@ const KhushuForm = ({ target, saved, onDone }: KhushuFormProps) => {
 /**
  * The Khushu sheet: opens after the Believer ticks a Salah (`SalahLogged`)
  * or presses a Khushu button, to rate, edit or remove that Salah's Khushu.
- * Mount it once.
+ * Un-ticking a Salah (`SalahUnlogged`) removes its Khushu. Mount it once.
  */
 export const KhushuSheet = () => {
   const { target, open, close } = useKhushuSheet();
   const { data: entries } = useKhushuEntries();
+  const { mutate: removeKhushu } = useRemoveKhushu();
 
   useEffect(
     () =>
@@ -165,6 +167,8 @@ export const KhushuSheet = () => {
       ),
     [open]
   );
+
+  useEffect(() => listenForUnloggedSalah(events, removeKhushu), [removeKhushu]);
 
   const saved =
     target &&
