@@ -6,7 +6,7 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings), 09 (Reminders for Prayer Times and Imsak)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
 - [x] Domain tests: schedule evaluation and Habit streaks
 - [x] Habit Reminders scheduled via the planner (delivery on a device: pending simulator verification)
