@@ -65,6 +65,19 @@ Sentry captures errors from all three apps. Each turns on only when its DSN is s
 
 The server reports unexpected errors only; oRPC errors below 500 (`UNAUTHORIZED`, `NOT_FOUND` and the like) are expected and are not sent. Native release builds upload source maps and debug symbols when `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` are set at build time, and skip the upload otherwise.
 
+## Sign-in
+
+Believers sign in with the native Apple (iOS) and Google sheets; the app sends the sheet's ID token to better-auth (`authClient.signIn.social({ provider, idToken })`) and keeps the session in SecureStore. Admins sign in to the web with email and password.
+
+| Variable | Where | Value |
+| --- | --- | --- |
+| `GOOGLE_CLIENT_IDS` | server | Comma-separated Google OAuth client IDs whose ID tokens are accepted: the web client ID, plus the iOS and Android ones |
+| `APPLE_BUNDLE_IDS` | server | The app's bundle IDs (defaults to `com.alrisali.app,com.alrisali.app.dev`) |
+| `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` | native | The Google web client ID, passed as `webClientId` |
+| `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` | native | The Google iOS client ID; `app.config.ts` derives the iOS URL scheme from it |
+
+Google Cloud Console needs a web client, an iOS client for each bundle ID, and an Android client per package name and signing SHA-1. The Apple Developer account needs the Sign in with Apple capability on each App ID. Native sign-in needs a dev build (not Expo Go). Signing out asks for confirmation, then emits `SignedOut` on the event bus; the device database wipes itself on that event.
+
 ## License
 
 Code: [MIT](LICENSE). Bundled content keeps its own licences.

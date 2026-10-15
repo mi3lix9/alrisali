@@ -1,8 +1,5 @@
-import type { Session } from "@alrisali/auth";
+import type { Auth, Session } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
-import type { Context as HonoContext } from "hono";
-
-import { db, auth } from "./services";
 
 /** What every oRPC procedure receives. */
 export interface Context {
@@ -11,17 +8,17 @@ export interface Context {
 }
 
 export interface CreateContextOptions {
-  context: HonoContext;
+  auth: Auth;
+  db: Database;
+  headers: Headers;
 }
 
+/** Resolves the caller's session from the request's cookies, if any. */
 export const createContext = async ({
-  context,
-}: CreateContextOptions): Promise<Context> => {
-  const session = await auth.api.getSession({
-    headers: context.req.raw.headers,
-  });
-  return {
-    db,
-    session,
-  };
-};
+  auth,
+  db,
+  headers,
+}: CreateContextOptions): Promise<Context> => ({
+  db,
+  session: await auth.api.getSession({ headers }),
+});
