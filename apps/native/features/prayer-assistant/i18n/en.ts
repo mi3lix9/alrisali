@@ -113,9 +113,23 @@ export const en: Catalog<typeof ar> = {
     showPreview: "Show the camera",
     unsupported: "This device can't follow your Positions with the camera.",
     denied:
-      "Camera access isn't allowed. Allow it in Settings so the camera can follow your Positions.",
+      "Camera access isn't allowed. Allow it in Settings so the assistant can follow your Salah with the camera.",
     fallback:
       "Carry on by tap: touch the screen as you move to the next Position.",
     openSettings: "Open Settings",
+  },
+  mat: {
+    placing:
+      "Lay the phone on the mat where you prostrate, screen facing up. Starting in {{value}} s.",
+    calibrating: "Learning the ceiling's light. Keep the phone still.",
+    watching: "Each sujud over the camera counts. Tap if one is missed.",
+    covered: "Sujud seen.",
+    meter: "How close a sujud is to counting",
+    tooDark:
+      "The room is too dark to see your sujud. Turn on a light, then recalibrate.",
+    unreadable: "This device's camera can't measure light for Mat mode.",
+    recalibrate: "Recalibrate",
+    privacy:
+      "Only the ceiling's light is measured, on this device. Nothing is kept.",
   },
 };

@@ -16,6 +16,7 @@ import { Temporal } from "temporal-polyfill";
 import { events } from "@/shared/lib/events";
 import { Screen } from "@/shared/ui/screen";
 
+import { MatSensor } from "../components/mat-sensor";
 import { PoseSensor } from "../components/pose-sensor";
 import { PrayingView } from "../components/praying-view";
 import { SalahSetup } from "../components/salah-setup";
@@ -56,6 +57,9 @@ const Sensor = ({ mode, bowSensitivity, state, send }: SensorProps) => {
     }
     case "sound": {
       return <TakbirSensor underWay={state.index > 0} send={send} />;
+    }
+    case "mat": {
+      return <MatSensor state={state} send={send} />;
     }
     default: {
       return null;

@@ -1,31 +1,17 @@
 import type { PoseEngine, Sighting } from "@alrisali/domain/prayer-assistant";
-import { Alert, Button, Spinner, Switch, Text } from "panelui-native";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { Alert, Spinner, Switch, Text } from "panelui-native";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AppState, Linking, StyleSheet, View } from "react-native";
-import {
-  Camera,
-  useCamera,
-  useCameraPermission,
-} from "react-native-vision-camera";
+import { StyleSheet, View } from "react-native";
+import { Camera, useCamera } from "react-native-vision-camera";
 import type { CameraFrameOutput, Constraint } from "react-native-vision-camera";
 
+import { useForeground } from "../hooks/use-foreground";
 import { usePoseSensor } from "../hooks/use-pose-sensor";
+import { CameraPermission } from "./camera-permission";
 
 /** MoveNet reads about ten frames a second; more would only cost battery. */
 const CONSTRAINTS: Constraint[] = [{ fps: 15 }];
-
-const subscribeAppState = (onChange: () => void) => {
-  const subscription = AppState.addEventListener("change", onChange);
-  return () => subscription.remove();
-};
-
-/** The camera runs only while the app is in the foreground. */
-const useForeground = (): boolean =>
-  useSyncExternalStore(
-    subscribeAppState,
-    () => AppState.currentState === "active"
-  );
 
 interface CameraProps {
   isActive: boolean;
@@ -127,46 +113,8 @@ const Watching = ({
  * unless they ask to see it. The camera stops when the screen closes or the
  * app leaves the foreground; tap carries the Salah on if it can't watch.
  */
-export const PoseSensor = (props: PoseSensorProps) => {
-  const { t } = useTranslation("prayer-assistant");
-  const { hasPermission, canRequestPermission, requestPermission } =
-    useCameraPermission();
-
-  useEffect(() => {
-    if (!hasPermission && canRequestPermission) {
-      void requestPermission();
-    }
-  }, [hasPermission, canRequestPermission, requestPermission]);
-
-  if (hasPermission) {
-    return <Watching {...props} />;
-  }
-  if (canRequestPermission) {
-    return (
-      <View className="flex-row items-center justify-center gap-2">
-        <Spinner size="sm" />
-        <Text muted>{t("camera.asking")}</Text>
-      </View>
-    );
-  }
-  return (
-    <Alert variant="warning">
-      <Alert.Indicator />
-      <Alert.Content>
-        <Alert.Title>{t("camera.denied")}</Alert.Title>
-        <Alert.Description>{t("camera.fallback")}</Alert.Description>
-        <View className="flex-row flex-wrap gap-2 pt-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onPress={() => {
-              void Linking.openSettings();
-            }}
-          >
-            {t("camera.openSettings")}
-          </Button>
-        </View>
-      </Alert.Content>
-    </Alert>
-  );
-};
+export const PoseSensor = (props: PoseSensorProps) => (
+  <CameraPermission>
+    <Watching {...props} />
+  </CameraPermission>
+);
