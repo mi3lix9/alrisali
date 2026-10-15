@@ -41,4 +41,11 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `believer_settings` ADD `time_format` text;",
     ],
   },
+  {
+    tag: "20261015192812_mood_check_ins",
+    statements: [
+      "CREATE TABLE `mood_check_ins` (\n\t`id` text PRIMARY KEY,\n\t`mood` text NOT NULL,\n\t`remedy_id` text NOT NULL,\n\t`checked_in_at` integer NOT NULL\n);",
+      "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",
+    ],
+  },
 ];
