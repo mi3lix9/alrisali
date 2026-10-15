@@ -5,7 +5,7 @@ import { logger } from "hono/logger";
 import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
-import { auth, db } from "./services";
+import { auth, db, userDatabases } from "./services";
 import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
 import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
 
@@ -39,6 +39,7 @@ app.use("/*", async (c, next) => {
   const context = await createContext({
     auth,
     db,
+    userDatabases,
     headers: c.req.raw.headers,
   });
 

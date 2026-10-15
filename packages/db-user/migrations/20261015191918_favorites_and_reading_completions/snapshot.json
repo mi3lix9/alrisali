@@ -1,11 +1,15 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "668d4e15-bd0b-4b58-a4ee-acc2d262203b",
+  "id": "844b0a5c-2e8e-4998-8f2c-09e947e8df4b",
   "prevIds": ["f6b9e1cd-5c37-45f5-8520-634e6e41ea5a"],
   "ddl": [
     {
-      "name": "quran_reader_settings",
+      "name": "favorites",
+      "entityType": "tables"
+    },
+    {
+      "name": "reading_completions",
       "entityType": "tables"
     },
     {
@@ -28,37 +32,77 @@
       "generated": null,
       "name": "id",
       "entityType": "columns",
-      "table": "quran_reader_settings"
+      "table": "favorites"
     },
     {
       "type": "text",
       "notNull": true,
       "autoincrement": false,
-      "default": "'page'",
+      "default": null,
       "generated": null,
-      "name": "mode",
+      "name": "kind",
       "entityType": "columns",
-      "table": "quran_reader_settings"
+      "table": "favorites"
     },
     {
       "type": "text",
       "notNull": true,
       "autoincrement": false,
-      "default": "'horizontal'",
+      "default": null,
       "generated": null,
-      "name": "page_nav",
+      "name": "key",
       "entityType": "columns",
-      "table": "quran_reader_settings"
+      "table": "favorites"
     },
     {
-      "type": "integer",
+      "type": "text",
       "notNull": true,
       "autoincrement": false,
-      "default": "26",
+      "default": null,
       "generated": null,
-      "name": "surah_font_size",
+      "name": "favorited_at",
       "entityType": "columns",
-      "table": "quran_reader_settings"
+      "table": "favorites"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "reading_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "supplication_id",
+      "entityType": "columns",
+      "table": "reading_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "reading_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "completed_at",
+      "entityType": "columns",
+      "table": "reading_completions"
     },
     {
       "type": "text",
@@ -203,8 +247,15 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
-      "name": "quran_reader_settings_pk",
-      "table": "quran_reader_settings",
+      "name": "favorites_pk",
+      "table": "favorites",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "reading_completions_pk",
+      "table": "reading_completions",
       "entityType": "pks"
     },
     {
@@ -227,6 +278,34 @@
       "name": "tasbih_pk",
       "table": "tasbih",
       "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "favorited_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "favorites_favorited_at",
+      "entityType": "indexes",
+      "table": "favorites"
+    },
+    {
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "reading_completions_date",
+      "entityType": "indexes",
+      "table": "reading_completions"
     },
     {
       "columns": [

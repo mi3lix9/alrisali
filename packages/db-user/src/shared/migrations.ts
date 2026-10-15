@@ -18,7 +18,16 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015192049_quran_reader_settings",
+    tag: "20261015191918_favorites_and_reading_completions",
+    statements: [
+      "CREATE TABLE `favorites` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`key` text NOT NULL,\n\t`favorited_at` text NOT NULL\n);",
+      "CREATE TABLE `reading_completions` (\n\t`id` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` text NOT NULL\n);",
+      "CREATE INDEX `favorites_favorited_at` ON `favorites` (`favorited_at`);",
+      "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015192341_quran_reader_settings",
     statements: [
       "CREATE TABLE `quran_reader_settings` (\n\t`id` text PRIMARY KEY,\n\t`mode` text DEFAULT 'page' NOT NULL,\n\t`page_nav` text DEFAULT 'horizontal' NOT NULL,\n\t`surah_font_size` integer DEFAULT 26 NOT NULL\n);",
     ],
