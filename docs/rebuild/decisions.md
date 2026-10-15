@@ -53,21 +53,25 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
 | Tests | Vitest; end-to-end with e2e (tester.army), one test suite for web, iOS and Android |
 | CI | GitHub Actions running uncheck and the tests |
 
-## Layout
+## Layout (ADR-0005)
 
 ```
-apps/native     Expo app; features/<glossary term>/
-apps/web        TanStack Start: landing + /admin
-apps/server     Hono + Bun + oRPC
-packages/domain pure TS: prayer times, Hijri, streaks, tasbih, recite matcher, rak'ah machine
-packages/api    oRPC contracts
+apps/native     app/ (thin routes) · features/<feature>/ · shared/{utils,ui,lib}
+apps/web        routes/ (thin) · features/<feature>/ (landing, admin-*) · shared/{utils,ui,lib}
+apps/server     features/<feature>/ (oRPC implementations, jobs) · shared/{utils,lib}
+packages/domain domain/<feature>/ pure rules + domain/shared/
+packages/api    api/<feature>/ oRPC contracts
+packages/db-user | db-content   <feature>/ tables, one migrations folder per package
+packages/db-server  auth, push tokens, contact, analytics tables
 packages/auth   better-auth config
-packages/db-user | db-content | db-server   Drizzle schemas + migrations
 packages/content bundled Quran/books data + NOTICE per source
-packages/i18n   ar/en catalogs
 packages/config shared tsconfig/lint
 packages/e2e    e2e tests
 ```
+
+Feature folder: `screens/ components/ hooks/ data/ i18n/ utils/ index.ts`; `index.ts` is the only public entry point, and empty subfolders are omitted. Features never import each other. Routes and Home compose them, and cross-feature events go through the typed event bus in `shared/lib`. `shared/` never imports a feature. oxlint `no-restricted-imports` and dependency-cruiser enforce this.
+
+Native features: onboarding, account, settings, home, prayer-times, prayer-log, khushu, qibla, prayer-assistant, reminders, calendar, gatherings, quran, books, recite-along, library-assets, lessons, tasbih, habits, programs, mood, companion, insights, announcements, contact. Web features: landing, admin-programs, admin-occasions, admin-gatherings, admin-lessons, admin-library, admin-daily-content, admin-announcements, admin-messages, admin-analytics.
 
 ## Spike results (2026-10-15, iOS simulator only; Android skipped)
 

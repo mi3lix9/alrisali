@@ -261,7 +261,7 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
 
 ### Monorepo and stack
 
-- bun workspaces with Turborepo.
+- bun workspaces with Turborepo. Code is organised by feature, with lint-enforced boundaries (ADR-0005). Every app has `features/<feature>/` and `shared/`. The domain, api, db-user and db-content packages are split per feature. Features never import each other and communicate through a typed event bus.
 - Apps:
   - Native app (Expo SDK 58, dev client, New Architecture).
   - Web app (TanStack Start: landing pages plus admin).
@@ -275,10 +275,9 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
   | auth | better-auth configuration |
   | db-user, db-content, db-server | Drizzle schemas and migrations |
   | content | Bundled Quran and Books data, with a notice per source |
-  | i18n | Arabic and English catalogues |
   | config | Shared configuration |
   | e2e | End-to-end tests |
-  | ui | Web shadcn components |
+  | ui | Web shadcn components (consumed through the web app's `shared/ui`) |
 
 - Native app:
   - Shell: expo-router native tabs, stack and modals; `@expo/ui` for SwiftUI/Compose controls and sheets.

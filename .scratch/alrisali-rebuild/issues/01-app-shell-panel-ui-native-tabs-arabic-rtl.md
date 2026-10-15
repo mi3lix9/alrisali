@@ -4,7 +4,7 @@
 
 **What to build:** Replace the scaffold's demo screens with the real app shell: expo-router native tabs (Home, Prayer, Library, Worship, Tasbih) with native stack/modals, Panel UI screens on Uniwind/Tailwind v4, Arabic RTL by default via expo-localization `forcesRTL` with an English switch, light/dark themes, typed i18n catalogues (ar/en). Every tab opens an empty, correctly-titled screen.
 
-**Blocked by:** None (can start immediately)
+**Blocked by:** 00 (Feature folder structure and enforced boundaries)
 
 **Status:** ready-for-agent
 

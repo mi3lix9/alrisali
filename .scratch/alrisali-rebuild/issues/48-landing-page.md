@@ -4,7 +4,7 @@
 
 **What to build:** Public landing page in Arabic and English with store links, Privacy, Terms and Contact pages on the web app.
 
-**Blocked by:** None (can start immediately)
+**Blocked by:** 00 (Feature folder structure and enforced boundaries)
 
 **Status:** ready-for-agent
 

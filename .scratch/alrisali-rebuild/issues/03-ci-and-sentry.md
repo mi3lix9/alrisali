@@ -4,7 +4,7 @@
 
 **What to build:** Every push runs uncheck (oxlint, oxfmt, tsc, sherif) and Vitest in GitHub Actions; Sentry captures errors from the native app, server and web app.
 
-**Blocked by:** None (can start immediately)
+**Blocked by:** 00 (Feature folder structure and enforced boundaries)
 
 **Status:** ready-for-agent
 
