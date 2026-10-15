@@ -9,4 +9,12 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `global_settings` (\n\t`id` text PRIMARY KEY,\n\t`hijri_adjustment` integer DEFAULT 0 NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015201516_programs",
+    statements: [
+      "CREATE TABLE `program_acts` (\n\t`id` text PRIMARY KEY,\n\t`program_id` text NOT NULL,\n\t`position` integer NOT NULL,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`description_ar` text DEFAULT '' NOT NULL,\n\t`description_en` text DEFAULT '' NOT NULL,\n\t`schedule` text NOT NULL,\n\t`salah` text,\n\t`detail` text NOT NULL\n);",
+      "CREATE TABLE `programs` (\n\t`id` text PRIMARY KEY,\n\t`category` text NOT NULL,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`description_ar` text DEFAULT '' NOT NULL,\n\t`description_en` text DEFAULT '' NOT NULL,\n\t`window_start_month` integer,\n\t`window_start_day` integer,\n\t`window_end_month` integer,\n\t`window_end_day` integer,\n\t`active` integer DEFAULT true NOT NULL,\n\t`position` integer NOT NULL\n);",
+      "CREATE INDEX `program_acts_program_idx` ON `program_acts` (`program_id`);",
+    ],
+  },
 ];

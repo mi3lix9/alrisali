@@ -19,6 +19,7 @@ export const ar = {
   hijri: {
     date: "{{day}} {{month}} {{year}} هـ",
     monthYear: "{{month}} {{year}} هـ",
+    dayMonth: "{{day}} {{month}}",
     months: {
       muharram: "محرّم",
       safar: "صفر",

@@ -88,7 +88,11 @@ const open = async (): Promise<ContentReplica> => {
   }
 };
 
-const getContentReplica = (): Promise<ContentReplica> => {
+/**
+ * The content replica, opened once. Content features read it under
+ * `CONTENT_QUERY_KEY`, so a pull that brings changes refreshes them.
+ */
+export const getContentReplica = (): Promise<ContentReplica> => {
   opening ??= open();
   return opening;
 };

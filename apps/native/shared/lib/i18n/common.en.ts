@@ -20,6 +20,7 @@ export const en: Catalog<typeof ar> = {
   hijri: {
     date: "{{day}} {{month}} {{year}} AH",
     monthYear: "{{month}} {{year}} AH",
+    dayMonth: "{{day}} {{month}}",
     months: {
       muharram: "Muharram",
       safar: "Safar",

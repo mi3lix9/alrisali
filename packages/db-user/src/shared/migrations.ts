@@ -87,4 +87,10 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `quran_reader_settings` ADD `reciter_id` integer DEFAULT 7 NOT NULL;",
     ],
   },
+  {
+    tag: "20261015201658_program_subscriptions",
+    statements: [
+      "CREATE TABLE `program_subscriptions` (\n\t`id` text PRIMARY KEY,\n\t`program_kind` text NOT NULL,\n\t`paused` integer DEFAULT false NOT NULL,\n\t`subscribed_at` integer NOT NULL\n);",
+    ],
+  },
 ];

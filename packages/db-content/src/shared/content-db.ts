@@ -1,5 +1,8 @@
 import { drizzle } from "drizzle-orm/sqlite-proxy";
-import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
+import type {
+  AsyncBatchRemoteCallback,
+  SqliteRemoteDatabase,
+} from "drizzle-orm/sqlite-proxy";
 
 /** A value SQLite stores or returns. */
 export type SqlValue = string | number | null | ArrayBuffer;
@@ -16,15 +19,47 @@ export type Execute = (
  */
 export type ContentDb = SqliteRemoteDatabase;
 
-// Drizzle's proxy wants `get` as one row and `run` without rows.
-export const createContentDb = (execute: Execute): ContentDb =>
-  drizzle(async (sql, params: SqlValue[], method) => {
-    const rows = await execute(sql, params);
-    if (method === "run") {
-      return { rows: [] };
+/**
+ * Runs write statements in one transaction: all of them or none (the
+ * server's content writer). `db.batch([...])` uses it.
+ */
+export type Transaction = (
+  statements: readonly { sql: string; params: readonly SqlValue[] }[]
+) => Promise<void>;
+
+const rowsFor = (rows: unknown[][], method: string): unknown[] => {
+  if (method === "run") {
+    return [];
+  }
+  return method === "get" ? (rows[0] as unknown[]) : rows;
+};
+
+// Drizzle's proxy wants `get` as one row and `run` without rows. A batch of
+// writes goes through `transaction` when given; anything else runs in turn
+// (the device's replica refuses writes either way).
+export const createContentDb = (
+  execute: Execute,
+  transaction?: Transaction
+): ContentDb => {
+  const runBatch: AsyncBatchRemoteCallback = async (batch) => {
+    if (transaction && batch.every(({ method }) => method === "run")) {
+      await transaction(batch);
+      return batch.map(() => ({ rows: [] }));
     }
-    return { rows: method === "get" ? (rows[0] as unknown[]) : rows };
-  });
+    const results: { rows: unknown[] }[] = [];
+    for (const { sql, params, method } of batch) {
+      // oxlint-disable-next-line no-await-in-loop -- statements run in order
+      results.push({ rows: rowsFor(await execute(sql, params), method) });
+    }
+    return results;
+  };
+  return drizzle(
+    async (sql, params: SqlValue[], method) => ({
+      rows: rowsFor(await execute(sql, params), method),
+    }),
+    runBatch
+  );
+};
 
 const MISSING_TABLE = /no such table/iu;
 

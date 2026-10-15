@@ -9,6 +9,12 @@ const SECTIONS = [
     description:
       "Shift every Believer's Hijri Date to match the official moon sighting.",
   },
+  {
+    to: "/admin/programs",
+    title: "Official Programs",
+    description:
+      "Create, order and activate the General and Seasonal Programs and their Acts.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

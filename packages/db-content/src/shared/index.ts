@@ -1,5 +1,5 @@
 export { createContentDb } from "./content-db";
-export type { ContentDb, Execute, SqlValue } from "./content-db";
+export type { ContentDb, Execute, SqlValue, Transaction } from "./content-db";
 export { createGlobalSettingsRepository } from "./global-settings";
 export type { GlobalSettingsRepository } from "./global-settings";
 export { migrateContent } from "./migrate";

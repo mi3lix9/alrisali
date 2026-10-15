@@ -8,6 +8,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Domain tests: every subscription limit error, Seasonal window visibility
-- [ ] Limit errors shown clearly
-- [ ] Pause/resume works
+- [x] Domain tests: every subscription limit error, Seasonal window visibility
+- [x] Limit errors shown clearly (dialog naming the limit and the fix; on-device look pending simulator verification)
+- [x] Pause/resume works
