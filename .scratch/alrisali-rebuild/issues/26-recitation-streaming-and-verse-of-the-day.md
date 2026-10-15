@@ -6,8 +6,9 @@
 
 **Blocked by:** 23 (Quran reader: Page Mode, Surah Mode, full-screen controls)
 
-**Status:** ready-for-agent
+**Status:** done — pending env: QF_CLIENT_ID, QF_CLIENT_SECRET; pending simulator verification (expo-audio added: needs a native dev-client rebuild)
 
-- [ ] Playback from first visible ayah
-- [ ] Cache expires after 7 days
-- [ ] Attribution shown in Sources & Credits
+- [x] Playback from first visible ayah (`recitationStart`: Page Mode = first ayah printed on the page, Surah Mode = ayah scrolled to the top; the pill plays on across surahs; tested in `@alrisali/domain/quran`)
+- [x] Cache expires after 7 days (`createRecitationCache` over the app cache directory; tested with a fake store and clock)
+- [x] Attribution shown in Sources & Credits (`quran-foundation` entry: "Quran data provided by Quran.Foundation")
+- [ ] Live stream from Quran Foundation on a device (server client tested against a fake QF OAuth2/Content API; pending env: QF_CLIENT_ID, QF_CLIENT_SECRET; pending simulator verification)
