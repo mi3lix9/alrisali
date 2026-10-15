@@ -16,12 +16,15 @@ export {
   ayatOfSurah,
   ayatOnPage,
   findAyah,
+  firstAyahOfJuz,
   firstAyahOfPage,
   firstPageOfSurah,
   isPage,
   isSurah,
+  JUZ_COUNT,
   PAGE_COUNT,
   pagePosition,
+  parsePage,
   SURAH_COUNT,
 } from "./mushaf";
 export type { Ayah, AyahKey, PagePosition } from "./mushaf";
@@ -36,6 +39,7 @@ export {
   surahEnd,
 } from "./reader";
 export type {
+  JumpTarget,
   OpenReaderOptions,
   PageNav,
   QuranReaderSettings,
@@ -43,3 +47,7 @@ export type {
   ReaderAction,
   ReaderMode,
 } from "./reader";
+export { scrubberDomain, scrubberTarget, scrubberValue } from "./scrubber";
+export type { ScrubberDomain } from "./scrubber";
+export { normalizeArabic, searchQuran } from "./search";
+export type { QuranSearchOptions, QuranSearchResult } from "./search";

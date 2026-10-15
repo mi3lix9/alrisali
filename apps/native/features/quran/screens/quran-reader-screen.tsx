@@ -5,8 +5,13 @@ import {
   openReader,
   pagePosition,
   readerReducer,
+  scrubberValue,
 } from "@alrisali/domain/quran";
-import type { QuranReaderSettings } from "@alrisali/domain/quran";
+import type {
+  JumpTarget,
+  QuranReaderSettings,
+  ReaderAction,
+} from "@alrisali/domain/quran";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Spinner, Text } from "panelui-native";
@@ -19,7 +24,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions } from "../components/ayah-sheet";
+import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
+import { QuranIndexSheet } from "../components/quran-index-sheet";
+import { QuranSearchSheet } from "../components/quran-search-sheet";
+import { ReaderBottomBar } from "../components/reader-bottom-bar";
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
 import { SurahMode } from "../components/surah-mode";
@@ -85,6 +94,8 @@ const Reader = ({
     })
   );
   const [chrome, send] = useReaderChrome();
+  // Bumped by every jump, so the page list or surah remounts at the target.
+  const [jumpCount, setJumpCount] = useState(0);
   const hint = useReaderHint();
   const dismissHint = hint.dismiss;
 
@@ -107,6 +118,19 @@ const Reader = ({
     (page: number) => dispatch({ type: "page-shown", page }),
     []
   );
+
+  /** A jump (scrubber, index, search, page jump) or a return to before one. */
+  const move = (action: Extract<ReaderAction, { type: "jump" | "return" }>) => {
+    send({ type: "close-sheet" });
+    if (readerReducer(state, action) !== state) {
+      dispatch(action);
+      setJumpCount((count) => count + 1);
+    }
+  };
+  const jumpTo = (to: JumpTarget) => move({ type: "jump", to });
+  const openSheet = (kind: "index" | "page-jump" | "search") =>
+    send({ type: "open-sheet", sheet: { kind } });
+  const closeSheet = () => send({ type: "close-sheet" });
 
   const changeSettings = (change: Partial<QuranReaderSettings>) => {
     send({ type: "interact" });
@@ -131,6 +155,7 @@ const Reader = ({
       <StatusBar hidden={!chrome.visible} animated />
       {state.mode === "page" ? (
         <PageMode
+          key={jumpCount}
           pageNav={state.pageNav}
           initialPage={state.currentPage}
           width={width}
@@ -143,6 +168,7 @@ const Reader = ({
         />
       ) : (
         <SurahMode
+          key={jumpCount}
           surah={state.currentSurah}
           fontSize={settings.surahFontSize}
           insetTop={insets.top}
@@ -161,9 +187,23 @@ const Reader = ({
           onBack={() =>
             router.canGoBack() ? router.back() : router.replace("/")
           }
+          onIndex={() => openSheet("index")}
+          onSearch={() => openSheet("search")}
           onSettings={() =>
             send({ type: "open-sheet", sheet: { kind: "settings" } })
           }
+        />
+      ) : null}
+      {chrome.visible ? (
+        <ReaderBottomBar
+          mode={state.mode}
+          value={scrubberValue(state)}
+          returnTo={state.returnTo}
+          insetBottom={insets.bottom}
+          onReturn={() => move({ type: "return" })}
+          onScrubberHold={() => send({ type: "scrubber-hold" })}
+          onScrubberRelease={() => send({ type: "scrubber-release" })}
+          onJump={jumpTo}
         />
       ) : null}
       {hint.shown ? <ReaderHint /> : null}
@@ -177,6 +217,24 @@ const Reader = ({
         settings={{ ...settings, mode: state.mode, pageNav: state.pageNav }}
         onChange={changeSettings}
         onClose={() => send({ type: "close-sheet" })}
+      />
+      <QuranIndexSheet
+        open={chrome.sheet?.kind === "index"}
+        current={{ surah: state.currentSurah, juz: position.juz }}
+        onSelect={jumpTo}
+        onPageJump={() => openSheet("page-jump")}
+        onClose={closeSheet}
+      />
+      <PageJumpSheet
+        open={chrome.sheet?.kind === "page-jump"}
+        initialPage={state.currentPage}
+        onSelect={jumpTo}
+        onClose={closeSheet}
+      />
+      <QuranSearchSheet
+        open={chrome.sheet?.kind === "search"}
+        onSelect={jumpTo}
+        onClose={closeSheet}
       />
     </View>
   );

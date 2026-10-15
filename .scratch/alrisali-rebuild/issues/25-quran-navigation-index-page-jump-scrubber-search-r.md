@@ -8,5 +8,5 @@
 
 **Status:** ready-for-agent
 
-- [ ] Reader model tests: return position, scrubber domains, search
-- [ ] All navigation works offline
+- [x] Reader model tests: return position, scrubber domains, search
+- [x] All navigation works offline

@@ -10,7 +10,7 @@ import {
   PAGE_COUNT,
   SURAH_COUNT,
 } from "./mushaf";
-import type { AyahKey } from "./mushaf";
+import type { Ayah, AyahKey } from "./mushaf";
 
 // The Quran reader's position and how it moves. The UI renders the state and
 // forwards what the Believer did as actions.
@@ -52,7 +52,18 @@ export interface QuranReaderState {
   /** 1–114. */
   currentSurah: number;
   lastReadAyah: AyahKey | null;
+  /**
+   * Where the Believer was before their last jump (scrubber, index, search,
+   * page jump); the return button takes them back there.
+   */
+  returnTo: AyahKey | null;
 }
+
+/** Where a jump goes: a page's first ayah, a surah's first ayah, or an ayah. */
+export type JumpTarget =
+  | { page: number }
+  | { surah: number }
+  | { ayah: string };
 
 export type ReaderAction =
   /** Paging or scrolling brought a page into view (Page Mode). */
@@ -64,7 +75,11 @@ export type ReaderAction =
   | { type: "next-surah" }
   | { type: "previous-surah" }
   | { type: "switch-mode"; mode: ReaderMode }
-  | { type: "set-page-nav"; pageNav: PageNav };
+  | { type: "set-page-nav"; pageNav: PageNav }
+  /** A jump from the scrubber, the index, search or page jump. */
+  | { type: "jump"; to: JumpTarget }
+  /** Back to `returnTo`; where the Believer was becomes `returnTo`. */
+  | { type: "return" };
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -117,6 +132,53 @@ const anchorAyah = (state: QuranReaderState) => {
     : ayatOfSurah(state.currentSurah)[0];
 };
 
+/** The ayah a jump lands on, or undefined when the target names none. */
+const jumpAyah = (to: JumpTarget) => {
+  if ("page" in to) {
+    return isPage(to.page) ? firstAyahOfPage(to.page) : undefined;
+  }
+  if ("surah" in to) {
+    return isSurah(to.surah) ? ayatOfSurah(to.surah)[0] : undefined;
+  }
+  return findAyah(to.ayah);
+};
+
+/** Whether a jump would land where the Believer already is. */
+const isHere = (
+  state: QuranReaderState,
+  to: JumpTarget,
+  target: Ayah,
+  anchor: Ayah | undefined
+): boolean => {
+  if (state.mode === "page") {
+    return target.page === state.currentPage;
+  }
+  return "surah" in to
+    ? target.surah === state.currentSurah
+    : target.key === anchor?.key;
+};
+
+const jump = (state: QuranReaderState, to: JumpTarget): QuranReaderState => {
+  const target = jumpAyah(to);
+  if (!target) {
+    return state;
+  }
+  const anchor = anchorAyah(state);
+  if (isHere(state, to, target, anchor)) {
+    // An ayah on the page in view still becomes the reading position.
+    return "ayah" in to && state.lastReadAyah !== target.key
+      ? { ...state, lastReadAyah: target.key }
+      : state;
+  }
+  return {
+    ...state,
+    currentPage: target.page,
+    currentSurah: target.surah,
+    lastReadAyah: target.key,
+    returnTo: anchor?.key ?? state.returnTo,
+  };
+};
+
 export const readerReducer = (
   state: QuranReaderState,
   action: ReaderAction
@@ -166,6 +228,12 @@ export const readerReducer = (
     case "set-page-nav": {
       return { ...state, pageNav: action.pageNav };
     }
+    case "jump": {
+      return jump(state, action.to);
+    }
+    case "return": {
+      return state.returnTo ? jump(state, { ayah: state.returnTo }) : state;
+    }
     default: {
       return state;
     }
@@ -205,6 +273,7 @@ export const openReader = ({
     currentPage: target?.page ?? 1,
     currentSurah: target?.surah ?? 1,
     lastReadAyah: known?.key ?? lastReadAyah,
+    returnTo: null,
   };
 };
 
