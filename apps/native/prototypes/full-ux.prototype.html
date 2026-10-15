@@ -74,6 +74,10 @@
         --color-occ-religious: var(--color-info);
         --color-occ-fasting: var(--color-warning);
         --color-recited: var(--color-warning-foreground);
+        /* Quran reader canvas (full screen; dark is true black, as reading apps do on OLED) */
+        --color-reader: #fbfaf7;
+        --color-reader-foreground: #1f1d1a;
+        --color-reader-muted: rgba(31, 29, 26, 0.5);
         --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
         --shadow-lg:
           0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
@@ -144,6 +148,9 @@
         --color-scrim: rgba(0, 0, 0, 0.55);
         --color-glass: rgba(35, 35, 35, 0.8);
         --color-desk: #0c0c0c;
+        --color-reader: #000;
+        --color-reader-foreground: #ece8df;
+        --color-reader-muted: rgba(236, 232, 223, 0.5);
         --shadow-lg:
           0 10px 30px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
       }
@@ -520,9 +527,6 @@
         width: 16px;
         height: 16px;
         opacity: 0.5;
-      }
-      [dir="rtl"] .flip {
-        transform: scaleX(-1);
       }
       .muted {
         color: var(--color-muted-foreground);
@@ -1765,15 +1769,34 @@
         text-align: left;
         color: var(--color-muted-foreground);
       }
-      /* ── Quran reader: Page Mode (printed mushaf, 15 lines) + Surah Mode (reflowing) ── */
+      /* ── Quran reader: full screen. Page Mode (15-line mushaf page, edge to edge) + Surah Mode (reflowing) ──
+   No navbar or tab bar: .phone.reading paints the reader canvas, and the chrome (.q-top, .q-bottom, .q-rec)
+   overlays the page only while .phone.chrome-on — a tap toggles it, so the page never shifts. */
+      .phone.reading {
+        background: var(--color-reader);
+        color: var(--color-reader-foreground);
+      }
+      .phone.reading .statusbar {
+        transition: opacity 0.25s;
+      }
+      .phone.reading:not(.chrome-on) .statusbar {
+        opacity: 0;
+      }
       .screen.q-fixed {
         overflow: hidden;
-        padding: 98px 0 96px;
+        padding: 54px 0 34px; /* status-bar and home-indicator safe areas */
         display: flex;
         flex-direction: column;
       }
       .screen.q-scroll {
-        padding-bottom: 124px;
+        padding: 54px var(--s3) calc(34px + var(--s6));
+      }
+      .q-carousel,
+      .q-vlist,
+      .q-flowtext {
+        user-select: none; /* a long-press opens the ayah sheet rather than selecting text */
+        -webkit-user-select: none;
+        -webkit-touch-callout: none;
       }
       .q-carousel {
         flex: 1;
@@ -1784,8 +1807,6 @@
         scroll-snap-type: x mandatory;
         overscroll-behavior-x: contain;
         scrollbar-width: none;
-        user-select: none;
-        -webkit-user-select: none;
         cursor: grab;
       }
       .q-carousel::-webkit-scrollbar {
@@ -1800,86 +1821,102 @@
         height: 100%;
         scroll-snap-align: center;
         scroll-snap-stop: always;
-        container-type: size;
-        display: grid;
-        place-items: center;
+        display: flex;
       }
       .q-slide > .q-page {
-        width: min(
-          100cqw - 2 * var(--s3),
-          (100cqh - var(--s2)) * var(--mushaf-ratio)
-        );
+        flex: 1;
+        padding: 0 var(--s3);
       }
-      .q-vlist {
-        display: flex;
-        flex-direction: column;
-        gap: var(--s4);
+      .q-vlist > .q-page {
+        aspect-ratio: var(--mushaf-ratio);
+        padding: var(--s3) 0;
+      }
+      .q-vlist > .q-page + .q-page {
+        border-top: 1px solid var(--color-border);
       }
       .q-page {
-        aspect-ratio: var(--mushaf-ratio);
         container-type: inline-size;
-        position: relative;
+        min-width: 0;
         display: flex;
         flex-direction: column;
-        padding: 3% 5% 2%; /* % of the page's own column (cq units on the container itself would resolve against its ancestor) */
-        background: var(--color-card);
-        color: var(--color-card-foreground);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-sm);
       }
-      .q-page::before {
-        content: "";
-        position: absolute;
-        inset: 2cqw;
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-md);
-        pointer-events: none;
-      }
-      .q-head,
-      .q-foot {
+      .q-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: var(--s2);
-        height: 7cqw;
-        padding: 0 2cqw;
-        font-size: 3.3cqw;
-        color: var(--color-muted-foreground);
+        height: 8cqw;
+        font-size: 3.6cqw;
+        color: var(--color-reader-muted);
         white-space: nowrap;
-      }
-      .q-foot .q-pno {
-        font-weight: 600;
-        color: var(--color-foreground);
-        font-variant-numeric: tabular-nums;
-      }
-      .q-foot > span {
-        flex: 1;
-      }
-      .q-foot > span:nth-child(2) {
-        text-align: center;
-      }
-      .q-foot > span:last-child {
-        text-align: end;
       }
       .q-head .badge {
         height: 4.6cqw;
         font-size: 2.8cqw;
         padding: 0 1.6cqw;
       }
+      .q-foot {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 10cqw;
+      }
+      /* Ornamental page pill: page number | hizb quarter */
+      .q-pill {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 2.4cqw;
+        height: 6.6cqw;
+        padding: 0 4.4cqw;
+        border-radius: 999px;
+        border: 1px solid var(--color-reader-muted);
+        box-shadow:
+          inset 0 0 0 2px var(--color-reader),
+          inset 0 0 0 3px var(--color-reader-muted);
+        font-size: 3.3cqw;
+        color: var(--color-reader-muted);
+        white-space: nowrap;
+      }
+      .q-pill b {
+        font-weight: 600;
+        color: var(--color-reader-foreground);
+        font-variant-numeric: tabular-nums;
+      }
+      .q-pill i {
+        align-self: stretch;
+        width: 1px;
+        margin: 1.4cqw 0;
+        background: var(--color-reader-muted);
+      }
+      .q-pill::before,
+      .q-pill::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 1.6cqw;
+        height: 1.6cqw;
+        background: var(--color-reader-muted);
+        transform: translateY(-50%) rotate(45deg);
+      }
+      .q-pill::before {
+        inset-inline-start: -0.8cqw;
+      }
+      .q-pill::after {
+        inset-inline-end: -0.8cqw;
+      }
       .q-lines {
         flex: 1;
         min-height: 0;
         display: grid;
         grid-template-rows: repeat(15, 1fr);
-        padding: 1cqw 2cqw;
         font-family: var(--font-mushaf);
-        font-size: 5.25cqw;
+        font-size: 7.4cqw; /* fitLines() scales the whole page down so its widest line fits */
         direction: rtl;
       }
       .q-lines.short {
         grid-template-rows: none;
-        grid-auto-rows: 9.6cqw;
+        grid-auto-rows: 13cqw;
         align-content: center;
       }
       .q-line {
@@ -1903,13 +1940,43 @@
         height: 80%;
         display: grid;
         place-items: center;
-        border: 1px solid var(--color-ring);
+        border: 1px solid var(--color-reader-muted);
         border-radius: var(--radius-sm);
-        background: var(--color-surface-secondary);
         box-shadow:
-          inset 0 0 0 2px var(--color-card),
-          inset 0 0 0 3px var(--color-border);
-        font-size: 0.92em;
+          inset 0 0 0 2px var(--color-reader),
+          inset 0 0 0 3px var(--color-reader-muted);
+        font-size: 0.86em;
+      }
+      /* Ayah marker: a rosette holding the number (mask, so it takes the text colour and the Last-Read accent) */
+      .q-n {
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        width: 2.3em;
+        height: 2.3em;
+        margin-inline: 0.15em;
+        font-family: var(--font-ui);
+        font-size: 0.5em;
+        font-weight: 600;
+        line-height: 1;
+        vertical-align: middle;
+      }
+      .q-n::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: currentColor;
+        opacity: 0.6;
+        -webkit-mask: var(--q-rosette) center / contain no-repeat;
+        mask: var(--q-rosette) center / contain no-repeat;
+      }
+      .q-end.last .q-n,
+      .q-m.last {
+        color: var(--color-recited);
+      } /* Last-Read Ayah: its marker takes the accent */
+      .q-end.last .q-n::before,
+      .q-m.last::before {
+        opacity: 1;
       }
       .q-w {
         cursor: pointer;
@@ -1918,13 +1985,6 @@
           background 0.2s,
           color 0.2s;
       }
-      .q-w:hover {
-        background: var(--color-inset);
-      }
-      .q-end.last,
-      .q-m.last {
-        color: var(--color-recited);
-      } /* Last-Read Ayah: its end marker takes the accent */
       .q-w.sel,
       .q-a.sel {
         background: var(--color-info-soft);
@@ -1933,6 +1993,7 @@
       .q-w.playing,
       .q-a.playing {
         background: var(--color-warning-soft);
+        color: var(--color-warning-foreground);
       }
       .q-flash {
         animation: q-flash 2.2s var(--ease-out);
@@ -1946,11 +2007,11 @@
       }
       .q-line .q-ph {
         flex: 1 1 0;
-        height: 0.5em;
+        height: 0.4em;
         margin-inline: 0.5cqw;
-        border-radius: 0.25em;
-        background: var(--color-skeleton);
-        opacity: 0.6;
+        border-radius: 0.2em;
+        background: var(--color-reader-muted);
+        opacity: 0.35;
         cursor: pointer;
       }
       .q-line .q-ph + .q-ph {
@@ -1959,7 +2020,7 @@
       /* Surah Mode */
       .q-sh {
         text-align: center;
-        padding: var(--s4);
+        padding: var(--s3) 0 0;
       }
       .q-sh .q-band {
         height: 52px;
@@ -1978,7 +2039,6 @@
         text-align: justify;
         line-height: 2.25;
         margin-top: var(--s4);
-        padding: 0 var(--s1);
       }
       .q-a {
         cursor: pointer;
@@ -1990,13 +2050,14 @@
         box-decoration-break: clone;
       }
       .q-a-ph {
-        color: var(--color-muted-foreground);
+        color: var(--color-reader-muted);
       }
       .q-a-ph i {
         display: inline-block;
-        height: 0.45em;
-        border-radius: 0.25em;
-        background: var(--color-skeleton);
+        height: 0.4em;
+        border-radius: 0.2em;
+        background: var(--color-reader-muted);
+        opacity: 0.35;
         vertical-align: middle;
         max-width: 100%;
       }
@@ -2006,76 +2067,73 @@
         white-space: nowrap;
         vertical-align: middle;
       }
-      /* Reader chrome: glass toolbar (mode switch + position + Last-Read Ayah) and mock recitation strip */
-      .q-bar,
-      .q-player {
+      .q-font {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--s1);
+      }
+      /* Reader chrome: translucent bars that overlay the page; hidden = slid out, transparent and inert */
+      .q-top,
+      .q-bottom {
         position: absolute;
-        left: var(--s4);
-        right: var(--s4);
+        left: 0;
+        right: 0;
         z-index: 35;
         display: flex;
         align-items: center;
-        gap: var(--s2);
+        color: var(--color-foreground);
         background: var(--color-glass);
         backdrop-filter: saturate(1.8) blur(24px);
         -webkit-backdrop-filter: saturate(1.8) blur(24px);
-        box-shadow:
-          0 0 0 0.5px var(--color-border),
-          var(--shadow-lg);
+        transition:
+          transform 0.34s var(--ease-out),
+          opacity 0.22s;
       }
-      .q-bar {
-        bottom: 22px;
-        height: 60px;
-        padding: 6px;
-        border-radius: 30px;
+      .q-top {
+        top: 0;
+        height: 100px;
+        gap: var(--s1);
+        padding: 54px var(--s2) 0;
+        border-bottom: 0.5px solid var(--color-border);
       }
-      .q-bar .seg {
-        width: 150px;
-        flex: none;
-        border-radius: 24px;
+      .q-bottom {
+        bottom: 0;
+        gap: var(--s2);
+        padding: var(--s2) var(--s3) 34px;
+        border-top: 0.5px solid var(--color-border);
       }
-      .q-bar .seg button {
-        border-radius: 21px;
+      .phone:not(.chrome-on) .q-top {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      .phone:not(.chrome-on) .q-bottom {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+      .q-top .nb-btn {
+        min-width: 40px;
         height: 40px;
+        justify-content: center;
+        padding: 0;
       }
-      .q-readout {
+      .q-title {
         flex: 1;
         min-width: 0;
-        height: 48px;
-        border-radius: 24px;
-        padding: 0 var(--s3);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-        text-align: start;
-        font-size: var(--t-sm);
-        font-weight: 600;
+        text-align: center;
+        line-height: 1.3;
       }
-      .q-readout:hover {
-        background: var(--color-accent);
-      }
-      .q-readout > span {
-        max-width: 100%;
+      .q-title > * {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .q-last {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: var(--t-xs);
-        font-weight: 500;
-        color: var(--color-muted-foreground);
-        border-radius: var(--radius-xs);
+      .q-mark.on {
+        color: var(--color-recited);
       }
-      .q-last svg {
-        width: 12px;
-        height: 12px;
-        flex: none;
+      .q-mark.on svg {
+        fill: currentColor;
       }
-      .q-last.pulse {
+      .q-mark.pulse {
         animation: q-pulse 1.4s var(--ease-out);
       }
       @keyframes q-pulse {
@@ -2084,23 +2142,212 @@
           background: var(--color-info-soft);
         }
       }
-      .q-player {
-        bottom: 92px;
-        height: 52px;
-        padding: 6px var(--s3) 6px 6px;
-        border-radius: 26px;
-        font-size: var(--t-sm);
+      .q-tool {
+        flex: none;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 22px;
+        color: var(--color-foreground);
       }
-      [dir="rtl"] .q-player {
-        padding: 6px 6px 6px var(--s3);
+      .q-tool:hover:not(:disabled) {
+        background: var(--color-accent);
       }
-      .q-player .progress {
+      .q-tool:disabled {
+        opacity: 0.35;
+      }
+      .q-ret {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        font-size: var(--t-xs);
+        font-weight: 600;
+        line-height: 1;
+      }
+      .q-ret svg {
+        width: 18px;
+        height: 18px;
+      }
+      /* Page scrubber: wide track, pill thumb; always right-to-left like the mushaf (page 1 at the right) */
+      .q-scrub {
+        position: relative;
         flex: 1;
+        min-width: 0;
       }
-      .q-font {
+      .q-scrub input {
+        display: block;
+        width: 100%;
+        height: 32px;
+        margin: 0;
+        background: transparent;
+        -webkit-appearance: none;
+        appearance: none;
+        cursor: pointer;
+      }
+      .q-scrub input::-webkit-slider-runnable-track {
+        height: 32px;
+        border-radius: 16px;
+        background: var(--color-surface-tertiary);
+      }
+      .q-scrub input::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 56px;
+        height: 24px;
+        margin-top: 4px;
+        border-radius: 12px;
+        background: var(--color-primary);
+        box-shadow: var(--shadow-sm);
+      }
+      .q-scrub input::-moz-range-track {
+        height: 32px;
+        border-radius: 16px;
+        background: var(--color-surface-tertiary);
+      }
+      .q-scrub input::-moz-range-thumb {
+        width: 56px;
+        height: 24px;
+        border: 0;
+        border-radius: 12px;
+        background: var(--color-primary);
+      }
+      .q-scrub input:focus-visible {
+        outline: 2px solid var(--color-ring);
+        outline-offset: 2px;
+        border-radius: 16px;
+      }
+      .q-bubble {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + var(--s3));
+        transform: translateX(-50%);
+        padding: var(--s2) var(--s3);
+        border-radius: var(--radius-lg);
+        background: var(--color-popover);
+        box-shadow:
+          0 0 0 0.5px var(--color-border),
+          var(--shadow-lg);
+        font-size: var(--t-sm);
+        font-weight: 600;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .q-scrub.scrubbing .q-bubble {
+        opacity: 1;
+      }
+      /* Recitation pill: reciter + play; floats above the bottom bar, and stays (lower) while audio plays */
+      .q-rec {
+        position: absolute;
+        z-index: 34;
+        left: 50%;
+        bottom: calc(34px + var(--s3));
+        width: min(300px, calc(100% - 2 * var(--s6)));
+        height: 52px;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: var(--s2);
+        padding-inline: var(--s4) 6px;
+        overflow: hidden;
+        border-radius: 26px;
+        color: var(--color-foreground);
+        background: var(--color-glass);
+        backdrop-filter: saturate(1.8) blur(24px);
+        -webkit-backdrop-filter: saturate(1.8) blur(24px);
+        box-shadow:
+          0 0 0 0.5px var(--color-border),
+          var(--shadow-lg);
+        transition:
+          bottom 0.34s var(--ease-out),
+          opacity 0.22s;
+      }
+      .phone.chrome-on .q-rec {
+        bottom: 104px;
+      }
+      .phone:not(.chrome-on) .q-rec:not(.on) {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .q-reciter {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.3;
+        font-size: var(--t-sm);
+        font-weight: 600;
+      }
+      .q-reciter > span {
         display: inline-flex;
         align-items: center;
-        gap: var(--s1);
+        gap: 2px;
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      .q-reciter svg {
+        width: 14px;
+        height: 14px;
+      }
+      .q-rec .btn.icon {
+        border-radius: 20px;
+      }
+      .q-rec-prog {
+        position: absolute;
+        inset: auto 0 0;
+        height: 2px;
+      }
+      .q-rec-prog > i {
+        display: block;
+        height: 100%;
+        background: var(--color-primary);
+      }
+      /* One-time hint on the first open */
+      .q-hint {
+        position: absolute;
+        z-index: 34;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: max-content;
+        max-width: calc(100% - 2 * var(--s8));
+        padding: var(--s3) var(--s4);
+        border-radius: var(--radius-2xl);
+        text-align: center;
+        color: var(--color-foreground);
+        background: var(--color-glass);
+        backdrop-filter: saturate(1.8) blur(24px);
+        -webkit-backdrop-filter: saturate(1.8) blur(24px);
+        box-shadow:
+          0 0 0 0.5px var(--color-border),
+          var(--shadow-lg);
+        pointer-events: none;
+        animation: q-hint 4.5s var(--ease-out) forwards;
+      }
+      @keyframes q-hint {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -40%);
+        }
+        12%,
+        80% {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .q-top,
+        .q-bottom,
+        .q-rec {
+          transition: opacity 0.2s;
+        }
       }
       .word {
         transition: color 0.2s;
@@ -3809,10 +4056,35 @@
           '<path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>',
         hand: '<path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>',
         wifi: '<path d="M5 12.6a10 10 0 0 1 14 0M8.5 16.1a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 20 0M12 20h.01"/>',
+        undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
       };
+      /** Icon; class "flip" marks a directional icon (back, chevron). In RTL its geometry is mirrored inside the SVG,
+    so the arrow points the reading direction regardless of CSS transforms on the element. */
       const ic = (name, cls = "") =>
-        `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] || ""}</svg>`;
+        `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${
+          cls.split(" ").includes("flip") &&
+          document.documentElement.dir === "rtl"
+            ? `<g transform="matrix(-1 0 0 1 24 0)">${ICONS[name] || ""}</g>`
+            : ICONS[name] || ""
+        }</svg>`;
       const chev = () => ic("chev", "chev flip");
+      /* Ayah-marker rosette (12 scallops around a ring), used as a CSS mask by .q-n */
+      document.documentElement.style.setProperty(
+        "--q-rosette",
+        `url("data:image/svg+xml,${encodeURIComponent(
+          (() => {
+            let d = "";
+            for (let i = 0; i < 12; i++) {
+              const a0 = (i / 12) * 2 * Math.PI,
+                a1 = ((i + 1) / 12) * 2 * Math.PI,
+                p = (a, r) =>
+                  `${(20 + r * Math.sin(a)).toFixed(2)} ${(20 - r * Math.cos(a)).toFixed(2)}`;
+              d += `${i ? "L" : "M"}${p(a0, 16.5)}A4.6 4.6 0 0 1 ${p(a1, 16.5)}`;
+            }
+            return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><path d="${d}Z" fill="black" fill-opacity=".14" stroke="black" stroke-width="1.6"/><circle cx="20" cy="20" r="12.2" fill="none" stroke="black" stroke-width="1.2"/></svg>`;
+          })()
+        )}")`
+      );
 
       /* ── Dates (all "today" logic runs in the selected location's time zone) ── */
       const WEEKDAYS = [
@@ -6743,6 +7015,7 @@
           onboarded: params.has("variant"),
           onboardStep: 0,
           statePanel: false,
+          quranHintSeen: false, // one-time "tap to show controls" hint on the first reader open
         },
         auth: { signedIn: false, provider: null, name: null, email: null },
         settings: {
@@ -6781,6 +7054,7 @@
           recite: { mode: "hold", pace: "normal" },
           quranMode: "page",
           quranPageNav: "carousel", // Page Mode | Surah Mode; Page Mode turns by horizontal carousel | vertical scroll
+          reciter: "husary",
         },
         nav: { tab: "home", stacks: {} },
         user: null,
@@ -6809,6 +7083,7 @@
           assetPage: 1,
           programsSeg: "official",
           insightsRange: "week",
+          quranChrome: false, // full-screen reader: top/bottom controls shown (tap toggles; auto-hides)
         },
         form: {},
         assistantRun: null,
@@ -7188,7 +7463,12 @@
         root.dir = L("rtl", "ltr");
         root.classList.toggle("dark", S.ui.theme === "dark");
         const phone = $("#phone");
-        phone.className = "phone fs-" + S.settings.fontSize;
+        const route = S.ui.onboarded && topRoute(),
+          full = !!(route && SCREENS[route.s].full);
+        phone.className =
+          "phone fs-" +
+          S.settings.fontSize +
+          (full ? " reading" + (S.view.quranChrome ? " chrome-on" : "") : "");
         const app = $("#app");
         const key = S.ui.onboarded
           ? routeKey()
@@ -7269,6 +7549,8 @@
         const route = topRoute(),
           def = SCREENS[route.s],
           p = route.p;
+        if (def.full)
+          return `<main class="screen no-tabs ${def.cls ? def.cls(p) : ""}">${def.render(p)}</main>${def.chrome ? def.chrome(p) : ""}${overlays()}`;
         if (def.immersive)
           return `<div class="screen immersive no-tabs">${def.render(p)}</div>${overlays()}`;
         const title = def.title ? def.title(p) : "";
@@ -7352,6 +7634,7 @@
           quran = {
             mode: S.settings.quranMode,
             pageNav: S.settings.quranPageNav,
+            chromeVisible: !!S.view.quranChrome,
             lastReadAyah: q.lastReadAyah,
             currentPage: q.currentPage,
           };
@@ -8568,9 +8851,65 @@
         },
       };
 
-      /* ── Quran reader: Page Mode (horizontal carousel | vertical scroll) and Surah Mode; both reopen at the Last-Read Ayah ──
-   Scroll/paging only patches the chrome (title, readout, Last-Read indicator) so position never resets; full renders
-   restore it in mount (carousel → currentPage; vertical/Surah keep .screen scrollTop; RT.qGo asks for an explicit jump). */
+      /* ── Quran reader: full screen; Page Mode (horizontal carousel | vertical scroll) and Surah Mode; both reopen at the Last-Read Ayah ──
+   No navbar or tab bar: a tap toggles the overlaid chrome (S.view.quranChrome), which hides again on the next tap, after 4 s idle
+   and when the reader scrolls; a long-press on an ayah opens its sheet. Scroll/paging only patches the chrome (title, bookmark,
+   scrubber) so position never resets; full renders restore it in mount (carousel → currentPage; vertical/Surah keep .screen
+   scrollTop; RT.qGo asks for an explicit jump). */
+      const Q_TOP = 54; // status-bar safe area: the chrome overlays the text, so reading position is measured from here
+      const JUZ_AR = [
+        "الأول",
+        "الثاني",
+        "الثالث",
+        "الرابع",
+        "الخامس",
+        "السادس",
+        "السابع",
+        "الثامن",
+        "التاسع",
+        "العاشر",
+        "الحادي عشر",
+        "الثاني عشر",
+        "الثالث عشر",
+        "الرابع عشر",
+        "الخامس عشر",
+        "السادس عشر",
+        "السابع عشر",
+        "الثامن عشر",
+        "التاسع عشر",
+        "العشرون",
+        "الحادي والعشرون",
+        "الثاني والعشرون",
+        "الثالث والعشرون",
+        "الرابع والعشرون",
+        "الخامس والعشرون",
+        "السادس والعشرون",
+        "السابع والعشرون",
+        "الثامن والعشرون",
+        "التاسع والعشرون",
+        "الثلاثون",
+      ];
+      const juzName = (j) => L("الجزء " + JUZ_AR[j - 1], "Juz " + j);
+      /** Hizb quarter of a page (approximation like hizbOf: the hizb's pages split evenly into quarters). */
+      function rubOf(p) {
+        const h = hizbOf(p);
+        let a = p,
+          b = p;
+        while (a > 1 && hizbOf(a - 1) === h) a--;
+        while (b < 604 && hizbOf(b + 1) === h) b++;
+        return { h, q: Math.floor(((p - a) / (b - a + 1)) * 4) };
+      }
+      function hizbLabel(p) {
+        const { h, q } = rubOf(p);
+        return `${q ? L(["", "١/٤", "١/٢", "٣/٤"][q], ["", "¼", "½", "¾"][q]) + " " : ""}${L("الحزب", "Hizb")} ${N(h)}`;
+      }
+      const RECITERS = {
+        husary: ["محمود خليل الحصري", "Mahmoud Khalil Al-Husary"],
+        alafasy: ["مشاري العفاسي", "Mishary Alafasy"],
+        basit: ["عبد الباسط عبد الصمد", "Abdul Basit Abdul Samad"],
+        minshawi: ["محمد صديق المنشاوي", "Mohamed Siddiq al-Minshawi"],
+      };
+      const reciterName = () => LL(RECITERS[S.settings.reciter]);
       const isCarousel = () =>
         S.settings.quranMode === "page" &&
         S.settings.quranPageNav === "carousel";
@@ -8581,6 +8920,7 @@
       }
       const endMark = (k) =>
         `${k === S.user.quran.lastReadAyah ? " last" : ""}`;
+      const marker = (a) => `<span class="q-n">${arNum(a)}</span>`;
       function lineHTML(line) {
         if (line === "B") return `<div class="q-line q-mid">${BASMALA}</div>`;
         if (typeof line === "string")
@@ -8590,23 +8930,25 @@
             const a = parseKey(seg.k)[1],
               cls = ayahCls(seg.k);
             if (seg.from == null)
-              return `<span class="q-ph" data-a="ayah" data-x="${seg.k}"></span>${seg.end ? `<span class="q-w q-end${cls}${endMark(seg.k)}" data-a="ayah" data-x="${seg.k}">\u00a0${arNum(a)}</span>` : ""}`;
+              return `<span class="q-ph" data-a="ayah" data-x="${seg.k}"></span>${seg.end ? `<span class="q-w q-end${cls}${endMark(seg.k)}" data-a="ayah" data-x="${seg.k}">${marker(a)}</span>` : ""}`;
             const ws = QT[seg.k].split(" ");
             let h = "";
             for (let i = seg.from; i < seg.to; i++)
               h +=
                 i === ws.length - 1
-                  ? `<span class="q-w q-end${cls}${endMark(seg.k)}" data-a="ayah" data-x="${seg.k}">${ws[i]}\u00a0${arNum(a)}</span>`
+                  ? `<span class="q-w q-end${cls}${endMark(seg.k)}" data-a="ayah" data-x="${seg.k}">${ws[i]}${marker(a)}</span>`
                   : `<span class="q-w${cls}" data-a="ayah" data-x="${seg.k}">${ws[i]}</span>`;
             return h;
           })
           .join("")}</div>`;
       }
+      /** A page as printed, edge to edge: juz | surah header line, 15 lines, ornamental page pill (page | hizb quarter). */
       function pageInner(p) {
-        const { real, lines } = pageLines(p);
-        return `<div class="q-head"><span>${surahTitle(surahOfPage(p))}</span>${real ? "" : badge(L("نص غير مضمّن", "Text not bundled"), "warning")}<span>${L("الجزء", "Juz")} ${N(juzOf(p))}</span></div>
+        const { real, lines } = pageLines(p),
+          s = surahOfPage(p);
+        return `<div class="q-head"><span>${juzName(juzOf(p))}</span>${real ? "" : badge(L("نص غير مضمّن", "Text not bundled"), "warning")}<span>${L(s.ar, s.en)}</span></div>
     <div class="q-lines${lines.length < 15 ? " short" : ""}">${lines.map(lineHTML).join("")}</div>
-    <div class="q-foot"><span>${L("الحزب", "Hizb")} ${N(hizbOf(p))}</span><span class="q-pno">${N(p)}</span><span></span></div>`;
+    <div class="q-foot"><span class="q-pill"><b>${N(p)}</b><i></i><span>${hizbLabel(p)}</span></span></div>`;
       }
       const pageShell = (p, fill) =>
         `<article class="q-page${fill ? " filled" : ""}" data-page="${p}" aria-label="${L("صفحة", "Page")} ${N(p)}">${fill ? pageInner(p) : ""}</article>`;
@@ -8615,21 +8957,25 @@
         el.classList.add("filled");
         fitLines(el);
       }
-      /** Lines are justified edge to edge; a line wider than the page shrinks to fit (the app fits words to the KFGQPC font at build time),
-    and a short closing line (a surah's last words) is centred, as in the print. */
+      /** Lines are justified edge to edge at one size per page: the page scales down until its widest line fits (the app fits
+    the KFGQPC font at build time), and a short closing line (a surah's last words) is centred, as in the print. */
       function fitLines(el) {
-        for (const ln of el.querySelectorAll(".q-text")) {
-          ln.style.fontSize = "";
-          const over = ln.scrollWidth / ln.clientWidth;
-          if (over > 1.002)
-            ln.style.fontSize =
-              (parseFloat(getComputedStyle(ln).fontSize) / over) * 0.985 + "px";
+        const box = el.querySelector(".q-lines");
+        if (!box) return;
+        box.style.fontSize = "";
+        const lines = [...box.querySelectorAll(".q-text")];
+        let over = 1;
+        for (const ln of lines)
+          over = Math.max(over, ln.scrollWidth / ln.clientWidth);
+        if (over > 1.002)
+          box.style.fontSize =
+            (parseFloat(getComputedStyle(box).fontSize) / over) * 0.985 + "px";
+        for (const ln of lines)
           ln.classList.toggle(
             "q-mid",
             [...ln.children].reduce((w, c) => w + c.offsetWidth, 0) <
               ln.clientWidth * 0.6
           );
-        }
       }
       function surahFlowHTML(n) {
         const s = SURAHS[n - 1],
@@ -8639,7 +8985,7 @@
         for (let a = 1; a <= s.ayat; a++) {
           const k = ayahKey(n, a),
             cls = ayahCls(k),
-            mark = `<span class="q-m${endMark(k)}">\u00a0${arNum(a)}</span>`;
+            mark = `<span class="q-m q-n${endMark(k)}">${arNum(a)}</span>`;
           if (QT[k]) {
             body += `<span class="q-a${cls}" data-a="ayah" data-x="${k}">${QT[k]}${mark}</span> `;
             continue;
@@ -8651,7 +8997,7 @@
           body += `<span class="q-a q-a-ph${cls}" data-a="ayah" data-x="${k}">${bars}</span> `;
         }
         const next = SURAHS[n];
-        return `<div class="card q-sh"><div class="q-band">سورة ${s.ar}</div>
+        return `<div class="q-sh"><div class="q-band">سورة ${s.ar}</div>
       <div class="hstack mt3 small muted"><span>${N(s.ayat)} ${L("آية", "ayat")} · ${L("تبدأ ص", "starts p.")} ${N(s.page)}</span><span class="spacer"></span>
         <span class="q-font"><button class="btn icon sm ghost" data-a="quranFont" data-x="-2" aria-label="${L("تصغير الخط", "Smaller text")}" ${S.settings.readerFont <= 16 ? "disabled" : ""}>${ic("minus")}</button><span class="num xs" style="min-width:20px;text-align:center">${N(S.settings.readerFont)}</span><button class="btn icon sm ghost" data-a="quranFont" data-x="2" aria-label="${L("تكبير الخط", "Larger text")}" ${S.settings.readerFont >= 40 ? "disabled" : ""}>${ic("plus")}</button></span>
         <button class="btn icon sm ghost" data-a="favSurah" data-x="${n}" aria-label="${L("المفضلة", "Favorite")}">${ic(isFav("surah", n) ? "heartFill" : "heart")}</button></div>
@@ -8670,51 +9016,158 @@
             ? surahOfPage(S.user.quran.currentPage)
             : SURAHS[S.user.quran.currentSurah - 1]
         );
-      const quranReadout = () => {
-        const q = S.user.quran;
+      const quranSub = () =>
+        `${L("الجزء", "Juz")} ${N(juzOf(S.user.quran.currentPage))} · ${L("صفحة", "Page")} ${N(S.user.quran.currentPage)}`;
+      /** Is the Last-Read Ayah on the current page (Page Mode) / in the current Surah (Surah Mode)? */
+      function lastHere() {
+        const q = S.user.quran,
+          k = q.lastReadAyah;
+        if (!k) return false;
         return S.settings.quranMode === "page"
-          ? `${L("صفحة", "Page")} ${N(q.currentPage)} · ${L("الجزء", "Juz")} ${N(juzOf(q.currentPage))}`
-          : `${L(SURAHS[q.currentSurah - 1].ar, SURAHS[q.currentSurah - 1].en)} · ${L("ص", "p.")} ${N(q.currentPage)}`;
-      };
-      const quranLastText = () =>
-        `${ic("bookmark")}<span>${L("آخر قراءة:", "Last read:")} ${S.user.quran.lastReadAyah ? ayahRef(S.user.quran.lastReadAyah) : "—"}</span>`;
-      function quranPlayer() {
-        const id = S.view.playing;
-        if (!id || !id.startsWith("ayah:")) return "";
-        const k = id.slice(5),
-          dur = durOf(id);
-        return `<div class="q-player" role="region" aria-label="${L("التلاوة", "Recitation")}"><button class="btn icon sm primary" data-a="quranStop" aria-label="${L("إيقاف", "Stop")}">${ic("pause")}</button>
-    <span class="spacer" style="min-width:0"><span class="strong">${ayahRef(k)}</span> <span class="xs muted">${L("مشاري العفاسي · تجريبي", "Mishary Alafasy · mock")}</span><span class="hstack"><span class="progress" id="q-play-prog"><i style="width:${(S.view.playPos / dur) * 100}%"></i></span><span class="xs muted num" id="q-play-t">${N(dur - S.view.playPos)}${L("ث", "s")}</span></span></span></div>`;
+          ? pageOfAyah(k) === q.currentPage
+          : parseKey(k)[0] === q.currentSurah;
+      }
+      const markLabel = () =>
+        `${L("آخر قراءة", "Last read")}: ${S.user.quran.lastReadAyah ? ayahRef(S.user.quran.lastReadAyah) : "—"}`;
+      /** Scrubber: pages 1–604 in Page Mode, Surahs 1–114 in Surah Mode. */
+      const scrubVal = () =>
+        S.settings.quranMode === "page"
+          ? S.user.quran.currentPage
+          : S.user.quran.currentSurah;
+      const scrubText = (v) =>
+        S.settings.quranMode === "page"
+          ? `${L("صفحة", "Page")} ${N(v)} · ${L(surahOfPage(v).ar, surahOfPage(v).en)}`
+          : `${N(v)} · ${surahTitle(SURAHS[v - 1])}`;
+      function syncScrub(sc) {
+        const t = scrubText(+sc.value),
+          b = $("#q-bubble");
+        sc.setAttribute("aria-valuetext", t);
+        if (b) b.textContent = t;
+      }
+      /** Recitation pill: reciter (opens the picker) + play; shown with the chrome, and kept while an ayah plays. */
+      function quranRec() {
+        const id = S.view.playing,
+          on = !!(id && id.startsWith("ayah:")),
+          k = on ? id.slice(5) : null,
+          dur = on ? durOf(id) : 1;
+        return `<div class="q-rec${on ? " on" : ""}" role="region" aria-label="${L("التلاوة", "Recitation")}">
+    <button class="q-reciter" data-a="openSheet" data-x="reciter" aria-label="${L("اختر القارئ", "Choose reciter")}: ${esc(reciterName())}"><span>${esc(reciterName())}${ic("down")}</span>${on ? `<span class="xs muted num" id="q-play-t">${ayahRef(k)} · ${N(dur - S.view.playPos)}${L("ث", "s")}</span>` : ""}</button>
+    <button class="btn icon primary" data-a="quranPlay" aria-label="${on ? L("إيقاف", "Stop") : L("استمع", "Play")}">${ic(on ? "pause" : "play")}</button>
+    ${on ? `<span class="q-rec-prog" id="q-play-prog"><i style="width:${(S.view.playPos / dur) * 100}%"></i></span>` : ""}</div>`;
       }
       function patchQuranPlayer() {
-        const bar = $("#q-play-prog > i"),
+        const id = S.view.playing,
+          bar = $("#q-play-prog > i"),
           t = $("#q-play-t"),
-          dur = durOf(S.view.playing);
+          dur = durOf(id);
         if (bar) bar.style.width = (S.view.playPos / dur) * 100 + "%";
-        if (t) t.textContent = N(dur - S.view.playPos) + L("ث", "s");
+        if (t)
+          t.textContent = `${ayahRef(id.slice(5))} · ${N(dur - S.view.playPos)}${L("ث", "s")}`;
+      }
+      function quranChrome() {
+        const on = S.view.quranChrome,
+          q = S.user.quran,
+          ret = q.returnTo,
+          page = S.settings.quranMode === "page";
+        return `<header class="q-top" role="toolbar" aria-label="${L("أدوات القارئ", "Reader controls")}" ${on ? "" : "inert"}>
+    <button class="nb-btn" data-a="back" aria-label="${L("رجوع", "Back")}">${ic("back", "flip")}</button>
+    <button class="nb-btn" data-a="openSheet" data-x="quranIndex" aria-label="${L("فهرس السور والأجزاء", "Surah & Juz index")}">${ic("list")}</button>
+    <button class="nb-btn q-mark${lastHere() ? " on" : ""}" id="q-mark" data-a="quranLast" aria-label="${markLabel()}" title="${markLabel()}">${ic("bookmark")}</button>
+    <div class="q-title"><div class="small strong" id="q-title">${quranTitle()}</div><div class="xs muted" id="q-sub">${quranSub()}</div></div>
+    <button class="nb-btn" data-a="openSheet" data-x="quranSearch" aria-label="${L("البحث في القرآن", "Search the Quran")}">${ic("search")}</button>
+    <button class="nb-btn" data-a="go" data-x="calendar" aria-label="${L("التقويم الهجري", "Hijri calendar")}">${ic("calendar")}</button>
+    <button class="nb-btn" data-a="openSheet" data-x="readerSettings" data-y="quran" aria-label="${L("إعدادات القراءة", "Reader settings")}">${ic("settings")}</button>
+  </header>
+  ${quranRec()}
+  <footer class="q-bottom" role="toolbar" aria-label="${L("التنقل في المصحف", "Mushaf navigation")}" ${on ? "" : "inert"}>
+    <button class="q-tool q-ret" data-a="quranReturn" ${ret ? "" : "disabled"} aria-label="${ret ? L("العودة إلى الموضع السابق", "Back to previous position") + ": " + ayahRef(ret) : L("لا موضع سابق", "No previous position")}">${ic("undo")}<span class="num">${ret ? N(pageOfAyah(ret)) : "—"}</span></button>
+    <div class="q-scrub" dir="rtl"><input type="range" id="q-scrub" min="1" max="${page ? 604 : 114}" value="${scrubVal()}" aria-label="${page ? L("انتقل إلى صفحة", "Go to page") : L("انتقل إلى سورة", "Go to Surah")}"><output class="q-bubble" id="q-bubble" for="q-scrub"></output></div>
+    <button class="q-tool" data-a="quranNotes" aria-label="${L("الآية: التفسير والملاحظات", "Ayah: tafsir & notes")}">${ic("file")}</button>
+  </footer>
+  ${S.ui.quranHintSeen ? "" : `<div class="q-hint" role="status"><div class="strong">${L("اضغط لإظهار الأدوات", "Tap to show controls")}</div><div class="xs muted mt1">${L("اضغط مطوّلًا على آية لخياراتها", "Long-press an ayah for its options")}</div></div>`}`;
       }
       function patchQuranChrome(pulse) {
-        const t = $(".navbar .nb-title"),
-          r = $("#q-readout"),
-          l = $("#q-last");
+        const t = $("#q-title"),
+          s = $("#q-sub"),
+          m = $("#q-mark"),
+          sc = $("#q-scrub");
         if (t) t.textContent = quranTitle();
-        if (r) r.textContent = quranReadout();
-        if (l) {
-          l.innerHTML = quranLastText();
+        if (s) s.textContent = quranSub();
+        if (m) {
+          m.classList.toggle("on", lastHere());
+          m.setAttribute("aria-label", markLabel());
+          m.title = markLabel();
           if (pulse) {
-            l.classList.remove("pulse");
-            void l.offsetWidth;
-            l.classList.add("pulse");
+            m.classList.remove("pulse");
+            void m.offsetWidth;
+            m.classList.add("pulse");
           }
         }
+        if (sc && !RT.qScrub) {
+          sc.value = scrubVal();
+          syncScrub(sc);
+        }
+      }
+      /* Chrome visibility: toggled in place (class on .phone + inert), never by re-render, so the page keeps its position. */
+      function setQuranChrome(on) {
+        clearTimeout(RT.qChromeT);
+        S.view.quranChrome = on;
+        $("#phone").classList.toggle("chrome-on", on);
+        document
+          .querySelectorAll(".q-top, .q-bottom")
+          .forEach((el) => (el.inert = !on));
+        if (on) armChromeHide();
+      }
+      /** Auto-hide after 4 s idle; waits while a sheet is open, the scrubber is held or keyboard focus is in the chrome. */
+      function armChromeHide() {
+        clearTimeout(RT.qChromeT);
+        RT.qChromeT = setTimeout(() => {
+          if (
+            !S.ui.onboarded ||
+            topRoute().s !== "quran" ||
+            !S.view.quranChrome
+          )
+            return;
+          if (
+            S.sheet ||
+            S.dialog ||
+            RT.qScrub ||
+            document.querySelector(
+              ".q-top :focus-visible, .q-bottom :focus-visible, .q-rec :focus-visible"
+            )
+          )
+            return armChromeHide();
+          setQuranChrome(false);
+          RT.lastAction = "chrome auto-hide (4 s idle)";
+          renderStatePanel();
+        }, 4000);
+      }
+      function quranTap() {
+        const h = $(".q-hint");
+        if (h) h.remove();
+        setQuranChrome(!S.view.quranChrome);
+        RT.lastAction =
+          "tap → chrome " + (S.view.quranChrome ? "shown" : "hidden");
+      }
+      function clearLongPress() {
+        if (RT.qLP) clearTimeout(RT.qLP.t);
+        RT.qLP = null;
+      }
+      /** Long-press on an ayah: its sheet (the click that ends the press is swallowed). */
+      function quranLongPress(k) {
+        clearLongPress();
+        RT.qLPSwallow = true;
+        haptic(10);
+        const h = $(".q-hint");
+        if (h) h.remove();
+        RT.lastAction = "long-press → ayah " + k;
+        openSheet("ayah", { y: k });
+        render();
       }
       SCREENS.quran = {
         title: () => quranTitle(),
-        large: false,
-        tabs: false,
+        full: true,
         cls: () => (isCarousel() ? "q-fixed" : "q-scroll"),
-        end: () =>
-          `<button class="nb-btn" data-a="openSheet" data-x="quranIndex" aria-label="${L("فهرس السور والأجزاء", "Surah & Juz index")}">${ic("list")}</button><button class="nb-btn" data-a="openSheet" data-x="readerSettings" data-y="quran" aria-label="${L("إعدادات القراءة", "Reader settings")}">${ic("type")}</button>`,
         render: () => {
           const q = S.user.quran,
             cur = q.currentPage,
@@ -8725,27 +9178,20 @@
             return `<div class="q-carousel" dir="rtl" aria-roledescription="carousel" aria-label="${L("صفحات المصحف — اسحب لتقليب الصفحة", "Mushaf pages — drag to turn the page")}">${pages.map((p) => `<div class="q-slide">${pageShell(p, Math.abs(p - cur) <= 1)}</div>`).join("")}</div>`;
           return `<div class="q-vlist">${pages.map((p) => pageShell(p, Math.abs(p - cur) <= 1)).join("")}</div>`;
         },
-        chrome:
-          () => `${quranPlayer()}<div class="q-bar" role="toolbar" aria-label="${L("شريط القراءة", "Reading toolbar")}">
-    ${seg(
-      [
-        ["page", L("صفحات", "Pages")],
-        ["surah", L("سورة", "Surah")],
-      ],
-      S.settings.quranMode,
-      "quranMode"
-    )}
-    <button class="q-readout" data-a="openSheet" data-x="${S.settings.quranMode === "page" ? "pageJump" : "quranIndex"}"><span id="q-readout">${quranReadout()}</span><span class="q-last" id="q-last">${quranLastText()}</span></button></div>`,
+        chrome: () => quranChrome(),
         mount: () => quranMount(),
       };
       function quranMount() {
         const scr = $("#app .screen"),
           q = S.user.quran,
           go = RT.qGo,
-          car = isCarousel() ? $(".q-carousel") : null;
+          car = isCarousel() ? $(".q-carousel") : null,
+          sc = $("#q-scrub");
         RT.qGo = null;
         RT.qSuppress = performance.now() + 600;
         RT.qDrag = null;
+        RT.qScrub = false;
+        if ($(".q-hint")) S.ui.quranHintSeen = true;
         if (S.settings.quranMode === "page") {
           const root = car || scr;
           root.querySelectorAll(".q-page.filled").forEach(fitLines);
@@ -8772,6 +9218,29 @@
         (car || scr).addEventListener("scroll", onQuranScroll, {
           passive: true,
         });
+        if (sc) {
+          const wrap = sc.parentElement;
+          syncScrub(sc);
+          sc.addEventListener("input", () => {
+            RT.qScrub = true;
+            wrap.classList.add("scrubbing");
+            syncScrub(sc);
+          });
+          sc.addEventListener("change", () => {
+            RT.qScrub = false;
+            wrap.classList.remove("scrubbing");
+            const v = +sc.value;
+            RT.lastAction = `scrub → ${S.settings.quranMode === "page" ? "page" : "surah"} ${v}`;
+            if (v !== scrubVal())
+              quranGo(
+                S.settings.quranMode === "page"
+                  ? firstAyahOfPage(v)
+                  : ayahKey(v, 1),
+                { top: S.settings.quranMode === "surah" }
+              );
+            render();
+          });
+        }
         RT.qPage = q.currentPage;
         RT.qFirst = firstVisibleAyah();
       }
@@ -8797,7 +9266,7 @@
           scr.scrollTop = 0;
           return;
         }
-        const viewTop = scr.getBoundingClientRect().top + 98;
+        const viewTop = scr.getBoundingClientRect().top + Q_TOP;
         let target = null,
           pad = 48;
         if (S.settings.quranMode === "page") {
@@ -8816,13 +9285,13 @@
         if (target)
           scr.scrollTop += target.getBoundingClientRect().top - viewTop - pad;
       }
-      /** Last-Read candidate: carousel → first ayah of the page in view; vertical/Surah → first ayah below the navbar. */
+      /** Last-Read candidate: carousel → first ayah of the page in view; vertical/Surah → first ayah below the status bar. */
       function firstVisibleAyah() {
         const q = S.user.quran;
         if (isCarousel()) return firstAyahOfPage(q.currentPage);
         const scr = $("#app .screen");
         if (!scr) return null;
-        const top = scr.getBoundingClientRect().top + 98 + 4;
+        const top = scr.getBoundingClientRect().top + Q_TOP + 4;
         const scopes =
           S.settings.quranMode === "page"
             ? [
@@ -8837,6 +9306,15 @@
         return null;
       }
       function onQuranScroll() {
+        clearLongPress();
+        if (
+          S.view.quranChrome &&
+          !RT.qScrub &&
+          performance.now() > RT.qSuppress
+        ) {
+          setQuranChrome(false);
+          RT.lastAction = "scroll → chrome hidden";
+        }
         if (RT.qRaf) return;
         RT.qRaf = requestAnimationFrame(() => {
           RT.qRaf = 0;
@@ -8859,9 +9337,9 @@
           const list = scr.querySelector(".q-vlist"),
             h =
               list.firstElementChild.offsetHeight +
-              parseFloat(getComputedStyle(list).rowGap);
+              (parseFloat(getComputedStyle(list).rowGap) || 0);
           page = clamp(
-            Math.floor((scr.scrollTop + 138 - list.offsetTop) / h) + 1,
+            Math.floor((scr.scrollTop + Q_TOP + 40 - list.offsetTop) / h) + 1,
             1,
             604
           );
@@ -10215,7 +10693,7 @@
         row({
           icon: "play",
           title: L("استمع للتلاوة", "Play recitation"),
-          sub: L("مشاري العفاسي · محاكاة", "Mishary Alafasy · mock"),
+          sub: `${reciterName()} · ${L("محاكاة", "mock")}`,
           a: "ayahPlay",
           x: k,
         }),
@@ -10236,6 +10714,54 @@
           chevron: false,
         }),
       ])}</div>`;
+        },
+      };
+      SHEETS.reciter = {
+        title: () => L("القارئ", "Reciter"),
+        render: () =>
+          `${group(
+            Object.entries(RECITERS).map(([id, n]) =>
+              row({
+                icon: "mic",
+                title: LL(n),
+                a: "setReciter",
+                x: id,
+                chevron: false,
+                end: S.settings.reciter === id ? ic("check") : "",
+              })
+            )
+          )}<p class="hint">${L("التلاوة في النموذج الأولي محاكاة.", "Recitation is mocked in the prototype.")}</p>`,
+      };
+      /** Search key for Arabic: no tashkeel/Quranic marks or tatweel, one alef, ya/alef maqsura and ta marbuta folded. */
+      const normAr = (s) =>
+        s
+          .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+          .replace(/[ٱأإآ]/g, "ا")
+          .replace(/ى/g, "ي")
+          .replace(/ة/g, "ه")
+          .toLowerCase();
+      SHEETS.quranSearch = {
+        title: () => L("البحث في القرآن", "Search the Quran"),
+        tall: true,
+        render: () => {
+          const raw = S.form.qSearch || "",
+            qn = normAr(raw.trim());
+          const field = `<div class="search mb3">${ic("search")}<input id="q-search" class="input" type="search" placeholder="${L("اسم سورة أو كلمات من آية", "A Surah name or words from an ayah")}" value="${esc(raw)}" data-m="form.qSearch" data-r="input" aria-label="${L("بحث", "Search")}" autocomplete="off"></div>`;
+          if (!qn)
+            return `${field}<p class="hint">${L("ابحث بأسماء السور، أو بنص الآيات المضمّنة في النموذج الأولي.", "Search Surah names, or the text of the ayat bundled in the prototype.")}</p>`;
+          const surahs = SURAHS.filter(
+              (s) =>
+                normAr(s.ar).includes(qn) ||
+                s.en.toLowerCase().includes(qn) ||
+                String(s.n) === qn
+            ).slice(0, 8),
+            ayat = Object.keys(QT)
+              .filter((k) => k !== "1:1" && normAr(QT[k]).includes(qn))
+              .slice(0, 30);
+          if (!surahs.length && !ayat.length)
+            return `${field}${empty("search", L("لا نتائج", "No results"), L("جرّب اسم سورة أو كلمة أخرى.", "Try a Surah name or another word."))}`;
+          return `${field}${surahs.length ? section(L("السور", "Surahs")) + group(surahs.map((s) => row({ lead: numBadge(s.n), title: surahTitle(s), sub: `${N(s.ayat)} ${L("آية", "ayat")} · ${L("ص", "p.")} ${N(s.page)}`, a: "openSurah", x: s.n }))) : ""}
+    ${ayat.length ? section(L("الآيات", "Ayat")) + group(ayat.map((k) => row({ title: `<span style="font-family:var(--font-mushaf);font-size:19px;line-height:1.9">${QT[k]}</span>`, sub: ayahRef(k), a: "openAyah", x: k }))) : ""}`;
         },
       };
       SHEETS.readerSettings = {
@@ -10797,15 +11323,22 @@
       A.assetPage = (n) => {
         S.view.assetPage = Number(n);
       };
-      /** Open the reader at an ayah (it becomes the Last-Read Ayah); mount scrolls/pages to it. */
+      /** Open the reader at an ayah (it becomes the Last-Read Ayah); mount scrolls/pages to it. Opening the reader starts
+    full screen (chrome hidden); a jump inside it remembers where the reader was, for the return button. */
       function quranGo(k, opts = {}) {
-        const q = S.user.quran;
+        const q = S.user.quran,
+          inReader = topRoute().s === "quran";
+        if (inReader && pageOfAyah(k) !== q.currentPage)
+          q.returnTo = firstVisibleAyah() || q.lastReadAyah;
         q.lastReadAyah = k;
         q.currentPage = pageOfAyah(k);
         q.currentSurah = parseKey(k)[0];
         RT.qGo = { key: k, flash: !!opts.flash, top: !!opts.top };
         closeSheet();
-        if (topRoute().s !== "quran") push("quran");
+        if (!inReader) {
+          S.view.quranChrome = false;
+          push("quran");
+        }
       }
       A.openQuran = (page) =>
         quranGo(
@@ -10850,9 +11383,33 @@
         const n = S.user.quran.currentSurah + 1;
         if (n <= 114) quranGo(ayahKey(n, 1), { top: true });
       };
-      A.ayah = (k) => {
-        if (performance.now() - (RT.qDragAt || 0) < 400) return false;
-        openSheet("ayah", { y: k });
+      /** A tap on the text toggles the chrome; the ayah sheet is on long-press (see the pointer listeners). */
+      A.ayah = () => {
+        if (performance.now() - (RT.qDragAt || 0) >= 400) quranTap();
+        return false;
+      };
+      A.quranLast = () => {
+        const k = S.user.quran.lastReadAyah;
+        if (!k) return false;
+        quranGo(k, { flash: true });
+      };
+      A.quranReturn = () => {
+        const k = S.user.quran.returnTo;
+        if (!k) return false;
+        quranGo(k, { flash: true });
+      };
+      A.quranNotes = () =>
+        openSheet("ayah", {
+          y: firstVisibleAyah() || S.user.quran.lastReadAyah || "1:1",
+        });
+      A.quranPlay = () => {
+        if (S.view.playing && S.view.playing.startsWith("ayah:")) stopPlay();
+        else
+          A.ayahPlay(firstVisibleAyah() || S.user.quran.lastReadAyah || "1:1");
+      };
+      A.setReciter = (id) => {
+        S.settings.reciter = id;
+        closeSheet();
       };
       A.ayahLast = (k) => {
         closeSheet();
@@ -11735,13 +12292,30 @@
         else renderStatePanel();
       });
       document.addEventListener("click", (e) => {
+        if (RT.qLPSwallow) {
+          RT.qLPSwallow = false; // the click that ends a long-press
+          return;
+        }
         const pb = e.target.closest("[data-proto]");
         if (pb) {
           protoAction(pb.dataset.proto);
           return;
         }
         const el = e.target.closest("[data-a]");
-        if (!el || el.disabled) return;
+        if (!el) {
+          // a tap anywhere on the reader's page (margins, header line, between ayat) toggles its chrome
+          if (
+            S.ui.onboarded &&
+            topRoute().s === "quran" &&
+            e.target.closest("#app .screen") &&
+            performance.now() - (RT.qDragAt || 0) >= 400
+          ) {
+            quranTap();
+            renderStatePanel();
+          }
+          return;
+        }
+        if (el.disabled) return;
         const fn = A[el.dataset.a];
         if (!fn) {
           console.warn("missing action", el.dataset.a);
@@ -11757,16 +12331,50 @@
         else renderStatePanel();
       });
       document.addEventListener("pointerdown", (e) => {
+        RT.qLPSwallow = false;
         if (e.target.closest("[data-hold]")) {
           RT.holding = true;
           RT.reciteAt = 0;
           e.preventDefault();
         }
+        if (!S.ui.onboarded || topRoute().s !== "quran") return;
+        if (e.target.closest(".q-top, .q-bottom, .q-rec") && S.view.quranChrome)
+          armChromeHide(); // interacting with the chrome keeps it up
+        const ay =
+          !S.sheet &&
+          e.button === 0 &&
+          e.target.closest('#app .screen [data-a="ayah"]');
+        if (ay) {
+          clearLongPress();
+          RT.qLP = {
+            x: e.clientX,
+            y: e.clientY,
+            t: setTimeout(() => quranLongPress(ay.dataset.x), 500),
+          };
+        }
+      });
+      document.addEventListener("pointermove", (e) => {
+        if (
+          RT.qLP &&
+          Math.hypot(e.clientX - RT.qLP.x, e.clientY - RT.qLP.y) > 8
+        )
+          clearLongPress();
       });
       for (const ev of ["pointerup", "pointercancel"])
         document.addEventListener(ev, () => {
           RT.holding = false;
+          clearLongPress();
         });
+      // Right-click / the platform's long-press menu on an ayah opens its sheet instead of the browser menu
+      document.addEventListener("contextmenu", (e) => {
+        const ay =
+          S.ui.onboarded &&
+          topRoute().s === "quran" &&
+          e.target.closest('#app .screen [data-a="ayah"]');
+        if (!ay) return;
+        e.preventDefault();
+        if (!(S.sheet && S.sheet.k === "ayah")) quranLongPress(ay.dataset.x);
+      });
       document.addEventListener("keydown", (e) => {
         const tag =
           (document.activeElement && document.activeElement.tagName) || "";
