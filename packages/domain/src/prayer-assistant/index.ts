@@ -32,3 +32,5 @@ export {
   prayerAssistantSettingsSchema,
 } from "./settings";
 export type { PrayerAssistantSettings } from "./settings";
+export { countTakbirs, createTakbirDetector, TAKBIR_REPEAT_MS } from "./takbir";
+export type { TakbirDetector } from "./takbir";
