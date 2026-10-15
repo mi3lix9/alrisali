@@ -22,6 +22,10 @@ export const en: Catalog<typeof ar> = {
       "Your data will be removed from this device. It stays in your account and comes back when you sign in again.",
     cancel: "Cancel",
     confirm: "Sign out",
+    unsyncedTitle: "Some records aren't synced",
+    unsyncedMessage:
+      "Couldn't reach your cloud database. If you sign out now, what you recorded since the last sync is lost. Check your connection and try again, or sign out anyway.",
+    signOutAnyway: "Sign out anyway",
   },
   deleteAccount: {
     title: "Delete account",
