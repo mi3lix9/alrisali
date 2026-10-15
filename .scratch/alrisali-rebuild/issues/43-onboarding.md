@@ -6,7 +6,7 @@
 
 **Blocked by:** 04 (Prayer Times timetable and next-Salah countdown), 09 (Reminders for Prayer Times and Imsak), 10 (Sign in with Apple and Google)
 
-**Status:** done
+**Status:** done — pending simulator verification
 
 - [x] Completes in under a minute (six steps, each opening on a default: Continue through; native timing pending simulator verification)
 - [x] Every choice persists
