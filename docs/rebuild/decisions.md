@@ -6,7 +6,7 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
 
 - Platforms: iOS and Android (Expo), plus a single web app with the public landing page and `/admin`.
 - Every feature in the inventory is ported in the first release, the Prayer Assistant included. Every module is redesigned during the build from Panel UI and native patterns; there is no Figma.
-- Unfinished features to finish: the last-read Quran Page, Companion XP, Nahj al-Balagha, and Tasbih targets, export and notes.
+- Unfinished features to finish: the Last-Read Ayah, Companion XP, Nahj al-Balagha, and Tasbih targets, export and notes.
 - Dropped: Feed, the old surah list page, the EPUB placeholder.
 - No migration from the old Postgres: everyone starts fresh.
 - Free app; code is MIT-licensed, and content keeps its own licences.
@@ -21,7 +21,7 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
 - Database lifecycle: the server creates a Believer's database on their first sign-in (Platform API, one group, named after the user id). Short-lived tokens scoped to that one database are minted through an oRPC route. Deleting an account destroys the database. Signing out wipes the device.
 - Schema rule for synced tables: additive only, with a `schema_version` row; the app runs its bundled migrations before pushing.
 - Reminders are scheduled on the device with expo-notifications; the server only sends Announcements, through Expo Push (ADR-0003).
-- Quran: Tanzil text and the KFGQPC font are bundled. Pages are reflowable until a line-exact layout is licensed. Recitation streams from Quran Foundation and is cached for at most 7 days (ADR-0004).
+- Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams from Quran Foundation and is cached for at most 7 days (ADR-0004).
 - Books (Mafatih, Sahifa, Nahj): bundled static data with stable Supplication ids. The content database refers to Supplications by those ids. Arabic and English texts are re-sourced from Thaqalayn (CC BY 4.0).
 
 ## Stack
@@ -97,7 +97,6 @@ Reports: `docs/rebuild/spikes/`.
 
 ## External actions (owner: you)
 
-- Ask Tarteel/QUL and KFGQPC for written permission to use the line-exact mushaf layout.
 - Email info@thaqalayn.net to confirm the rights to the translations, including Sayed Ali Raza's Nahj translation.
 - Create a Quran Foundation developer account (for streaming audio).
 

@@ -58,9 +58,15 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 ## Texts
 
-**Quran Page**: One of the 604 pages of the Madani mushaf; the unit the Quran is read in. _Avoid_: Quran id
+**Quran Page**: One of the 604 fifteen-line pages of the Madinah mushaf (Hafs). _Avoid_: Quran id
 
 **Surah**: One of the 114 chapters of the Quran.
+
+**Page Mode**: Reading the Quran as Quran Pages, each line laid out like the printed mushaf, turned by swiping horizontally or by scrolling vertically.
+
+**Surah Mode**: Reading one Surah at a time as continuous, reflowing text that ends with a way to go on to the next Surah.
+
+**Last-Read Ayah**: The surah:ayah where the Believer stopped reading; Page Mode and Surah Mode both reopen at it. _Avoid_: Last-read page, Quran progress
 
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
