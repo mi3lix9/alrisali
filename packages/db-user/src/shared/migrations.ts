@@ -54,4 +54,11 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `quran_reader_settings` (\n\t`id` text PRIMARY KEY,\n\t`mode` text DEFAULT 'page' NOT NULL,\n\t`page_nav` text DEFAULT 'horizontal' NOT NULL,\n\t`surah_font_size` integer DEFAULT 26 NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015193622_open_tasbih",
+    statements: [
+      "ALTER TABLE `tasbih` ADD `target` integer;",
+      "ALTER TABLE `tasbih` ADD `notes` text;",
+    ],
+  },
 ];
