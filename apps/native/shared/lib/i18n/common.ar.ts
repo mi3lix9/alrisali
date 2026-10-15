@@ -10,6 +10,7 @@ export const ar = {
     tasbih: "التسبيح",
   },
   settings: "الإعدادات",
+  account: "الحساب",
   notFound: {
     title: "الصفحة غير موجودة",
     goHome: "العودة إلى الرئيسية",

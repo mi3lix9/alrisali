@@ -12,6 +12,7 @@ export const en: Catalog<typeof ar> = {
     tasbih: "Tasbih",
   },
   settings: "Settings",
+  account: "Account",
   notFound: {
     title: "Page not found",
     goHome: "Back to Home",

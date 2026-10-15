@@ -16,6 +16,25 @@ export const en: Catalog<typeof ar> = {
     light: "Light",
     dark: "Dark",
   },
+  location: {
+    title: "Location",
+    description: "Prayer Times are calculated for this location.",
+    notSet: "You haven't set your location yet.",
+    name: "Place name (optional)",
+    latitude: "Latitude",
+    longitude: "Longitude",
+    invalid:
+      "Latitude must be between -90 and 90, longitude between -180 and 180.",
+    save: "Save location",
+  },
+  calculationMethod: {
+    title: "Calculation Method",
+    description: "The rules used to calculate Prayer Times.",
+    jafari: "Ja'fari",
+    sunni: "Sunni",
+    hanafi: "Hanafi",
+    ibadi: "Ibadi",
+  },
   textSize: {
     title: "Text size",
     small: "Small",
