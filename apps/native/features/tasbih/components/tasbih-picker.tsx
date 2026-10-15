@@ -48,6 +48,7 @@ export const TasbihPicker = () => {
         size="lg"
         variant="outline"
         start={<PlusIcon size={16} />}
+        testID="tasbih-new"
         onPress={() => router.push("/tasbih/new")}
       >
         {t("picker.new")}

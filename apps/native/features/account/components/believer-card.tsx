@@ -40,6 +40,7 @@ export const BelieverCard = ({ believer }: { believer: Believer }) => {
       <Card.Footer>
         <Button
           variant="destructive"
+          testID="account-sign-out"
           loading={isSigningOut}
           onPress={confirmSignOut}
         >

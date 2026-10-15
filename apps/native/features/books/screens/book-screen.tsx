@@ -12,6 +12,7 @@ import { Screen } from "@/shared/ui/screen";
 const SupplicationRow = ({ item }: { item: SupplicationSummary }) => (
   <Item
     size="sm"
+    testID={`books-supplication-${item.id}`}
     onPress={() =>
       router.push({
         pathname: "/library/supplication/[id]",

@@ -87,6 +87,7 @@ export const QuranIndexSheet = ({
               size="sm"
               variant="outline"
               startContent={<FileIcon size={16} />}
+              testID="quran-index-page-jump"
               onPress={onPageJump}
             >
               {t("navigation.pageJump")}

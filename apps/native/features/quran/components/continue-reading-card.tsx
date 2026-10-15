@@ -28,7 +28,7 @@ export const ContinueReadingCard = () => {
     <Card>
       <Card.Header>
         <Card.Title>{t("lastRead.continue")}</Card.Title>
-        <Card.Description>
+        <Card.Description testID="quran-last-read-position">
           {ayah && surah
             ? t("lastRead.position", {
                 surah: i18n.language === "ar" ? surah.nameAr : surah.nameEn,
@@ -40,6 +40,7 @@ export const ContinueReadingCard = () => {
       </Card.Header>
       <Card.Footer>
         <Button
+          testID="quran-continue-reading"
           startContent={<BookmarkIcon size={18} />}
           onPress={() =>
             router.push({

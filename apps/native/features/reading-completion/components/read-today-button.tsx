@@ -21,6 +21,7 @@ export const ReadTodayButton = ({
   return (
     <Button
       variant={read ? "secondary" : "primary"}
+      testID="reading-completion-mark"
       accessibilityHint={read ? t("undoHint") : undefined}
       accessibilityState={{ checked: read }}
       disabled={isRead.isPending || setRead.isPending}

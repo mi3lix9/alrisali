@@ -71,7 +71,7 @@ const Counter = ({
 
       <View className="w-full max-w-72 gap-2">
         <Progress value={progress.count} maxValue={target} />
-        <Text muted size="sm" className="text-center">
+        <Text muted size="sm" className="text-center" testID="tasbih-step">
           {t("counter.step", {
             step: formatCount(progress.step + 1),
             steps: formatCount(TASBIH_AL_ZAHRA_STEPS.length),
@@ -82,6 +82,7 @@ const Counter = ({
       <Text
         accessibilityLiveRegion="polite"
         className="text-success min-h-6 text-center"
+        testID="tasbih-round-message"
       >
         {roundCompleted ? t("roundCompleted") : ""}
       </Text>
