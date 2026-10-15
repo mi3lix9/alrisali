@@ -98,6 +98,7 @@
         "@orpc/server": "catalog:",
         "@orpc/zod": "catalog:",
         "@sentry/node": "^11.8.0",
+        "@tursodatabase/api": "2.0.5",
         "better-auth": "catalog:",
         "hono": "^4.13.7",
         "libsql": "catalog:",
@@ -106,6 +107,7 @@
       },
       "devDependencies": {
         "@alrisali/config": "workspace:*",
+        "@alrisali/db-user": "workspace:*",
         "@types/bun": "catalog:",
         "tsdown": "^0.23.0",
         "typescript": "^6.0.3",
@@ -234,6 +236,12 @@
         "@tursodatabase/sync": "0.8.3",
         "drizzle-kit": "1.0.0-rc.4",
         "typescript": "^6.0.3",
+      },
+      "optionalDependencies": {
+        "@tursodatabase/cli-darwin-arm64": "0.8.0",
+        "@tursodatabase/cli-darwin-x64": "0.8.0",
+        "@tursodatabase/cli-linux-arm64-gnu": "0.8.0",
+        "@tursodatabase/cli-linux-x64-gnu": "0.8.0",
       },
     },
     "packages/domain": {
@@ -1231,6 +1239,16 @@
     "@turbo/windows-64": ["@turbo/windows-64@2.11.8", "", { "os": "win32", "cpu": "x64" }, "sha512-NnHtcWPE6PymlYsCKEuYditlY/nMeCEB3xyD4yc3cpqpxW7/4Xqdlqd5TpqvEpjS8CDazPHelGCQS/ghUIoZ6g=="],
 
     "@turbo/windows-arm64": ["@turbo/windows-arm64@2.11.8", "", { "os": "win32", "cpu": "arm64" }, "sha512-o8UyM/VlYCvW5Enfo2O37Pe11p3wmnEYtJrohXA2SyOlehmo5KyXpptPRKrXOMNfdmoYEulo6Nhj0tIv2UB0hA=="],
+
+    "@tursodatabase/api": ["@tursodatabase/api@2.0.5", "", { "dependencies": { "whatwg-fetch": "^3.6.19" } }, "sha512-Bp17LkleBhxMkLEEdzYjflVQEueavxyKaYifY3An3ZimXn6bKmcBUYGDpjzIe7rxqZVoswzlYOXA4jociI5Z1Q=="],
+
+    "@tursodatabase/cli-darwin-arm64": ["@tursodatabase/cli-darwin-arm64@0.8.0", "", { "os": "darwin", "cpu": "arm64" }, "sha512-OYrvFZrO6a/uOF6dlE1eZ2k/GjygO5jV6YcJrBCDSo4gP1xC/aTCBWXnoGAWkvhTaNz1NgerhBYP/Ll9eu2xdg=="],
+
+    "@tursodatabase/cli-darwin-x64": ["@tursodatabase/cli-darwin-x64@0.8.0", "", { "os": "darwin", "cpu": "x64" }, "sha512-JwdrmZOFEqKi0Ne/nfnNTZwHuC9R98nEYw2BPf0KhkIbpscJ1pzrFVA1J3vgsfS2l9Y99q7rxLr4/mtn9g8ttg=="],
+
+    "@tursodatabase/cli-linux-arm64-gnu": ["@tursodatabase/cli-linux-arm64-gnu@0.8.0", "", { "os": "linux", "cpu": "arm64" }, "sha512-eLTmntaPZ3IYbziOGdNW5gn/wedWVF+BIIgHUmYdrqZb7yYv6j2lu8Hkb+NlhuKrxHC9LjbPRzSXhlJRng+qbQ=="],
+
+    "@tursodatabase/cli-linux-x64-gnu": ["@tursodatabase/cli-linux-x64-gnu@0.8.0", "", { "os": "linux", "cpu": "x64" }, "sha512-7vYkiigW1LXewOGpATsoUNoGfOqy4hQC76XArdOfQn4/CPSh6p4p8UCxsQvgHDvPyAbDSHXfHjyHr5ktQhsCAg=="],
 
     "@tursodatabase/database-common": ["@tursodatabase/database-common@0.8.3", "", {}, "sha512-T8sMfSnRjgGzKMDVkSg0lh1Jh6dDtTWzjYFK0ZJHtKzr+zs69a7Igo4Z+sxfh+rk9gEqn2njLgRYfpMEghMVMw=="],
 

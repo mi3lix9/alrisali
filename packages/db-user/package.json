@@ -5,12 +5,14 @@
   "description": "Drizzle schema and migrations for the per-user database.",
   "type": "module",
   "exports": {
+    "./testing": "./src/shared/testing.ts",
     "./*": "./src/*/index.ts"
   },
   "scripts": {
     "check-types": "tsc -b",
     "db:generate": "drizzle-kit generate",
-    "db:bundle": "bun scripts/bundle-migrations.ts && oxfmt src/shared/migrations.ts"
+    "db:bundle": "bun scripts/bundle-migrations.ts && oxfmt src/shared/migrations.ts",
+    "sync-server": "bun scripts/sync-server.ts"
   },
   "dependencies": {
     "@alrisali/domain": "workspace:*",
@@ -22,5 +24,11 @@
     "@tursodatabase/sync": "0.8.3",
     "drizzle-kit": "1.0.0-rc.4",
     "typescript": "^6.0.3"
+  },
+  "optionalDependencies": {
+    "@tursodatabase/cli-darwin-arm64": "0.8.0",
+    "@tursodatabase/cli-darwin-x64": "0.8.0",
+    "@tursodatabase/cli-linux-arm64-gnu": "0.8.0",
+    "@tursodatabase/cli-linux-x64-gnu": "0.8.0"
   }
 }

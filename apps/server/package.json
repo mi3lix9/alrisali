@@ -19,6 +19,7 @@
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
     "@sentry/node": "^11.8.0",
+    "@tursodatabase/api": "2.0.5",
     "better-auth": "catalog:",
     "hono": "^4.13.7",
     "libsql": "catalog:",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",
+    "@alrisali/db-user": "workspace:*",
     "@types/bun": "catalog:",
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3"
