@@ -25,7 +25,13 @@ app.use(
   })
 );
 
-app.on(["POST", "GET"], "/api/auth/*", async (c) => auth.handler(c.req.raw));
+app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// oRPC interceptors are callback-based by design.
+// oxlint-disable-next-line promise/prefer-await-to-callbacks
+const logErrors = onError((error) => {
+  console.error(error);
+});
 
 export const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
@@ -33,19 +39,11 @@ export const apiHandler = new OpenAPIHandler(appRouter, {
       schemaConverters: [new ZodToJsonSchemaConverter()],
     }),
   ],
-  interceptors: [
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
+  interceptors: [logErrors],
 });
 
 export const rpcHandler = new RPCHandler(appRouter, {
-  interceptors: [
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
+  interceptors: [logErrors],
 });
 
 app.use("/*", async (c, next) => {
@@ -69,7 +67,7 @@ app.use("/*", async (c, next) => {
     return c.newResponse(apiResult.response.body, apiResult.response);
   }
 
-  await next();
+  return next();
 });
 
 app.get("/", (c) => c.text("OK"));

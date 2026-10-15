@@ -9,7 +9,7 @@ import { SignUp } from "@/components/sign-up";
 import { authClient } from "@/lib/auth-client";
 import { queryClient, orpc } from "@/utils/orpc";
 
-export default function Home() {
+const Home = () => {
   const healthCheck = useQuery(orpc.healthCheck.queryOptions());
   const privateData = useQuery(orpc.privateData.queryOptions());
   const isConnected = healthCheck?.data === "OK";
@@ -19,7 +19,13 @@ export default function Home() {
   const mutedColor = useThemeColor("muted");
   const successColor = useThemeColor("success");
   const dangerColor = useThemeColor("danger");
-  const foregroundColor = useThemeColor("foreground");
+
+  let connectionLabel = "API Disconnected";
+  if (isLoading) {
+    connectionLabel = "Checking connection...";
+  } else if (isConnected) {
+    connectionLabel = "Connected to API";
+  }
 
   return (
     <Container className="p-6">
@@ -68,13 +74,7 @@ export default function Home() {
               <Text className="text-foreground mb-1 font-medium">
                 ORPC Backend
               </Text>
-              <Card.Description>
-                {isLoading
-                  ? "Checking connection..."
-                  : isConnected
-                    ? "Connected to API"
-                    : "API Disconnected"}
-              </Card.Description>
+              <Card.Description>{connectionLabel}</Card.Description>
             </View>
             {isLoading && (
               <Ionicons name="hourglass-outline" size={20} color={mutedColor} />
@@ -108,4 +108,6 @@ export default function Home() {
       )}
     </Container>
   );
-}
+};
+
+export default Home;

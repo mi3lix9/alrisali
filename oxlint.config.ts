@@ -5,7 +5,22 @@ import tanstack from "ultracite/oxlint/tanstack";
 import vitest from "ultracite/oxlint/vitest";
 
 export default defineConfig({
-  env: core.env,
+  ...(core.env ? { env: core.env } : {}),
   extends: [core, react, tanstack, vitest],
-  ignorePatterns: core.ignorePatterns,
+  ...(core.ignorePatterns ? { ignorePatterns: core.ignorePatterns } : {}),
+  rules: {
+    // React Navigation and expo-router take render functions as options
+    // (tabBarIcon, headerRight, drawerIcon).
+    "react/no-unstable-nested-components": ["error", { allowAsProps: true }],
+  },
+  overrides: [
+    {
+      // Metro and Babel load these synchronously as CommonJS.
+      files: ["apps/native/babel.config.js", "apps/native/metro.config.js"],
+      rules: {
+        "node/global-require": "off",
+        "unicorn/prefer-module": "off",
+      },
+    },
+  ],
 });

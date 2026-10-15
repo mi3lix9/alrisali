@@ -1,8 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import { useThemeColor } from "heroui-native";
+import type { ComponentProps } from "react";
 
-export default function TabLayout() {
+// @expo/vector-icons types `color` without RN 0.88's number/null ColorValue members.
+type IconColor = ComponentProps<typeof Ionicons>["color"];
+
+const TabLayout = () => {
   const themeColorForeground = useThemeColor("foreground");
   const themeColorBackground = useThemeColor("background");
 
@@ -28,7 +32,7 @@ export default function TabLayout() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="home" size={size} color={color as IconColor} />
           ),
         }}
       />
@@ -37,10 +41,12 @@ export default function TabLayout() {
         options={{
           title: "Explore",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="compass" size={size} color={color} />
+            <Ionicons name="compass" size={size} color={color as IconColor} />
           ),
         }}
       />
     </Tabs>
   );
-}
+};
+
+export default TabLayout;

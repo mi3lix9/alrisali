@@ -10,7 +10,8 @@ import {
   useToast,
 } from "heroui-native";
 import { useRef } from "react";
-import type { TextInput } from "react-native";
+import type { Ref } from "react";
+import type { TextInput, TextInputInstance } from "react-native";
 import { Text, View } from "react-native";
 import z from "zod";
 
@@ -34,7 +35,7 @@ const signUpSchema = z.object({
     .min(8, "Use at least 8 characters"),
 });
 
-function getErrorMessage(error: unknown): string | null {
+const getErrorMessage = (error: unknown): string | null => {
   if (!error) {
     return null;
   }
@@ -61,11 +62,11 @@ function getErrorMessage(error: unknown): string | null {
   }
 
   return null;
-}
+};
 
-export function SignUp() {
-  const emailInputRef = useRef<TextInput>(null);
-  const passwordInputRef = useRef<TextInput>(null);
+export const SignUp = () => {
+  const emailInputRef = useRef<TextInputInstance>(null);
+  const passwordInputRef = useRef<TextInputInstance>(null);
   const { toast } = useToast();
 
   const form = useForm({
@@ -150,7 +151,8 @@ export function SignUp() {
                     <TextField>
                       <Label>Email</Label>
                       <Input
-                        ref={emailInputRef}
+                        // heroui-native 1.0 types refs as RN's TextInput component type, not the RN 0.88 instance type.
+                        ref={emailInputRef as unknown as Ref<TextInput>}
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChangeText={field.handleChange}
@@ -174,7 +176,8 @@ export function SignUp() {
                     <TextField>
                       <Label>Password</Label>
                       <Input
-                        ref={passwordInputRef}
+                        // heroui-native 1.0 types refs as RN's TextInput component type, not the RN 0.88 instance type.
+                        ref={passwordInputRef as unknown as Ref<TextInput>}
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChangeText={field.handleChange}
@@ -207,4 +210,4 @@ export function SignUp() {
       </form.Subscribe>
     </Surface>
   );
-}
+};

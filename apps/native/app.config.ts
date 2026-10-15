@@ -5,7 +5,7 @@ const IS_PRODUCTION = process.env.APP_VARIANT === "production";
 const APP_ID = IS_PRODUCTION ? "com.alrisali.app" : "com.alrisali.app.dev";
 const APP_NAME = "الرسالي";
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
+const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: APP_NAME,
   slug: "alrisali",
@@ -53,3 +53,5 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     reactCompiler: true,
   },
 });
+
+export default appConfig;

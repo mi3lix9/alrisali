@@ -5,13 +5,8 @@ import { Text, View } from "react-native";
 
 import { Container } from "@/components/container";
 
-function Modal() {
+const Modal = () => {
   const accentForegroundColor = useThemeColor("accent-foreground");
-
-  function handleClose() {
-    router.back();
-  }
-
   return (
     <Container>
       <View className="flex-1 items-center justify-center p-4">
@@ -31,13 +26,13 @@ function Modal() {
               This is an example modal screen for dialogs and confirmations.
             </Text>
           </View>
-          <Button onPress={handleClose} className="w-full" size="sm">
+          <Button onPress={() => router.back()} className="w-full" size="sm">
             <Button.Label>Close</Button.Label>
           </Button>
         </Surface>
       </View>
     </Container>
   );
-}
+};
 
 export default Modal;

@@ -4,17 +4,13 @@ import { Label } from "@alrisali/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import z from "zod";
+import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 
 import Loader from "./loader";
 
-export default function SignUpForm({
-  onSwitchToSignIn,
-}: {
-  onSwitchToSignIn: () => void;
-}) {
+const SignUpForm = ({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) => {
   const navigate = useNavigate({
     from: "/",
   });
@@ -168,4 +164,6 @@ export default function SignUpForm({
       </div>
     </div>
   );
-}
+};
+
+export default SignUpForm;

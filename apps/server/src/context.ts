@@ -7,9 +7,9 @@ export interface CreateContextOptions {
   context: HonoContext;
 }
 
-export async function createContext({
+export const createContext = async ({
   context,
-}: CreateContextOptions): Promise<ApiContext> {
+}: CreateContextOptions): Promise<ApiContext> => {
   const session = await auth.api.getSession({
     headers: context.req.raw.headers,
   });
@@ -17,6 +17,6 @@ export async function createContext({
     db,
     session,
   };
-}
+};
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
