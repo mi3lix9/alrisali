@@ -136,4 +136,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `lesson_progress` (\n\t`lesson_id` text PRIMARY KEY,\n\t`current_slide` integer NOT NULL,\n\t`furthest_slide` integer NOT NULL,\n\t`completed_at` integer,\n\t`updated_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015211413_library_asset_positions",
+    statements: [
+      "CREATE TABLE `library_asset_positions` (\n\t`asset_id` text PRIMARY KEY,\n\t`position` real NOT NULL,\n\t`saved_at` text NOT NULL\n);",
+    ],
+  },
 ];

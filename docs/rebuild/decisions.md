@@ -76,7 +76,7 @@ packages/e2e    e2e tests
 
 Feature folder: `screens/ components/ hooks/ data/ i18n/ utils/ index.ts`; `index.ts` is the only public entry point, and empty subfolders are omitted. Features never import each other. Routes and Home compose them, and cross-feature events go through the typed event bus in `shared/lib`. `shared/` never imports a feature. oxlint `no-restricted-imports` and dependency-cruiser enforce this.
 
-Native features: onboarding, account, settings, home, prayer-times, prayer-log, khushu, qibla, prayer-assistant, reminders, calendar, gatherings, quran, books, recite-along, library-assets, lessons, tasbih, habits, programs, mood, companion, insights, announcements, contact. Web features: landing, admin-programs, admin-occasions, admin-gatherings, admin-lessons, admin-library, admin-daily-content, admin-announcements, admin-messages, admin-analytics.
+Native features: onboarding, account, settings, home, prayer-times, prayer-log, khushu, qibla, prayer-assistant, reminders, calendar, gatherings, quran, books, recite-along, library-assets, lessons, tasbih, habits, programs, mood, companion, insights, announcements, contact. Web features: landing, admin-programs, admin-occasions, admin-gatherings, admin-lessons, admin-library-assets, admin-daily-content, admin-announcements, admin-messages, admin-analytics.
 
 ## Spike results (2026-10-15, iOS simulator only; Android skipped)
 
