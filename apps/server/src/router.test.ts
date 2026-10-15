@@ -1588,6 +1588,34 @@ describe("Library Assets", () => {
     });
   });
 
+  it("keeps a Library Asset the Admin can remove again when the content database fails", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ published: true })
+    )) as { id: string };
+
+    const working = content;
+    content = {
+      ...working,
+      db: () => Promise.reject(new Error("content database unreachable")),
+    };
+    await expect(
+      callAs(admin, "libraryAssets.remove", { id })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+    content = working;
+
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [{ id }],
+    });
+    await callAs(admin, "libraryAssets.remove", { id });
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [],
+    });
+  });
+
   it("publishes structured text only when its file is in the structured-text format", async () => {
     const admin = await signInAsAdmin();
     const good = await uploadLibraryFile(
