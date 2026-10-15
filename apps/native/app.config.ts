@@ -5,6 +5,19 @@ const IS_PRODUCTION = process.env.APP_VARIANT === "production";
 const APP_ID = IS_PRODUCTION ? "com.alrisali.app" : "com.alrisali.app.dev";
 const APP_NAME = "الرسالي";
 
+const GOOGLE_CLIENT_ID_SUFFIX = ".apps.googleusercontent.com";
+
+/** Google's sheet returns to the app on its reversed iOS client ID. */
+const googleIosUrlScheme = (): string => {
+  const clientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+  if (!clientId) {
+    throw new Error(
+      "Missing EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: Google Sign-In needs it for the iOS URL scheme."
+    );
+  }
+  return `com.googleusercontent.apps.${clientId.replace(GOOGLE_CLIENT_ID_SUFFIX, "")}`;
+};
+
 const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: APP_NAME,
@@ -17,6 +30,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: APP_ID,
+    usesAppleSignIn: true,
   },
   android: {
     adaptiveIcon: {
@@ -39,6 +53,11 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     // launch flips the layout back in JS (shared/lib/app-providers.tsx); a JS
     // `I18nManager.forceRTL` would be overwritten by this on every launch.
     ["expo-localization", { supportsRTL: true, forcesRTL: true }],
+    "expo-apple-authentication",
+    [
+      "@react-native-google-signin/google-signin",
+      { iosUrlScheme: googleIosUrlScheme() },
+    ],
     [
       "@sentry/react-native/expo",
       {

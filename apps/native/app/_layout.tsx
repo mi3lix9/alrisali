@@ -21,6 +21,10 @@ const RootStack = () => {
         name="settings"
         options={{ title: t("settings"), presentation: "modal" }}
       />
+      <Stack.Screen
+        name="account"
+        options={{ title: t("account"), presentation: "modal" }}
+      />
     </Stack>
   );
 };
