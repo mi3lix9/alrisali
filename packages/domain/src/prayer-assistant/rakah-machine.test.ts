@@ -354,4 +354,23 @@ describe("confirmed Positions (Mat mode)", () => {
       )
     ).toStrictEqual({ rakah: 3, position: "sujud", final: false });
   });
+
+  it("times the final Tashahhud from when the sensor saw the Believer sit", () => {
+    const lastSujud = feed(
+      startSalah("fajr", NORMAL),
+      Array.from({ length: 4 }, (_, index) => ({
+        kind: "confirmed",
+        position: "sujud",
+        at: index * 1000,
+      }))
+    );
+    const seated = observe(lastSujud, {
+      kind: "confirmed",
+      position: "tashahhud",
+      since: 5000,
+      at: 8000,
+    });
+    expect(currentStep(seated).final).toBeTruthy();
+    expect(completesAt(seated)).toBe(5000 + seated.holds.finalTashahhudMs);
+  });
 });

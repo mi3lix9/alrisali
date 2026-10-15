@@ -43,10 +43,10 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: APP_ID,
     usesAppleSignIn: true,
     infoPlist: {
-      // The Prayer Assistant's Camera and Head Height modes (VisionCamera has
-      // no config plugin of its own).
+      // The Prayer Assistant's Camera, Head Height and Mat modes (VisionCamera
+      // has no config plugin of its own).
       NSCameraUsageDescription:
-        "يرى الرسالي وضعيتك أثناء الصلاة ليتابع أركانها، والمعاينة مخفية فلا ترى نفسك، ولا يُحفظ شيء من الصور. Al-Risali watches your posture during Salah to follow its Positions; the preview stays hidden so you don't watch yourself, and no image is kept.",
+        "يرى الرسالي وضعيتك أثناء الصلاة ليتابع أركانها، أو يقيس ضوء السقف من الهاتف على السجادة ليعدّ سجداتك. المعاينة مخفية فلا ترى نفسك، ولا يُحفظ شيء من الصور. Al-Risali watches your posture during Salah to follow its Positions, or measures the ceiling's light from the phone on your mat to count each sujud; the preview stays hidden so you don't watch yourself, and no image is kept.",
     },
   },
   android: {
@@ -62,7 +62,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
       // Reminders fire at the Prayer Time itself; without it Android may
       // deliver them minutes late (features/reminders asks for it).
       "android.permission.SCHEDULE_EXACT_ALARM",
-      // The Prayer Assistant's Camera and Head Height modes see the Believer.
+      // The Prayer Assistant's Camera, Head Height and Mat modes.
       "android.permission.CAMERA",
     ],
     config: googleMapsAndroid(),

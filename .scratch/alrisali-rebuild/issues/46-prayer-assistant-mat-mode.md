@@ -6,7 +6,7 @@
 
 **Blocked by:** 45 (Prayer Assistant: Camera and Head Height)
 
-**Status:** ready-for-agent
+**Status:** done — pending device verification
 
-- [ ] Domain detector tests with recorded luminance fixtures
-- [ ] Physical-device run counts sujud
+- [ ] Domain detector tests with recorded luminance fixtures — the tests run the detector through luminance fixture sequences (`mat-fixtures.ts`: whole Fajr and Dhuhr, pass-bys, auto-exposure flicker and creep, flat ceiling, dark room, and a shallow sujud that only a kept dip catches). They are **modelled** on the old app's on-device measurements, not recorded. No phone has run Mat mode yet. Pending device: record real Y-plane traces and swap them in.
+- [ ] Physical-device run counts sujud — pending device verification (Y-plane layout and stride, the exposure lock on iOS, Android frames, real dips)

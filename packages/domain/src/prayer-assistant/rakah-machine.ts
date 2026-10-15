@@ -76,7 +76,8 @@ export const salahSteps = (salah: Salah): readonly Step[] => {
  *   held for the Pace; sensing never moves backwards.
  * - `confirmed`: a Position a sensor has already proven (Mat mode's sujud
  *   cover). It moves straight to the next step in that Position without a
- *   hold, never jumping past a Tashahhud.
+ *   hold, never jumping past a Tashahhud. `since` is when the sensor first
+ *   saw that Position (the final Tashahhud's hold counts from it).
  * - `tick`: time passes, so the final Tashahhud hold can end the Salah.
  *
  * An Observation is a Sighting stamped with `at`, a monotonic time in
@@ -86,7 +87,7 @@ export type Sighting =
   | { kind: "advance" }
   | { kind: "back" }
   | { kind: "sensed"; position: Position | null }
-  | { kind: "confirmed"; position: Position }
+  | { kind: "confirmed"; position: Position; since?: number }
   | { kind: "tick" };
 
 export type Observation = Sighting & { at: number };
@@ -180,12 +181,13 @@ const back = (state: AssistantState, at: number): AssistantState =>
 const confirmed = (
   state: AssistantState,
   position: Position,
-  at: number
+  at: number,
+  since: number
 ): AssistantState => {
   for (let index = state.index + 1; index < state.steps.length; index += 1) {
     const step = state.steps[index];
     if (step?.position === position) {
-      return moveTo(state, index, at);
+      return moveTo(state, index, at, since);
     }
     if (step?.position === "tashahhud") {
       return state;
@@ -279,7 +281,10 @@ export const observe = (
       return back(state, at);
     }
     case "confirmed": {
-      return finishIfHeld(confirmed(state, observation.position, at), at);
+      return finishIfHeld(
+        confirmed(state, observation.position, at, observation.since ?? at),
+        at
+      );
     }
     case "sensed": {
       return finishIfHeld(

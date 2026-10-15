@@ -1,4 +1,11 @@
 export {
+  MAT_EXPOSURE_LOCK_MS,
+  readMat,
+  recalibrateMat,
+  startMatSensor,
+} from "./mat";
+export type { LumaFrame, MatReading, MatSensor } from "./mat";
+export {
   CUSTOM_PACE_LIMITS,
   customPaceSchema,
   PACE_PRESETS,
