@@ -1,7 +1,9 @@
 import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 
-const HINT_SEEN_KEY = "alrisali.quran.hintSeen";
+import { deviceEntry } from "@/shared/lib/device-entries";
+
+const HINT_SEEN_KEY = deviceEntry("alrisali.quran.hintSeen");
 
 /**
  * The one-time hint on the reader's first open (tap for the controls,
