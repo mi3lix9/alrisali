@@ -16,14 +16,17 @@ const settingsRepository = async (): Promise<BelieverSettingsRepository> => {
   return createBelieverSettingsRepository(db);
 };
 
+/** The saved settings as they are now, for work that outlives a render. */
+export const readBelieverSettings = async (): Promise<BelieverSettings> => {
+  const settings = await settingsRepository();
+  return settings.get();
+};
+
 /** The Believer's location and Calculation Method, from their database. */
 export const useBelieverSettings = () =>
   useQuery({
     queryKey: SETTINGS_QUERY_KEY,
-    queryFn: async (): Promise<BelieverSettings> => {
-      const settings = await settingsRepository();
-      return settings.get();
-    },
+    queryFn: readBelieverSettings,
   });
 
 /** Saves a settings change and refreshes every reader of the settings. */
