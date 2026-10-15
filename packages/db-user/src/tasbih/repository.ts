@@ -60,8 +60,9 @@ export interface TasbihRepository {
   ) => Promise<void>;
   saveOpenTasbihCount: (tasbihId: string, count: number) => Promise<void>;
   /**
-   * Records the Open Tasbih's count as a Dhikr Session, then starts the
-   * Open Tasbih again from 0. Returns the recorded session.
+   * Records the Open Tasbih's count as a Dhikr Session and starts the Open
+   * Tasbih again from 0, together: if either fails, neither happens.
+   * Returns the recorded session.
    */
   saveOpenTasbihSession: (session: DhikrSession) => Promise<DhikrSession>;
   /** Deletes an Open Tasbih; Tasbih al-Zahra cannot be deleted. */
@@ -201,13 +202,18 @@ export const createTasbihRepository = (db: UserDb): TasbihRepository => {
     return parsed;
   };
 
-  const saveOpenTasbihSession = async (
+  const saveOpenTasbihSession = (
     session: DhikrSession
-  ): Promise<DhikrSession> => {
-    const recorded = await recordDhikrSession(session);
-    await saveOpenTasbihCount(recorded.tasbihId, 0);
-    return recorded;
-  };
+  ): Promise<DhikrSession> =>
+    db.transaction(async (tx) => {
+      const recorded = dhikrSessionSchema.parse(session);
+      await tx.insert(dhikrSessions).values(recorded);
+      await tx
+        .update(tasbih)
+        .set({ count: 0 })
+        .where(isOpenTasbih(recorded.tasbihId));
+      return recorded;
+    });
 
   const listDhikrSessions = (): Promise<DhikrSession[]> =>
     db
