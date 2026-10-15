@@ -67,4 +67,11 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `quran_last_read` (\n\t`id` text PRIMARY KEY,\n\t`ayah` text NOT NULL,\n\t`set_at` text NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015195013_prayer_logs",
+    statements: [
+      "CREATE TABLE `prayer_logs` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`salah` text NOT NULL,\n\t`logged_at` integer NOT NULL\n);",
+      "CREATE INDEX `prayer_logs_date_idx` ON `prayer_logs` (`date`);",
+    ],
+  },
 ];

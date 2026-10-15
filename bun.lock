@@ -243,6 +243,7 @@
       "dependencies": {
         "@alrisali/domain": "workspace:*",
         "drizzle-orm": "catalog:",
+        "temporal-polyfill": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {

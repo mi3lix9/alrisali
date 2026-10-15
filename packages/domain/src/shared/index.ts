@@ -53,6 +53,8 @@ export {
   visibleTabs,
 } from "./tabs";
 export type { Tab } from "./tabs";
+export { SALAH, salahSchema } from "./salah";
+export type { Salah } from "./salah";
 export { DEFAULT_TEXT_SIZE, TEXT_SCALE, TEXT_SIZES } from "./text-size";
 export type { TextSize } from "./text-size";
 export {

@@ -1,0 +1,31 @@
+export const ar = {
+  title: "سجل الصلاة",
+  description: "علّم كل صلاة أدّيتها.",
+  today: "اليوم",
+  previousDay: "اليوم السابق",
+  nextDay: "اليوم التالي",
+  salah: {
+    fajr: "الفجر",
+    dhuhr: "الظهر",
+    asr: "العصر",
+    maghrib: "المغرب",
+    isha: "العشاء",
+  },
+  streak: {
+    label: "سلسلة الصلاة",
+    days_zero: "{{count}} يوم",
+    days_one: "يوم واحد",
+    days_two: "يومان",
+    days_few: "{{count}} أيام",
+    days_many: "{{count}} يومًا",
+    days_other: "{{count}} يوم",
+    hint: "أكمل الصلوات الخمس اليوم لتستمر سلسلتك.",
+  },
+  untick: {
+    title: "إلغاء تسجيل صلاة {{name}}؟",
+    message: "ستُزال صلاة {{name}} من سجل هذا اليوم.",
+    cancel: "إبقاء",
+    confirm: "إلغاء التسجيل",
+  },
+  saveError: "تعذّر حفظ التغيير. حاول مرة أخرى.",
+};
