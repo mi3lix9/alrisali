@@ -12,6 +12,7 @@ import { Screen } from "@/shared/ui/screen";
 
 import { ProgramCard } from "../components/program-card";
 import { useOfficialPrograms } from "../data/official-programs";
+import { useSeenProgramIds } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
 import { useHijriToday } from "../hooks/use-hijri-today";
 
@@ -25,6 +26,9 @@ export const ProgramsScreen = () => {
   const today = useHijriToday();
   const programs = useOfficialPrograms();
   const { data: subscriptions = [] } = useSubscriptions();
+  // Until it loads, no Program is badged rather than all of them.
+  const { data: seen } = useSeenProgramIds();
+  const unseen = (id: string) => seen !== undefined && !seen.has(id);
 
   const title = <Stack.Screen options={{ title: t("title") }} />;
 
@@ -65,6 +69,7 @@ export const ProgramsScreen = () => {
               program={program}
               subscription={subscriptionOf(program.id)}
               inSeason={isProgramAvailable(program, today)}
+              unseen={unseen(program.id)}
             />
           ))}
         </View>
@@ -83,6 +88,7 @@ export const ProgramsScreen = () => {
               program={program}
               subscription={undefined}
               inSeason
+              unseen={unseen(program.id)}
             />
           ))
         )}

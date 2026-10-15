@@ -15,10 +15,13 @@ export const ProgramCard = ({
   program,
   subscription,
   inSeason,
+  unseen,
 }: {
   program: OfficialProgram;
   subscription: Subscription | undefined;
   inSeason: boolean;
+  /** Not opened yet: carries a "new" badge. */
+  unseen: boolean;
 }) => {
   const { t } = useTranslation("programs");
   const describe = useDescribe();
@@ -44,6 +47,11 @@ export const ProgramCard = ({
         </Card.Header>
         <Card.Content className="gap-2">
           <View className="flex-row flex-wrap items-center gap-2">
+            {unseen ? (
+              <Badge size="sm" variant="info">
+                {t("new")}
+              </Badge>
+            ) : null}
             <Badge size="sm" variant="secondary">
               {t(`category.${program.category}`)}
             </Badge>

@@ -3,19 +3,22 @@ import { isProgramAvailable } from "@alrisali/domain/programs";
 import type { Act } from "@alrisali/domain/programs";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Badge, Card, Spinner, Text } from "panelui-native";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { launchLanguage } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
+import { ActSheet } from "../components/act-sheet";
 import { SubscriptionActions } from "../components/subscription-actions";
 import { useOfficialProgram } from "../data/official-programs";
+import { useMarkProgramSeen } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
 import { useDescribe } from "../hooks/use-describe";
 import { useHijriToday } from "../hooks/use-hijri-today";
 
-const ActRow = ({ act }: { act: Act }) => {
+const ActRow = ({ act, onOpen }: { act: Act; onOpen: () => void }) => {
   const { t } = useTranslation("programs");
   const describe = useDescribe();
   const details = [
@@ -27,7 +30,12 @@ const ActRow = ({ act }: { act: Act }) => {
   ].filter((part) => part !== null);
 
   return (
-    <View className="gap-1">
+    <Pressable
+      className="gap-1"
+      accessibilityRole="button"
+      accessibilityHint={t("day.openLabel", { act: act.name[launchLanguage] })}
+      onPress={onOpen}
+    >
       <View className="flex-row flex-wrap items-center gap-2">
         <Text weight="medium">{act.name[launchLanguage]}</Text>
         {act.detail.type === "regular" ? null : (
@@ -39,7 +47,7 @@ const ActRow = ({ act }: { act: Act }) => {
       <Text muted size="sm">
         {details.join(" · ")}
       </Text>
-    </View>
+    </Pressable>
   );
 };
 
@@ -52,6 +60,16 @@ export const ProgramScreen = () => {
   const { data: program, isPending } = useOfficialProgram(id);
   const { data: subscriptions = [] } = useSubscriptions();
   const subscription = subscriptions.find(({ programId }) => programId === id);
+  const { mutate: markSeen } = useMarkProgramSeen();
+  const [opened, setOpened] = useState<Act | null>(null);
+  const found = Boolean(program);
+
+  // Opening a Program clears its "new" badge.
+  useEffect(() => {
+    if (found) {
+      markSeen(id);
+    }
+  }, [found, id, markSeen]);
 
   if (isPending) {
     return (
@@ -111,10 +129,13 @@ export const ProgramScreen = () => {
           {program.acts.length === 0 ? (
             <Text muted>{t("noActs")}</Text>
           ) : (
-            program.acts.map((act) => <ActRow key={act.id} act={act} />)
+            program.acts.map((act) => (
+              <ActRow key={act.id} act={act} onOpen={() => setOpened(act)} />
+            ))
           )}
         </Card.Content>
       </Card>
+      <ActSheet act={opened} onClose={() => setOpened(null)} />
     </Screen>
   );
 };
