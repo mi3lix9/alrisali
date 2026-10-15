@@ -9,6 +9,12 @@ const SECTIONS = [
     description:
       "Shift every Believer's Hijri Date to match the official moon sighting.",
   },
+  {
+    to: "/admin/messages",
+    title: "Messages",
+    description:
+      "Read Contact Messages from Believers and Guests, and track replies.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

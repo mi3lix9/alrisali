@@ -6,7 +6,14 @@ import UserMenu from "./user-menu";
 const NAV_LINK = "text-muted-foreground hover:text-foreground";
 const ACTIVE_LINK = "text-foreground font-medium";
 
-export const AdminLayout = ({ children }: { children: ReactNode }) => (
+export const AdminLayout = ({
+  children,
+  messagesBadge,
+}: {
+  children: ReactNode;
+  /** Beside the Messages link: the unread count, composed in by the route. */
+  messagesBadge?: ReactNode;
+}) => (
   <div className="grid h-svh grid-rows-[auto_1fr]">
     <header className="border-b">
       <div className="flex flex-row items-center justify-between gap-6 px-4 py-2">
@@ -28,6 +35,14 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => (
             activeProps={{ className: ACTIVE_LINK }}
           >
             Hijri Adjustment
+          </Link>
+          <Link
+            to="/admin/messages"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Messages
+            {messagesBadge}
           </Link>
         </nav>
         <UserMenu />

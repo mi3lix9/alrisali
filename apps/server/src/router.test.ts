@@ -27,6 +27,7 @@ import {
   describe,
   expect,
   it,
+  vi,
 } from "vitest";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
@@ -40,6 +41,13 @@ import { appRouter } from "./router";
 
 type Access = "anonymous" | "believer" | "admin";
 
+const CONTACT_MESSAGE = {
+  name: "Zainab",
+  email: "zainab@example.com",
+  subject: "Prayer Times",
+  message: "Fajr shows a minute late in Karbala.",
+};
+
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
  * the router is listed here: adding one without its rule fails the suite.
@@ -51,6 +59,13 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "contact.send": { access: "anonymous", input: CONTACT_MESSAGE },
+  "contact.inbox": { access: "admin", input: {} },
+  "contact.counts": { access: "admin" },
+  "contact.setStatus": {
+    access: "admin",
+    input: { ids: ["unknown"], status: "read" },
+  },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
   "quran.reciters": { access: "anonymous" },
@@ -182,7 +197,13 @@ const signIn = async (
   return new Headers({ cookie });
 };
 
-const callAs = async (headers: Headers, path: string, input?: unknown) => {
+/** Calls a procedure as a request from `clientIp` with these cookies. */
+const callAs = async (
+  headers: Headers,
+  path: string,
+  input?: unknown,
+  clientIp: string | null = "203.0.113.7"
+) => {
   const entry = PROCEDURES.find(([name]) => name === path);
   if (!entry) {
     throw new Error(`No procedure ${path}`);
@@ -194,6 +215,8 @@ const callAs = async (headers: Headers, path: string, input?: unknown) => {
     content,
     recitation,
     headers,
+    clientIp,
+    ipHashKey: TEST_ENV.BETTER_AUTH_SECRET,
   });
   return call(entry[1], input ?? ACCESS[path]?.input, { context });
 };
@@ -826,5 +849,179 @@ describe("Believer cloud databases on Turso Cloud (Platform API)", () => {
       callAs(headers, "account.deleteAccount")
     ).resolves.toStrictEqual({ deleted: true });
     await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
+  });
+});
+
+interface Inbox {
+  messages: {
+    id: string;
+    subject: string;
+    status: string;
+    fromBeliever: boolean;
+  }[];
+}
+
+const send = (
+  input: Partial<typeof CONTACT_MESSAGE> = {},
+  { headers = new Headers(), ip = "203.0.113.7" } = {}
+) => callAs(headers, "contact.send", { ...CONTACT_MESSAGE, ...input }, ip);
+
+const inbox = async (admin: Headers, status?: string) =>
+  (await callAs(admin, "contact.inbox", status ? { status } : {})) as Inbox;
+
+const setStatus = (admin: Headers, ids: string[], status: string) =>
+  callAs(admin, "contact.setStatus", { ids, status });
+
+const HOUR = 60 * 60 * 1000;
+
+describe("contact messages", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(() => setUp());
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("puts a Guest's message in the Admins' inbox as new", async () => {
+    await send();
+    const admin = await signInAsAdmin();
+
+    await expect(inbox(admin)).resolves.toMatchObject({
+      messages: [
+        {
+          ...CONTACT_MESSAGE,
+          status: "new",
+          fromBeliever: false,
+          userAgent: null,
+        },
+      ],
+    });
+    await expect(callAs(admin, "contact.counts")).resolves.toStrictEqual({
+      new: 1,
+      read: 0,
+      replied: 0,
+      archived: 0,
+    });
+  });
+
+  it("knows a message came from a signed-in Believer", async () => {
+    const zainab = await signIn("google", idToken(googleBeliever));
+    await send({}, { headers: zainab });
+
+    const { messages } = await inbox(await signInAsAdmin());
+
+    expect(messages.map(({ fromBeliever }) => fromBeliever)).toStrictEqual([
+      true,
+    ]);
+  });
+
+  it("refuses a message outside the limits even without the form", async () => {
+    await expect(send({ message: "Too short" })).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+    });
+    await expect(send({ email: "zainab" })).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+    });
+    await expect(inbox(await signInAsAdmin())).resolves.toStrictEqual({
+      messages: [],
+    });
+  });
+
+  it("refuses a fourth message from one IP address within the hour", async () => {
+    await send({ subject: "First" });
+    await send({ subject: "Second" });
+    await send({ subject: "Third" });
+
+    await expect(send({ subject: "Fourth" })).rejects.toMatchObject({
+      code: "TOO_MANY_REQUESTS",
+    });
+    const { messages } = await inbox(await signInAsAdmin());
+    expect(messages.map(({ subject }) => subject)).toStrictEqual([
+      "Third",
+      "Second",
+      "First",
+    ]);
+  });
+
+  it("limits each IP address on its own, signed in or not", async () => {
+    const zainab = await signIn("google", idToken(googleBeliever));
+    await send({}, { headers: zainab });
+    await send();
+    await send();
+
+    await expect(send({}, { headers: zainab })).rejects.toMatchObject({
+      code: "TOO_MANY_REQUESTS",
+    });
+    await expect(send({}, { ip: "198.51.100.4" })).resolves.toBeDefined();
+  });
+
+  it("accepts messages again once the hour has passed", async () => {
+    vi.useFakeTimers({ toFake: ["Date"], now: Date.now() });
+    await send();
+    vi.setSystemTime(Date.now() + 20 * 60 * 1000);
+    await send();
+    await send();
+    await expect(send()).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+
+    // The first message leaves the window; the other two are still in it.
+    vi.setSystemTime(Date.now() - 20 * 60 * 1000 + HOUR + 1000);
+    await expect(send()).resolves.toBeDefined();
+    await expect(send()).rejects.toMatchObject({ code: "TOO_MANY_REQUESTS" });
+  });
+
+  it("moves messages through read, replied and archived", async () => {
+    await send({ subject: "First" });
+    await send({ subject: "Second" });
+    await send({ subject: "Third" });
+    const admin = await signInAsAdmin();
+    const { messages } = await inbox(admin);
+    const [third, second, first] = messages.map(({ id }) => id);
+
+    await expect(
+      setStatus(admin, [first ?? "", second ?? ""], "read")
+    ).resolves.toStrictEqual({ updated: 2 });
+    await setStatus(admin, [second ?? ""], "replied");
+    await setStatus(admin, [third ?? ""], "archived");
+
+    await expect(callAs(admin, "contact.counts")).resolves.toStrictEqual({
+      new: 0,
+      read: 1,
+      replied: 1,
+      archived: 1,
+    });
+    const subjectsWith = async (status: string) => {
+      const filtered = await inbox(admin, status);
+      return filtered.messages.map(({ subject }) => subject);
+    };
+    await expect(
+      Promise.all(["new", "read", "replied", "archived"].map(subjectsWith))
+    ).resolves.toStrictEqual([[], ["First"], ["Second"], ["Third"]]);
+  });
+
+  it("changes nothing for an id it does not know", async () => {
+    await send();
+    const admin = await signInAsAdmin();
+
+    await expect(setStatus(admin, ["unknown"], "read")).resolves.toStrictEqual({
+      updated: 0,
+    });
+    await expect(callAs(admin, "contact.counts")).resolves.toMatchObject({
+      new: 1,
+    });
+  });
+
+  it("deletes a Believer's messages with their account", async () => {
+    const zainab = await signIn("google", idToken(googleBeliever));
+    await send({ subject: "From Zainab" }, { headers: zainab });
+    await send({ subject: "From a Guest" });
+
+    await callAs(zainab, "account.deleteAccount");
+
+    const { messages } = await inbox(await signInAsAdmin());
+    expect(messages.map(({ subject }) => subject)).toStrictEqual([
+      "From a Guest",
+    ]);
   });
 });

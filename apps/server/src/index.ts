@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 
+import { clientIpOf } from "@/features/contact";
 import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
 import { createContext } from "./context";
@@ -57,6 +58,9 @@ app.use("/*", async (c, next) => {
     content,
     recitation,
     headers: c.req.raw.headers,
+    clientIp: clientIpOf(c.req.raw, c.env),
+    // The auth secret doubles as the IP hash key: one secret less to manage.
+    ipHashKey: ENV.BETTER_AUTH_SECRET,
   });
 
   const rpcResult = await rpcHandler.handle(c.req.raw, {

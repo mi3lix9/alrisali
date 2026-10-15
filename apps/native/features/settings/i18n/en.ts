@@ -77,6 +77,7 @@ export const en: Catalog<typeof ar> = {
     sources: "Sources & Credits",
     privacy: "Privacy Policy",
     terms: "Terms of Service",
+    contact: "Contact us",
   },
   sources: {
     title: "Sources & Credits",
