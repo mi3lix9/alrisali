@@ -111,3 +111,4 @@ export type {
   PrayerTimesSettings,
   TimeFormat,
 } from "./prayer-times";
+export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";

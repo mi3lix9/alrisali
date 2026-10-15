@@ -5,6 +5,11 @@ import type { ar } from "./ar";
 export const en: Catalog<typeof ar> = {
   books: "Books",
   notFound: "This text could not be found.",
+  search: {
+    title: "Supplications",
+    indexing: "Searching the supplication texts…",
+    more: "Showing {{shown}} of {{total}}",
+  },
   reader: {
     view: {
       label: "View",

@@ -1,6 +1,11 @@
 export const ar = {
   books: "الكتب",
   notFound: "لم يُعثر على هذا النص.",
+  search: {
+    title: "الأدعية",
+    indexing: "جارٍ البحث في نصوص الأدعية…",
+    more: "تُعرض {{shown}} من {{total}}",
+  },
   reader: {
     view: {
       label: "طريقة العرض",

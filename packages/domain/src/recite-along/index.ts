@@ -1,6 +1,6 @@
 export { createReciteMatcher, wordsMatch } from "./matcher";
 export type { ReciteMatcher } from "./matcher";
-export { normalizeArabic, tokenizeText } from "./normalize";
+export { tokenizeText } from "./normalize";
 export type { ReciteToken, TokenizedText } from "./normalize";
 export {
   initialProgress,

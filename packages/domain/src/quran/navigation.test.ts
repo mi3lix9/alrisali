@@ -5,7 +5,6 @@ import {
   firstAyahOfJuz,
   firstPageOfSurah,
   JUZ_COUNT,
-  normalizeArabic,
   openReader,
   PAGE_COUNT,
   parsePage,
@@ -14,6 +13,7 @@ import {
   scrubberTarget,
   scrubberValue,
   searchQuran,
+  searchSurahs,
   SURAH_COUNT,
 } from ".";
 import type { QuranReaderState, ReaderAction } from ".";
@@ -200,12 +200,16 @@ describe("juz index", () => {
 });
 
 describe("search", () => {
-  it("strips diacritics and Quranic marks, and folds letter forms", () => {
-    expect(normalizeArabic("بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ")).toBe(
-      "بسم الله الرحمن الرحيم"
-    );
-    expect(normalizeArabic("إِنَّآ أَعۡطَيۡنَٰكَ ٱلۡكَوۡثَرَ")).toBe("انا اعطينك الكوثر");
-    expect(normalizeArabic("الصلاة على موسى")).toBe("الصلاه علي موسي");
+  it("finds a Surah by name without its diacritics or letter forms", () => {
+    expect(searchSurahs("البقره").map((s) => s.number)).toStrictEqual([2]);
+    expect(searchSurahs("الاخلاص").map((s) => s.number)).toStrictEqual([112]);
+    expect(searchSurahs("الْكَهْف").map((s) => s.number)).toStrictEqual([18]);
+  });
+
+  it("finds a Surah by English name or number, and none for nothing", () => {
+    expect(searchSurahs("al-kahf").map((s) => s.number)).toStrictEqual([18]);
+    expect(searchSurahs("١٨").map((s) => s.number)).toStrictEqual([18]);
+    expect(searchSurahs("  ")).toStrictEqual([]);
   });
 
   it("finds an ayah typed without diacritics", () => {

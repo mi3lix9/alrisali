@@ -11,6 +11,13 @@ export const ar = {
   },
   settings: "الإعدادات",
   account: "الحساب",
+  search: {
+    label: "بحث",
+    noResults: "لا توجد نتائج.",
+  },
+  library: {
+    searchPlaceholder: "ابحث في السور والأدعية والمواد",
+  },
   notFound: {
     title: "الصفحة غير موجودة",
     goHome: "العودة إلى الرئيسية",
