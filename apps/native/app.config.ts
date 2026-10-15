@@ -35,6 +35,10 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     "expo-router",
+    // Arabic-first: every launch is right-to-left natively. An English
+    // launch flips the layout back in JS (shared/lib/app-providers.tsx); a JS
+    // `I18nManager.forceRTL` would be overwritten by this on every launch.
+    ["expo-localization", { supportsRTL: true, forcesRTL: true }],
     [
       "@sentry/react-native/expo",
       {
