@@ -18,7 +18,11 @@ const BAND_HEIGHT = 28;
 const SIDE_PADDING = 12;
 /** Lines are measured at this size, then the page is scaled to fit. */
 const MEASURE_SIZE = 20;
-/** The glyphs' tallest marks need this much of a line slot. */
+/**
+ * The glyphs' tallest marks need this much of a line slot. Text is given
+ * the whole slot as its line height: Panel UI's `Text` carries the line
+ * height of its `text-base` size, which clips the marks off a bigger font.
+ */
 const FONT_TO_SLOT = 0.62;
 /** Keeps a hair of room so a fitted line never wraps. */
 const FIT_MARGIN = 0.98;
@@ -85,7 +89,12 @@ const Word = ({
     className={`${selected ? "bg-accent" : ""} ${
       lastRead && word.isAyahEnd ? "text-info" : "text-foreground"
     }`}
-    style={{ fontFamily: QURAN_FONT, fontSize, writingDirection: "rtl" }}
+    style={{
+      fontFamily: QURAN_FONT,
+      fontSize,
+      lineHeight: fontSize / FONT_TO_SLOT,
+      writingDirection: "rtl",
+    }}
   >
     {word.text}
   </Text>
@@ -131,6 +140,7 @@ const Line = ({
           style={{
             fontFamily: QURAN_FONT,
             fontSize,
+            lineHeight: fontSize / FONT_TO_SLOT,
             textAlign: "center",
             writingDirection: "rtl",
           }}
@@ -184,9 +194,12 @@ const PageView = ({
   const position = pagePosition(page);
   const surah = SURAHS[position.surah - 1];
   const fitKey = `${page}:${width}`;
-  // The cache holds the fit; the state only redraws once it is measured.
-  const [, setMeasured] = useState<string>();
-  const fit = fits.get(fitKey);
+  // A fit measured here lives in state: the React Compiler memoises
+  // `fits.get(fitKey)` on `fitKey`, so a fit written to the cache after the
+  // first render would never be read back and the page would stay blank.
+  // The cache only spares pages already measured another measuring pass.
+  const [measured, setMeasured] = useState<{ key: string; fit: PageFit }>();
+  const fit = measured?.key === fitKey ? measured.fit : fits.get(fitKey);
 
   const linesWidth = width - SIDE_PADDING * 2;
   const linesHeight = height - insetTop - insetBottom - BAND_HEIGHT * 2;
@@ -194,22 +207,22 @@ const PageView = ({
   const opening = OPENING_PAGES.has(page);
 
   const onMeasured = ({ nativeEvent }: TextLayoutEvent) => {
-    const measured = quranPage.lines.map((line, index) =>
+    const widths = quranPage.lines.map((line, index) =>
       line.kind === "ayah" ? (nativeEvent.lines[index]?.width ?? 0) : 0
     );
-    const widest = Math.max(...measured);
+    const widest = Math.max(...widths);
     const fontSize = Math.min(
       (MEASURE_SIZE * linesWidth * FIT_MARGIN) / widest,
       slotHeight * FONT_TO_SLOT
     );
     const next: PageFit = {
       fontSize,
-      lineWidths: measured.map(
+      lineWidths: widths.map(
         (lineWidth) => (lineWidth * fontSize) / MEASURE_SIZE
       ),
     };
     fits.set(fitKey, next);
-    setMeasured(fitKey);
+    setMeasured({ key: fitKey, fit: next });
   };
 
   const gestures = { onTap, onLongPressAyah, selectedAyah, lastReadAyah };

@@ -7,7 +7,8 @@ import { Button, Text, ToggleButton, ToggleButtonGroup } from "panelui-native";
 import { PauseIcon, PlayIcon, RotateCcwIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+
+import { SafeAreaView } from "@/shared/ui/safe-area-view";
 
 import { useRecitePreferences } from "../hooks/use-recite-preferences";
 import type { VoiceSupport } from "../hooks/use-voice";

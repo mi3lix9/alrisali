@@ -10,11 +10,11 @@ import { useEffect } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { events } from "@/shared/lib/events";
 import { launchLanguage, usePreferences } from "@/shared/lib/preferences";
+import { SafeAreaView } from "@/shared/ui/safe-area-view";
 
 import { LanguageStep } from "../components/language-step";
 import { NotificationsStep } from "../components/notifications-step";
