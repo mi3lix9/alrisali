@@ -5,7 +5,6 @@
   "description": "Drizzle schema and migrations for the per-user database.",
   "type": "module",
   "exports": {
-    "./testing": "./src/shared/testing.ts",
     "./*": "./src/*/index.ts"
   },
   "scripts": {

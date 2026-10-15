@@ -1,9 +1,17 @@
+import { createHash } from "node:crypto";
+
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
 
 import type { Context } from "@/context";
 import { authed } from "@/shared/lib/orpc";
 
-import { userDatabaseName } from "./user-database-host";
+/**
+ * The cloud database name for a Believer, derived from their user id. Turso
+ * names allow only lowercase letters, digits and dashes, and the name is
+ * part of a DNS label, so the id is hashed rather than used as is.
+ */
+export const userDatabaseName = (userId: string): string =>
+  `b-${createHash("sha256").update(userId).digest("hex").slice(0, 24)}`;
 
 /**
  * The Believer's cloud database, created on their first call. Idempotent:

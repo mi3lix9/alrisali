@@ -8,6 +8,5 @@ export const accountRouter = {
 };
 
 export { createUserDatabaseHost } from "./host-from-env";
-export type { UserDatabaseHost } from "./user-database-host";
 export { createLocalSyncHost } from "./local-sync-host";
 export { createTursoHost } from "./turso-host";

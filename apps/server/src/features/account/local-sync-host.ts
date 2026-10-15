@@ -1,5 +1,5 @@
-import { TOKEN_LIFETIME_MS } from "./user-database-host";
-import type { UserDatabaseHost } from "./user-database-host";
+import { TOKEN_LIFETIME_MS } from "@/shared/lib/user-database-host";
+import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 export interface LocalSyncHostOptions {
   /** A running `tursodb --sync-server`, e.g. http://127.0.0.1:8090. */

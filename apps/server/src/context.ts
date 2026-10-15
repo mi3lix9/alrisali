@@ -1,7 +1,7 @@
 import type { Auth, Session } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
-import type { UserDatabaseHost } from "@/features/account";
+import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
 /** What every oRPC procedure receives. */
 export interface Context {

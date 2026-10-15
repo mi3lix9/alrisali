@@ -1,8 +1,8 @@
 import { createClient } from "@tursodatabase/api";
 import type { TursoClientError } from "@tursodatabase/api";
 
-import { TOKEN_LIFETIME_MS } from "./user-database-host";
-import type { UserDatabaseHost } from "./user-database-host";
+import { TOKEN_LIFETIME_MS } from "@/shared/lib/user-database-host";
+import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 export interface TursoHostOptions {
   org: string;

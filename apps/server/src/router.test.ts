@@ -23,7 +23,7 @@ import {
 } from "vitest";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
-import type { UserDatabaseHost } from "@/features/account";
+import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 import { createContext } from "./context";
 import { appRouter } from "./router";

@@ -1,6 +1,7 @@
+import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
+
 import { createLocalSyncHost } from "./local-sync-host";
 import { createTursoHost } from "./turso-host";
-import type { UserDatabaseHost } from "./user-database-host";
 
 export interface UserDatabaseHostEnv {
   NODE_ENV?: string;
