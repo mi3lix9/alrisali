@@ -9,4 +9,12 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190106_tasbih",
+    statements: [
+      "CREATE TABLE `dhikr_sessions` (\n\t`id` text PRIMARY KEY,\n\t`tasbih_id` text NOT NULL,\n\t`count` integer NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `tasbih` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`name` text,\n\t`count` integer DEFAULT 0 NOT NULL,\n\t`step` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
+    ],
+  },
 ];
