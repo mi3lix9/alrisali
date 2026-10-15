@@ -36,8 +36,10 @@ describe("Books content integrity", () => {
     expect(publishedIds.length).toBeGreaterThan(0);
     for (const id of publishedIds) {
       expect(getSupplication(id)?.id).toBe(id);
-      // oxlint-disable-next-line no-await-in-loop -- one text per id, in order
-      await expect(loadSupplicationText(id)).resolves.not.toHaveLength(0);
+    }
+    const texts = await Promise.all(publishedIds.map(loadSupplicationText));
+    for (const text of texts) {
+      expect(text).not.toHaveLength(0);
     }
   });
 

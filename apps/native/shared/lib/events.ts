@@ -8,6 +8,16 @@ export interface AppEvents {
   SignedIn: { userId: string };
   /** The signed-in Believer signed out on this device. */
   SignedOut: undefined;
+  /**
+   * A Dhikr Session was recorded on this device. `sessionId` is stable, so a
+   * listener (Companion XP) can award once per session.
+   */
+  DhikrSessionCompleted: {
+    sessionId: string;
+    tasbihId: string;
+    count: number;
+    completedAt: number;
+  };
 }
 
 export const events = createEventBus<AppEvents>();

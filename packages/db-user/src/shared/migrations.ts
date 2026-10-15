@@ -10,7 +10,15 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015190710_quran_reader_settings",
+    tag: "20261015190106_tasbih",
+    statements: [
+      "CREATE TABLE `dhikr_sessions` (\n\t`id` text PRIMARY KEY,\n\t`tasbih_id` text NOT NULL,\n\t`count` integer NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `tasbih` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`name` text,\n\t`count` integer DEFAULT 0 NOT NULL,\n\t`step` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
+    ],
+  },
+  {
+    tag: "20261015192049_quran_reader_settings",
     statements: [
       "CREATE TABLE `quran_reader_settings` (\n\t`id` text PRIMARY KEY,\n\t`mode` text DEFAULT 'page' NOT NULL,\n\t`page_nav` text DEFAULT 'horizontal' NOT NULL,\n\t`surah_font_size` integer DEFAULT 26 NOT NULL\n);",
     ],
