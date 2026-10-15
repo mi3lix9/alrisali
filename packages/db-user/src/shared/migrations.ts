@@ -94,4 +94,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `khushu_date_idx` ON `khushu` (`date`);",
     ],
   },
+  {
+    tag: "20261015202037_prayer_assistant_settings",
+    statements: [
+      "CREATE TABLE `prayer_assistant_settings` (\n\t`id` text PRIMARY KEY,\n\t`pace` text,\n\t`hold_ms` integer,\n\t`tashahhud_ms` integer,\n\t`bow_sensitivity` integer\n);",
+    ],
+  },
 ];

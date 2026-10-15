@@ -26,6 +26,12 @@ export interface AppEvents {
    * (Companion XP, the Prayer Assistant) can react once per logged Salah.
    */
   SalahLogged: { date: string; salah: Salah; loggedAt: number };
+  /**
+   * The Prayer Assistant followed the Believer to the end of a Salah, on
+   * `date` (ISO `YYYY-MM-DD`). The Prayer Log ticks it, which then emits
+   * `SalahLogged` (and with it the Khushu sheet opens).
+   */
+  SalahCompleted: { date: string; salah: Salah; completedAt: number };
 }
 
 export const events = createEventBus<AppEvents>();

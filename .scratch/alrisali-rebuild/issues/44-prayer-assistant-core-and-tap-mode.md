@@ -6,8 +6,8 @@
 
 **Blocked by:** 06 (Khushu rating)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification (tap screen, keep-awake, Khushu sheet after completion)
 
-- [ ] Domain tests: rak'ah counts, middle tashahhud, hold timings per Pace, final hold
-- [ ] Completion logs Salah and opens Khushu
-- [ ] Screen stays awake
+- [x] Domain tests: rak'ah counts, middle tashahhud, hold timings per Pace, final hold
+- [x] Completion logs Salah and opens Khushu
+- [x] Screen stays awake
