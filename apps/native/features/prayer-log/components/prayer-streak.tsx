@@ -11,6 +11,7 @@ export const PrayerStreak = ({ streak }: { streak: number }) => {
     <View
       accessible
       accessibilityLabel={`${t("streak.label")}: ${days}`}
+      testID="prayer-streak"
       className="gap-1"
     >
       <Text muted>{t("streak.label")}</Text>

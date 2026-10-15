@@ -1,3 +1,4 @@
+import "@/shared/lib/polyfills";
 import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";

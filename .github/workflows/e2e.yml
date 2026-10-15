@@ -1,0 +1,97 @@
+name: e2e
+
+# End-to-end journeys (packages/e2e, tester.army e2e). Every step is a
+# locator, so no model key is needed. See packages/e2e/README.md.
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: e2e-web
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Placeholder for the web build's required public variable; the landing
+      # journey never calls the server.
+      VITE_SERVER_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v5
+      # e2e needs Node >= 24.8.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Install Chromium
+        run: bunx e2e-web install chromium --with-deps
+        working-directory: packages/e2e
+      - run: bunx e2e run --target web --reporter list,junit
+        working-directory: packages/e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: e2e-web
+          path: packages/e2e/.e2e
+          include-hidden-files: true
+          if-no-files-found: warn
+
+  ios:
+    name: e2e-ios
+    # Apple-silicon runner: the Turso xcframework ships an arm64 simulator
+    # slice only, so the build is arm64.
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      # Placeholders for the native app's required variables. Guests never
+      # reach the server, and Google Sign-In only needs a well-formed iOS
+      # client ID to derive its URL scheme.
+      EXPO_PUBLIC_SERVER_URL: http://localhost:3000
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ci-placeholder.apps.googleusercontent.com
+      APP_VARIANT: development
+    steps:
+      - uses: actions/checkout@v5
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "27"
+      # react-native-vision-camera-resizer compiles .metal shaders (README.md, CI).
+      - run: xcodebuild -downloadComponent MetalToolchain
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - name: Build the iOS simulator dev build
+        run: bun run build:ios
+        working-directory: packages/e2e
+      - uses: actions/cache@v4
+        with:
+          path: ~/.agent-device
+          key: agent-device-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - name: Boot the simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | jq -r '[.devices[][] | select(.name == "iPhone 17")][0].udid')
+          xcrun simctl bootstatus "$UDID" -b
+      # The journey reinstalls the build itself, so each run starts as a new Guest.
+      - run: bunx e2e run --target ios --reporter list,junit
+        working-directory: packages/e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: e2e-ios
+          path: packages/e2e/.e2e
+          include-hidden-files: true
+          if-no-files-found: warn

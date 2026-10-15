@@ -35,5 +35,5 @@ jobs:
       - run: bun run test
       - run: bun run build
 
-  # Native jobs (iOS builds, Maestro) will run on macOS runners. Their
-  # prerequisites are documented in README.md under "CI".
+  # The iOS simulator build and the end-to-end journeys run in e2e.yml on a
+  # macOS runner. Their prerequisites are documented in README.md under "CI".

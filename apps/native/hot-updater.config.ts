@@ -22,7 +22,9 @@ export default defineConfig({
   build: expo(),
   storage: s3Storage({
     bucketName: process.env.HOT_UPDATER_BUCKET ?? "",
-    endpoint: process.env.HOT_UPDATER_BUCKET_ENDPOINT,
+    ...(process.env.HOT_UPDATER_BUCKET_ENDPOINT
+      ? { endpoint: process.env.HOT_UPDATER_BUCKET_ENDPOINT }
+      : {}),
     region: process.env.HOT_UPDATER_BUCKET_REGION ?? "auto",
     // Resolved on the first upload, so a missing variable is named there.
     credentials: () => {
