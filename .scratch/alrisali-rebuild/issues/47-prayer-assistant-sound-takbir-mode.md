@@ -6,7 +6,7 @@
 
 **Blocked by:** 30 (Recite-Along by voice), 44 (Prayer Assistant core and tap mode)
 
-**Status:** ready-for-agent
+**Status:** done — pending device verification
 
-- [ ] Domain Takbir detector tests incl. U+200F
-- [ ] Fallback to tap when speech unavailable
+- [x] Domain Takbir detector tests incl. U+200F
+- [x] Fallback to tap when speech unavailable (Sound mode notice + tap always active; on-device listening pending device verification)

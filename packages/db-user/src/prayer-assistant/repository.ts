@@ -4,6 +4,7 @@ import {
   DEFAULT_PRAYER_ASSISTANT_SETTINGS,
   paceSchema,
   prayerAssistantSettingsSchema,
+  recognitionModeSchema,
 } from "@alrisali/domain/prayer-assistant";
 import type { PrayerAssistantSettings } from "@alrisali/domain/prayer-assistant";
 import { eq } from "drizzle-orm";
@@ -54,6 +55,11 @@ export const createPrayerAssistantRepository = (
         row?.bowSensitivity,
         DEFAULTS.bowSensitivity
       ),
+      recognitionMode: known(
+        recognitionModeSchema,
+        row?.recognitionMode,
+        DEFAULTS.recognitionMode
+      ),
     };
   };
 
@@ -66,12 +72,14 @@ export const createPrayerAssistantRepository = (
       pace: parsed.pace ?? current.pace,
       custom: parsed.custom ?? current.custom,
       bowSensitivity: parsed.bowSensitivity ?? current.bowSensitivity,
+      recognitionMode: parsed.recognitionMode ?? current.recognitionMode,
     };
     const columns = {
       pace: next.pace,
       holdMs: next.custom.holdMs,
       tashahhudMs: next.custom.tashahhudMs,
       bowSensitivity: next.bowSensitivity,
+      recognitionMode: next.recognitionMode,
     };
     await db
       .insert(prayerAssistantSettings)

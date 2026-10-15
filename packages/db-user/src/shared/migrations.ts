@@ -124,4 +124,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `act_completions_date_idx` ON `act_completions` (`date`);",
     ],
   },
+  {
+    tag: "20261015210608_prayer_assistant_recognition_mode",
+    statements: [
+      "ALTER TABLE `prayer_assistant_settings` ADD `recognition_mode` text;",
+    ],
+  },
 ];

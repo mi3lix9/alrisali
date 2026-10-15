@@ -35,10 +35,11 @@ describe(createPrayerAssistantRepository, () => {
       pace: "normal",
       custom: { holdMs: 800, tashahhudMs: 3000 },
       bowSensitivity: 70,
+      recognitionMode: "tap",
     });
   });
 
-  it("keeps the chosen Pace, Custom holds and bow sensitivity across a relaunch", async () => {
+  it("keeps the chosen Pace, Custom holds, bow sensitivity and Recognition Mode across a relaunch", async () => {
     const assistant = createPrayerAssistantRepository(database.db);
     await assistant.update({ pace: "slow" });
     await expect(
@@ -46,11 +47,13 @@ describe(createPrayerAssistantRepository, () => {
         pace: "custom",
         custom: { holdMs: 1000, tashahhudMs: 5000 },
         bowSensitivity: 40,
+        recognitionMode: "camera",
       })
     ).resolves.toStrictEqual({
       pace: "custom",
       custom: { holdMs: 1000, tashahhudMs: 5000 },
       bowSensitivity: 40,
+      recognitionMode: "camera",
     });
 
     await database.close();
@@ -62,6 +65,7 @@ describe(createPrayerAssistantRepository, () => {
       pace: "custom",
       custom: { holdMs: 1000, tashahhudMs: 5000 },
       bowSensitivity: 40,
+      recognitionMode: "camera",
     });
   });
 
@@ -73,16 +77,21 @@ describe(createPrayerAssistantRepository, () => {
     await expect(assistant.update({ bowSensitivity: 101 })).rejects.toThrow(
       "bowSensitivity"
     );
+    await expect(
+      // @ts-expect-error a Recognition Mode this app does not know
+      assistant.update({ recognitionMode: "telepathy" })
+    ).rejects.toThrow("recognitionMode");
     await expect(assistant.settings()).resolves.toStrictEqual({
       pace: "normal",
       custom: { holdMs: 800, tashahhudMs: 3000 },
       bowSensitivity: 70,
+      recognitionMode: "tap",
     });
   });
 
   it("reads values a newer app synced as the defaults", async () => {
     await database.db.run(
-      sql`INSERT INTO prayer_assistant_settings (id, pace, hold_ms, tashahhud_ms, bow_sensitivity) VALUES ('believer', 'glacial', 99999, 1, 500)`
+      sql`INSERT INTO prayer_assistant_settings (id, pace, hold_ms, tashahhud_ms, bow_sensitivity, recognition_mode) VALUES ('believer', 'glacial', 99999, 1, 500, 'telepathy')`
     );
     await expect(
       createPrayerAssistantRepository(database.db).settings()
@@ -90,6 +99,7 @@ describe(createPrayerAssistantRepository, () => {
       pace: "normal",
       custom: { holdMs: 800, tashahhudMs: 3000 },
       bowSensitivity: 70,
+      recognitionMode: "tap",
     });
   });
 });
