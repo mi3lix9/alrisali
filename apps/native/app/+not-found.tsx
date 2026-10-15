@@ -1,32 +1,29 @@
 import { Link, Stack } from "expo-router";
-import { Button, Surface } from "heroui-native";
-import { Text, View } from "react-native";
+import { Button, EmptyState } from "panelui-native";
+import { useTranslation } from "react-i18next";
 
-import { Container } from "@/shared/ui/container";
+import { Screen } from "@/shared/ui/screen";
 
-const NotFoundScreen = () => (
-  <>
-    <Stack.Screen options={{ title: "Not Found" }} />
-    <Container>
-      <View className="flex-1 items-center justify-center p-4">
-        <Surface
-          variant="secondary"
-          className="max-w-sm items-center rounded-lg p-6"
-        >
-          <Text className="mb-3 text-4xl">🤔</Text>
-          <Text className="text-foreground mb-1 text-lg font-medium">
-            Page Not Found
-          </Text>
-          <Text className="text-muted mb-4 text-center text-sm">
-            The page you&apos;re looking for doesn&apos;t exist.
-          </Text>
-          <Link href="/" asChild>
-            <Button size="sm">Go Home</Button>
-          </Link>
-        </Surface>
-      </View>
-    </Container>
-  </>
-);
+const NotFoundRoute = () => {
+  const { t } = useTranslation();
 
-export default NotFoundScreen;
+  return (
+    <>
+      <Stack.Screen options={{ title: t("notFound.title") }} />
+      <Screen>
+        <EmptyState>
+          <EmptyState.Header>
+            <EmptyState.Title>{t("notFound.title")}</EmptyState.Title>
+          </EmptyState.Header>
+          <EmptyState.Content>
+            <Link href="/" asChild>
+              <Button>{t("notFound.goHome")}</Button>
+            </Link>
+          </EmptyState.Content>
+        </EmptyState>
+      </Screen>
+    </>
+  );
+};
+
+export default NotFoundRoute;
