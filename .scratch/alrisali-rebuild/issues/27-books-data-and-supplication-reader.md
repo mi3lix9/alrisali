@@ -12,4 +12,4 @@
 - [ ] All three Books browsable offline (code complete: Library → Books card → Book contents → reader; all text bundled in `@alrisali/content/books`, loaded per Supplication; iOS JS bundle exports cleanly; pending simulator verification)
 - [ ] Reader font and language toggles work (code complete: Arabic/English/both toggle and font −/+ (16–40) persisted on device; pending simulator verification)
 
-Notes: Thaqalayn has no Mafatih al-Jinan book; the Mafatih Book holds the 6 duas and 5 ziyarat Thaqalayn publishes (no other source used, nothing from al-islam.org). ThaqalaynAPI was returning 500, so Nahj came from that project's published dataset (the build script tries the API first). Rebuild with `bun run books:build -F @alrisali/content`.
+Notes: Thaqalayn has no Mafatih al-Jinan book; the Mafatih Book holds the 6 duas and 5 ziyarat Thaqalayn publishes (no other source used, nothing from al-islam.org). ThaqalaynAPI was returning 500, so Nahj came from that project's published dataset (the build script tries the API first). Rebuild with `cd packages/content && bun run books:build [--cache <dir>]`.
