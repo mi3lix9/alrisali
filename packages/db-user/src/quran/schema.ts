@@ -11,6 +11,9 @@ export const quranReaderSettings = sqliteTable("quran_reader_settings", {
   surahFontSize: integer("surah_font_size")
     .notNull()
     .default(DEFAULT_QURAN_READER_SETTINGS.surahFontSize),
+  reciterId: integer("reciter_id")
+    .notNull()
+    .default(DEFAULT_QURAN_READER_SETTINGS.reciterId),
 });
 
 /**

@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "@alrisali/api": "workspace:*",
+    "@alrisali/auth": "workspace:*",
+    "@alrisali/content": "workspace:*",
+    "@alrisali/domain": "workspace:*",
     "@alrisali/i18n": "workspace:*",
     "@alrisali/ui": "workspace:*",
     "@orpc/client": "catalog:",
@@ -35,6 +38,7 @@
     "sonner": "catalog:",
     "srvx": "1.0.5",
     "tailwindcss": "catalog:",
+    "temporal-polyfill": "catalog:",
     "varlock": "catalog:",
     "zod": "catalog:"
   },

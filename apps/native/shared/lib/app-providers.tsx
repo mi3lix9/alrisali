@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { I18nextProvider } from "react-i18next";
 import { LayoutDirection, useCSSVariable, useUniwind } from "uniwind";
 
+import { useContentSync } from "./content-database";
 import { i18n, launchDirection } from "./i18n";
 import { queryClient } from "./orpc";
 import { useUserDataSync } from "./user-database";
@@ -56,8 +57,9 @@ const NavigationTheme = ({ children }: { children: ReactNode }) => (
   <ThemeProvider value={useNavigationTheme()}>{children}</ThemeProvider>
 );
 
-const UserDataSync = () => {
+const DataSync = () => {
   useUserDataSync();
+  useContentSync();
   return null;
 };
 
@@ -76,7 +78,7 @@ export const AppProviders = ({ children }: { children: ReactNode }) => (
         <Direction dir={launchDirection} className="flex-1">
           <PanelUIProvider>
             <LocaleDirContext.Provider value={launchDirection}>
-              <UserDataSync />
+              <DataSync />
               <NavigationTheme>{children}</NavigationTheme>
             </LocaleDirContext.Provider>
           </PanelUIProvider>

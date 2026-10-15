@@ -134,6 +134,7 @@ describe("Guest → Believer sync", () => {
       locationFollowsDevice: true,
       imsakMinutes: 10,
       timeFormat: null,
+      messageStyle: "classic",
     });
   });
 
@@ -159,6 +160,7 @@ describe("Guest → Believer sync", () => {
       locationFollowsDevice: true,
       imsakMinutes: 10,
       timeFormat: null,
+      messageStyle: "classic",
     };
     await expect(onPhone.get()).resolves.toStrictEqual(mashhad);
     await expect(onTablet.get()).resolves.toStrictEqual(mashhad);

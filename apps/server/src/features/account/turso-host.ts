@@ -46,11 +46,11 @@ export const createTursoHost = ({
         throw error;
       }
     },
-    mintToken: async (name) => {
+    mintToken: async (name, access = "full-access") => {
       const expiresAt = Date.now() + TOKEN_LIFETIME_MS;
       const { jwt } = await turso.databases.createToken(name, {
         expiration: `${TOKEN_LIFETIME_MS / 60_000}m`,
-        authorization: "full-access",
+        authorization: access,
       });
       return { token: jwt, expiresAt };
     },

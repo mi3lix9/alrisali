@@ -45,6 +45,12 @@ export {
 } from "./occasions";
 export type { Occasion, OccasionDay, OccasionType } from "./occasions";
 export {
+  DEFAULT_MESSAGE_STYLE,
+  MESSAGE_STYLES,
+  messageStyleSchema,
+} from "./message-style";
+export type { MessageStyle } from "./message-style";
+export {
   ALWAYS_SHOWN_TAB,
   DEFAULT_HIDDEN_TABS,
   readHiddenTabs,

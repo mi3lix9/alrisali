@@ -1,3 +1,4 @@
+import "../i18n";
 import { CALCULATION_METHODS } from "@alrisali/domain/shared";
 import { Card, RadioGroup } from "panelui-native";
 import { useTranslation } from "react-i18next";

@@ -6,8 +6,14 @@ import {
   openReader,
   pagePosition,
   readerReducer,
+  recitationStart,
+  scrubberValue,
 } from "@alrisali/domain/quran";
-import type { QuranReaderSettings } from "@alrisali/domain/quran";
+import type {
+  JumpTarget,
+  QuranReaderSettings,
+  ReaderAction,
+} from "@alrisali/domain/quran";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Spinner, Text } from "panelui-native";
@@ -27,9 +33,17 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions } from "../components/ayah-sheet";
+import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
+import { QuranIndexSheet } from "../components/quran-index-sheet";
+import { QuranSearchSheet } from "../components/quran-search-sheet";
+import {
+  READER_BOTTOM_BAR_HEIGHT,
+  ReaderBottomBar,
+} from "../components/reader-bottom-bar";
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
+import { RecitationPill } from "../components/recitation-pill";
 import { SurahMode } from "../components/surah-mode";
 import { useQuranLastRead, useSetQuranLastRead } from "../data/last-read";
 import {
@@ -48,6 +62,9 @@ interface ReaderParams {
   surah?: string;
   [key: string]: string | undefined;
 }
+
+/** Space between the recitation pill and the screen's bottom edge. */
+const RECITATION_PILL_GAP = 24;
 
 const ReaderHint = () => {
   const { t } = useTranslation("quran");
@@ -115,6 +132,8 @@ const Reader = ({
     [state.lastReadAyah]
   );
   const [chrome, send] = useReaderChrome();
+  // Bumped by every jump, so the page list or surah remounts at the target.
+  const [jumpCount, setJumpCount] = useState(0);
   const hint = useReaderHint();
   const dismissHint = hint.dismiss;
 
@@ -141,6 +160,19 @@ const Reader = ({
     (ayah: AyahKey) => dispatch({ type: "ayah-shown", ayah }),
     []
   );
+
+  /** A jump (scrubber, index, search, page jump) or a return to before one. */
+  const move = (action: Extract<ReaderAction, { type: "jump" | "return" }>) => {
+    send({ type: "close-sheet" });
+    if (readerReducer(state, action) !== state) {
+      dispatch(action);
+      setJumpCount((count) => count + 1);
+    }
+  };
+  const jumpTo = (to: JumpTarget) => move({ type: "jump", to });
+  const openSheet = (kind: "index" | "page-jump" | "search") =>
+    send({ type: "open-sheet", sheet: { kind } });
+  const closeSheet = () => send({ type: "close-sheet" });
 
   const changeSettings = (change: Partial<QuranReaderSettings>) => {
     send({ type: "interact" });
@@ -173,6 +205,7 @@ const Reader = ({
       <StatusBar hidden={!chrome.visible} animated />
       {state.mode === "page" ? (
         <PageMode
+          key={jumpCount}
           pageNav={state.pageNav}
           initialPage={state.currentPage}
           width={width}
@@ -185,6 +218,7 @@ const Reader = ({
         />
       ) : (
         <SurahMode
+          key={jumpCount}
           surah={state.currentSurah}
           fontSize={settings.surahFontSize}
           insetTop={insets.top}
@@ -205,12 +239,38 @@ const Reader = ({
           onBack={() =>
             router.canGoBack() ? router.back() : router.replace("/")
           }
+          onIndex={() => openSheet("index")}
+          onSearch={() => openSheet("search")}
           onSettings={() =>
             send({ type: "open-sheet", sheet: { kind: "settings" } })
           }
           lastReadOnScreen={lastReadOnScreen}
         />
       ) : null}
+      {chrome.visible ? (
+        <ReaderBottomBar
+          mode={state.mode}
+          value={scrubberValue(state)}
+          returnTo={state.returnTo}
+          insetBottom={insets.bottom}
+          onReturn={() => move({ type: "return" })}
+          onScrubberHold={() => send({ type: "scrubber-hold" })}
+          onScrubberRelease={() => send({ type: "scrubber-release" })}
+          onJump={jumpTo}
+        />
+      ) : null}
+      <RecitationPill
+        start={recitationStart(state)}
+        reciterId={settings.reciterId}
+        chromeVisible={chrome.visible}
+        bottom={
+          insets.bottom +
+          RECITATION_PILL_GAP +
+          (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
+        }
+        onReciterChange={(reciterId) => update.mutate({ reciterId })}
+        onInteract={() => send({ type: "interact" })}
+      />
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}
@@ -231,6 +291,24 @@ const Reader = ({
         settings={{ ...settings, mode: state.mode, pageNav: state.pageNav }}
         onChange={changeSettings}
         onClose={() => send({ type: "close-sheet" })}
+      />
+      <QuranIndexSheet
+        open={chrome.sheet?.kind === "index"}
+        current={{ surah: state.currentSurah, juz: position.juz }}
+        onSelect={jumpTo}
+        onPageJump={() => openSheet("page-jump")}
+        onClose={closeSheet}
+      />
+      <PageJumpSheet
+        open={chrome.sheet?.kind === "page-jump"}
+        initialPage={state.currentPage}
+        onSelect={jumpTo}
+        onClose={closeSheet}
+      />
+      <QuranSearchSheet
+        open={chrome.sheet?.kind === "search"}
+        onSelect={jumpTo}
+        onClose={closeSheet}
       />
     </View>
   );

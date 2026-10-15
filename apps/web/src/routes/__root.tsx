@@ -1,4 +1,3 @@
-import { Toaster } from "@alrisali/ui/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
@@ -12,6 +11,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { directionOf, parseLocaleParam } from "@/features/landing";
 import type { orpc } from "@/shared/lib/orpc";
+import { Toaster } from "@/shared/ui/sonner";
 
 import appCss from "../index.css?url";
 

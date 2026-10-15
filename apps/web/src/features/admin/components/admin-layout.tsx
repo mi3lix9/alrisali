@@ -3,20 +3,43 @@ import type { ReactNode } from "react";
 
 import UserMenu from "./user-menu";
 
+const NAV_LINK = "text-muted-foreground hover:text-foreground";
+const ACTIVE_LINK = "text-foreground font-medium";
+
 export const AdminLayout = ({ children }: { children: ReactNode }) => (
   <div className="grid h-svh grid-rows-[auto_1fr]">
-    <div>
-      <div className="flex flex-row items-center justify-between px-2 py-1">
-        <nav className="flex gap-4 text-lg">
-          <Link to="/{-$locale}">Home</Link>
-          <Link to="/dashboard">Dashboard</Link>
+    <header className="border-b">
+      <div className="flex flex-row items-center justify-between gap-6 px-4 py-2">
+        <nav className="flex items-center gap-6 text-sm">
+          <Link to="/admin" className="text-base font-semibold">
+            Al-Risali Admin
+          </Link>
+          <Link
+            to="/admin"
+            activeOptions={{ exact: true }}
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Overview
+          </Link>
+          <Link
+            to="/admin/hijri-adjustment"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Hijri Adjustment
+          </Link>
+          <Link
+            to="/admin/daily-content"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Daily Content
+          </Link>
         </nav>
-        <div className="flex items-center gap-2">
-          <UserMenu />
-        </div>
+        <UserMenu />
       </div>
-      <hr />
-    </div>
-    {children}
+    </header>
+    <div className="overflow-y-auto">{children}</div>
   </div>
 );

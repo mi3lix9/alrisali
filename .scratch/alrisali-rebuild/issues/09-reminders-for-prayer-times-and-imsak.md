@@ -6,9 +6,9 @@
 
 **Blocked by:** 04 (Prayer Times timetable and next-Salah countdown)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Domain tests: window, 64 cap, precedence of mute/voice/disable, quiet hours, time zone change
-- [ ] Notifications fire offline at the right local time on device
-- [ ] Message Style changes notification copy
-- [ ] Settings change reschedules immediately
+- [x] Domain tests: window, 64 cap, precedence of mute/voice/disable, quiet hours, time zone change (`packages/domain/src/reminders/planner.test.ts`, plus DST and the schedule diff; settings persistence in `packages/db-user/src/reminders/repository.test.ts`)
+- [ ] Notifications fire offline at the right local time on device — pending simulator verification (needs a dev-client build with expo-notifications and the bundled sounds; scheduling uses DATE triggers at the Prayer Time instants, so nothing needs the network)
+- [x] Message Style changes notification copy (Classic: rotating saying + source; Modern: coaching line; the copy is in each request's fingerprint, so a style change reschedules; on-device look pending simulator verification)
+- [x] Settings change reschedules immediately (the root `ReminderScheduler` re-plans whenever Believer or Reminder settings data changes, and on every foreground; the diff cancels/reschedules only what changed)

@@ -74,4 +74,24 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `prayer_logs_date_idx` ON `prayer_logs` (`date`);",
     ],
   },
+  {
+    tag: "20261015195759_reminder_settings_and_message_style",
+    statements: [
+      "CREATE TABLE `reminder_settings` (\n\t`id` text PRIMARY KEY,\n\t`salah_rules` text,\n\t`imsak_rule` text,\n\t`quiet_hours_enabled` integer,\n\t`quiet_hours_start` integer,\n\t`quiet_hours_end` integer\n);",
+      "ALTER TABLE `believer_settings` ADD `message_style` text;",
+    ],
+  },
+  {
+    tag: "20261015200354_quran_reciter",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `reciter_id` integer DEFAULT 7 NOT NULL;",
+    ],
+  },
+  {
+    tag: "20261015200852_khushu",
+    statements: [
+      "CREATE TABLE `khushu` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`salah` text NOT NULL,\n\t`level` integer NOT NULL,\n\t`distractions` text NOT NULL,\n\t`custom_distraction` text,\n\t`rated_at` integer NOT NULL\n);",
+      "CREATE INDEX `khushu_date_idx` ON `khushu` (`date`);",
+    ],
+  },
 ];

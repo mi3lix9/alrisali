@@ -1,4 +1,7 @@
-import { Button } from "@alrisali/ui/components/button";
+import { Link, useNavigate } from "@tanstack/react-router";
+
+import { authClient } from "@/shared/lib/auth-client";
+import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,11 +10,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@alrisali/ui/components/dropdown-menu";
-import { Skeleton } from "@alrisali/ui/components/skeleton";
-import { Link, useNavigate } from "@tanstack/react-router";
-
-import { authClient } from "@/shared/lib/auth-client";
+} from "@/shared/ui/dropdown-menu";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 const UserMenu = () => {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ const UserMenu = () => {
 
   if (!session) {
     return (
-      <Link to="/login">
+      <Link to="/admin/login">
         <Button variant="outline">Sign In</Button>
       </Link>
     );
@@ -46,7 +46,7 @@ const UserMenu = () => {
                 fetchOptions: {
                   onSuccess: () => {
                     navigate({
-                      to: "/",
+                      to: "/admin/login",
                     });
                   },
                 },

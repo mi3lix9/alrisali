@@ -87,6 +87,7 @@ describe("reader navigation", () => {
       currentPage: 42,
       currentSurah: 2,
       lastReadAyah: "2:255",
+      returnTo: null,
     });
     expect(openReader({ settings: pageMode, page: 605 })).toMatchObject({
       currentPage: 1,
@@ -202,6 +203,7 @@ describe("Last-Read Ayah", () => {
       currentPage: findAyah("18:10")?.page,
       currentSurah: 18,
       lastReadAyah: "18:10",
+      returnTo: null,
     });
     expect(
       openReader({ settings: surahMode, lastReadAyah: "18:10" })

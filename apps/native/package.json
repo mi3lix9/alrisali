@@ -17,6 +17,7 @@
   "dependencies": {
     "@alrisali/api": "workspace:*",
     "@alrisali/content": "workspace:*",
+    "@alrisali/db-content": "workspace:*",
     "@alrisali/db-user": "workspace:*",
     "@alrisali/domain": "workspace:*",
     "@alrisali/i18n": "workspace:*",
@@ -37,6 +38,7 @@
     "drizzle-orm": "catalog:",
     "expo": "58.0.10",
     "expo-apple-authentication": "~58.0.2",
+    "expo-audio": "~58.0.9",
     "expo-constants": "~58.0.12",
     "expo-crypto": "~58.0.6",
     "expo-file-system": "~58.0.9",
@@ -47,6 +49,7 @@
     "expo-localization": "~58.0.4",
     "expo-location": "~58.0.16",
     "expo-network": "~58.0.3",
+    "expo-notifications": "~58.1.4",
     "expo-router": "~58.0.19",
     "expo-secure-store": "~58.0.2",
     "expo-sharing": "~58.0.18",

@@ -3,6 +3,12 @@ import * as schema from "@alrisali/db-server/schema/auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
+import { admin } from "better-auth/plugins/admin";
+import { eq } from "drizzle-orm";
+
+import { ADMIN_ROLE } from "./roles";
+
+export { ADMIN_ROLE, isAdmin } from "./roles";
 
 export interface AuthConfig {
   BETTER_AUTH_URL: string;
@@ -76,9 +82,34 @@ export const createAuth = (
         httpOnly: true,
       },
     },
-    plugins: [expo()],
+    // The admin plugin's role marks Admins (better-auth keeps it on the user,
+    // comma-separated when there are several).
+    plugins: [expo(), admin({ adminRoles: [ADMIN_ROLE] })],
   });
 };
 
 export type Auth = ReturnType<typeof createAuth>;
 export type Session = Auth["$Infer"]["Session"];
+
+const setRole = async (
+  database: Database,
+  email: string,
+  role: string | null
+): Promise<void> => {
+  const updated = await database
+    .update(schema.user)
+    .set({ role })
+    .where(eq(schema.user.email, email))
+    .returning({ id: schema.user.id });
+  if (updated.length === 0) {
+    throw new Error(`No account with the email ${email}: sign in once first`);
+  }
+};
+
+/** Makes an existing account an Admin. */
+export const grantAdminRole = (database: Database, email: string) =>
+  setRole(database, email, ADMIN_ROLE);
+
+/** Takes the Admin role away; the account stays a Believer. */
+export const revokeAdminRole = (database: Database, email: string) =>
+  setRole(database, email, null);

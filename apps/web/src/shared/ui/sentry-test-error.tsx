@@ -1,4 +1,4 @@
-import { Button } from "@alrisali/ui/components/button";
+import { Button } from "./button";
 
 /** Throws an uncaught error on click, to check that Sentry receives web errors. */
 export const SentryTestErrorScreen = () => (
