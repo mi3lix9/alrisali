@@ -326,11 +326,12 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
   - Uses real IANA time zones through Temporal.
 - **Hijri:**
   - Umm al-Qura through Intl, with an arithmetic fallback.
-  - The effective date applies the Admin Hijri Adjustment plus the Believer's adjustment (±2). Guests get the Admin adjustment.
+  - The effective date applies the Admin Hijri Adjustment plus the Believer's adjustment (±2). Guests keep their personal Hijri Adjustment too: their data is the future user database (ADR-0002).
   - Builds the month grid, resolves Occasions for a date, and decides whether a date falls inside a Hijri window (inclusive).
 - **Prayer Streak:**
   - Derived, never stored: the count of consecutive days on which all five Salah were logged, ending at the given date.
   - The day being evaluated must itself be complete; otherwise the streak is 0.
+  - Display (Insights, the Prayer Log card, Home): while today is still incomplete, show the streak that ended yesterday; once today is complete, include today.
 - **Tasbih:**
   - Tasbih al-Zahra state machine: steps 34, 33, 33; it auto-advances, a completed round yields a Dhikr Session of 100, then it resets.
   - Open Tasbih with a target event.
