@@ -39,6 +39,12 @@ const SECTIONS = [
       "Publish majalis, lectures and other Gatherings, and the Speakers who lead them.",
   },
   {
+    to: "/admin/library",
+    title: "Library",
+    description:
+      "Upload books, audio, video and structured texts with covers, order them by category and publish them.",
+  },
+  {
     to: "/admin/programs",
     title: "Official Programs",
     description:
