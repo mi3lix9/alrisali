@@ -31,6 +31,8 @@ export interface AyahGestures {
   onLongPressAyah: (ayah: AyahKey) => void;
   /** The ayah whose sheet is open, drawn highlighted. */
   selectedAyah: AyahKey | null;
+  /** The Last-Read Ayah, its rosette drawn in the accent colour. */
+  lastReadAyah: AyahKey | null;
 }
 
 interface QuranPageViewProps extends AyahGestures {
@@ -58,16 +60,21 @@ const lineText = (line: QuranLine): string =>
 
 const wordKey = (word: QuranWord): AyahKey => `${word.surah}:${word.ayah}`;
 
-interface WordProps extends Omit<AyahGestures, "selectedAyah"> {
+interface WordProps extends Omit<
+  AyahGestures,
+  "selectedAyah" | "lastReadAyah"
+> {
   word: QuranWord;
   fontSize: number;
   selected: boolean;
+  lastRead: boolean;
 }
 
 const Word = ({
   word,
   fontSize,
   selected,
+  lastRead,
   onTap,
   onLongPressAyah,
 }: WordProps) => (
@@ -75,7 +82,9 @@ const Word = ({
     onPress={onTap}
     onLongPress={() => onLongPressAyah(wordKey(word))}
     suppressHighlighting
-    className={selected ? "bg-accent text-foreground" : "text-foreground"}
+    className={`${selected ? "bg-accent" : ""} ${
+      lastRead && word.isAyahEnd ? "text-info" : "text-foreground"
+    }`}
     style={{ fontFamily: QURAN_FONT, fontSize, writingDirection: "rtl" }}
   >
     {word.text}
@@ -97,6 +106,7 @@ const Line = ({
   onTap,
   onLongPressAyah,
   selectedAyah,
+  lastReadAyah,
 }: LineProps) => {
   const { t } = useTranslation("quran");
   if (line.kind !== "ayah") {
@@ -143,6 +153,7 @@ const Line = ({
           word={word}
           fontSize={fontSize}
           selected={selectedAyah === wordKey(word)}
+          lastRead={lastReadAyah === wordKey(word)}
           onTap={onTap}
           onLongPressAyah={onLongPressAyah}
         />
@@ -166,6 +177,7 @@ const PageView = ({
   onTap,
   onLongPressAyah,
   selectedAyah,
+  lastReadAyah,
 }: QuranPageViewProps) => {
   const { t, i18n } = useTranslation("quran");
   const quranPage = useMemo(() => getQuranPage(page), [page]);
@@ -200,7 +212,7 @@ const PageView = ({
     setMeasured(fitKey);
   };
 
-  const gestures = { onTap, onLongPressAyah, selectedAyah };
+  const gestures = { onTap, onLongPressAyah, selectedAyah, lastReadAyah };
 
   return (
     <Pressable

@@ -1,6 +1,7 @@
 import "../i18n";
 import type { AyahKey } from "@alrisali/content/quran";
 import {
+  findAyah,
   firstPageOfSurah,
   openReader,
   pagePosition,
@@ -10,7 +11,14 @@ import type { QuranReaderSettings } from "@alrisali/domain/quran";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Spinner, Text } from "panelui-native";
-import { useCallback, useReducer, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
@@ -23,10 +31,12 @@ import { PageMode } from "../components/page-mode";
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
 import { SurahMode } from "../components/surah-mode";
+import { useQuranLastRead, useSetQuranLastRead } from "../data/last-read";
 import {
   useQuranReaderSettings,
   useUpdateQuranReaderSettings,
 } from "../data/reader-settings";
+import { ReaderLastReadContext } from "../hooks/reader-last-read";
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
@@ -61,6 +71,8 @@ const ReaderHint = () => {
 
 interface ReaderProps {
   settings: QuranReaderSettings;
+  /** The saved Last-Read Ayah: where the reader opens without a target. */
+  lastReadAyah: AyahKey | null;
   params: ReaderParams;
   width: number;
   height: number;
@@ -69,6 +81,7 @@ interface ReaderProps {
 
 const Reader = ({
   settings,
+  lastReadAyah,
   params,
   width,
   height,
@@ -76,13 +89,30 @@ const Reader = ({
 }: ReaderProps) => {
   const insets = useSafeAreaInsets();
   const update = useUpdateQuranReaderSettings();
+  const saveLastRead = useSetQuranLastRead().mutate;
   const [state, dispatch] = useReducer(readerReducer, undefined, () =>
     openReader({
       settings,
       ayah: params.ayah ?? null,
       ...(params.page ? { page: Number(params.page) } : {}),
       ...(params.surah ? { surah: Number(params.surah) } : {}),
+      lastReadAyah,
     })
+  );
+  // The reader owns the Last-Read Ayah while open and saves each change.
+  const savedLastRead = useRef(lastReadAyah);
+  useEffect(() => {
+    if (state.lastReadAyah && state.lastReadAyah !== savedLastRead.current) {
+      savedLastRead.current = state.lastReadAyah;
+      saveLastRead(state.lastReadAyah);
+    }
+  }, [state.lastReadAyah, saveLastRead]);
+  const lastReadContext = useMemo(
+    () => ({
+      lastReadAyah: state.lastReadAyah,
+      setLastRead: (ayah: AyahKey) => dispatch({ type: "set-last-read", ayah }),
+    }),
+    [state.lastReadAyah]
   );
   const [chrome, send] = useReaderChrome();
   const hint = useReaderHint();
@@ -107,6 +137,10 @@ const Reader = ({
     (page: number) => dispatch({ type: "page-shown", page }),
     []
   );
+  const onAyahShown = useCallback(
+    (ayah: AyahKey) => dispatch({ type: "ayah-shown", ayah }),
+    []
+  );
 
   const changeSettings = (change: Partial<QuranReaderSettings>) => {
     send({ type: "interact" });
@@ -124,7 +158,15 @@ const Reader = ({
     state.mode === "page"
       ? pagePosition(state.currentPage)
       : pagePosition(firstPageOfSurah(state.currentSurah));
-  const gestures = { onTap, onLongPressAyah, selectedAyah };
+  const gestures = {
+    onTap,
+    onLongPressAyah,
+    selectedAyah,
+    lastReadAyah: state.lastReadAyah,
+  };
+  const lastReadOnScreen =
+    state.lastReadAyah !== null &&
+    findAyah(state.lastReadAyah)?.page === state.currentPage;
 
   return (
     <View className="bg-background flex-1 dark:bg-black">
@@ -147,8 +189,10 @@ const Reader = ({
           fontSize={settings.surahFontSize}
           insetTop={insets.top}
           insetBottom={insets.bottom}
+          initialAyah={state.lastReadAyah}
           onNextSurah={() => dispatch({ type: "next-surah" })}
           onScrollStart={onScrollStart}
+          onAyahShown={onAyahShown}
           {...gestures}
         />
       )}
@@ -164,12 +208,22 @@ const Reader = ({
           onSettings={() =>
             send({ type: "open-sheet", sheet: { kind: "settings" } })
           }
+          lastReadOnScreen={lastReadOnScreen}
         />
       ) : null}
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}
-        actions={ayahActions}
+        // The sheet draws in a portal, so its actions get the context there.
+        actions={
+          ayahActions
+            ? (ayah) => (
+                <ReaderLastReadContext.Provider value={lastReadContext}>
+                  {ayahActions(ayah)}
+                </ReaderLastReadContext.Provider>
+              )
+            : undefined
+        }
         onClose={() => send({ type: "close-sheet" })}
       />
       <ReaderSettingsSheet
@@ -196,6 +250,7 @@ export const QuranReaderScreen = ({ ayahActions }: QuranReaderScreenProps) => {
   const params = useLocalSearchParams<ReaderParams>();
   const fontLoaded = useQuranFont();
   const settings = useQuranReaderSettings();
+  const lastRead = useQuranLastRead();
   const [size, setSize] = useState<{ width: number; height: number }>();
 
   const onLayout = ({ nativeEvent }: LayoutChangeEvent) =>
@@ -207,9 +262,10 @@ export const QuranReaderScreen = ({ ayahActions }: QuranReaderScreenProps) => {
   return (
     <View className="bg-background flex-1 dark:bg-black" onLayout={onLayout}>
       <Stack.Screen options={{ headerShown: false }} />
-      {fontLoaded && settings.data && size ? (
+      {fontLoaded && settings.data && !lastRead.isPending && size ? (
         <Reader
           settings={settings.data}
+          lastReadAyah={lastRead.data?.ayah ?? null}
           params={params}
           width={size.width}
           height={size.height}

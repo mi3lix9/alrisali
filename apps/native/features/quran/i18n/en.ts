@@ -39,6 +39,17 @@ export const en: Catalog<typeof ar> = {
     copyHint: "Long-press the text to copy it.",
     share: "Share",
   },
+  lastRead: {
+    set: "Set as last read",
+    isSet: "Last read",
+    bookmark: "Go to my last-read ayah",
+    bookmarkHere: "Last-read ayah is on this page",
+    continue: "Continue reading",
+    position: "{{surah}} · Ayah {{ayah}} · Page {{page}}",
+    resume: "Continue",
+    empty: "Start from Al-Fatihah; your place is kept as you read.",
+    start: "Start reading",
+  },
   settings: {
     title: "Quran reading",
     mode: {

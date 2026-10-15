@@ -34,6 +34,17 @@ export const ar = {
     copyHint: "اضغط مطوّلًا على النص لنسخه.",
     share: "مشاركة",
   },
+  lastRead: {
+    set: "اجعلها آخر ما قرأت",
+    isSet: "آخر ما قرأت",
+    bookmark: "انتقل إلى آخر ما قرأت",
+    bookmarkHere: "آخر ما قرأت في هذه الصفحة",
+    continue: "تابع القراءة",
+    position: "{{surah}} · الآية {{ayah}} · الصفحة {{page}}",
+    resume: "تابع",
+    empty: "ابدأ القراءة من الفاتحة، وسنحفظ موضعك.",
+    start: "ابدأ القراءة",
+  },
   settings: {
     title: "قراءة القرآن",
     mode: {

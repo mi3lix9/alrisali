@@ -8,7 +8,9 @@ import { connect } from "@tursodatabase/sync";
 
 import { isDatabaseFile } from "./connection";
 import type { SyncedConnection } from "./connection";
-import type { ConnectOptions } from "./user-database";
+import type { SyncServer } from "./sync-server";
+import { openUserDatabase } from "./user-database";
+import type { ConnectOptions, UserDatabase } from "./user-database";
 
 export const connectNode = async (
   options: ConnectOptions
@@ -52,6 +54,23 @@ export const temporaryDirectory = (): TemporaryDirectory => {
     remove: () => rmSync(directory, { force: true, recursive: true }),
   };
 };
+
+/**
+ * One device's database, signed in to `cloudName` on the sync server, for
+ * checking that a feature's rows follow the Believer between devices.
+ */
+export const openSignedInDevice = (options: {
+  server: SyncServer;
+  directory: TemporaryDirectory;
+  cloudName: string;
+  device: string;
+}): Promise<UserDatabase> =>
+  openUserDatabase({
+    path: path.join(options.directory.path, `${options.device}.db`),
+    remoteUrl: () => options.server.databaseUrl(options.cloudName),
+    authToken: () => Promise.resolve(`token-for-${options.cloudName}`),
+    connect: connectNode,
+  });
 
 export { startSyncServer } from "./sync-server";
 export type { SyncServer } from "./sync-server";

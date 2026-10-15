@@ -1,4 +1,5 @@
 import { getQuranPage, SURAHS } from "@alrisali/content/quran";
+import type { AyahKey } from "@alrisali/content/quran";
 import {
   ayatOfSurah,
   firstPageOfSurah,
@@ -6,9 +7,16 @@ import {
 } from "@alrisali/domain/quran";
 import { Button, Card, Direction, Text } from "panelui-native";
 import { ChevronRightIcon } from "panelui-native/icons";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import type { ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, View } from "react-native";
+import type {
+  LayoutChangeEvent,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  TextLayoutEvent,
+} from "react-native";
 
 import { QURAN_FONT } from "../hooks/use-quran-font";
 import { formatNumber } from "../utils/format";
@@ -21,9 +29,24 @@ interface SurahModeProps extends AyahGestures {
   fontSize: number;
   insetTop: number;
   insetBottom: number;
+  /**
+   * The ayah to open scrolled to, when it is in this surah. Read once, on
+   * mount; remount the component to jump again.
+   */
+  initialAyah?: AyahKey | null | undefined;
   onNextSurah: () => void;
   /** The Believer started a scroll. */
   onScrollStart: () => void;
+  /** A Believer's scroll settled with this ayah at the top of the view. */
+  onAyahShown?: ((ayah: AyahKey) => void) | undefined;
+}
+
+/** Where the surah's text lies in the scroll content, measured on layout. */
+interface TextLayout {
+  /** The text's top within the scroll content, under the top padding. */
+  top: number | null;
+  /** Each drawn line's top, bottom and first character offset in the text. */
+  lines: { y: number; bottom: number; start: number }[];
 }
 
 /** The surah's header band and basmala, as its first page sets them. */
@@ -56,10 +79,27 @@ export const SurahMode = ({
   onTap,
   onLongPressAyah,
   selectedAyah,
+  lastReadAyah,
+  initialAyah,
+  onAyahShown,
 }: SurahModeProps) => {
   const { t, i18n } = useTranslation("quran");
   const opening = useOpening(surah);
-  const ayat = ayatOfSurah(surah);
+  const ayat = useMemo(() => ayatOfSurah(surah), [surah]);
+  // Where each ayah starts in the joined text (each ends with a space).
+  const starts = useMemo(() => {
+    const result: number[] = [];
+    let at = 0;
+    for (const ayah of ayat) {
+      result.push(at);
+      at += ayah.text.length + 1;
+    }
+    return result;
+  }, [ayat]);
+  const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
+  const layout = useRef<TextLayout>({ top: null, lines: [] });
+  const jumped = useRef(false);
+  const dragged = useRef(false);
   const { nextSurah } = surahEnd(surah);
   const next = nextSurah ? SURAHS[nextSurah - 1] : undefined;
   const name = (number: number) => {
@@ -73,8 +113,54 @@ export const SurahMode = ({
     writingDirection: "rtl" as const,
   };
 
+  // Opens at `initialAyah` once both the text's place and its lines are known.
+  const jumpToInitial = () => {
+    const { top, lines } = layout.current;
+    const index = ayat.findIndex((ayah) => ayah.key === initialAyah);
+    if (jumped.current || top === null || lines.length === 0 || index === -1) {
+      return;
+    }
+    jumped.current = true;
+    const start = starts[index] ?? 0;
+    const line = lines.findLast((candidate) => candidate.start <= start);
+    scrollRef.current?.scrollTo({ y: top + (line?.y ?? 0), animated: false });
+  };
+
+  const onTextPlaced = ({ nativeEvent }: LayoutChangeEvent) => {
+    layout.current.top = nativeEvent.layout.y;
+    jumpToInitial();
+  };
+
+  const onTextLayout = ({ nativeEvent }: TextLayoutEvent) => {
+    let start = 0;
+    layout.current.lines = nativeEvent.lines.map((line) => {
+      const measured = { y: line.y, bottom: line.y + line.height, start };
+      start += line.text.length;
+      return measured;
+    });
+    jumpToInitial();
+  };
+
+  const onScrollSettled = ({
+    nativeEvent,
+  }: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { top, lines } = layout.current;
+    if (!dragged.current || !onAyahShown || top === null) {
+      return;
+    }
+    const offset = nativeEvent.contentOffset.y - top;
+    const line = lines.find((candidate) => candidate.bottom > offset);
+    const start = line?.start ?? 0;
+    const index = starts.findLastIndex((ayahStart) => ayahStart <= start);
+    const ayah = ayat[Math.max(index, 0)];
+    if (ayah) {
+      onAyahShown(ayah.key);
+    }
+  };
+
   return (
     <ScrollView
+      ref={scrollRef}
       // Each surah opens at its top.
       key={surah}
       className="bg-background flex-1 dark:bg-black"
@@ -83,7 +169,12 @@ export const SurahMode = ({
         paddingBottom: insetBottom + 32,
         paddingHorizontal: 16,
       }}
-      onScrollBeginDrag={onScrollStart}
+      onScrollBeginDrag={() => {
+        dragged.current = true;
+        onScrollStart();
+      }}
+      onScrollEndDrag={onScrollSettled}
+      onMomentumScrollEnd={onScrollSettled}
     >
       <Pressable onPress={onTap} accessible={false}>
         <Direction dir="rtl" className="gap-4">
@@ -105,18 +196,20 @@ export const SurahMode = ({
               {opening.basmala}
             </Text>
           ) : null}
-          <Text style={[quranText, { textAlign: "justify" }]}>
+          <Text
+            style={[quranText, { textAlign: "justify" }]}
+            onLayout={onTextPlaced}
+            onTextLayout={onTextLayout}
+          >
             {ayat.map((ayah) => (
               <Text
                 key={ayah.key}
                 onPress={onTap}
                 onLongPress={() => onLongPressAyah(ayah.key)}
                 suppressHighlighting
-                className={
-                  selectedAyah === ayah.key
-                    ? "bg-accent text-foreground"
-                    : "text-foreground"
-                }
+                className={`${selectedAyah === ayah.key ? "bg-accent" : ""} ${
+                  lastReadAyah === ayah.key ? "text-info" : "text-foreground"
+                }`}
               >
                 {`${ayah.text} `}
               </Text>
