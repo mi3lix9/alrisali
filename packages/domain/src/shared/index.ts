@@ -37,13 +37,21 @@ export type {
 export { distanceKm, LOCATION_REFRESH_KM, locationSchema } from "./location";
 export type { Location } from "./location";
 export {
+  allOccasions,
   BUILT_IN_OCCASIONS,
+  OCCASION_NAME_MAX_LENGTH,
   OCCASION_TYPES,
+  occasionDetailsSchema,
   occasionSchema,
   occasionsInMonth,
   occasionsOn,
 } from "./occasions";
-export type { Occasion, OccasionDay, OccasionType } from "./occasions";
+export type {
+  Occasion,
+  OccasionDay,
+  OccasionDetails,
+  OccasionType,
+} from "./occasions";
 export {
   DEFAULT_MESSAGE_STYLE,
   MESSAGE_STYLES,

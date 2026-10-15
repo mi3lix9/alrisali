@@ -12,19 +12,26 @@ export const OCCASION_TYPES = [
 
 export type OccasionType = (typeof OCCASION_TYPES)[number];
 
+/** The longest name an Occasion may have, in either language. */
+export const OCCASION_NAME_MAX_LENGTH = 120;
+
+const occasionName = z.string().trim().min(1).max(OCCASION_NAME_MAX_LENGTH);
+
 /** A recurring Hijri-dated commemoration, built in or added by the Admins. */
 export const occasionSchema = z.object({
   id: z.string().min(1),
   month: hijriMonthSchema,
   day: hijriDaySchema,
   type: z.enum(OCCASION_TYPES),
-  name: z.object({
-    ar: z.string().trim().min(1),
-    en: z.string().trim().min(1),
-  }),
+  name: z.object({ ar: occasionName, en: occasionName }),
 });
 
 export type Occasion = z.infer<typeof occasionSchema>;
+
+/** What an Admin writes for an Occasion; its id comes from the server. */
+export const occasionDetailsSchema = occasionSchema.omit({ id: true });
+
+export type OccasionDetails = z.infer<typeof occasionDetailsSchema>;
 
 /** The Shia Occasions bundled with the app, by Hijri month and day. */
 export const BUILT_IN_OCCASIONS: readonly Occasion[] = [
@@ -492,6 +499,15 @@ export const BUILT_IN_OCCASIONS: readonly Occasion[] = [
 /** The day an Occasion falls on in a month: the 30th moves to a 29th. */
 const dayInMonth = (occasion: Occasion, monthLength: number) =>
   Math.min(occasion.day, monthLength);
+
+/**
+ * Every Occasion a device shows: the built-in ones, then those the Admins
+ * published, so on a shared day the built-in ones come first.
+ */
+export const allOccasions = (published: readonly Occasion[]): Occasion[] => [
+  ...BUILT_IN_OCCASIONS,
+  ...published,
+];
 
 /** The Occasions on a Hijri Date, in the order given. */
 export const occasionsOn = (

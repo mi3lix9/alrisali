@@ -39,6 +39,7 @@
   "devDependencies": {
     "@alrisali/config": "workspace:*",
     "@alrisali/db-user": "workspace:*",
+    "@alrisali/domain": "workspace:*",
     "@types/bun": "catalog:",
     "temporal-polyfill": "catalog:",
     "tsdown": "^0.23.0",

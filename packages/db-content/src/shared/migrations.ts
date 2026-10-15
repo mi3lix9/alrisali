@@ -15,4 +15,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `daily_content` (\n\t`weekday` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015203035_occasions",
+    statements: [
+      "CREATE TABLE `occasions` (\n\t`id` text PRIMARY KEY,\n\t`month` integer NOT NULL,\n\t`day` integer NOT NULL,\n\t`type` text NOT NULL,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`created_at` integer NOT NULL\n);",
+    ],
+  },
 ];

@@ -3,6 +3,7 @@ import type { ContractRouterClient } from "@orpc/contract";
 import { accountContract } from "./account";
 import { dailyContentContract } from "./daily-content";
 import { hijriAdjustmentContract } from "./hijri-adjustment";
+import { occasionsContract } from "./occasions";
 import { quranContract } from "./quran";
 import { sharedContract } from "./shared";
 
@@ -13,6 +14,7 @@ export const contract = {
   account: accountContract,
   dailyContent: dailyContentContract,
   hijriAdjustment: hijriAdjustmentContract,
+  occasions: occasionsContract,
   quran: quranContract,
 };
 

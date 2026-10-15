@@ -1,7 +1,6 @@
 import "../i18n";
 import {
   addHijriMonths,
-  BUILT_IN_OCCASIONS,
   occasionsInMonth,
   occasionsOn,
 } from "@alrisali/domain/shared";
@@ -23,6 +22,7 @@ import { Screen } from "@/shared/ui/screen";
 
 import { HijriMonthGridView } from "../components/hijri-month-grid";
 import { OccasionList } from "../components/occasion-list";
+import { useOccasions } from "../data/occasions";
 
 const GREGORIAN_MONTH = { month: "short", year: "numeric" } as const;
 
@@ -34,6 +34,7 @@ export const CalendarScreen = () => {
   const { t } = useTranslation("calendar");
   const calendar = useHijriCalendar();
   const formatHijriDate = useFormatHijriDate();
+  const occasions = useOccasions();
   const today = Temporal.Now.plainDateISO();
   const [selected, setSelected] = useState(today);
   // The month on screen, as an offset from today's, so it follows a change
@@ -93,7 +94,7 @@ export const CalendarScreen = () => {
           <Card.Content>
             <HijriMonthGridView
               grid={grid}
-              occasions={BUILT_IN_OCCASIONS}
+              occasions={occasions}
               today={today}
               selected={selected}
               onSelect={setSelected}
@@ -114,11 +115,7 @@ export const CalendarScreen = () => {
           </Card.Header>
           <Card.Content>
             <OccasionList
-              occasions={occasionsOn(
-                selectedHijri,
-                selectedLength,
-                BUILT_IN_OCCASIONS
-              )}
+              occasions={occasionsOn(selectedHijri, selectedLength, occasions)}
               empty={t("day.noOccasions")}
             />
           </Card.Content>
@@ -128,15 +125,15 @@ export const CalendarScreen = () => {
             <Card.Title>{t("monthOccasions")}</Card.Title>
           </Card.Header>
           <Card.Content className="gap-4">
-            {occasionsInMonth(grid.month, grid.length, BUILT_IN_OCCASIONS).map(
-              ({ day, occasions }) => (
+            {occasionsInMonth(grid.month, grid.length, occasions).map(
+              ({ day, occasions: onDay }) => (
                 <View key={day} className="gap-2">
                   <Text size="sm" muted>
                     {`${formatHijriDate({ ...shown, day })} — ${formatGregorianDate(
                       calendar.toGregorian({ ...shown, day })
                     )}`}
                   </Text>
-                  <OccasionList occasions={occasions} empty="" />
+                  <OccasionList occasions={onDay} empty="" />
                 </View>
               )
             )}

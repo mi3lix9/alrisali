@@ -14,3 +14,21 @@ export const globalSettings = sqliteTable("global_settings", {
     .notNull()
     .default(DEFAULT_HIJRI_ADJUSTMENT),
 });
+
+/**
+ * The Occasions Admins publish; devices show them after the built-in ones.
+ * Shared because the calendar (devices) and the Admins' Occasions both use it.
+ */
+export const occasions = sqliteTable("occasions", {
+  id: text("id").primaryKey(),
+  /** Hijri month, 1–12. */
+  month: integer("month").notNull(),
+  /** Hijri day, 1–30; the 30th falls on the 29th in a 29-day month. */
+  day: integer("day").notNull(),
+  /** One of the domain's `OCCASION_TYPES`. */
+  type: text("type").notNull(),
+  nameAr: text("name_ar").notNull(),
+  nameEn: text("name_en").notNull(),
+  /** Milliseconds since the epoch; orders Occasions of the same day. */
+  createdAt: integer("created_at").notNull(),
+});

@@ -5,6 +5,8 @@ export type { GlobalSettingsRepository } from "./global-settings";
 export { migrateContent } from "./migrate";
 export type { ContentStatement, ContentWriter, Migration } from "./migrate";
 export { migrations } from "./migrations";
+export { createOccasionsRepository } from "./occasions";
+export type { OccasionsRepository } from "./occasions";
 export { ContentReplicaReadOnlyError, openContentReplica } from "./replica";
 export type {
   ContentReplica,
@@ -13,4 +15,4 @@ export type {
   ReplicaConnectOptions,
   ReplicaSyncOutcome,
 } from "./replica";
-export { globalSettings } from "./schema";
+export { globalSettings, occasions } from "./schema";

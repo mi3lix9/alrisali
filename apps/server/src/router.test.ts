@@ -8,6 +8,7 @@ import { createDailyContentRepository } from "@alrisali/db-content/daily-content
 import {
   ContentReplicaReadOnlyError,
   createGlobalSettingsRepository,
+  createOccasionsRepository,
   globalSettings,
   openContentReplica,
 } from "@alrisali/db-content/shared";
@@ -23,6 +24,8 @@ import {
   todaysDailyContent,
   WEEKDAYS,
 } from "@alrisali/domain/daily-content";
+import { occasionSchema } from "@alrisali/domain/shared";
+import type { OccasionDetails } from "@alrisali/domain/shared";
 import { call, isProcedure } from "@orpc/server";
 import type { AnyProcedure } from "@orpc/server";
 import { Temporal } from "temporal-polyfill";
@@ -35,6 +38,7 @@ import {
   expect,
   it,
 } from "vitest";
+import { z } from "zod";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { createContentDatabase } from "@/shared/lib/content-database";
@@ -46,6 +50,19 @@ import { createContext } from "./context";
 import { appRouter } from "./router";
 
 type Access = "anonymous" | "believer" | "admin";
+
+/** A valid Occasion as an Admin writes it: Laylat al-Raghaib by default. */
+const occasionDetails = (
+  change: Partial<OccasionDetails> = {}
+): OccasionDetails => ({
+  month: 7,
+  day: 1,
+  type: "celebration",
+  name: { ar: "ليلة الرغائب", en: "Laylat al-Raghaib" },
+  ...change,
+});
+
+const publishedOccasions = z.object({ occasions: z.array(occasionSchema) });
 
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
@@ -65,6 +82,13 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
+  "occasions.list": { access: "admin" },
+  "occasions.create": { access: "admin", input: occasionDetails() },
+  "occasions.update": {
+    access: "admin",
+    input: { id: "missing", ...occasionDetails() },
+  },
+  "occasions.delete": { access: "admin", input: { id: "missing" } },
   "quran.reciters": { access: "anonymous" },
   "quran.surahAudio": {
     access: "anonymous",
@@ -650,6 +674,142 @@ describe("Daily Content", () => {
       ).toBeTruthy();
     }
     await offline.close();
+  });
+});
+
+const listOccasions = async (admin: Headers) =>
+  publishedOccasions.parse(await callAs(admin, "occasions.list")).occasions;
+const createOccasion = async (admin: Headers, details: unknown) =>
+  occasionSchema.parse(await callAs(admin, "occasions.create", details));
+
+describe("Occasions managed by Admins", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("creates Occasions and lists them in calendar order", async () => {
+    const admin = await signInAsAdmin();
+    const later = await createOccasion(
+      admin,
+      occasionDetails({ month: 9, day: 19 })
+    );
+    const created = await createOccasion(admin, {
+      ...occasionDetails(),
+      name: { ar: "  ليلة الرغائب ", en: "Laylat al-Raghaib" },
+    });
+
+    expect(created).toStrictEqual({
+      id: expect.any(String),
+      ...occasionDetails(),
+      name: { ar: "ليلة الرغائب", en: "Laylat al-Raghaib" },
+    });
+    await expect(listOccasions(admin)).resolves.toStrictEqual([created, later]);
+  });
+
+  it("edits and deletes an Occasion", async () => {
+    const admin = await signInAsAdmin();
+    const kept = await createOccasion(admin, occasionDetails({ month: 12 }));
+    const created = await createOccasion(admin, occasionDetails());
+
+    const edited = { ...created, day: 2, type: "religious" };
+    await expect(
+      callAs(admin, "occasions.update", edited)
+    ).resolves.toStrictEqual(edited);
+    await expect(listOccasions(admin)).resolves.toStrictEqual([edited, kept]);
+
+    await expect(
+      callAs(admin, "occasions.delete", { id: created.id })
+    ).resolves.toStrictEqual({ deleted: true });
+    await expect(listOccasions(admin)).resolves.toStrictEqual([kept]);
+  });
+
+  it("answers an edit or delete of an Occasion that is gone", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "occasions.update", { id: "gone", ...occasionDetails() })
+    ).resolves.toBeNull();
+    await expect(
+      callAs(admin, "occasions.delete", { id: "gone" })
+    ).resolves.toStrictEqual({ deleted: false });
+    await expect(listOccasions(admin)).resolves.toStrictEqual([]);
+  });
+
+  it.each([
+    ["a 13th month", { month: 13 }],
+    ["a 31st day", { day: 31 }],
+    ["day 0", { day: 0 }],
+    ["an unknown type", { type: "lecture" }],
+    ["an empty Arabic name", { name: { ar: " ", en: "Laylat al-Raghaib" } }],
+    ["no English name", { name: { ar: "ليلة الرغائب" } }],
+  ])("refuses an Occasion with %s", async (_, change) => {
+    const admin = await signInAsAdmin();
+    const created = await createOccasion(admin, occasionDetails());
+
+    await expect(
+      callAs(admin, "occasions.create", { ...occasionDetails(), ...change })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "occasions.update", { ...created, ...change })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(listOccasions(admin)).resolves.toStrictEqual([created]);
+  });
+
+  it("shows a new Occasion on a device after its next sync", async () => {
+    const admin = await signInAsAdmin();
+    // The device first pulls the content database with no Occasions yet.
+    await listOccasions(admin);
+    const { replica } = await openDeviceReplica(device, () => true);
+    const onDevice = createOccasionsRepository(replica.db);
+    await replica.sync();
+
+    const created = await createOccasion(admin, occasionDetails());
+
+    await expect(onDevice.list()).resolves.toStrictEqual([]);
+    await expect(replica.sync()).resolves.toStrictEqual({
+      status: "pulled",
+      pulledChanges: true,
+    });
+    await expect(onDevice.list()).resolves.toStrictEqual([created]);
+    await replica.close();
+  });
+
+  it("shows an edited or deleted Occasion on a device after its next sync", async () => {
+    const admin = await signInAsAdmin();
+    const created = await createOccasion(admin, occasionDetails());
+    const { replica } = await openDeviceReplica(device, () => true);
+    const onDevice = createOccasionsRepository(replica.db);
+    await replica.sync();
+
+    const edited = { ...created, name: { ...created.name, en: "Raghaib" } };
+    await callAs(admin, "occasions.update", edited);
+    await replica.sync();
+    await expect(onDevice.list()).resolves.toStrictEqual([edited]);
+
+    await callAs(admin, "occasions.delete", { id: created.id });
+    await replica.sync();
+    await expect(onDevice.list()).resolves.toStrictEqual([]);
+    await replica.close();
+  });
+
+  it("reads no Occasions on a device that has never pulled", async () => {
+    await callAs(await signInAsAdmin(), "occasions.create", occasionDetails());
+    const { replica } = await openDeviceReplica(device, () => false);
+
+    await expect(
+      createOccasionsRepository(replica.db).list()
+    ).resolves.toStrictEqual([]);
+    await replica.close();
   });
 });
 

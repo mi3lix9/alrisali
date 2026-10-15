@@ -14,6 +14,12 @@ const SECTIONS = [
     title: "Daily Content",
     description: "Choose the Supplication Home features on each weekday.",
   },
+  {
+    to: "/admin/occasions",
+    title: "Occasions",
+    description:
+      "Add, edit and delete the Occasions shown beside the built-in ones.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

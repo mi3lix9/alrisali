@@ -20,6 +20,7 @@ import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$local
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
 import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
+import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
 
 const Char123LocaleChar125RouteRoute =
   Char123LocaleChar125RouteRouteImport.update({
@@ -82,6 +83,11 @@ const AdminAuthedHijriAdjustmentRoute =
     path: '/hijri-adjustment',
     getParentRoute: () => AdminAuthedRouteRoute,
   } as any)
+const AdminAuthedOccasionsRoute = AdminAuthedOccasionsRouteImport.update({
+  id: '/occasions',
+  path: '/occasions',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
@@ -94,6 +100,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/': typeof AdminAuthedIndexRoute
 }
 export interface FileRoutesByTo {
@@ -105,6 +112,7 @@ export interface FileRoutesByTo {
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin': typeof AdminAuthedIndexRoute
 }
 export interface FileRoutesById {
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
 }
 export interface FileRouteTypes {
@@ -134,6 +143,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/admin/daily-content'
     | '/admin/hijri-adjustment'
+    | '/admin/occasions'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/admin/daily-content'
     | '/admin/hijri-adjustment'
+    | '/admin/occasions'
     | '/admin'
   id:
     | '__root__'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/admin/_authed/daily-content'
     | '/admin/_authed/hijri-adjustment'
+    | '/admin/_authed/occasions'
     | '/admin/_authed/'
   fileRoutesById: FileRoutesById
 }
@@ -247,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedHijriAdjustmentRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/occasions': {
+      id: '/admin/_authed/occasions'
+      path: '/occasions'
+      fullPath: '/admin/occasions'
+      preLoaderRoute: typeof AdminAuthedOccasionsRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
   }
 }
 
@@ -273,12 +292,14 @@ const Char123LocaleChar125RouteRouteWithChildren =
 interface AdminAuthedRouteRouteChildren {
   AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
+  AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
 }
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
+  AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
 }
 
