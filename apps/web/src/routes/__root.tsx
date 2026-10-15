@@ -9,9 +9,9 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import type { orpc } from "@/utils/orpc";
-
-import Header from "../components/header";
+import { UserMenu } from "@/features/admin";
+import type { orpc } from "@/shared/lib/orpc";
+import Header from "@/shared/ui/header";
 
 import appCss from "../index.css?url";
 
@@ -27,7 +27,7 @@ const RootDocument = () => (
     </head>
     <body>
       <div className="grid h-svh grid-rows-[auto_1fr]">
-        <Header />
+        <Header actions={<UserMenu />} />
         <Outlet />
       </div>
       <Toaster richColors />

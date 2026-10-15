@@ -1,4 +1,3 @@
-import { appRouter } from "@alrisali/api/routers/index";
 import { OpenAPIHandler } from "@orpc/openapi/fetch";
 import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
 import { onError } from "@orpc/server";
@@ -10,6 +9,7 @@ import { logger } from "hono/logger";
 
 import { createContext } from "./context";
 import { ENV } from "./env.server";
+import { appRouter } from "./router";
 import { auth } from "./services";
 
 const app = new Hono();

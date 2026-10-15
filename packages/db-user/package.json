@@ -5,7 +5,7 @@
   "description": "Drizzle schema and migrations for the per-user database.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    "./*": "./src/*/index.ts"
   },
   "scripts": {
     "check-types": "tsc -b"

@@ -4,6 +4,8 @@ import react from "ultracite/oxlint/react";
 import tanstack from "ultracite/oxlint/tanstack";
 import vitest from "ultracite/oxlint/vitest";
 
+import { boundaryOverrides } from "./scripts/boundaries/oxlint-boundaries.ts";
+
 export default defineConfig({
   ...(core.env ? { env: core.env } : {}),
   extends: [core, react, tanstack, vitest],
@@ -27,5 +29,7 @@ export default defineConfig({
         "unicorn/prefer-module": "off",
       },
     },
+    // Feature folders and their boundaries (ADR-0005).
+    ...boundaryOverrides,
   ],
 });

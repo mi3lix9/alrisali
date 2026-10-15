@@ -6,7 +6,7 @@ import React, { useCallback } from "react";
 import type { ComponentProps } from "react";
 import { Pressable, Text } from "react-native";
 
-import { ThemeToggle } from "@/components/theme-toggle";
+import { ThemeToggle } from "@/shared/ui/theme-toggle";
 
 // @expo/vector-icons types `color` without RN 0.88's number/null ColorValue members.
 type IconColor = ComponentProps<typeof Ionicons>["color"];

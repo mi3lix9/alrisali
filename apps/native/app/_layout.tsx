@@ -5,8 +5,8 @@ import { HeroUINativeProvider } from "heroui-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
-import { AppThemeProvider } from "@/contexts/app-theme-context";
-import { queryClient } from "@/utils/orpc";
+import { AppThemeProvider } from "@/shared/lib/app-theme";
+import { queryClient } from "@/shared/lib/orpc";
 
 export const unstable_settings = {
   initialRouteName: "(drawer)",
