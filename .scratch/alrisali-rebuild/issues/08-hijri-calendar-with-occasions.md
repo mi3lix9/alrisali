@@ -6,8 +6,8 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Domain tests: conversion, adjustment, month grid, Occasion resolution, Hijri window across year boundary
-- [ ] Calendar screen shows grid and Occasions colour-coded by type
-- [ ] Personal Hijri Adjustment changes every displayed Hijri Date
+- [x] Domain tests: conversion, adjustment, month grid, Occasion resolution, Hijri window across year boundary — `packages/domain/src/shared/{hijri,occasions}.test.ts`; Umm al-Qura via Intl, arithmetic fallback when Intl ignores the calendar (probed), plus `believer_settings.hijri_adjustment` repository tests
+- [ ] Calendar screen shows grid and Occasions colour-coded by type — built: `/calendar` (own Hijri grid with Gregorian days, a dot per Occasion type, chosen day's and month's Occasions with type badges); Home shows today's Hijri Date and Occasions; type-checks and the iOS JS bundle exports. pending simulator verification
+- [ ] Personal Hijri Adjustment changes every displayed Hijri Date — built: Settings → Hijri Adjustment (−2…+2) saves to the per-user DB; every Hijri Date comes from `useHijriCalendar()` (`shared/lib/hijri-calendar.ts`), keyed on the effective adjustment; the shift itself is covered by domain tests. pending simulator verification

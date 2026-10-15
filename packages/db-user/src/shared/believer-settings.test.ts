@@ -36,42 +36,61 @@ describe(createBelieverSettingsRepository, () => {
     directory.remove();
   });
 
-  it("starts with the Ja'fari method and no location", async () => {
+  it("starts with the Ja'fari method, no location and no Hijri Adjustment", async () => {
     const settings = createBelieverSettingsRepository(database.db);
 
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "jafari",
       location: null,
+      hijriAdjustment: 0,
     });
   });
 
-  it("keeps the Calculation Method and location across a relaunch", async () => {
+  it("keeps the settings across a relaunch", async () => {
     await createBelieverSettingsRepository(database.db).update({
       calculationMethod: "hanafi",
       location: NAJAF,
+      hijriAdjustment: -1,
     });
 
     await relaunch();
 
     await expect(
       createBelieverSettingsRepository(database.db).get()
-    ).resolves.toStrictEqual({ calculationMethod: "hanafi", location: NAJAF });
+    ).resolves.toStrictEqual({
+      calculationMethod: "hanafi",
+      location: NAJAF,
+      hijriAdjustment: -1,
+    });
   });
 
-  it("changes one setting without touching the other", async () => {
+  it("changes one setting without touching the others", async () => {
     const settings = createBelieverSettingsRepository(database.db);
-    await settings.update({ calculationMethod: "ibadi", location: NAJAF });
+    await settings.update({
+      calculationMethod: "ibadi",
+      location: NAJAF,
+      hijriAdjustment: 2,
+    });
 
     await settings.update({ calculationMethod: "sunni" });
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "sunni",
       location: NAJAF,
+      hijriAdjustment: 2,
     });
 
     await settings.update({ location: null });
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "sunni",
       location: null,
+      hijriAdjustment: 2,
+    });
+
+    await settings.update({ hijriAdjustment: 0 });
+    await expect(settings.get()).resolves.toStrictEqual({
+      calculationMethod: "sunni",
+      location: null,
+      hijriAdjustment: 0,
     });
   });
 
@@ -80,8 +99,23 @@ describe(createBelieverSettingsRepository, () => {
     const unnamed = { ...NAJAF, name: null };
 
     await expect(settings.update({ location: unnamed })).resolves.toStrictEqual(
-      { calculationMethod: "jafari", location: unnamed }
+      { calculationMethod: "jafari", location: unnamed, hijriAdjustment: 0 }
     );
+  });
+
+  it("rejects a Hijri Adjustment beyond two days and keeps the saved one", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ hijriAdjustment: 1 });
+
+    await expect(settings.update({ hijriAdjustment: 3 })).rejects.toThrow(
+      "hijriAdjustment"
+    );
+    await expect(settings.update({ hijriAdjustment: -3 })).rejects.toThrow(
+      "hijriAdjustment"
+    );
+
+    const { hijriAdjustment } = await settings.get();
+    expect(hijriAdjustment).toBe(1);
   });
 
   it("rejects a location off the globe and keeps the saved one", async () => {
@@ -111,6 +145,7 @@ describe(createBelieverSettingsRepository, () => {
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "jafari",
       location: NAJAF,
+      hijriAdjustment: 0,
     });
   });
 });

@@ -26,4 +26,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
     ],
   },
+  {
+    tag: "20261015192400_hijri_adjustment",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
+    ],
+  },
 ];
