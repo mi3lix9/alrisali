@@ -5,6 +5,7 @@ import { logger } from "hono/logger";
 
 import { startAnnouncementScheduler } from "@/features/announcements";
 import { clientIpOf } from "@/features/contact";
+import { servesLibraryFile } from "@/features/library-assets";
 import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
 import { createContext } from "./context";
@@ -58,8 +59,8 @@ if (otaConfig) {
 }
 
 // Published files (Speaker photos, Slides, Library Assets) from the private
-// files bucket.
-mountFiles(app, files);
+// files bucket; an unpublished Library Asset's files are not served.
+mountFiles(app, files, { canServe: servesLibraryFile(content) });
 // Sends scheduled Announcements when they fall due (Expo Push).
 if (ENV.NODE_ENV !== "test") {
   startAnnouncementScheduler({ content, db, push });

@@ -35,14 +35,29 @@ export const createUpload = admin.createUpload.handler(
 /** Browsers and apps may reuse a redirect until shortly before it expires. */
 const REDIRECT_MAX_AGE_SECONDS = DOWNLOAD_EXPIRY_SECONDS / 2;
 
+export interface MountFilesOptions {
+  /**
+   * Whether the file at `key` is published; an unpublished one answers 404.
+   * Every uploaded file is served when absent.
+   */
+  canServe?: (key: string) => Promise<boolean>;
+}
+
 /**
  * `GET /files/<key>`: redirects to a short-lived URL of the published file
  * (the bucket is private). Anyone may read what Admins published.
  */
-export const mountFiles = (app: Hono, files: FileBucket): void => {
+export const mountFiles = (
+  app: Hono,
+  files: FileBucket,
+  { canServe }: MountFilesOptions = {}
+): void => {
   app.get(`${FILES_PATH}/*`, async (c) => {
     const key = c.req.path.slice(FILES_PATH.length + 1);
     if (!fileKeySchema.safeParse(key).success) {
+      return c.notFound();
+    }
+    if (canServe && !(await canServe(key))) {
       return c.notFound();
     }
     c.header("cache-control", `public, max-age=${REDIRECT_MAX_AGE_SECONDS}`);
