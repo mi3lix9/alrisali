@@ -21,6 +21,7 @@ export const BooksCard = () => {
             <Item
               key={book.id}
               size="sm"
+              testID={`books-book-${book.id}`}
               onPress={() =>
                 router.push({
                   pathname: "/library/book/[id]",

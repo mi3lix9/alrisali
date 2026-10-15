@@ -43,6 +43,7 @@ export const SignInCard = () => {
         ) : null}
         <Button
           variant="social"
+          testID="account-google-sign-in"
           loading={signIn.isPending}
           onPress={() => signIn.mutate(googleIdToken)}
         >

@@ -99,6 +99,7 @@ export const ProgramsScreen = () => {
         <Button
           variant="outline"
           startContent={<PlusIcon size={18} />}
+          testID="programs-build"
           onPress={() => router.push("/worship/programs/build")}
         >
           {t("personal.build")}

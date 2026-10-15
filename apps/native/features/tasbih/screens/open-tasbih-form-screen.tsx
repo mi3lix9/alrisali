@@ -94,6 +94,7 @@ const OpenTasbihForm = ({ saved }: { saved: OpenTasbih | null }) => {
         }}
       />
       <Input
+        testID="tasbih-form-name"
         label={t("form.name")}
         placeholder={t("form.namePlaceholder")}
         value={name}
@@ -125,7 +126,7 @@ const OpenTasbihForm = ({ saved }: { saved: OpenTasbih | null }) => {
           {t("form.failed")}
         </Text>
       ) : null}
-      <Button onPress={submit} disabled={saving}>
+      <Button testID="tasbih-form-submit" onPress={submit} disabled={saving}>
         {saved ? t("form.save") : t("form.create")}
       </Button>
       {saved ? (

@@ -218,6 +218,7 @@ const PageView = ({
     <Pressable
       onPress={onTap}
       accessible={false}
+      testID={`quran-page-${page}`}
       style={{
         width,
         height,

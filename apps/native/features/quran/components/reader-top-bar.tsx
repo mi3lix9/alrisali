@@ -74,6 +74,7 @@ export const ReaderTopBar = ({
         <Button
           variant="ghost"
           size="icon"
+          testID="quran-reader-back"
           accessibilityLabel={t("chrome.back")}
           onPress={onBack}
         >
@@ -82,6 +83,7 @@ export const ReaderTopBar = ({
         <Button
           variant="ghost"
           size="icon"
+          testID="quran-reader-index"
           accessibilityLabel={t("navigation.index")}
           onPress={onIndex}
         >

@@ -32,6 +32,7 @@ export const CounterButton = ({
   return (
     <Pressable
       onPressIn={onTap}
+      testID="tasbih-counter"
       accessibilityRole="button"
       accessibilityLabel={t("counter.label")}
       accessibilityHint={t("counter.hint")}

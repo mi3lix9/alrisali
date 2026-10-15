@@ -16,23 +16,39 @@ const TabsLayout = () => {
 
   return (
     <NativeTabs unstable_nativeProps={{ direction: launchDirection }}>
-      <NativeTabs.Trigger name="(home)">
+      <NativeTabs.Trigger name="(home)" testID="tabs-home">
         <NativeTabs.Trigger.Label>{t("tabs.home")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="house" md="home" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="prayer" hidden={!shown.includes("prayer")}>
+      <NativeTabs.Trigger
+        name="prayer"
+        testID="tabs-prayer"
+        hidden={!shown.includes("prayer")}
+      >
         <NativeTabs.Trigger.Label>{t("tabs.prayer")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="clock" md="schedule" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="library" hidden={!shown.includes("library")}>
+      <NativeTabs.Trigger
+        name="library"
+        testID="tabs-library"
+        hidden={!shown.includes("library")}
+      >
         <NativeTabs.Trigger.Label>{t("tabs.library")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="books.vertical" md="local_library" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="worship" hidden={!shown.includes("worship")}>
+      <NativeTabs.Trigger
+        name="worship"
+        testID="tabs-worship"
+        hidden={!shown.includes("worship")}
+      >
         <NativeTabs.Trigger.Label>{t("tabs.worship")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="sparkles" md="self_improvement" />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="tasbih" hidden={!shown.includes("tasbih")}>
+      <NativeTabs.Trigger
+        name="tasbih"
+        testID="tabs-tasbih"
+        hidden={!shown.includes("tasbih")}
+      >
         <NativeTabs.Trigger.Label>{t("tabs.tasbih")}</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="circle.dotted" md="blur_circular" />
       </NativeTabs.Trigger>
