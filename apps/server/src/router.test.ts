@@ -7,6 +7,7 @@ import type { Auth } from "@alrisali/auth";
 import { createAnnouncementsRepository } from "@alrisali/db-content/announcements";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
+import { createLessonsRepository } from "@alrisali/db-content/lessons";
 import { createProgramsRepository } from "@alrisali/db-content/programs";
 import {
   ContentReplicaReadOnlyError,
@@ -150,6 +151,23 @@ const dailyNawafil: OfficialProgram = {
     },
   ],
 };
+
+/** An uploaded Slide image's key; `n` tells them apart. */
+const slideKey = (n: number) =>
+  `slide/00000000-0000-4000-8000-${String(n).padStart(12, "0")}.png`;
+
+/** A Lesson as an Admin fills it in: new, with two new captioned Slides. */
+const lessonDraft = (overrides: Record<string, unknown> = {}) => ({
+  title: { ar: "التوحيد", en: "Tawheed" },
+  description: { ar: "أصول العقيدة", en: "" },
+  category: "aqeedah",
+  published: true,
+  slides: [
+    { imageKey: slideKey(1), caption: { ar: "الله واحد", en: "God is One" } },
+    { imageKey: slideKey(2), caption: { ar: "", en: "" } },
+  ],
+  ...overrides,
+});
 
 const CONTACT_MESSAGE = {
   name: "Zainab",
@@ -318,6 +336,11 @@ const ACCESS: Record<
   },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
+  "lessons.list": { access: "admin" },
+  "lessons.get": { access: "admin", input: { id: "tawheed" } },
+  "lessons.save": { access: "admin", input: lessonDraft() },
+  "lessons.remove": { access: "admin", input: { id: "tawheed" } },
+  "lessons.reorder": { access: "admin", input: { ids: ["tawheed"] } },
   "occasions.list": { access: "admin" },
   "occasions.create": { access: "admin", input: occasionDetails() },
   "occasions.update": {
@@ -1531,6 +1554,191 @@ describe("Official Programs", () => {
     await expect(
       callAs(admin, "programs.save", withoutWindow)
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
+
+/** A device's view of the Lessons it pulled. */
+const pulledLessons = async (directory: TemporaryDirectory) => {
+  const { replica } = await openDeviceReplica(directory, () => true);
+  await replica.sync();
+  const lessons = await createLessonsRepository(replica.db).list();
+  await replica.close();
+  return lessons;
+};
+
+interface SavedLesson {
+  id: string;
+  published: boolean;
+  slides: { id: string; imageKey: string }[];
+}
+
+const saveLesson = async (admin: Headers, draft = lessonDraft()) =>
+  (await callAs(admin, "lessons.save", draft)) as SavedLesson;
+
+describe("Lessons and Slides", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(async () => {
+    await startLocalCloud();
+    await startBucket();
+  });
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(async () => {
+    await stopBucket();
+    await stopLocalCloud();
+  });
+
+  it("lets an Admin upload a Slide image", async () => {
+    const upload = await requestUpload(await signInAsAdmin(), {
+      purpose: "slide",
+      contentType: "image/png",
+      size: PNG.length,
+    });
+
+    expect(upload.key).toMatch(/^slide\/[\da-f-]{36}\.png$/u);
+    await expect(putFile(upload, PNG)).resolves.toMatchObject({ status: 200 });
+    expect(storedFile(upload.key)).toStrictEqual({
+      body: PNG,
+      contentType: "image/png",
+    });
+  });
+
+  it("publishes a Lesson and its Slides, in order, to devices", async () => {
+    const admin = await signInAsAdmin();
+    const upload = await requestUpload(admin, {
+      purpose: "slide",
+      contentType: "image/png",
+      size: PNG.length,
+    });
+    await putFile(upload, PNG);
+    const lesson = await saveLesson(
+      admin,
+      lessonDraft({
+        slides: [
+          { imageKey: upload.key, caption: { ar: "الأولى", en: "First" } },
+          { imageKey: slideKey(2), caption: { ar: "الثانية", en: "" } },
+        ],
+      })
+    );
+
+    expect(lesson.slides.map(({ imageKey }) => imageKey)).toStrictEqual([
+      upload.key,
+      slideKey(2),
+    ]);
+    await expect(pulledLessons(device)).resolves.toStrictEqual([lesson]);
+  });
+
+  it("keeps drafts from devices but shows them to Admins", async () => {
+    const admin = await signInAsAdmin();
+    const published = await saveLesson(admin);
+    const draft = await saveLesson(
+      admin,
+      lessonDraft({ published: false, slides: [] })
+    );
+
+    await expect(pulledLessons(device)).resolves.toStrictEqual([published]);
+    await expect(callAs(admin, "lessons.list")).resolves.toStrictEqual([
+      published,
+      draft,
+    ]);
+  });
+
+  it("keeps a Slide's id when an Admin edits the Lesson, and gives new ones their own", async () => {
+    const admin = await signInAsAdmin();
+    const lesson = await saveLesson(admin);
+    const [first, second] = lesson.slides;
+
+    const edited = await saveLesson(
+      admin,
+      lessonDraft({
+        id: lesson.id,
+        slides: [
+          { ...second, caption: { ar: "معدلة", en: "" } },
+          { imageKey: slideKey(3), caption: { ar: "", en: "" } },
+        ],
+      })
+    );
+
+    expect(edited.slides[0]?.id).toBe(second?.id);
+    expect(edited.slides[1]?.id).not.toBe(first?.id);
+    await expect(pulledLessons(device)).resolves.toStrictEqual([edited]);
+  });
+
+  it("does not let one Lesson take another's Slide", async () => {
+    const admin = await signInAsAdmin();
+    const tawheed = await saveLesson(admin);
+    const [taken] = tawheed.slides;
+
+    const wudu = await saveLesson(
+      admin,
+      lessonDraft({
+        category: "fiqh",
+        slides: [{ ...taken, caption: { ar: "", en: "" } }],
+      })
+    );
+
+    expect(wudu.slides[0]?.id).not.toBe(taken?.id);
+    await expect(
+      callAs(admin, "lessons.get", { id: tawheed.id })
+    ).resolves.toStrictEqual(tawheed);
+  });
+
+  it("orders and deletes Lessons", async () => {
+    const admin = await signInAsAdmin();
+    const tawheed = await saveLesson(admin);
+    const wudu = await saveLesson(admin, lessonDraft({ category: "fiqh" }));
+
+    await callAs(admin, "lessons.reorder", { ids: [wudu.id, tawheed.id] });
+    await expect(callAs(admin, "lessons.list")).resolves.toStrictEqual([
+      wudu,
+      tawheed,
+    ]);
+    await callAs(admin, "lessons.remove", { id: wudu.id });
+
+    await expect(pulledLessons(device)).resolves.toStrictEqual([tawheed]);
+    await expect(
+      callAs(admin, "lessons.get", { id: wudu.id })
+    ).resolves.toBeNull();
+  });
+
+  it("takes only images uploaded as Slides", async () => {
+    await expect(
+      saveLesson(
+        await signInAsAdmin(),
+        lessonDraft({
+          slides: [
+            {
+              imageKey:
+                "speaker-photo/00000000-0000-4000-8000-000000000001.png",
+              caption: { ar: "", en: "" },
+            },
+          ],
+        })
+      )
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("refuses publishing a Lesson with no Slides", async () => {
+    await expect(
+      saveLesson(await signInAsAdmin(), lessonDraft({ slides: [] }))
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("shows devices no Lessons before their first pull", async () => {
+    const { replica } = await openDeviceReplica(device, () => false);
+
+    await expect(
+      createLessonsRepository(replica.db).list()
+    ).resolves.toStrictEqual([]);
+    await replica.close();
   });
 });
 

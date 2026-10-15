@@ -2,6 +2,17 @@ import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import { fileKeySchema } from "../shared/files";
+import {
+  localizedTextSchema,
+  optionalLocalizedTextSchema,
+} from "../shared/localized-text";
+
+export {
+  localized,
+  localizedTextSchema,
+  optionalLocalizedTextSchema,
+} from "../shared/localized-text";
+export type { LocalizedText } from "../shared/localized-text";
 
 /** What a Gathering is, for its badge and colour. */
 export const GATHERING_TYPES = [
@@ -17,26 +28,6 @@ export type GatheringType = (typeof GATHERING_TYPES)[number];
 export const ATTENDANCE = ["everyone", "men", "women"] as const;
 
 export type Attendance = (typeof ATTENDANCE)[number];
-
-/** Text Admins write in Arabic, with an optional English version. */
-export const localizedTextSchema = z.object({
-  ar: z.string().trim().min(1),
-  en: z.string().trim(),
-});
-
-export type LocalizedText = z.infer<typeof localizedTextSchema>;
-
-/** Optional text in both languages; empty when the Admin left it out. */
-export const optionalLocalizedTextSchema = z.object({
-  ar: z.string().trim(),
-  en: z.string().trim(),
-});
-
-/** The text in the Believer's language, Arabic when there is no English. */
-export const localized = (
-  text: { ar: string; en: string },
-  language: "ar" | "en"
-): string => (language === "en" && text.en ? text.en : text.ar);
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/u;
 const TIME_OF_DAY = /^(?:[01]\d|2[0-3]):[0-5]\d$/u;

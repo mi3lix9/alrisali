@@ -44,4 +44,12 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `announcement` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text DEFAULT '' NOT NULL,\n\t`body_ar` text DEFAULT '' NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`body_en` text DEFAULT '' NOT NULL,\n\t`audience` text DEFAULT 'all' NOT NULL,\n\t`status` text DEFAULT 'draft' NOT NULL,\n\t`scheduled_at` integer,\n\t`sent_at` integer,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015205830_lessons",
+    statements: [
+      "CREATE TABLE `lesson_slides` (\n\t`id` text PRIMARY KEY,\n\t`lesson_id` text NOT NULL,\n\t`position` integer NOT NULL,\n\t`image_key` text NOT NULL,\n\t`caption_ar` text DEFAULT '' NOT NULL,\n\t`caption_en` text DEFAULT '' NOT NULL\n);",
+      "CREATE TABLE `lessons` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`description_ar` text DEFAULT '' NOT NULL,\n\t`description_en` text DEFAULT '' NOT NULL,\n\t`category` text NOT NULL,\n\t`published` integer DEFAULT false NOT NULL,\n\t`position` integer NOT NULL\n);",
+      "CREATE INDEX `lesson_slides_lesson_idx` ON `lesson_slides` (`lesson_id`);",
+    ],
+  },
 ];

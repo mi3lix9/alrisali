@@ -5,6 +5,7 @@ import { contactRouter } from "@/features/contact";
 import { dailyContentRouter } from "@/features/daily-content";
 import { gatheringsRouter } from "@/features/gatherings";
 import { hijriAdjustmentRouter } from "@/features/hijri-adjustment";
+import { lessonsRouter } from "@/features/lessons";
 import { occasionsRouter } from "@/features/occasions";
 import { programsRouter } from "@/features/programs";
 import { quranRouter } from "@/features/quran";
@@ -24,6 +25,7 @@ export const appRouter = os.router({
   dailyContent: dailyContentRouter,
   gatherings: gatheringsRouter,
   hijriAdjustment: hijriAdjustmentRouter,
+  lessons: lessonsRouter,
   occasions: occasionsRouter,
   programs: programsRouter,
   quran: quranRouter,
