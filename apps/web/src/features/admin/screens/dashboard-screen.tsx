@@ -9,6 +9,11 @@ const SECTIONS = [
     description:
       "Shift every Believer's Hijri Date to match the official moon sighting.",
   },
+  {
+    to: "/admin/daily-content",
+    title: "Daily Content",
+    description: "Choose the Supplication Home features on each weekday.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

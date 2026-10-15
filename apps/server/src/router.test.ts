@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import type { Auth } from "@alrisali/auth";
+import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import {
   ContentReplicaReadOnlyError,
   createGlobalSettingsRepository,
@@ -17,8 +18,14 @@ import { migrateDb } from "@alrisali/db-server/migrate";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
 import { startSyncServer, temporaryDirectory } from "@alrisali/db-user/testing";
 import type { SyncServer, TemporaryDirectory } from "@alrisali/db-user/testing";
+import {
+  supplicationIdSchema,
+  todaysDailyContent,
+  WEEKDAYS,
+} from "@alrisali/domain/daily-content";
 import { call, isProcedure } from "@orpc/server";
 import type { AnyProcedure } from "@orpc/server";
+import { Temporal } from "temporal-polyfill";
 import {
   afterAll,
   afterEach,
@@ -51,6 +58,11 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "dailyContent.list": { access: "admin" },
+  "dailyContent.set": {
+    access: "admin",
+    input: { weekday: "friday", supplicationId: "sahifa-weekday-friday" },
+  },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
   "quran.reciters": { access: "anonymous" },
@@ -533,6 +545,111 @@ describe("content replica", () => {
     await expect(
       callAs(admin, "hijriAdjustment.set", { adjustment: 3 })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
+
+const feature = (admin: Headers, weekday: string, supplicationId: unknown) =>
+  callAs(admin, "dailyContent.set", { weekday, supplicationId });
+
+describe("Daily Content", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("lists every weekday, empty until Admins choose", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
+      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+    });
+  });
+
+  it("features the chosen Supplication on its weekday, replacing the last choice", async () => {
+    const admin = await signInAsAdmin();
+
+    await feature(admin, "thursday", "sahifa-1");
+    const after = (await feature(admin, "thursday", "mafatih-dua-kumayl")) as {
+      days: { weekday: string; supplicationId: string | null }[];
+    };
+
+    expect(after.days.find((day) => day.weekday === "thursday")).toStrictEqual({
+      weekday: "thursday",
+      supplicationId: "mafatih-dua-kumayl",
+    });
+    expect(
+      after.days.filter((day) => day.supplicationId !== null)
+    ).toHaveLength(1);
+  });
+
+  it("clears a weekday", async () => {
+    const admin = await signInAsAdmin();
+    await feature(admin, "friday", "sahifa-weekday-friday");
+
+    await feature(admin, "friday", null);
+
+    await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
+      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+    });
+  });
+
+  it("refuses an id no Book holds, such as the old app's routes", async () => {
+    const admin = await signInAsAdmin();
+
+    await Promise.all(
+      [
+        "sahifa-999",
+        "/mafatih/daily-supplications/sunday-supplication",
+        "",
+      ].map((supplicationId) =>
+        expect(feature(admin, "sunday", supplicationId)).rejects.toMatchObject({
+          code: "BAD_REQUEST",
+        })
+      )
+    );
+    await expect(feature(admin, "someday", "sahifa-1")).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+    });
+  });
+
+  it("reaches a device on its next sync and stays there offline", async () => {
+    const admin = await signInAsAdmin();
+    await feature(admin, "thursday", "mafatih-dua-kumayl");
+    let online = false;
+    const { replica } = await openDeviceReplica(device, () => online);
+    const today = Temporal.PlainDate.from("2026-10-15");
+
+    // Never pulled: nothing to feature yet.
+    await expect(
+      createDailyContentRepository(replica.db).all()
+    ).resolves.toStrictEqual([]);
+    online = true;
+    await replica.sync();
+    await replica.close();
+    online = false;
+    const { replica: offline } = await openDeviceReplica(device, () => online);
+
+    const entries = await createDailyContentRepository(offline.db).all();
+    expect(todaysDailyContent(entries, today)).toMatchObject({
+      id: "mafatih-dua-kumayl",
+      bookId: "mafatih",
+    });
+    // Every reference a device pulls resolves to a bundled Supplication.
+    for (const { supplicationId } of entries) {
+      expect(
+        supplicationIdSchema.safeParse(supplicationId).success
+      ).toBeTruthy();
+    }
+    await offline.close();
   });
 });
 
