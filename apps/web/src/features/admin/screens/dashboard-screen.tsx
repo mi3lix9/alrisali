@@ -9,6 +9,12 @@ const SECTIONS = [
     description:
       "Shift every Believer's Hijri Date to match the official moon sighting.",
   },
+  {
+    to: "/admin/occasions",
+    title: "Occasions",
+    description:
+      "Add, edit and delete the Occasions shown beside the built-in ones.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

@@ -8,5 +8,5 @@
 
 **Status:** ready-for-agent
 
-- [ ] Admin CRUD with validation
-- [ ] New Occasion appears on devices after sync
+- [x] Admin CRUD with validation
+- [x] New Occasion appears on devices after sync (router test over the local sync server; on-device rendering pending simulator verification)

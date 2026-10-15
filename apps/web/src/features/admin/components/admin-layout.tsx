@@ -29,6 +29,13 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => (
           >
             Hijri Adjustment
           </Link>
+          <Link
+            to="/admin/occasions"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Occasions
+          </Link>
         </nav>
         <UserMenu />
       </div>

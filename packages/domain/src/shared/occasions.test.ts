@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  allOccasions,
   BUILT_IN_OCCASIONS,
+  occasionDetailsSchema,
   occasionSchema,
   occasionsInMonth,
   occasionsOn,
@@ -62,5 +64,49 @@ describe("Occasions", () => {
     expect(new Set(ids(BUILT_IN_OCCASIONS)).size).toBe(
       BUILT_IN_OCCASIONS.length
     );
+  });
+
+  it("shows the Admins' Occasions after the built-in ones of their day", () => {
+    const published: Occasion = {
+      id: "0b7d6c2e-admin",
+      month: 1,
+      day: 10,
+      type: "religious",
+      name: { ar: "مجلس عاشوراء", en: "Ashura gathering night" },
+    };
+    const occasions = allOccasions([published]);
+
+    expect(occasions).toHaveLength(BUILT_IN_OCCASIONS.length + 1);
+    expect(
+      ids(occasionsOn({ year: 1448, month: 1, day: 10 }, 30, occasions))
+    ).toStrictEqual(["ashura", "0b7d6c2e-admin"]);
+    expect(allOccasions([])).toStrictEqual(BUILT_IN_OCCASIONS);
+  });
+
+  it("accepts an Admin's Occasion only with a real Hijri day, a type and both names", () => {
+    const valid = {
+      month: 7,
+      day: 13,
+      type: "celebration",
+      name: { ar: " مولد الإمام علي (ع) ", en: "Birth of Imam Ali (a.s)" },
+    };
+
+    expect(occasionDetailsSchema.parse(valid)).toStrictEqual({
+      ...valid,
+      name: { ar: "مولد الإمام علي (ع)", en: "Birth of Imam Ali (a.s)" },
+    });
+    for (const invalid of [
+      { ...valid, month: 13 },
+      { ...valid, month: 0 },
+      { ...valid, day: 31 },
+      { ...valid, day: 0 },
+      { ...valid, day: 1.5 },
+      { ...valid, type: "lecture" },
+      { ...valid, name: { ar: "  ", en: "Birth" } },
+      { ...valid, name: { ar: "مولد", en: "" } },
+      { ...valid, name: { ar: "مولد", en: "x".repeat(121) } },
+    ]) {
+      expect(occasionDetailsSchema.safeParse(invalid).success).toBeFalsy();
+    }
   });
 });
