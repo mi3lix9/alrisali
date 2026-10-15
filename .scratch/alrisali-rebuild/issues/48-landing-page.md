@@ -6,7 +6,8 @@
 
 **Blocked by:** 00 (Feature folder structure and enforced boundaries)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Both languages with correct direction
-- [ ] Links to stores and Contact form
+- [x] Both languages with correct direction (Arabic at `/`, `/privacy`, `/terms`, `/contact` with `lang="ar" dir="rtl"`; English under `/en` with `lang="en" dir="ltr"`; verified on SSR output)
+- [x] Links to stores and Contact form (store URLs from `VITE_APP_STORE_URL` / `VITE_PLAY_STORE_URL`; the Contact page route is linked from the header, footer and landing — the form itself arrives in ticket 20)
+  - Live App Store listing pending env: VITE_APP_STORE_URL (schema default is a placeholder id until the listing exists)
