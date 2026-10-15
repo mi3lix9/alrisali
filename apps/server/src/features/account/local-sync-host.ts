@@ -9,6 +9,16 @@ export interface LocalSyncHostOptions {
 const base64url = (value: unknown): string =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
 
+interface PipelineResponse {
+  results: (
+    | {
+        type: "ok";
+        response: { result: { rows: { value?: string | number }[][] } };
+      }
+    | { type: "error"; error: { message: string } }
+  )[];
+}
+
 /**
  * Believers' databases on a local `tursodb --sync-server` (development and
  * tests). That server checks no tokens, so the token here is an unsigned
@@ -16,16 +26,25 @@ const base64url = (value: unknown): string =>
  */
 export const createLocalSyncHost = ({
   baseUrl,
-}: LocalSyncHostOptions): UserDatabaseHost => ({
-  ensure: async (name) => {
-    const url = `${baseUrl.replace(/\/+$/u, "")}/db/${name}`;
-    // The server creates a database on its first request; an existing one
-    // just answers.
-    const response = await fetch(`${url}/v2/pipeline`, {
+}: LocalSyncHostOptions): UserDatabaseHost => {
+  const databasesUrl = `${baseUrl.replace(/\/+$/u, "")}/db`;
+
+  /**
+   * Runs statements in order on the server itself. The server creates a
+   * database on its first request; an existing one just answers.
+   */
+  const pipeline = async (
+    name: string,
+    statements: string[]
+  ): Promise<unknown[][][]> => {
+    const response = await fetch(`${databasesUrl}/${name}/v2/pipeline`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        requests: [{ type: "execute", stmt: { sql: "SELECT 1" } }],
+        requests: statements.map((sql) => ({
+          type: "execute",
+          stmt: { sql },
+        })),
       }),
     });
     if (!response.ok) {
@@ -33,15 +52,45 @@ export const createLocalSyncHost = ({
         `Local sync server refused ${name}: ${response.status} ${await response.text()}`
       );
     }
-    return { url };
-  },
-  mintToken: (name) => {
-    const expiresAt = Date.now() + TOKEN_LIFETIME_MS;
-    const token = [
-      base64url({ alg: "none", typ: "JWT" }),
-      base64url({ db: name, exp: Math.floor(expiresAt / 1000) }),
-      "",
-    ].join(".");
-    return Promise.resolve({ token, expiresAt });
-  },
-});
+    const { results } = (await response.json()) as PipelineResponse;
+    return results.map((result) => {
+      if (result.type !== "ok") {
+        throw new Error(
+          `Local sync server failed on ${name}: ${result.error.message}`
+        );
+      }
+      return result.response.result.rows.map((row) =>
+        row.map((cell) => cell.value)
+      );
+    });
+  };
+
+  return {
+    ensure: async (name) => {
+      await pipeline(name, ["SELECT 1"]);
+      return { url: `${databasesUrl}/${name}` };
+    },
+    mintToken: (name) => {
+      const expiresAt = Date.now() + TOKEN_LIFETIME_MS;
+      const token = [
+        base64url({ alg: "none", typ: "JWT" }),
+        base64url({ db: name, exp: Math.floor(expiresAt / 1000) }),
+        "",
+      ].join(".");
+      return Promise.resolve({ token, expiresAt });
+    },
+    // The local server cannot delete a database, so destroying one drops
+    // every table in it: nothing the Believer recorded is left to pull.
+    destroy: async (name) => {
+      const [tables = []] = await pipeline(name, [
+        "SELECT name FROM sqlite_schema WHERE type = 'table' AND name NOT LIKE 'sqlite\\_%' ESCAPE '\\'",
+      ]);
+      if (tables.length > 0) {
+        await pipeline(
+          name,
+          tables.map(([table]) => `DROP TABLE "${String(table)}"`)
+        );
+      }
+    },
+  };
+};

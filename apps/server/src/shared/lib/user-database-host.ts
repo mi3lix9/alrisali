@@ -10,6 +10,11 @@ export interface UserDatabaseHost {
   ensure: (name: string) => Promise<{ url: string }>;
   /** A short-lived token that opens this one database and no other. */
   mintToken: (name: string) => Promise<{ token: string; expiresAt: number }>;
+  /**
+   * Destroys the database and everything in it (account deletion). Calling
+   * it for a database that is already gone is harmless.
+   */
+  destroy: (name: string) => Promise<void>;
 }
 
 /** How long a minted database token lives. */

@@ -39,6 +39,7 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "account.privateData": { access: "believer" },
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
+  "account.deleteAccount": { access: "believer" },
 };
 
 const proceduresOf = (
@@ -304,6 +305,127 @@ describe("Believer cloud databases on the local sync server", () => {
   });
 });
 
+/** How many server rows of each table belong to a Believer. */
+const rowCountsOf = async (userId: string) => {
+  const rows = {
+    user: await db.query.user.findMany({ where: { id: userId } }),
+    session: await db.query.session.findMany({ where: { userId } }),
+    account: await db.query.account.findMany({ where: { userId } }),
+    believerDatabase: await db.query.believerDatabase.findMany({
+      where: { userId },
+    }),
+  };
+  return Object.fromEntries(
+    Object.entries(rows).map(([table, found]) => [table, found.length])
+  );
+};
+
+const NO_ROWS = { user: 0, session: 0, account: 0, believerDatabase: 0 };
+const ONE_ROW_EACH = { user: 1, session: 1, account: 1, believerDatabase: 1 };
+
+/** The name of the Believer's cloud database, created if need be. */
+const databaseOf = async (headers: Headers): Promise<string> => {
+  const { url } = await ensure(headers);
+  return nameIn(url);
+};
+
+const userIdOf = async (headers: Headers): Promise<string> => {
+  const { user: signedIn } = (await callAs(headers, "account.privateData")) as {
+    user: { id: string };
+  };
+  return signedIn.id;
+};
+
+const tablesIn = (name: string) =>
+  syncServer.query(
+    name,
+    "SELECT name FROM sqlite_schema WHERE type = 'table' ORDER BY name"
+  );
+
+/** What a device would have pushed: settings in the Believer's database. */
+const recordInCloud = async (name: string) => {
+  await syncServer.query(
+    name,
+    "CREATE TABLE believer_settings (id TEXT PRIMARY KEY, location_name TEXT)"
+  );
+  await syncServer.query(
+    name,
+    "INSERT INTO believer_settings VALUES ('believer', 'Najaf')"
+  );
+};
+
+describe("account deletion on the local sync server", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(() => setUp());
+
+  afterAll(stopLocalCloud);
+
+  it("removes the Believer's cloud database and auth rows, and no one else's", async () => {
+    const zainab = await signIn("google", idToken(googleBeliever));
+    const hasan = await signIn("google", idToken(otherBeliever));
+    const zainabId = await userIdOf(zainab);
+    const hasanId = await userIdOf(hasan);
+    const zainabDatabase = await databaseOf(zainab);
+    const hasanDatabase = await databaseOf(hasan);
+    await recordInCloud(zainabDatabase);
+    await recordInCloud(hasanDatabase);
+
+    await expect(
+      callAs(zainab, "account.deleteAccount")
+    ).resolves.toStrictEqual({ deleted: true });
+
+    await expect(tablesIn(zainabDatabase)).resolves.toStrictEqual([]);
+    await expect(rowCountsOf(zainabId)).resolves.toStrictEqual(NO_ROWS);
+    await expect(tablesIn(hasanDatabase)).resolves.toStrictEqual([
+      ["believer_settings"],
+    ]);
+    await expect(rowCountsOf(hasanId)).resolves.toStrictEqual(ONE_ROW_EACH);
+  });
+
+  it("ends the session it was called with", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+
+    await callAs(headers, "account.deleteAccount");
+
+    await expect(callAs(headers, "account.privateData")).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+  });
+
+  it("starts a new, empty account and database when the Believer signs in again", async () => {
+    const before = await signIn("google", idToken(googleBeliever));
+    const beforeId = await userIdOf(before);
+    const oldDatabase = await databaseOf(before);
+    await recordInCloud(oldDatabase);
+    await callAs(before, "account.deleteAccount");
+
+    const again = await signIn("google", idToken(googleBeliever));
+    const newDatabase = await databaseOf(again);
+
+    await expect(userIdOf(again)).resolves.not.toBe(beforeId);
+    expect(newDatabase).not.toBe(oldDatabase);
+    await expect(tablesIn(newDatabase)).resolves.toStrictEqual([]);
+  });
+
+  it("keeps the account when the cloud database cannot be destroyed", async () => {
+    const host = createLocalSyncHost({ baseUrl: syncServer.baseUrl });
+    await setUp({
+      ...host,
+      destroy: () => Promise.reject(new Error("Turso is down")),
+    });
+    const headers = await signIn("google", idToken(googleBeliever));
+    const userId = await userIdOf(headers);
+    await ensure(headers);
+
+    await expect(callAs(headers, "account.deleteAccount")).rejects.toThrow(
+      "Turso is down"
+    );
+
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(ONE_ROW_EACH);
+    await expect(callAs(headers, "account.privateData")).resolves.toBeDefined();
+  });
+});
+
 /**
  * A stand-in for Turso's Platform API: databases by name, 409 on a second
  * create, and a token per database that records which one it opens.
@@ -356,6 +478,11 @@ const fakePlatformApi = async () => {
     if (request.method === "POST" && tokens) {
       tokenRequests.push({ database: name, query: url.search });
       send(200, { jwt: `jwt-for-${name}` });
+      return;
+    }
+    if (request.method === "DELETE") {
+      databases.delete(name);
+      send(200, { database: name });
       return;
     }
     send(200, { database: { DbId: name, Hostname: hostname, Name: name } });
@@ -428,5 +555,24 @@ describe("Believer cloud databases on Turso Cloud (Platform API)", () => {
         query: "?expiration=60m&authorization=full-access",
       },
     ]);
+  });
+
+  it("destroys the Believer's database on Turso when they delete their account", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+    await callAs(headers, "account.ensureUserDatabase");
+
+    await callAs(headers, "account.deleteAccount");
+
+    expect(platform.databases.size).toBe(0);
+  });
+
+  it("deletes an account whose database is already gone", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+    const userId = await userIdOf(headers);
+
+    await expect(
+      callAs(headers, "account.deleteAccount")
+    ).resolves.toStrictEqual({ deleted: true });
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
   });
 });
