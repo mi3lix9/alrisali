@@ -36,3 +36,4 @@ bunx e2e run tests/native/prayer-log.e2e.ts --target ios   # one file
 
 - `tests/web/landing.e2e.ts`: the Arabic landing page, its store links, the switch to English.
 - `tests/native/prayer-log.e2e.ts`: onboarding as a Guest, logging today's five Salah on Home, the Prayer Streak reaching one day.
+- `tests/native/insights.e2e.ts`: a new Guest opening Insights from Home and seeing an empty week.

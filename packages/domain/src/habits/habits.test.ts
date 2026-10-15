@@ -1,9 +1,14 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
-import { habitScheduleSchema, isHabitDueOn } from "../shared";
+import {
+  habitScheduleSchema,
+  habitStreak,
+  isHabitDueOn,
+  readHabitSchedule,
+} from "../shared";
 import type { HabitSchedule } from "../shared";
-import { DEFAULT_HABITS, habitStreak, readHabitSchedule } from "./habits";
+import { DEFAULT_HABITS } from "./habits";
 
 // 2026-10-15 is a Thursday (ISO weekday 4).
 const THURSDAY = Temporal.PlainDate.from("2026-10-15");

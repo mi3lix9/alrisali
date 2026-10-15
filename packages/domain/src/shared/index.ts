@@ -7,9 +7,12 @@ export type { CalculationMethod } from "./calculation-method";
 export {
   habitScheduleSchema,
   isHabitDueOn,
+  readHabitSchedule,
   serialiseHabitSchedule,
 } from "./habit-schedule";
 export type { HabitReminderPlan, HabitSchedule } from "./habit-schedule";
+export { habitStreak, prayerStreak } from "./streaks";
+export type { HabitStreak } from "./streaks";
 export {
   addHijriMonths,
   createHijriCalendar,
