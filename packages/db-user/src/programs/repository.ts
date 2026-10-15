@@ -9,14 +9,15 @@ import type {
 import { asc, eq } from "drizzle-orm";
 
 import type { UserDb } from "../shared";
-import { programSubscriptions } from "./schema";
+import { personalPrograms, programSubscriptions } from "./schema";
 
 export interface SubscriptionsRepository {
   /** The Believer's Subscriptions, oldest first, paused ones included. */
   list: () => Promise<Subscription[]>;
   /**
    * Subscribes to a Program. Throws `SubscriptionRefusedError` (already
-   * subscribed, or the total, General or Seasonal limit reached).
+   * subscribed, a Personal Program this database does not hold, or the
+   * total, General or Seasonal limit reached).
    */
   subscribe: (program: {
     id: string;
@@ -62,7 +63,21 @@ export const createSubscriptionsRepository = (
   return {
     list,
     subscribe: async (program) => {
-      assertCanSubscribe(await list(), program);
+      if (program.kind === "personal") {
+        // Only the creator's own database holds a Personal Program.
+        const own = await db
+          .select({ id: personalPrograms.id })
+          .from(personalPrograms)
+          .where(eq(personalPrograms.id, program.id))
+          .get();
+        assertCanSubscribe(await list(), {
+          id: program.id,
+          kind: "personal",
+          ownedByBeliever: own !== undefined,
+        });
+      } else {
+        assertCanSubscribe(await list(), { ...program, kind: program.kind });
+      }
       const subscription = subscriptionSchema.parse({
         programId: program.id,
         programKind: program.kind,

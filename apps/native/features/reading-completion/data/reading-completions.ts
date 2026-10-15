@@ -2,6 +2,7 @@ import { createReadingCompletionsRepository } from "@alrisali/db-user/reading-co
 import type { ReadingCompletion } from "@alrisali/domain/reading-completion";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
+import { events } from "@/shared/lib/events";
 import { queryClient } from "@/shared/lib/orpc";
 import {
   getUserDatabase,
@@ -37,7 +38,13 @@ export const useSetRead = () =>
         ? completions.markRead(completion)
         : completions.unmarkRead(completion));
     },
-    onSuccess: async () => {
+    onSuccess: async (_result, { completion, read }) => {
+      if (read) {
+        events.emit("ReadingCompleted", {
+          ...completion,
+          completedAt: Date.now(),
+        });
+      }
       await queryClient.invalidateQueries({
         queryKey: COMPLETIONS_QUERY_KEY,
       });

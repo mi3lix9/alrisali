@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { UsageAnalytics } from "@/features/analytics";
 import { PushDeviceRegistration } from "@/features/announcements";
+import { CompanionAwards } from "@/features/companion";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
@@ -62,6 +63,7 @@ const Layout = () => (
       {(habits) => <ReminderScheduler habits={habits} />}
     </HabitReminderPlans>
     <UsageAnalytics />
+    <CompanionAwards />
     <PushDeviceRegistration />
     <CompletedSalahLogger />
     <RootStack />

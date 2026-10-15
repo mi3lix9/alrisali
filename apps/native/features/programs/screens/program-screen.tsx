@@ -5,11 +5,12 @@ import { Stack, useLocalSearchParams } from "expo-router";
 import { Badge, Card, Spinner, Text } from "panelui-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { launchLanguage } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
+import { ActRow } from "../components/act-row";
 import { ActSheet } from "../components/act-sheet";
 import { SubscriptionActions } from "../components/subscription-actions";
 import { useOfficialProgram } from "../data/official-programs";
@@ -17,39 +18,6 @@ import { useMarkProgramSeen } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
 import { useDescribe } from "../hooks/use-describe";
 import { useHijriToday } from "../hooks/use-hijri-today";
-
-const ActRow = ({ act, onOpen }: { act: Act; onOpen: () => void }) => {
-  const { t } = useTranslation("programs");
-  const describe = useDescribe();
-  const details = [
-    describe.timing(act),
-    describe.schedule(act),
-    act.detail.type === "prayer"
-      ? t("rakahs", { count: act.detail.rakahs })
-      : null,
-  ].filter((part) => part !== null);
-
-  return (
-    <Pressable
-      className="gap-1"
-      accessibilityRole="button"
-      accessibilityHint={t("day.openLabel", { act: act.name[launchLanguage] })}
-      onPress={onOpen}
-    >
-      <View className="flex-row flex-wrap items-center gap-2">
-        <Text weight="medium">{act.name[launchLanguage]}</Text>
-        {act.detail.type === "regular" ? null : (
-          <Badge size="sm" variant="info">
-            {t(`types.${act.detail.type}`)}
-          </Badge>
-        )}
-      </View>
-      <Text muted size="sm">
-        {details.join(" · ")}
-      </Text>
-    </Pressable>
-  );
-};
 
 /** One Official Program: what it is, its Acts, and the Subscription controls. */
 export const ProgramScreen = () => {
@@ -118,7 +86,10 @@ export const ProgramScreen = () => {
         {description ? <Text>{description}</Text> : null}
       </View>
 
-      <SubscriptionActions program={program} subscription={subscription} />
+      <SubscriptionActions
+        program={{ id: program.id, kind: program.category }}
+        subscription={subscription}
+      />
 
       <Card>
         <Card.Header>

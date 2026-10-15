@@ -7,8 +7,9 @@ import type { ar } from "./ar";
 export const en: Catalog<typeof ar> = {
   title: "Programs",
   link: {
-    title: "Official Programs",
-    description: "Worship plans from the Al-Risali team, general and seasonal.",
+    title: "Programs",
+    description:
+      "Worship plans from the Al-Risali team, general and seasonal, and Programs you build yourself.",
     subscribed_zero: "No Subscriptions yet",
     subscribed_one: "Subscribed to {{count}} Program",
     subscribed_two: "Subscribed to {{count}} Programs",
@@ -90,6 +91,8 @@ export const en: Catalog<typeof ar> = {
   refused: {
     title: "Can't subscribe",
     "already-subscribed": "You are already subscribed to this Program.",
+    "not-creator":
+      "Only the Believer who built a Personal Program can subscribe to it.",
     "maximum-programs":
       "You have reached the limit of {{limit}} Programs. Unsubscribe from another one first (paused Programs count too).",
     "maximum-general":
@@ -126,4 +129,76 @@ export const en: Catalog<typeof ar> = {
   rakahs_few: "{{count}} rak'ahs",
   rakahs_many: "{{count}} rak'ahs",
   rakahs_other: "{{count}} rak'ahs",
+  personal: {
+    title: "My Personal Programs",
+    description:
+      "Build your own Program from Acts you write or pick from the Official Programs.",
+    none: "You haven't built a Personal Program yet.",
+    build: "Build a Program",
+    badge: "Personal",
+    edit: "Edit Program",
+    delete: "Delete Program",
+    notFound: "This Program no longer exists.",
+    confirmDelete: {
+      title: "Delete this Program?",
+      message:
+        "The Program and its Acts will be deleted and your Subscription ended. Acts you completed stay in your record.",
+      confirm: "Delete",
+      cancel: "Cancel",
+    },
+  },
+  builder: {
+    newTitle: "New Program",
+    editTitle: "Edit Program",
+    name: "Program name",
+    namePlaceholder: "Friday nights",
+    invalidName: "Give the Program a name (up to 120 characters).",
+    description: "Description",
+    descriptionPlaceholder: "Optional description",
+    acts: "Acts",
+    noActs:
+      "Add an Act you write yourself, or pick Acts from the Official Programs.",
+    writeAct: "Write an Act",
+    addFromOfficial: "From Official Programs",
+    editAct: "Edit {{act}}",
+    removeAct: "Remove {{act}}",
+    moveUp: "Move {{act}} up",
+    moveDown: "Move {{act}} down",
+    create: "Create Program",
+    save: "Save changes",
+    failed: "The Program could not be saved. Please try again.",
+  },
+  actForm: {
+    newTitle: "New Act",
+    editTitle: "Edit Act",
+    name: "Act name",
+    namePlaceholder: "Read Surah al-Waqi'ah",
+    invalidName: "Give the Act a name (up to 120 characters).",
+    repeat: "Repeat",
+    kinds: {
+      daily: "Daily",
+      weekdays: "On chosen days",
+      once: "Once",
+    },
+    days: "Days",
+    invalidDays: "Choose at least one day.",
+    date: "Date",
+    timing: "When",
+    general: "Any time",
+    before: "Before a Salah",
+    after: "After a Salah",
+    salah: "Salah",
+    save: "Save Act",
+    cancel: "Cancel",
+  },
+  picker: {
+    title: "Acts from Official Programs",
+    description:
+      "They are copied into your Program with their duas and prayers; you can change when they're done afterwards.",
+    empty: "No Official Programs are available right now.",
+    add: "Add",
+    addLabel: "Add {{act}} to your Program",
+    added: "Added",
+    done: "Done",
+  },
 };

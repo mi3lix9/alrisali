@@ -5,7 +5,11 @@ import {
   SUBSCRIPTION_LIMITS,
   SubscriptionRefusedError,
 } from "./subscription";
-import type { SubscribedProgramKind, Subscription } from "./subscription";
+import type {
+  SubscribedProgramKind,
+  Subscription,
+  SubscriptionTarget,
+} from "./subscription";
 
 const held = (
   programId: string,
@@ -15,7 +19,7 @@ const held = (
 
 const refusalOf = (
   subscriptions: readonly Subscription[],
-  program: { id: string; kind: SubscribedProgramKind }
+  program: SubscriptionTarget
 ) => {
   try {
     assertCanSubscribe(subscriptions, program);
@@ -28,11 +32,25 @@ const refusalOf = (
   }
 };
 
+/** A Personal Program this Believer built. */
+const own = (id: string): SubscriptionTarget => ({
+  id,
+  kind: "personal",
+  ownedByBeliever: true,
+});
+
 describe("Subscription limits", () => {
   it("lets a Believer with nothing subscribe to any Program", () => {
-    for (const kind of ["general", "seasonal", "personal"] as const) {
+    for (const kind of ["general", "seasonal"] as const) {
       expect(refusalOf([], { id: "p", kind })).toBeNull();
     }
+    expect(refusalOf([], own("mine"))).toBeNull();
+  });
+
+  it("lets only its creator subscribe to a Personal Program", () => {
+    expect(
+      refusalOf([], { id: "theirs", kind: "personal", ownedByBeliever: false })
+    ).toStrictEqual({ reason: "not-creator", limit: null });
   });
 
   it("refuses a second Subscription to the same Program", () => {
@@ -81,13 +99,11 @@ describe("Subscription limits", () => {
     ];
     expect(five).toHaveLength(SUBSCRIPTION_LIMITS.total);
 
-    expect(refusalOf(five, { id: "mine-4", kind: "personal" })).toStrictEqual({
+    expect(refusalOf(five, own("mine-4"))).toStrictEqual({
       reason: "maximum-programs",
       limit: 5,
     });
-    expect(
-      refusalOf(five.slice(0, 4), { id: "mine-4", kind: "personal" })
-    ).toBeNull();
+    expect(refusalOf(five.slice(0, 4), own("mine-4"))).toBeNull();
   });
 
   it("counts paused Subscriptions, so resuming never breaks a limit", () => {

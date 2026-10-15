@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
 import { HijriTodayCard } from "@/features/calendar";
+import { CompanionCard } from "@/features/companion";
 import { DailyContentCard } from "@/features/daily-content";
 import { UpcomingGatheringsCard } from "@/features/gatherings";
 import { InsightsLinkCard } from "@/features/insights";
@@ -42,6 +43,7 @@ const HomeRoute = () => {
         <UpcomingGatheringsCard />
         <ContinueReadingCard />
         <PrayerLogQuickTicks />
+        <CompanionCard />
         <InsightsLinkCard />
         <DailyContentCard />
         <VerseOfTheDayCard />

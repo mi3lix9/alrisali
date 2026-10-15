@@ -38,6 +38,17 @@ export interface AppEvents {
    */
   LessonCompleted: { lessonId: string; completedAt: number };
   /**
+   * The Believer marked a Supplication read on `date` (ISO `YYYY-MM-DD`), a
+   * Reading Completion. `supplicationId` + `date` is stable, so a listener
+   * (Companion XP) can award once per Supplication per date; unmarking emits
+   * nothing.
+   */
+  ReadingCompleted: {
+    supplicationId: string;
+    date: string;
+    completedAt: number;
+  };
+  /**
    * The Believer completed an Act of one of their Programs, for today or a
    * past `date` (ISO `YYYY-MM-DD`). `programId` + `actId` + `date` is stable,
    * so a listener (Companion XP) can award once per Act per date; undoing
