@@ -79,4 +79,28 @@ export const en: Catalog<typeof ar> = {
     stopCancel: "Keep going",
     stopConfirm: "Stop",
   },
+  sound: {
+    checking: "Getting the microphone ready…",
+    sayOpening: "Say “Allahu Akbar” to begin the Salah.",
+    listening:
+      "Listening for your Takbir: each “Allahu Akbar” moves to the next Position.",
+    network:
+      "Arabic isn't available offline on this device, so your voice is sent over the internet to be recognised.",
+    unavailable: {
+      "no-recognizer":
+        "Arabic speech recognition isn't available on this device.",
+      "service-off":
+        "Speech recognition is turned off on this device. Turn on Dictation in Settings.",
+      denied:
+        "Microphone or speech recognition access isn't allowed. Allow both in Settings to hear your Takbir.",
+      restricted: "Speech recognition is restricted on this device.",
+      offline:
+        "Arabic recognition on this device needs the internet, and the device is offline.",
+      failing: "Listening kept stopping without hearing anything.",
+    },
+    fallback:
+      "Carry on by tap: tap the screen as you move to the next Position.",
+    retry: "Try again",
+    openSettings: "Open Settings",
+  },
 };

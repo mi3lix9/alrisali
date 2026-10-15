@@ -6,6 +6,7 @@ import type {
 import { useKeepAwake } from "expo-keep-awake";
 import { Button, Progress, Text } from "panelui-native";
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, Pressable, View } from "react-native";
 
@@ -41,13 +42,20 @@ interface PrayingViewProps {
   state: AssistantState;
   send: (sighting: Sighting) => void;
   onStop: () => void;
+  /** What the Recognition Mode's sensor is doing, above the Position. */
+  notice?: ReactNode;
 }
 
 /**
  * The Salah in progress: the Rak'ah and Position, read from a distance. A
  * tap anywhere moves to the next Position. The screen stays awake.
  */
-export const PrayingView = ({ state, send, onStop }: PrayingViewProps) => {
+export const PrayingView = ({
+  state,
+  send,
+  onStop,
+  notice,
+}: PrayingViewProps) => {
   useKeepAwake();
   const { t } = useTranslation("prayer-assistant");
   const step = currentStep(state);
@@ -71,6 +79,7 @@ export const PrayingView = ({ state, send, onStop }: PrayingViewProps) => {
         maxValue={state.steps.length}
         accessibilityLabel={rakah}
       />
+      {notice}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t("praying.tapToAdvance")}
