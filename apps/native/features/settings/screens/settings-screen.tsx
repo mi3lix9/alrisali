@@ -11,6 +11,9 @@ import {
 } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
+import { CalculationMethodCard } from "../components/calculation-method-card";
+import { LocationCard } from "../components/location-card";
+
 export const SettingsScreen = () => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
@@ -75,6 +78,8 @@ export const SettingsScreen = () => {
           </RadioGroup>
         </Card.Content>
       </Card>
+      <LocationCard />
+      <CalculationMethodCard />
     </Screen>
   );
 };
