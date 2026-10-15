@@ -114,6 +114,7 @@ export const QuranIndexSheet = ({
                     </Item.Title>
                     <Item.Description>
                       {t("navigation.surahMeta", {
+                        count: ayatOfSurah(surah.number).length,
                         ayat: format(ayatOfSurah(surah.number).length),
                         page: format(firstPageOfSurah(surah.number)),
                       })}
