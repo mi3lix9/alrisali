@@ -12,6 +12,7 @@ import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
 import {
+  apple,
   auth,
   content,
   db,
@@ -78,6 +79,7 @@ app.use("/*", async (c, next) => {
     recitation,
     files,
     push,
+    apple,
     headers: c.req.raw.headers,
     clientIp: clientIpOf(c.req.raw, c.env),
     // The auth secret doubles as the IP hash key: one secret less to manage.

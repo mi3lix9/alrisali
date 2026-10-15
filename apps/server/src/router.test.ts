@@ -56,6 +56,7 @@ import { z } from "zod";
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { runAnnouncementScheduler } from "@/features/announcements";
 import { servesLibraryFile } from "@/features/library-assets";
+import type { AppleGrant, AppleRevoker } from "@/shared/lib/apple-revoker";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
 import {
@@ -522,6 +523,12 @@ let auth: Auth;
 let userDatabases: UserDatabaseHost;
 let content: ContentDatabase;
 let files: FileBucket;
+// Stands in for Apple's revocation; records what it was asked to revoke.
+let appleRevocations: {
+  grant: AppleGrant;
+  authorizationCode: string | undefined;
+}[];
+let apple: AppleRevoker;
 
 // An in-process stand-in for the Railway files bucket, started by the tests
 // that upload. Presigning needs no bucket, so the rest point nowhere.
@@ -567,6 +574,13 @@ const setUp = async (host?: UserDatabaseHost) => {
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
   push = fakePush();
+  appleRevocations = [];
+  apple = {
+    revoke: (grant, authorizationCode) => {
+      appleRevocations.push({ grant, authorizationCode });
+      return Promise.resolve();
+    },
+  };
   // A fresh content database per test, so no test sees another's content.
   contentDatabases += 1;
   content = createContentDatabase({
@@ -624,6 +638,7 @@ const callAs = async (
     recitation,
     files,
     push,
+    apple,
     headers,
     clientIp,
     ipHashKey: TEST_ENV.BETTER_AUTH_SECRET,
@@ -2137,6 +2152,58 @@ describe("account deletion on the local sync server", () => {
     await expect(userIdOf(again)).resolves.not.toBe(beforeId);
     expect(newDatabase).not.toBe(oldDatabase);
     await expect(tablesIn(newDatabase)).resolves.toStrictEqual([]);
+  });
+
+  it("revokes Sign in with Apple with the fresh authorization code", async () => {
+    const appleToken = idToken({
+      sub: "apple-002",
+      aud: "com.alrisali.app",
+      email: "maryam@privaterelay.appleid.com",
+      email_verified: "true",
+    });
+    const headers = await signIn("apple", appleToken);
+    const userId = await userIdOf(headers);
+
+    await callAs(headers, "account.deleteAccount", {
+      appleAuthorizationCode: "fresh-code",
+    });
+
+    expect(appleRevocations).toStrictEqual([
+      {
+        grant: { idToken: appleToken, accessToken: null, refreshToken: null },
+        authorizationCode: "fresh-code",
+      },
+    ]);
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
+  });
+
+  it("does not ask Apple to revoke anything for a Google account", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+
+    await callAs(headers, "account.deleteAccount");
+
+    expect(appleRevocations).toStrictEqual([]);
+  });
+
+  it("keeps the account when Apple refuses the revocation", async () => {
+    const headers = await signIn(
+      "apple",
+      idToken({ sub: "apple-003", email: "ali@privaterelay.appleid.com" })
+    );
+    const userId = await userIdOf(headers);
+    await ensure(headers);
+    apple = {
+      revoke: () =>
+        Promise.reject(new Error("Apple /auth/revoke answered 400")),
+    };
+
+    await expect(
+      callAs(headers, "account.deleteAccount", {
+        appleAuthorizationCode: "expired-code",
+      })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(ONE_ROW_EACH);
   });
 
   it("keeps the account when the cloud database cannot be destroyed", async () => {

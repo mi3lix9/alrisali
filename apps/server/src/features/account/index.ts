@@ -9,6 +9,7 @@ export const accountRouter = {
   deleteAccount,
 };
 
+export { createAppleRevokerFromEnv } from "./apple-sign-in";
 export { createUserDatabaseHost } from "./host-from-env";
 export { createLocalSyncHost } from "./local-sync-host";
 export { createTursoHost } from "./turso-host";

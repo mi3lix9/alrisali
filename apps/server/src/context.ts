@@ -1,6 +1,7 @@
 import type { Auth, Session } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
+import type { AppleRevoker } from "./shared/lib/apple-revoker";
 import type { ContentDatabase } from "./shared/lib/content-database";
 import type { FileBucket } from "./shared/lib/file-bucket";
 import type { PushTransport } from "./shared/lib/push-transport";
@@ -31,6 +32,8 @@ export interface Context {
   ipHashKey: string;
   /** Where Announcements are sent: Expo Push. */
   push: PushTransport;
+  /** Revokes Sign in with Apple when a Believer deletes their account. */
+  apple: AppleRevoker;
 }
 
 export interface CreateContextOptions {
@@ -41,6 +44,7 @@ export interface CreateContextOptions {
   recitation: RecitationSource;
   files: FileBucket;
   push: PushTransport;
+  apple: AppleRevoker;
   headers: Headers;
   clientIp: string | null;
   ipHashKey: string;
@@ -55,6 +59,7 @@ export const createContext = async ({
   recitation,
   files,
   push,
+  apple,
   headers,
   clientIp,
   ipHashKey,
@@ -67,5 +72,6 @@ export const createContext = async ({
   client: { ip: clientIp, userAgent: headers.get("user-agent") },
   ipHashKey,
   push,
+  apple,
   session: await auth.api.getSession({ headers }),
 });
