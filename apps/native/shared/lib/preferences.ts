@@ -1,76 +1,69 @@
+import { createShellPreferencesRepository } from "@alrisali/db-user/shared";
 import {
-  DEFAULT_HIDDEN_TABS,
-  DEFAULT_TEXT_SIZE,
   readHiddenTabs,
-  setTabVisible,
   TEXT_SCALE,
   TEXT_SIZES,
+  THEME_PREFERENCES,
 } from "@alrisali/domain/shared";
-import type { Tab, TextSize } from "@alrisali/domain/shared";
-import { DEFAULT_LANGUAGE, LANGUAGES } from "@alrisali/i18n";
+import type { TextSize } from "@alrisali/domain/shared";
+import { LANGUAGES } from "@alrisali/i18n";
 import type { Language } from "@alrisali/i18n";
+import { captureException } from "@sentry/react-native";
 import * as SecureStore from "expo-secure-store";
 import { Uniwind } from "uniwind";
 import { z } from "zod";
 import { create } from "zustand";
 
 import { deviceEntry } from "./device-entries";
+import { events } from "./events";
+import { createPreferences } from "./preferences-store";
+import type { CachedPreferences, PreferencesCache } from "./preferences-store";
+import { getUserDatabase } from "./user-database";
 
-// Device preferences the shell needs before its first frame: the language
-// (and with it the layout direction), the theme, the text size and the
-// hidden tabs. They are read synchronously at startup, so they live in a
-// small key-value entry rather than in the Believer's database, which opens
-// asynchronously.
-//
-// The text size and hidden tabs are Believer settings that should follow the
-// Believer to a new phone: once the per-user database is in place they belong
-// in its settings, with this entry kept as the startup cache.
+// The shell preferences live in the Believer's database
+// (`shell_preferences`); this SecureStore entry is their startup cache, read
+// synchronously before the first frame. See preferences-store.ts.
 
 const STORAGE_KEY = deviceEntry("alrisali.preferences");
 
-export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
-
-export type ThemePreference = (typeof THEME_PREFERENCES)[number];
-
-interface Preferences {
-  language: Language;
-  theme: ThemePreference;
-  textSize: TextSize;
-  hiddenTabs: readonly Tab[];
-}
-
-const DEFAULTS: Preferences = {
-  language: DEFAULT_LANGUAGE,
-  theme: "system",
-  textSize: DEFAULT_TEXT_SIZE,
-  hiddenTabs: DEFAULT_HIDDEN_TABS,
+const NOTHING_CACHED: CachedPreferences = {
+  language: null,
+  theme: null,
+  textSize: null,
+  hiddenTabs: null,
 };
 
-const storedSchema = z
+const cachedSchema = z
   .object({
-    language: z.enum(LANGUAGES),
-    theme: z.enum(THEME_PREFERENCES),
-    textSize: z.enum(TEXT_SIZES),
+    language: z.enum(LANGUAGES).nullable(),
+    theme: z.enum(THEME_PREFERENCES).nullable(),
+    textSize: z.enum(TEXT_SIZES).nullable(),
     hiddenTabs: z.unknown(),
   })
   .partial();
 
-const readStored = (): Preferences => {
-  const raw = SecureStore.getItem(STORAGE_KEY);
-  if (!raw) {
-    return DEFAULTS;
-  }
-  try {
-    const { data } = storedSchema.safeParse(JSON.parse(raw));
-    return {
-      language: data?.language ?? DEFAULTS.language,
-      theme: data?.theme ?? DEFAULTS.theme,
-      textSize: data?.textSize ?? DEFAULTS.textSize,
-      hiddenTabs: readHiddenTabs(data?.hiddenTabs),
-    };
-  } catch {
-    return DEFAULTS;
-  }
+const secureStoreCache: PreferencesCache = {
+  read: () => {
+    const raw = SecureStore.getItem(STORAGE_KEY);
+    if (!raw) {
+      return NOTHING_CACHED;
+    }
+    try {
+      const { data } = cachedSchema.safeParse(JSON.parse(raw));
+      return {
+        language: data?.language ?? null,
+        theme: data?.theme ?? null,
+        textSize: data?.textSize ?? null,
+        hiddenTabs: Array.isArray(data?.hiddenTabs)
+          ? readHiddenTabs(data.hiddenTabs)
+          : null,
+      };
+    } catch {
+      return NOTHING_CACHED;
+    }
+  },
+  write: (preferences) =>
+    SecureStore.setItem(STORAGE_KEY, JSON.stringify(preferences)),
 };
 
 // Tailwind's type scale in points. Panel UI and the app size text with these
@@ -102,47 +95,29 @@ const applyTextSize = (textSize: TextSize) => {
   }
 };
 
-const stored = readStored();
+export const usePreferences = create(
+  createPreferences({
+    cache: secureStoreCache,
+    repository: async () => {
+      const { db } = await getUserDatabase();
+      return createShellPreferencesRepository(db);
+    },
+    applyTheme: (theme) => Uniwind.setTheme(theme),
+    applyTextSize,
+    onError: captureException,
+  })
+);
 
 /**
- * The language this launch runs in. A language change is stored at once but
- * applies on the next launch, when the whole shell (native tab bar included)
- * is laid out again in the new direction.
+ * The language this launch runs in. A language change (by the Believer, or
+ * from their database) is stored at once but applies on the next launch,
+ * when the whole shell (native tab bar included) is laid out again in the
+ * new direction.
  */
-export const launchLanguage: Language = stored.language;
+export const launchLanguage: Language = usePreferences.getState().language;
 
-Uniwind.setTheme(stored.theme);
-applyTextSize(stored.textSize);
-
-interface PreferencesState extends Preferences {
-  setLanguage: (language: Language) => void;
-  setTheme: (theme: ThemePreference) => void;
-  setTextSize: (textSize: TextSize) => void;
-  setTabVisible: (tab: Tab, visible: boolean) => void;
-}
-
-export const usePreferences = create<PreferencesState>()((set, get) => {
-  const persist = (patch: Partial<Preferences>) => {
-    const { language, theme, textSize, hiddenTabs } = { ...get(), ...patch };
-    SecureStore.setItem(
-      STORAGE_KEY,
-      JSON.stringify({ language, theme, textSize, hiddenTabs })
-    );
-    set(patch);
-  };
-
-  return {
-    ...stored,
-    setLanguage: (language) => persist({ language }),
-    setTheme: (theme) => {
-      Uniwind.setTheme(theme);
-      persist({ theme });
-    },
-    setTextSize: (textSize) => {
-      applyTextSize(textSize);
-      persist({ textSize });
-    },
-    setTabVisible: (tab, visible) =>
-      persist({ hiddenTabs: setTabVisible(get().hiddenTabs, tab, visible) }),
-  };
+// Hydrates when the database opens at launch, after every sync, and after
+// sign-in or sign-out swap it.
+events.on("UserDatabaseChanged", () => {
+  void usePreferences.getState().hydrate();
 });

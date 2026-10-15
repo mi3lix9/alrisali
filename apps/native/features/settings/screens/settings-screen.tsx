@@ -1,15 +1,12 @@
 import "../i18n";
+import { THEME_PREFERENCES } from "@alrisali/domain/shared";
 import { LANGUAGES } from "@alrisali/i18n";
 import { reloadAppAsync } from "expo";
 import { Button, Card, RadioGroup } from "panelui-native";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
-import {
-  launchLanguage,
-  THEME_PREFERENCES,
-  usePreferences,
-} from "@/shared/lib/preferences";
+import { launchLanguage, usePreferences } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
 import { AboutCard } from "../components/about-card";
