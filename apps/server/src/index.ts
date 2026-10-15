@@ -18,7 +18,6 @@ import {
   db,
   files,
   push,
-  recitation,
   userDatabases,
   signInOptions,
 } from "./services";
@@ -77,7 +76,6 @@ app.use("/*", async (c, next) => {
     db,
     userDatabases,
     content,
-    recitation,
     files,
     push,
     apple,

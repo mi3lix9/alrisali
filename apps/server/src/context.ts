@@ -5,7 +5,6 @@ import type { AppleRevoker } from "./shared/lib/apple-revoker";
 import type { ContentDatabase } from "./shared/lib/content-database";
 import type { FileBucket } from "./shared/lib/file-bucket";
 import type { PushTransport } from "./shared/lib/push-transport";
-import type { RecitationSource } from "./shared/lib/recitation-source";
 import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
 /** Who sent the request, as far as the server can tell. */
@@ -23,8 +22,6 @@ export interface Context {
   userDatabases: UserDatabaseHost;
   /** The shared content database Admins publish to. */
   content: ContentDatabase;
-  /** Recitation from the Quran Foundation audio API. */
-  recitation: RecitationSource;
   /** The bucket Admins upload files to. */
   files: FileBucket;
   client: RequestClient;
@@ -43,7 +40,6 @@ export interface CreateContextOptions {
   db: Database;
   userDatabases: UserDatabaseHost;
   content: ContentDatabase;
-  recitation: RecitationSource;
   files: FileBucket;
   push: PushTransport;
   apple: AppleRevoker;
@@ -59,7 +55,6 @@ export const createContext = async ({
   db,
   userDatabases,
   content,
-  recitation,
   files,
   push,
   apple,
@@ -71,7 +66,6 @@ export const createContext = async ({
   db,
   userDatabases,
   content,
-  recitation,
   files,
   client: { ip: clientIp, userAgent: headers.get("user-agent") },
   ipHashKey,

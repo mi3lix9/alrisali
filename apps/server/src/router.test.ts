@@ -72,7 +72,6 @@ import type {
   PushTicket,
   PushTransport,
 } from "@/shared/lib/push-transport";
-import type { RecitationSource } from "@/shared/lib/recitation-source";
 import { mountFiles } from "@/shared/lib/uploads";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
@@ -404,11 +403,6 @@ const ACCESS: Record<
   "programs.save": { access: "admin", input: dailyNawafil },
   "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
   "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
-  "quran.reciters": { access: "anonymous" },
-  "quran.surahAudio": {
-    access: "anonymous",
-    input: { reciterId: 7, surah: 1 },
-  },
 };
 
 const proceduresOf = (
@@ -448,25 +442,6 @@ const TEST_ENV = {
   CORS_ORIGIN: "http://localhost:3001",
   GOOGLE_CLIENT_IDS: "web-client.apps.googleusercontent.com",
   APPLE_BUNDLE_IDS: "com.alrisali.app",
-};
-
-// Stand-in for the Quran Foundation audio API.
-const recitation: RecitationSource = {
-  reciters: () =>
-    Promise.resolve([
-      {
-        id: 7,
-        name: { ar: "مشاري العفاسي", en: "Mishary Alafasy" },
-        style: null,
-      },
-    ]),
-  surahAudio: (reciterId, surah) =>
-    Promise.resolve([
-      {
-        ayah: `${surah}:1`,
-        url: `https://verses.quran.foundation/${reciterId}/001001.mp3`,
-      },
-    ]),
 };
 
 const pathsFor = (...access: Access[]): string[] =>
@@ -638,7 +613,6 @@ const callAs = async (
     db,
     userDatabases,
     content,
-    recitation,
     files,
     push,
     apple,

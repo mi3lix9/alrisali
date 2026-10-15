@@ -11,7 +11,6 @@ import { lessonsContract } from "./lessons";
 import { libraryAssetsContract } from "./library-assets";
 import { occasionsContract } from "./occasions";
 import { programsContract } from "./programs";
-import { quranContract } from "./quran";
 import { sharedContract } from "./shared";
 
 // The whole oRPC API: each feature's contract under its own key. The server
@@ -29,7 +28,6 @@ export const contract = {
   libraryAssets: libraryAssetsContract,
   occasions: occasionsContract,
   programs: programsContract,
-  quran: quranContract,
 };
 
 export type AppRouterClient = ContractRouterClient<typeof contract>;
