@@ -6,7 +6,7 @@
 
 **Blocked by:** 05 (Prayer Log and Prayer Streak)
 
-**Status:** ready-for-agent
+**Status:** done — pending env: GitHub Actions billing (e2e.yml first run)
 
 - [ ] Journey passes locally and in CI (macOS runner) — passes locally (web + iOS simulator iPhone 17, 2026-10-15); CI job `.github/workflows/e2e.yml` (macos-26) pending first GitHub Actions run
 - [x] Pattern documented for later journeys (packages/e2e/README.md)
