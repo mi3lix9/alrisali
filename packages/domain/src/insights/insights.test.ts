@@ -1,13 +1,13 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
-import { HEATMAP_DAYS, insights, loggedKhushu } from "./insights";
 import type {
   DhikrSessionSource,
   InsightsHabit,
   InsightsSources,
   KhushuRating,
-} from "./insights";
+} from "../shared";
+import { HEATMAP_DAYS, insights, loggedKhushu } from "./insights";
 
 const date = (iso: string) => Temporal.PlainDate.from(iso);
 
