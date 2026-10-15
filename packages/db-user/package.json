@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@alrisali/domain": "workspace:*",
+    "@alrisali/i18n": "workspace:*",
     "drizzle-orm": "catalog:",
     "temporal-polyfill": "catalog:",
     "zod": "catalog:"

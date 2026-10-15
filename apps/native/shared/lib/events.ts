@@ -11,6 +11,12 @@ export interface AppEvents {
   /** The signed-in Believer signed out on this device. */
   SignedOut: undefined;
   /**
+   * The Believer's database may hold different data: it was opened or synced
+   * (launch, foreground, sign-in), or sign-out wiped it for a fresh Guest
+   * database. Readers kept outside queries (the shell preferences) re-read.
+   */
+  UserDatabaseChanged: undefined;
+  /**
    * The Believer finished the first run on this device: their settings are
    * in place and notifications were offered, so Reminders can be planned.
    */

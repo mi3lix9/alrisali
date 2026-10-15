@@ -88,6 +88,12 @@ export type { Salah } from "./salah";
 export { DEFAULT_TEXT_SIZE, TEXT_SCALE, TEXT_SIZES } from "./text-size";
 export type { TextSize } from "./text-size";
 export {
+  DEFAULT_THEME_PREFERENCE,
+  THEME_PREFERENCES,
+  themePreferenceSchema,
+} from "./theme";
+export type { ThemePreference } from "./theme";
+export {
   calculatePrayerTimes,
   currentPrayerTime,
   DEFAULT_HIDDEN_PRAYER_TIMES,

@@ -37,3 +37,18 @@ export const believerSettings = sqliteTable("believer_settings", {
   /** "classic" or "modern"; null until chosen, read as Classic. */
   messageStyle: text("message_style"),
 });
+
+/**
+ * The Believer's shell preferences, one row: the language, theme, text size
+ * and hidden tabs, so they follow the Believer to a new phone. Every column
+ * is null until chosen on some device. The shell reads them before its first
+ * frame, so the device keeps a startup cache (apps/native preferences).
+ */
+export const shellPreferences = sqliteTable("shell_preferences", {
+  id: text("id").primaryKey(),
+  language: text("language"),
+  theme: text("theme"),
+  textSize: text("text_size"),
+  /** The hidden tabs, a JSON array of tab names. */
+  hiddenTabs: text("hidden_tabs"),
+});

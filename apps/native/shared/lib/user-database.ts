@@ -112,6 +112,7 @@ export const wipeUserDatabase = (): Promise<void> => {
         await database.wipe();
       }
       await queryClient.resetQueries({ queryKey: USER_DATA_QUERY_KEY });
+      events.emit("UserDatabaseChanged");
     } finally {
       wiping = undefined;
     }
@@ -163,6 +164,8 @@ const syncReportingErrors = async (): Promise<void> => {
     // Offline or a failed sync is retried on the next foreground or write.
     captureException(error);
   }
+  // A paused (Guest) or failed sync still leaves the local database to read.
+  events.emit("UserDatabaseChanged");
 };
 
 /**
