@@ -94,6 +94,7 @@ export const ar = {
     sources: "المصادر والشكر",
     privacy: "سياسة الخصوصية",
     terms: "شروط الاستخدام",
+    contact: "تواصل معنا",
   },
   sources: {
     title: "المصادر والشكر",

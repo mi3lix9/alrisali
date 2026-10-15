@@ -7,9 +7,13 @@ const PAGES = [
   { key: "sources", href: "/settings/sources" },
   { key: "privacy", href: "/settings/privacy" },
   { key: "terms", href: "/settings/terms" },
+  { key: "contact", href: "/settings/contact" },
 ] as const;
 
-/** Links to Sources & Credits, the Privacy Policy and the Terms of Service. */
+/**
+ * Links to Sources & Credits, the Privacy Policy, the Terms of Service and
+ * the Contact form.
+ */
 export const AboutCard = () => {
   const { t } = useTranslation("settings");
 

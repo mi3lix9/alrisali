@@ -1,4 +1,5 @@
 import { accountRouter } from "@/features/account";
+import { contactRouter } from "@/features/contact";
 import { dailyContentRouter } from "@/features/daily-content";
 import { gatheringsRouter } from "@/features/gatherings";
 import { hijriAdjustmentRouter } from "@/features/hijri-adjustment";
@@ -15,6 +16,7 @@ export const appRouter = os.router({
   contentReplica,
   createUpload,
   account: accountRouter,
+  contact: contactRouter,
   dailyContent: dailyContentRouter,
   gatherings: gatheringsRouter,
   hijriAdjustment: hijriAdjustmentRouter,

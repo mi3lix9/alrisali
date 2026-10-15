@@ -32,6 +32,12 @@ const SECTIONS = [
     description:
       "Create, order and activate the General and Seasonal Programs and their Acts.",
   },
+  {
+    to: "/admin/messages",
+    title: "Messages",
+    description:
+      "Read Contact Messages from Believers and Guests, and track replies.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

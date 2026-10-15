@@ -1,5 +1,6 @@
 import { account, session, user } from "@alrisali/db-server/schema/auth";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
+import { contactMessage } from "@alrisali/db-server/schema/contact";
 import { eq } from "drizzle-orm";
 
 import { authed } from "@/shared/lib/orpc";
@@ -25,6 +26,7 @@ export const deleteAccount = authed.account.deleteAccount.handler(
     // keys cascade from `user` as well; deleting each table explicitly does
     // not depend on them being enforced.
     await db.batch([
+      db.delete(contactMessage).where(eq(contactMessage.userId, userId)),
       db.delete(believerDatabase).where(eq(believerDatabase.userId, userId)),
       db.delete(session).where(eq(session.userId, userId)),
       db.delete(account).where(eq(account.userId, userId)),

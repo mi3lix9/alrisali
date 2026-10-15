@@ -6,8 +6,8 @@
 
 **Blocked by:** 13 (Admin web foundation and content replica)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Validation limits enforced client and server
-- [ ] Rate limiting tested
-- [ ] Admin inbox with statuses new/read/replied/archived
+- [x] Validation limits enforced client and server (one zod schema in `@alrisali/domain/contact`: web form, native form, oRPC input; native form look pending simulator verification)
+- [x] Rate limiting tested (3 per rolling hour per HMAC'd IP; router tests incl. window expiry)
+- [x] Admin inbox with statuses new/read/replied/archived (`/admin/messages`, unread badge in the admin nav)
