@@ -17,4 +17,13 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
     ],
   },
+  {
+    tag: "20261015191918_favorites_and_reading_completions",
+    statements: [
+      "CREATE TABLE `favorites` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`key` text NOT NULL,\n\t`favorited_at` text NOT NULL\n);",
+      "CREATE TABLE `reading_completions` (\n\t`id` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` text NOT NULL\n);",
+      "CREATE INDEX `favorites_favorited_at` ON `favorites` (`favorited_at`);",
+      "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
+    ],
+  },
 ];

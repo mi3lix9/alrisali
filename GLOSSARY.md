@@ -76,7 +76,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Library**: The place where the Quran, Books, Library Assets and the Believer's Favorites are browsed.
 
-**Favorite**: A Surah, Book, Supplication or Library Asset the Believer has saved for quick return. _Avoid_: Bookmark
+**Favorite**: A Surah, ayah, Supplication or Library Asset the Believer has saved for quick return. _Avoid_: Bookmark
 
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 

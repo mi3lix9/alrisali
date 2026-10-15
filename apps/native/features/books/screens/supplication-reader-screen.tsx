@@ -13,7 +13,7 @@ import {
 } from "panelui-native";
 import { MinusIcon, PlusIcon } from "panelui-native/icons";
 import { useState } from "react";
-import type { ComponentType, ReactElement } from "react";
+import type { ComponentType, ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 
@@ -171,12 +171,18 @@ const PassageView = ({
 
 /**
  * Reads one Supplication in Arabic, English or both, at the chosen size, or
- * its Arabic as Recite-Along when the route provides it.
+ * its Arabic as Recite-Along when the route provides it. A route can add other
+ * features' controls for the Supplication: `headerRight` in the header,
+ * `footer` after the text.
  */
 export const SupplicationReaderScreen = ({
   reciteAlong: ReciteAlong,
+  headerRight,
+  footer,
 }: {
   reciteAlong?: ComponentType<ReciteAlongSlotProps>;
+  headerRight?: (supplicationId: string) => ReactNode;
+  footer?: (supplicationId: string) => ReactNode;
 }) => {
   const { t } = useTranslation("books");
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -211,6 +217,9 @@ export const SupplicationReaderScreen = ({
         options={{
           title: supplication.title[launchLanguage],
           headerLargeTitle: false,
+          ...(headerRight && {
+            headerRight: () => headerRight(supplication.id),
+          }),
         }}
       />
       {ReciteAlong && view === "recite" && text.data ? (
@@ -231,6 +240,11 @@ export const SupplicationReaderScreen = ({
           keyExtractor={(_, index) => String(index)}
           extraData={`${language}-${fontSize}`}
           ListHeaderComponent={controls}
+          ListFooterComponent={
+            text.data && footer ? (
+              <View className="pt-6 pb-4">{footer(supplication.id)}</View>
+            ) : undefined
+          }
           ListEmptyComponent={
             text.isError ? (
               <Text muted>{t("reader.loadError")}</Text>
