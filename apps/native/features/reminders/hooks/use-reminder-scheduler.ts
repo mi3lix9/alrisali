@@ -14,11 +14,13 @@ import { AppState } from "react-native";
 import { Temporal } from "temporal-polyfill";
 
 import { useBelieverSettings } from "@/shared/lib/believer-settings";
+import { events } from "@/shared/lib/events";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useReminderSettings } from "../data/reminder-settings";
 import { toReminderRequest } from "../utils/notification-request";
 import { syncReminders } from "../utils/scheduler";
+import { useNotificationAccess } from "./use-notification-permission";
 
 /**
  * Plans from now, on the device's current time zone (it changes when the
@@ -69,15 +71,27 @@ const planAndSync = async (
 /**
  * Keeps the rolling window of Reminders scheduled: on launch, whenever the
  * app returns to the foreground (topping it up and following a new time
- * zone), and as soon as any setting it depends on changes.
+ * zone), as soon as any setting it depends on changes, and when
+ * notifications are allowed (in onboarding or on the Reminders screen).
  */
 export const useReminderScheduler = (): void => {
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
+  const { access, refresh } = useNotificationAccess();
+  const granted = access?.granted;
+
+  // Onboarding asks for notifications: read the answer when it finishes.
+  useEffect(
+    () =>
+      events.on("OnboardingCompleted", () => {
+        void refresh();
+      }),
+    [refresh]
+  );
 
   useEffect(() => {
-    if (!believer || !settings) {
+    if (!believer || !settings || granted === undefined) {
       return;
     }
     void planAndSync(believer, settings, t);
@@ -87,5 +101,5 @@ export const useReminderScheduler = (): void => {
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, t]);
+  }, [believer, settings, t, granted]);
 };

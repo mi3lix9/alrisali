@@ -2,6 +2,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { useOnboarded } from "@/features/onboarding";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
@@ -17,18 +18,29 @@ export const unstable_settings = {
 
 const RootStack = () => {
   const { t } = useTranslation();
+  const onboarded = useOnboarded();
 
+  // Until the first run is over, onboarding is the only screen.
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="settings"
-        options={{ headerShown: false, presentation: "modal" }}
-      />
-      <Stack.Screen
-        name="account"
-        options={{ title: t("account"), presentation: "modal" }}
-      />
+      <Stack.Protected guard={onboarded}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="settings"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="account"
+          options={{ title: t("account"), presentation: "modal" }}
+        />
+        <Stack.Screen name="calendar" />
+        <Stack.Screen name="qibla" />
+        <Stack.Screen name="quran" />
+        <Stack.Screen name="debug-sentry" />
+      </Stack.Protected>
+      <Stack.Protected guard={!onboarded}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack.Protected>
     </Stack>
   );
 };
