@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
 import { HijriTodayCard } from "@/features/calendar";
+import { PrayerLogQuickTicks } from "@/features/prayer-log";
 import { NextPrayerCard } from "@/features/prayer-times";
 import { Screen } from "@/shared/ui/screen";
 
@@ -34,6 +35,7 @@ const HomeRoute = () => {
       <Screen>
         <NextPrayerCard />
         <HijriTodayCard />
+        <PrayerLogQuickTicks />
       </Screen>
     </>
   );

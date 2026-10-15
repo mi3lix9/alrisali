@@ -1,3 +1,5 @@
+import type { Salah } from "@alrisali/domain/shared";
+
 import { createEventBus } from "./event-bus";
 
 // Every cross-feature event, by name. A feature emits or listens to these
@@ -18,6 +20,12 @@ export interface AppEvents {
     count: number;
     completedAt: number;
   };
+  /**
+   * The Believer ticked a Salah in their Prayer Log, for today or a past
+   * `date` (ISO `YYYY-MM-DD`). `date` + `salah` is stable, so a listener
+   * (Companion XP, the Prayer Assistant) can react once per logged Salah.
+   */
+  SalahLogged: { date: string; salah: Salah; loggedAt: number };
 }
 
 export const events = createEventBus<AppEvents>();
