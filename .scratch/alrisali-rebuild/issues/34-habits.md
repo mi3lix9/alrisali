@@ -8,6 +8,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Domain tests: schedule evaluation and Habit streaks
-- [ ] Habit Reminders scheduled via the planner
-- [ ] Defaults seeded exactly once
+- [x] Domain tests: schedule evaluation and Habit streaks
+- [x] Habit Reminders scheduled via the planner (delivery on a device: pending simulator verification)
+- [x] Defaults seeded exactly once

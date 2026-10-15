@@ -1,6 +1,8 @@
 import { classicSayingById } from "@alrisali/domain/reminders";
 import type {
+  HabitReminderMessage,
   PlannedReminder,
+  PrayerReminderMessage,
   ReminderAlert,
 } from "@alrisali/domain/reminders";
 import type { Language } from "@alrisali/i18n";
@@ -71,13 +73,12 @@ const minutesPhrase = (
   });
 };
 
-/** The Reminder worded in the launch language and its Message Style. */
-export const toReminderRequest = (
-  reminder: PlannedReminder,
+/** A Prayer Time Reminder's title and body. */
+const prayerTimeWording = (
+  message: PrayerReminderMessage,
   t: TFunction<"reminders">,
   language: Language
-): ReminderRequest => {
-  const { message } = reminder;
+): { title: string; body: string } => {
   const { prayerTime, minutesBefore } = message;
   const name = t(`names.${prayerTime}`);
   const minutes = minutesPhrase(t, language, minutesBefore);
@@ -103,6 +104,23 @@ export const toReminderRequest = (
           source: saying.source[language],
         })
       : t(`notification.modern.${prayerTime}`);
+  return { title, body };
+};
+
+/** The Reminder worded in the launch language and its Message Style. */
+export const toReminderRequest = (
+  reminder: PlannedReminder<PrayerReminderMessage | HabitReminderMessage>,
+  t: TFunction<"reminders">,
+  language: Language
+): ReminderRequest => {
+  const { message } = reminder;
+  const { title, body } =
+    message.kind === "habit"
+      ? {
+          title: message.name,
+          body: t(`notification.habit.${message.style}`),
+        }
+      : prayerTimeWording(message, t, language);
   const fireAt = reminder.fireAt.epochMilliseconds;
   const { channelId, sound } = alertSound(reminder.alert);
   return {

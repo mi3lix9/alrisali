@@ -21,6 +21,12 @@ export interface AppEvents {
     completedAt: number;
   };
   /**
+   * The Believer ticked a Habit for today or a past `date` (ISO
+   * `YYYY-MM-DD`). `habitId` + `date` is stable, so a listener (Companion XP)
+   * can award once per Habit per date; un-ticking emits nothing.
+   */
+  HabitCompleted: { habitId: string; date: string; completedAt: number };
+  /**
    * The Believer ticked a Salah in their Prayer Log, for today or a past
    * `date` (ISO `YYYY-MM-DD`). `date` + `salah` is stable, so a listener
    * (Companion XP, the Prayer Assistant) can react once per logged Salah.

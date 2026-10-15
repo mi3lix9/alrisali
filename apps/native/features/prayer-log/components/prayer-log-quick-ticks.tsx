@@ -4,7 +4,9 @@ import { Card, Chip, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { usePrayerLog, useToday } from "../hooks/use-prayer-log";
+import { useToday } from "@/shared/lib/today";
+
+import { usePrayerLog } from "../hooks/use-prayer-log";
 import { PrayerStreak } from "./prayer-streak";
 
 /** Home's quick ticks for today's Salah, with the Prayer Streak. */
