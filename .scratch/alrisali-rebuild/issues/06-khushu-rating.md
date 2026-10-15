@@ -6,8 +6,8 @@
 
 **Blocked by:** 05 (Prayer Log and Prayer Streak)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification (sheet visuals)
 
-- [ ] Khushu saved per Salah per date and editable/removable
-- [ ] Custom Distraction text supported
-- [ ] Data persists across relaunch
+- [x] Khushu saved per Salah per date and editable/removable
+- [x] Custom Distraction text supported
+- [x] Data persists across relaunch

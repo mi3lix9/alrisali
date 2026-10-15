@@ -88,7 +88,8 @@ const open = async (): Promise<ContentReplica> => {
   }
 };
 
-const getContentReplica = (): Promise<ContentReplica> => {
+/** The device's content replica, opened once; content features query it under `CONTENT_QUERY_KEY`. */
+export const getContentReplica = (): Promise<ContentReplica> => {
   opening ??= open();
   return opening;
 };
