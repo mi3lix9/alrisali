@@ -10,7 +10,15 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015190433_hijri_adjustment",
+    tag: "20261015190106_tasbih",
+    statements: [
+      "CREATE TABLE `dhikr_sessions` (\n\t`id` text PRIMARY KEY,\n\t`tasbih_id` text NOT NULL,\n\t`count` integer NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `tasbih` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`name` text,\n\t`count` integer DEFAULT 0 NOT NULL,\n\t`step` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
+    ],
+  },
+  {
+    tag: "20261015191907_hijri_adjustment",
     statements: [
       "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
     ],

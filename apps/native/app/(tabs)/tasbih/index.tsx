@@ -1,1 +1,1 @@
-export { Screen as default } from "@/shared/ui/screen";
+export { TasbihScreen as default } from "@/features/tasbih";
