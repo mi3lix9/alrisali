@@ -27,9 +27,11 @@ const RootStack = () => {
   const { t } = useTranslation();
   const onboarded = useOnboarded();
 
-  // Until the first run is over, onboarding is the only screen.
+  // Until the first run is over, onboarding is the only screen. A screen
+  // pushed over the tabs shows only the back chevron: the tabs screen has no
+  // title of its own, and its route name, "(tabs)", would label the button.
   return (
-    <Stack>
+    <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
       <Stack.Protected guard={onboarded}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen

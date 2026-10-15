@@ -84,11 +84,13 @@ export const PrayerLogCard = ({ loggedSalahActions }: PrayerLogCardProps) => {
                     key={salah}
                     className="min-h-9 flex-row items-center justify-between gap-2"
                   >
-                    <Checkbox
-                      checked={performed}
-                      onCheckedChange={() => view.toggle(salah)}
-                      label={t(`salah.${salah}`)}
-                    />
+                    <View className="flex-1">
+                      <Checkbox
+                        checked={performed}
+                        onCheckedChange={() => view.toggle(salah)}
+                        label={t(`salah.${salah}`)}
+                      />
+                    </View>
                     {performed ? loggedSalahActions?.(date, salah) : null}
                   </View>
                 );
