@@ -1,10 +1,16 @@
 import { DeleteAccountCard } from "@/features/account";
+import { QuranReaderSettingsCard } from "@/features/quran";
 import { SettingsScreen } from "@/features/settings";
 
 const SettingsRoute = () => (
-  <SettingsScreen>
-    <DeleteAccountCard />
-  </SettingsScreen>
+  <SettingsScreen
+    featureCards={
+      <>
+        <QuranReaderSettingsCard />
+        <DeleteAccountCard />
+      </>
+    }
+  />
 );
 
 export default SettingsRoute;

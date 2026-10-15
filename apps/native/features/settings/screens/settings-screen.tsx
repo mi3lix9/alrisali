@@ -19,11 +19,12 @@ import { LocationCard } from "../components/location-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
-/**
- * The Settings modal. `children` come after the app's own settings: the
- * route adds what other features own there (account deletion).
- */
-export const SettingsScreen = ({ children }: { children?: ReactNode }) => {
+interface SettingsScreenProps {
+  /** Other features' settings cards, composed by the route. */
+  featureCards?: ReactNode;
+}
+
+export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
 
@@ -91,9 +92,9 @@ export const SettingsScreen = ({ children }: { children?: ReactNode }) => {
       <CalculationMethodCard />
       <HijriAdjustmentCard />
       <TextSizeCard />
+      {featureCards}
       <TabsCard />
       <AboutCard />
-      {children}
     </Screen>
   );
 };

@@ -11,7 +11,8 @@
     "prebuild": "expo prebuild",
     "web": "expo start --web",
     "check-types": "tsc -b ../../packages/api && tsc --noEmit",
-    "env:generate": "varlock codegen"
+    "env:generate": "varlock codegen",
+    "ota:deploy": "varlock run -- hot-updater deploy"
   },
   "dependencies": {
     "@alrisali/api": "workspace:*",
@@ -21,6 +22,8 @@
     "@alrisali/i18n": "workspace:*",
     "@better-auth/expo": "catalog:",
     "@expo/metro-runtime": "~58.0.14",
+    "@hot-updater/expo": "1.0.7",
+    "@hot-updater/react-native": "1.0.7",
     "@orpc/client": "catalog:",
     "@orpc/tanstack-query": "catalog:",
     "@react-native-google-signin/google-signin": "^16.1.5",
@@ -46,6 +49,8 @@
     "expo-network": "~58.0.3",
     "expo-router": "~58.0.19",
     "expo-secure-store": "~58.0.2",
+    "expo-sharing": "~58.0.18",
+    "expo-speech-recognition": "57.1.1",
     "expo-splash-screen": "~58.0.9",
     "expo-status-bar": "~58.0.3",
     "expo-symbols": "~58.0.4",
@@ -74,9 +79,12 @@
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",
+    "@hot-updater/aws": "1.0.7",
+    "@hot-updater/standalone": "1.0.7",
     "@types/node": "^26.4.1",
     "@types/react": "catalog:",
     "babel-preset-expo": "~58.0.0",
+    "hot-updater": "1.0.7",
     "typescript": "^6.0.3"
   }
 }

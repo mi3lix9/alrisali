@@ -3,6 +3,8 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 const IS_PRODUCTION = process.env.APP_VARIANT === "production";
 
 const APP_ID = IS_PRODUCTION ? "com.alrisali.app" : "com.alrisali.app.dev";
+// The Hot Updater channel a build checks; `bun run ota:deploy` targets it.
+const OTA_CHANNEL = IS_PRODUCTION ? "production" : "development";
 const APP_NAME = "الرسالي";
 
 const GOOGLE_CLIENT_ID_SUFFIX = ".apps.googleusercontent.com";
@@ -70,6 +72,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
       "@react-native-google-signin/google-signin",
       { iosUrlScheme: googleIosUrlScheme() },
     ],
+    ["@hot-updater/expo", { channel: OTA_CHANNEL }],
     [
       "@sentry/react-native/expo",
       {
@@ -91,10 +94,33 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    [
+      "expo-speech-recognition",
+      {
+        // Recite-Along by voice (and later the Prayer Assistant's Takbir).
+        // Listening happens only while the screen is open.
+        microphonePermission:
+          "يستمع الرسالي إلى تلاوتك ليُتابع الكلمات معك. Al-Risali listens to your recitation to follow the words with you.",
+        speechRecognitionPermission:
+          "يتعرّف الرسالي على كلماتك العربية ليُتابع النص معك. Al-Risali recognises your Arabic words to follow the text with you.",
+        // Lets Android report which locales the on-device service holds.
+        androidSpeechServicePackages: [
+          "com.google.android.as",
+          "com.google.android.googlequicksearchbox",
+        ],
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    ...config.extra,
+    // Links EAS Build and Submit to the Expo project.
+    ...(process.env.EAS_PROJECT_ID
+      ? { eas: { projectId: process.env.EAS_PROJECT_ID } }
+      : {}),
   },
 });
 

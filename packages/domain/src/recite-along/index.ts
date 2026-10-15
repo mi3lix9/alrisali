@@ -5,10 +5,13 @@ export type { ReciteToken, TokenizedText } from "./normalize";
 export {
   initialProgress,
   isAdvancing,
+  isListening,
   PACE_MS,
   RECITE_MODES,
   RECITE_PACES,
   reciteStep,
+  usesVoice,
+  withoutVoice,
 } from "./progress";
 export type {
   ReciteEvent,

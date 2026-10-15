@@ -4,12 +4,16 @@ import type {
   TasbihAlZahraDhikr,
   TasbihAlZahraProgress,
 } from "@alrisali/domain/tasbih";
+import { Stack } from "expo-router";
 import { Button, Direction, Progress, Spinner, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
-import { Alert, Pressable, View } from "react-native";
+import { Alert, View } from "react-native";
 
 import { launchLanguage } from "@/shared/lib/preferences";
 
+import { CounterButton, formatCount } from "../components/counter-button";
+import { ExportButton } from "../components/export-button";
+import { TasbihPicker } from "../components/tasbih-picker";
 import { useTasbihAlZahra } from "../hooks/use-tasbih-al-zahra";
 
 /** Each step's dhikr as recited, in Arabic whatever the app language. */
@@ -18,8 +22,6 @@ const RECITATION: Record<TasbihAlZahraDhikr, string> = {
   alhamdulillah: "ٱلْحَمْدُ لِلَّٰهِ",
   subhanallah: "سُبْحَانَ ٱللَّٰهِ",
 };
-
-const format = (value: number): string => value.toLocaleString(launchLanguage);
 
 const StepDots = ({ step }: { step: number }) => (
   <View className="flex-row gap-1">
@@ -50,10 +52,6 @@ const Counter = ({
   const { t } = useTranslation("tasbih");
   const { dhikr, target } =
     TASBIH_AL_ZAHRA_STEPS[progress.step] ?? TASBIH_AL_ZAHRA_STEPS[0];
-  const counted = t("counter.progress", {
-    count: format(progress.count),
-    target: format(target),
-  });
 
   return (
     <View className="flex-1 items-center justify-center gap-8 p-6">
@@ -69,26 +67,14 @@ const Counter = ({
         <StepDots step={progress.step} />
       </View>
 
-      <Pressable
-        onPressIn={onTap}
-        accessibilityRole="button"
-        accessibilityLabel={t("counter.label")}
-        accessibilityHint={t("counter.hint")}
-        accessibilityValue={{ text: counted }}
-        className="bg-card border-border size-64 items-center justify-center rounded-full border-4 active:opacity-80"
-      >
-        <Text className="text-7xl font-bold tabular-nums">
-          {format(progress.count)}
-        </Text>
-        <Text muted>/ {format(target)}</Text>
-      </Pressable>
+      <CounterButton count={progress.count} target={target} onTap={onTap} />
 
       <View className="w-full max-w-72 gap-2">
         <Progress value={progress.count} maxValue={target} />
         <Text muted size="sm" className="text-center">
           {t("counter.step", {
-            step: format(progress.step + 1),
-            steps: format(TASBIH_AL_ZAHRA_STEPS.length),
+            step: formatCount(progress.step + 1),
+            steps: formatCount(TASBIH_AL_ZAHRA_STEPS.length),
           })}
         </Text>
       </View>
@@ -107,7 +93,10 @@ const Counter = ({
   );
 };
 
-/** The Tasbih tab: Tasbih al-Zahra, always first. */
+/**
+ * The Tasbih tab: Tasbih al-Zahra, always first, with every Open Tasbih one
+ * chip away and the Dhikr Session export in the header.
+ */
 export const TasbihScreen = () => {
   const { t } = useTranslation("tasbih");
   const { progress, roundCompleted, tap, reset } = useTasbihAlZahra();
@@ -120,6 +109,8 @@ export const TasbihScreen = () => {
 
   return (
     <View className="bg-background flex-1">
+      <Stack.Screen options={{ headerRight: () => <ExportButton /> }} />
+      <TasbihPicker />
       {progress ? (
         <Counter
           progress={progress}
