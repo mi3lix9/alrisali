@@ -18,6 +18,7 @@ import { Route as Char123LocaleChar125ContactRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$locale}/privacy'
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
+import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
 import { Route as AdminAuthedMessagesRouteImport } from './routes/admin/_authed/messages'
 
@@ -71,6 +72,11 @@ const AdminAuthedIndexRoute = AdminAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
+const AdminAuthedDailyContentRoute = AdminAuthedDailyContentRouteImport.update({
+  id: '/daily-content',
+  path: '/daily-content',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedHijriAdjustmentRoute =
   AdminAuthedHijriAdjustmentRouteImport.update({
     id: '/hijri-adjustment',
@@ -92,6 +98,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/': typeof AdminAuthedIndexRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin': typeof AdminAuthedIndexRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/_authed/messages': typeof AdminAuthedMessagesRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/daily-content'
     | '/admin/hijri-adjustment'
     | '/admin/messages'
     | '/admin/'
@@ -143,6 +153,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}'
+    | '/admin/daily-content'
     | '/admin/hijri-adjustment'
     | '/admin/messages'
     | '/admin'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/_authed/daily-content'
     | '/admin/_authed/hijri-adjustment'
     | '/admin/_authed/messages'
     | '/admin/_authed/'
@@ -233,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedIndexRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/daily-content': {
+      id: '/admin/_authed/daily-content'
+      path: '/daily-content'
+      fullPath: '/admin/daily-content'
+      preLoaderRoute: typeof AdminAuthedDailyContentRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/hijri-adjustment': {
       id: '/admin/_authed/hijri-adjustment'
       path: '/hijri-adjustment'
@@ -271,12 +290,14 @@ const Char123LocaleChar125RouteRouteWithChildren =
   )
 
 interface AdminAuthedRouteRouteChildren {
+  AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
   AdminAuthedMessagesRoute: typeof AdminAuthedMessagesRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
 }
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
+  AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
   AdminAuthedMessagesRoute: AdminAuthedMessagesRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,

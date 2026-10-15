@@ -40,6 +40,7 @@
     "@alrisali/config": "workspace:*",
     "@alrisali/db-user": "workspace:*",
     "@types/bun": "catalog:",
+    "temporal-polyfill": "catalog:",
     "tsdown": "^0.23.0",
     "typescript": "^6.0.3"
   }
