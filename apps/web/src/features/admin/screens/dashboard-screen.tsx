@@ -45,6 +45,12 @@ const SECTIONS = [
       "Create, order and activate the General and Seasonal Programs and their Acts.",
   },
   {
+    to: "/admin/lessons",
+    title: "Lessons",
+    description:
+      "Create, order and publish Lessons by category, with their captioned image Slides.",
+  },
+  {
     to: "/admin/messages",
     title: "Messages",
     description:

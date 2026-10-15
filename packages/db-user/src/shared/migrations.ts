@@ -130,4 +130,10 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `prayer_assistant_settings` ADD `recognition_mode` text;",
     ],
   },
+  {
+    tag: "20261015211045_lesson_progress",
+    statements: [
+      "CREATE TABLE `lesson_progress` (\n\t`lesson_id` text PRIMARY KEY,\n\t`current_slide` integer NOT NULL,\n\t`furthest_slide` integer NOT NULL,\n\t`completed_at` integer,\n\t`updated_at` integer NOT NULL\n);",
+    ],
+  },
 ];

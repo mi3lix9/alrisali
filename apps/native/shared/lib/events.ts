@@ -32,6 +32,12 @@ export interface AppEvents {
    */
   HabitCompleted: { habitId: string; date: string; completedAt: number };
   /**
+   * The Believer completed a Lesson on this device, at its last Slide or by
+   * Mark complete. Emitted once per Lesson (progress keeps `completedAt`),
+   * so a listener (Companion XP) can award once per `lessonId`.
+   */
+  LessonCompleted: { lessonId: string; completedAt: number };
+  /**
    * The Believer completed an Act of one of their Programs, for today or a
    * past `date` (ISO `YYYY-MM-DD`). `programId` + `actId` + `date` is stable,
    * so a listener (Companion XP) can award once per Act per date; undoing

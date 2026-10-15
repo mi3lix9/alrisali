@@ -129,6 +129,9 @@ export const startUsageAnalytics = (): void => {
   events.on("DhikrSessionCompleted", ({ count }) => {
     trackEvent({ type: "feature_use", name: "tasbih", data: { count } });
   });
+  events.on("LessonCompleted", () => {
+    trackEvent({ type: "feature_use", name: "lessons" });
+  });
   events.on("SignedIn", () => {
     trackEvent({ type: "action", name: "sign-in" });
   });
