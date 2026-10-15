@@ -1,3 +1,13 @@
+# Feature folders (ADR-0005)
+
+Code lives in feature folders named after GLOSSARY.md terms. Read [docs/adr/0005-feature-folders-with-enforced-boundaries.md](docs/adr/0005-feature-folders-with-enforced-boundaries.md) before adding a feature, a screen, a route, a table, a contract, or anything in `shared/`.
+
+- **Where things go**: `apps/native/{features,shared}/`, `apps/web/src/{features,shared}/`, `apps/server/src/{features,shared}/`. A feature holds `screens/ components/ hooks/ data/ i18n/ utils/` (only those it needs) and exposes itself through `index.ts` alone. `shared/` splits into `ui/`, `lib/` (clients, providers, the event bus) and `utils/` (pure helpers).
+- **Imports**: inside a feature, import its own files by relative path. Everything else reaches a feature as `@/features/<feature>`, and only route files (expo-router `app/`, TanStack `routes/`, the server's `router.ts`) do that. Route files render a feature's screen, or compose several on Home, and hold no logic.
+- **Cross-feature reactions** travel as events: add the event to `apps/native/shared/lib/events.ts`, `events.emit` it in one feature, `events.on` it in the other. Shared UI that needs a feature's piece takes it as a prop or slot from the route.
+- **Packages**: `domain`, `api`, `db-user` and `db-content` keep one `src/<feature>/` folder per feature plus `src/shared/`, imported as `@alrisali/<package>/<feature>`. A feature imports only its own subpath and `shared`; web `admin-<x>` features own `<x>`. oRPC contracts are written first in `packages/api/src/<feature>/`; the server implements them in `apps/server/src/features/<feature>/` from `@/shared/lib/orpc`; clients call them through `shared/lib/orpc`.
+- **Enforcement**: `bun run check` runs oxlint `no-restricted-imports` (rules generated from the folders on disk in `scripts/boundaries/oxlint-boundaries.ts`) and dependency-cruiser (`.dependency-cruiser.cjs`, also `bun run check:boundaries`). A boundary error names the rule it broke; restructure the import rather than silencing it.
+
 # Ultracite Code Standards
 
 This project uses **Ultracite**, a zero-config preset that enforces strict code quality standards through automated formatting and linting.

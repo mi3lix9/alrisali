@@ -1,7 +1,9 @@
 {
   "extends": "@alrisali/config/tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    // oxlint loads oxlint.config.ts with Node, which needs the .ts extension.
+    "allowImportingTsExtensions": true
   },
-  "include": ["*.ts"]
+  "include": ["*.ts", "scripts/boundaries/*.ts"]
 }

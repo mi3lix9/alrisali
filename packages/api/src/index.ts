@@ -1,20 +1,13 @@
-import { ORPCError, os } from "@orpc/server";
+import type { ContractRouterClient } from "@orpc/contract";
 
-import type { Context } from "./context";
+import { accountContract } from "./account";
+import { sharedContract } from "./shared";
 
-export const o = os.$context<Context>();
+// The whole oRPC API: each feature's contract under its own key. The server
+// implements it; the apps call it through a client typed from it.
+export const contract = {
+  ...sharedContract,
+  account: accountContract,
+};
 
-export const publicProcedure = o;
-
-const requireAuth = o.middleware(({ context, next }) => {
-  if (!context.session?.user) {
-    throw new ORPCError("UNAUTHORIZED");
-  }
-  return next({
-    context: {
-      session: context.session,
-    },
-  });
-});
-
-export const protectedProcedure = publicProcedure.use(requireAuth);
+export type AppRouterClient = ContractRouterClient<typeof contract>;

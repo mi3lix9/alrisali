@@ -1,6 +1,6 @@
 {
   "references": [{ "path": "../../packages/api" }],
-  "extends": "expo/tsconfig.base",
+  "extends": "expo/tsconfig.base.json",
   "compilerOptions": {
     "strict": true,
     "noUncheckedIndexedAccess": true,
