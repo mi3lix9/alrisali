@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@alrisali/auth": "workspace:*",
-    "@alrisali/db": "workspace:*",
+    "@alrisali/db-server": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",

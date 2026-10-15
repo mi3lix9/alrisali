@@ -1,5 +1,5 @@
-import type { Database } from "@alrisali/db";
-import * as schema from "@alrisali/db/schema/auth";
+import type { Database } from "@alrisali/db-server";
+import * as schema from "@alrisali/db-server/schema/auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter/relations-v2";
 import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";

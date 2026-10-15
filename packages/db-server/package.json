@@ -1,5 +1,5 @@
 {
-  "name": "@alrisali/db",
+  "name": "@alrisali/db-server",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
