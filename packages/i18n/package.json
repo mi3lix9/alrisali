@@ -5,7 +5,8 @@
   "description": "Arabic and English catalogs.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./legal": "./src/legal/index.ts"
   },
   "scripts": {
     "check-types": "tsc -b"
