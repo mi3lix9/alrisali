@@ -20,17 +20,17 @@ const run = (...events: RecitationEvent[]) => {
 
 describe(playFromAyah, () => {
   it("starts the queue at the long-pressed ayah", () => {
-    expect(run(playFromAyah("2:255", 7))).toStrictEqual({
+    expect(run(playFromAyah("2:255", "ar.alafasy"))).toStrictEqual({
       status: "loading",
       ayah: "2:255",
-      reciterId: 7,
+      reciter: "ar.alafasy",
       until: null,
     });
   });
 
   it("continues past that ayah once it finishes", () => {
     const state = run(
-      playFromAyah("2:255", 7),
+      playFromAyah("2:255", "ar.alafasy"),
       { type: "ready" },
       { type: "finished" }
     );
@@ -39,9 +39,9 @@ describe(playFromAyah, () => {
 
   it("replaces what is playing with the long-pressed ayah", () => {
     const state = run(
-      { type: "play", ayah: "1:1", reciterId: 7 },
+      { type: "play", ayah: "1:1", reciter: "ar.alafasy" },
       { type: "ready" },
-      playFromAyah("36:1", 7)
+      playFromAyah("36:1", "ar.alafasy")
     );
     expect(state).toMatchObject({ status: "loading", ayah: "36:1" });
   });

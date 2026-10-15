@@ -30,8 +30,8 @@ export const VerseOfTheDayCard = () => {
   const playback = useRecitationPlayback();
   const ayah = verseOfTheDay(Temporal.Now.plainDateISO());
   const surah = SURAHS[ayah.surah - 1];
-  const reciterId =
-    settings.data?.reciterId ?? DEFAULT_QURAN_READER_SETTINGS.reciterId;
+  const reciter =
+    settings.data?.reciter ?? DEFAULT_QURAN_READER_SETTINGS.reciter;
 
   const mine =
     playback.status !== "idle" &&
@@ -43,7 +43,7 @@ export const VerseOfTheDayCard = () => {
     sendRecitation({
       type: "play",
       ayah: ayah.key,
-      reciterId,
+      reciter,
       until: ayah.key,
     });
   const listen = (() => {

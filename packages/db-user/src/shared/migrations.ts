@@ -161,4 +161,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `shell_preferences` (\n\t`id` text PRIMARY KEY,\n\t`language` text,\n\t`theme` text,\n\t`text_size` text,\n\t`hidden_tabs` text\n);",
     ],
   },
+  {
+    tag: "20261015224555_quran_reciter_key",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `reciter` text DEFAULT 'ar.alafasy' NOT NULL;",
+    ],
+  },
 ];

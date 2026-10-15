@@ -91,8 +91,10 @@ export const en: Catalog<typeof ar> = {
         "The Quran text (Hafs), the mushaf's pages and lines, and the Uthmanic font, from the developer release of the King Fahd Glorious Qur'an Printing Complex.",
       thaqalayn:
         "Arabic texts and English translations of Mafatih al-Jinan, al-Sahifa al-Sajjadiyya and Nahj al-Balagha, from the Thaqalayn library, reformatted for offline reading. Not endorsed by Thaqalayn.",
-      "quran-foundation":
-        "Recitation audio and the Verse of the Day are streamed from Quran.Foundation. Quran data provided by Quran.Foundation.",
+      "alquran-cloud":
+        "Recitation audio and the Verse of the Day via alquran.cloud / Islamic Network, streamed straight to the device. The recordings' copyrights belong to the reciters.",
+      everyayah:
+        "Recitations of reciters alquran.cloud lacks, such as Minshawi and Abdul Basit (Mujawwad), via EveryAyah.com. The recordings' copyrights belong to the reciters.",
       "adhan-recording":
         "The Adhan voice of Prayer Time Reminders: the opening of a Shia Adhan recorded by Saeed Hatamzadeh-Varmazyar, from Wikimedia Commons, under CC BY-SA 4.0, shortened and converted to WAV.",
       tanzil:

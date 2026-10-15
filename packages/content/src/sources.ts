@@ -32,12 +32,21 @@ export const CONTENT_SOURCES = [
     },
   },
   {
-    id: "quran-foundation",
-    name: "Quran.Foundation",
-    url: "https://quran.foundation",
+    id: "alquran-cloud",
+    name: "alquran.cloud / Islamic Network",
+    url: "https://alquran.cloud",
     licence: {
-      name: "Quran Foundation Developer Terms",
-      url: "https://api-docs.quran.foundation/legal/developer-terms/",
+      name: "alquran.cloud terms: free redistribution; recordings' copyrights belong to the reciters",
+      url: "https://alquran.cloud/terms-and-conditions",
+    },
+  },
+  {
+    id: "everyayah",
+    name: "EveryAyah.com",
+    url: "https://everyayah.com",
+    licence: {
+      name: "Recordings' copyrights belong to the reciters",
+      url: "https://everyayah.com",
     },
   },
   {

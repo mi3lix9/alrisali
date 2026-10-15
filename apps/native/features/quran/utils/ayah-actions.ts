@@ -8,8 +8,8 @@ import { formatNumber } from "./format";
  */
 export const playFromAyah = (
   ayah: AyahKey,
-  reciterId: number
-): RecitationEvent => ({ type: "play", ayah, reciterId });
+  reciter: string
+): RecitationEvent => ({ type: "play", ayah, reciter });
 
 interface AyahCopy {
   text: string;

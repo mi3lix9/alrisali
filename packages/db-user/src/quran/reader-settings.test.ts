@@ -35,7 +35,7 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "page",
       pageNav: "horizontal",
       surahFontSize: 26,
-      reciterId: 7,
+      reciter: "ar.alafasy",
     });
   });
 
@@ -43,7 +43,7 @@ describe(createQuranReaderSettingsRepository, () => {
     const settings = createQuranReaderSettingsRepository(database.db);
     await settings.update({ pageNav: "vertical" });
     await settings.update({ mode: "surah", surahFontSize: 30 });
-    await settings.update({ reciterId: 1 });
+    await settings.update({ reciter: "everyayah.minshawy-murattal" });
 
     await database.close();
     database = await launch();
@@ -54,7 +54,7 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "surah",
       pageNav: "vertical",
       surahFontSize: 30,
-      reciterId: 1,
+      reciter: "everyayah.minshawy-murattal",
     });
   });
 
@@ -76,7 +76,26 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "page",
       pageNav: "vertical",
       surahFontSize: 26,
-      reciterId: 7,
+      reciter: "ar.alafasy",
+    });
+  });
+
+  it("recites with Alafasy for a reciter the app does not bundle", async () => {
+    await database.db.run(
+      sql`INSERT INTO quran_reader_settings (id, reciter_id, reciter) VALUES ('believer', 1, 'ar.unknown')`
+    );
+    await expect(
+      createQuranReaderSettingsRepository(database.db).get()
+    ).resolves.toMatchObject({ reciter: "ar.alafasy" });
+  });
+
+  it("refuses a reciter the app does not bundle", async () => {
+    const settings = createQuranReaderSettingsRepository(database.db);
+    await expect(settings.update({ reciter: "7" })).rejects.toThrow(
+      "No such reciter"
+    );
+    await expect(settings.get()).resolves.toMatchObject({
+      reciter: "ar.alafasy",
     });
   });
 });

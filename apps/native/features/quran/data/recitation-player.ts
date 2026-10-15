@@ -8,17 +8,13 @@ import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
 import { create } from "zustand";
 
-import { client, queryClient } from "@/shared/lib/orpc";
-
 import { recitationCache } from "./recitation-cache";
 
 // One recitation plays at a time, in the reader or on Home. The domain's
 // `recitationPlayback` decides what plays; this module makes the device's
 // audio follow it: an ayah is played from its file on the device when one
-// under 7 days old is there, otherwise streamed and then kept.
-
-/** Quran Foundation's audio URLs are stable; refetch them once a day. */
-const AUDIO_URLS_STALE_MS = 24 * 60 * 60 * 1000;
+// under 7 days old is there, otherwise streamed straight from the reciter's
+// source and then kept.
 
 const usePlaybackStore = create<{ playback: RecitationPlayback }>(() => ({
   playback: { status: "idle" },
@@ -31,20 +27,6 @@ export const useRecitationPlayback = (): RecitationPlayback =>
 let player: AudioPlayer | null = null;
 /** Bumped on every load and stop, so a slow load never plays over a newer one. */
 let loadId = 0;
-
-const audioUrl = async (reciterId: number, ayah: AyahKey): Promise<string> => {
-  const surah = Number(ayah.split(":")[0]);
-  const audio = await queryClient.fetchQuery({
-    queryKey: ["quran", "surah-audio", reciterId, surah],
-    queryFn: () => client.quran.surahAudio({ reciterId, surah }),
-    staleTime: AUDIO_URLS_STALE_MS,
-  });
-  const entry = audio.find((file) => file.ayah === ayah);
-  if (!entry) {
-    throw new Error(`Recitation ${reciterId} has no audio for ${ayah}`);
-  }
-  return entry.url;
-};
 
 type Send = (event: RecitationEvent) => void;
 
@@ -70,16 +52,12 @@ const devicePlayer = (send: Send): AudioPlayer => {
   return player;
 };
 
-const load = async (reciterId: number, ayah: AyahKey, send: Send) => {
+const load = async (reciter: string, ayah: AyahKey, send: Send) => {
   loadId += 1;
   const id = loadId;
-  const recited = { reciterId, ayah };
-  let streamed: string | null = null;
+  const recited = { reciter, ayah };
   try {
-    const uri = await recitationCache.source(recited, async () => {
-      streamed = await audioUrl(reciterId, ayah);
-      return streamed;
-    });
+    const uri = await recitationCache.source(recited);
     if (id !== loadId) {
       return;
     }
@@ -94,12 +72,11 @@ const load = async (reciterId: number, ayah: AyahKey, send: Send) => {
     }
     return;
   }
-  if (streamed) {
-    try {
-      await recitationCache.keep(recited, streamed);
-    } catch {
-      // Keeping the file is best effort: the ayah already plays from the stream.
-    }
+  try {
+    // A no-op while the file on the device is under 7 days old.
+    await recitationCache.keep(recited);
+  } catch {
+    // Keeping the file is best effort: the ayah already plays from the stream.
   }
 };
 
@@ -119,7 +96,7 @@ const follow = (
     next.status === "loading" &&
     (event.type === "play" || moved || previous.status === "error")
   ) {
-    void load(next.reciterId, next.ayah, send);
+    void load(next.reciter, next.ayah, send);
   } else if (next.status === "paused") {
     player?.pause();
   } else if (next.status === "playing" && previous.status === "paused") {

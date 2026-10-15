@@ -18,7 +18,7 @@ export type AyahActions = (ayah: AyahKey) => ReactNode;
 interface AyahSheetProps {
   ayah: AyahKey | null;
   /** The reader's reciter, who recites from this ayah on Play. */
-  reciterId: number;
+  reciter: string;
   onClose: () => void;
   actions?: AyahActions | undefined;
 }
@@ -29,7 +29,7 @@ interface AyahSheetProps {
  */
 export const AyahSheet = ({
   ayah,
-  reciterId,
+  reciter,
   onClose,
   actions,
 }: AyahSheetProps) => {
@@ -83,7 +83,7 @@ export const AyahSheet = ({
                   variant="outline"
                   startContent={<PlayIcon size={18} />}
                   onPress={() => {
-                    sendRecitation(playFromAyah(found.key, reciterId));
+                    sendRecitation(playFromAyah(found.key, reciter));
                     onClose();
                   }}
                 >

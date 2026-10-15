@@ -1,6 +1,6 @@
 import { SURAHS } from "@alrisali/content/quran";
 import type { AyahKey } from "@alrisali/domain/quran";
-import { findAyah } from "@alrisali/domain/quran";
+import { findAyah, findReciter } from "@alrisali/domain/quran";
 import { Button, Spinner, Text } from "panelui-native";
 import {
   ChevronDownIcon,
@@ -19,19 +19,19 @@ import {
   stopReaderRecitation,
   useRecitationPlayback,
 } from "../data/recitation-player";
-import { useReciters } from "../data/reciters";
 import { formatNumber } from "../utils/format";
 import { ReciterSheet, useReciterName } from "./reciter-sheet";
 
 interface RecitationPillProps {
   /** The first ayah on screen: where Play starts. */
   start: AyahKey;
-  reciterId: number;
+  /** The bundled reciter's key. */
+  reciter: string;
   /** Whether the reader's controls show; the pill also stays while audio plays. */
   chromeVisible: boolean;
   /** Distance from the screen's bottom edge. */
   bottom: number;
-  onReciterChange: (reciterId: number) => void;
+  onReciterChange: (reciter: string) => void;
   /** Keeps the controls up while the Believer uses the pill. */
   onInteract: () => void;
 }
@@ -42,7 +42,7 @@ interface RecitationPillProps {
  */
 export const RecitationPill = ({
   start,
-  reciterId,
+  reciter,
   chromeVisible,
   bottom,
   onReciterChange,
@@ -50,7 +50,6 @@ export const RecitationPill = ({
 }: RecitationPillProps) => {
   const { t, i18n } = useTranslation("quran");
   const playback = useRecitationPlayback();
-  const reciters = useReciters();
   const nameOf = useReciterName();
   const [choosing, setChoosing] = useState(false);
   useEffect(() => stopReaderRecitation, []);
@@ -67,15 +66,15 @@ export const RecitationPill = ({
   };
   const playing = active ? findAyah(playback.ayah) : undefined;
   const surah = playing ? SURAHS[playing.surah - 1] : undefined;
-  const reciter = reciters.data?.find((entry) => entry.id === reciterId);
+  const chosen = findReciter(reciter);
   let label = t("recitation.label");
   if (playing && surah) {
     label = t("recitation.position", {
       surah: i18n.language === "ar" ? surah.nameAr : surah.nameEn,
       ayah: formatNumber(i18n.language, playing.ayah),
     });
-  } else if (reciter) {
-    label = nameOf(reciter);
+  } else if (chosen) {
+    label = nameOf(chosen);
   }
 
   const main = (() => {
@@ -84,7 +83,7 @@ export const RecitationPill = ({
         label: t("recitation.play"),
         icon: <PlayIcon size={20} />,
         handlePress: () =>
-          sendRecitation({ type: "play", ayah: start, reciterId }),
+          sendRecitation({ type: "play", ayah: start, reciter }),
       };
     }
     switch (playback.status) {
@@ -119,11 +118,11 @@ export const RecitationPill = ({
     }
   })();
 
-  const selectReciter = (id: number) => {
+  const selectReciter = (key: string) => {
     setChoosing(false);
-    onReciterChange(id);
-    if (active && id !== playback.reciterId) {
-      sendRecitation({ type: "play", ayah: playback.ayah, reciterId: id });
+    onReciterChange(key);
+    if (active && key !== playback.reciter) {
+      sendRecitation({ type: "play", ayah: playback.ayah, reciter: key });
     }
   };
 
@@ -182,7 +181,7 @@ export const RecitationPill = ({
       </Animated.View>
       <ReciterSheet
         open={choosing}
-        reciterId={reciterId}
+        reciter={reciter}
         onSelect={selectReciter}
         onClose={() => setChoosing(false)}
       />

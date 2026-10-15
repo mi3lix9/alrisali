@@ -11,9 +11,15 @@ export const quranReaderSettings = sqliteTable("quran_reader_settings", {
   surahFontSize: integer("surah_font_size")
     .notNull()
     .default(DEFAULT_QURAN_READER_SETTINGS.surahFontSize),
-  reciterId: integer("reciter_id")
+  /**
+   * Unused: the numeric recitation id older apps kept. Left in place
+   * so the migration stays additive; `reciter` replaced it.
+   */
+  reciterId: integer("reciter_id").notNull().default(7),
+  /** The bundled reciter's key, e.g. `ar.alafasy`. */
+  reciter: text("reciter")
     .notNull()
-    .default(DEFAULT_QURAN_READER_SETTINGS.reciterId),
+    .default(DEFAULT_QURAN_READER_SETTINGS.reciter),
 });
 
 /**

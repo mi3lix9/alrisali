@@ -265,20 +265,20 @@ const Reader = ({
       ) : null}
       <RecitationPill
         start={recitationStart(state)}
-        reciterId={settings.reciterId}
+        reciter={settings.reciter}
         chromeVisible={chrome.visible}
         bottom={
           insets.bottom +
           RECITATION_PILL_GAP +
           (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
         }
-        onReciterChange={(reciterId) => update.mutate({ reciterId })}
+        onReciterChange={(reciter) => update.mutate({ reciter })}
         onInteract={() => send({ type: "interact" })}
       />
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}
-        reciterId={settings.reciterId}
+        reciter={settings.reciter}
         // The sheet draws in a portal, so its actions get the context there.
         actions={
           ayahActions
