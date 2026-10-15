@@ -174,8 +174,11 @@ export const readerReducer = (
 
 export interface OpenReaderOptions {
   settings: QuranReaderSettings;
-  /** Open at this ayah: its page in Page Mode, its surah in Surah Mode. */
-  ayah?: AyahKey | null;
+  /**
+   * Open at this ayah (`surah:ayah`): its page in Page Mode, its surah in
+   * Surah Mode. Anything that names no ayah, such as a bad link, is ignored.
+   */
+  ayah?: string | null;
   /** Open at this page (Page Mode), when no ayah is given. */
   page?: number;
   /** Open at this surah (Surah Mode), when no ayah is given. */
