@@ -25,6 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
@@ -94,6 +95,7 @@ interface ReaderProps {
   width: number;
   height: number;
   ayahActions?: AyahActions | undefined;
+  topBarActions?: ReactNode;
 }
 
 const Reader = ({
@@ -103,6 +105,7 @@ const Reader = ({
   width,
   height,
   ayahActions,
+  topBarActions,
 }: ReaderProps) => {
   const insets = useSafeAreaInsets();
   const update = useUpdateQuranReaderSettings();
@@ -245,6 +248,7 @@ const Reader = ({
             send({ type: "open-sheet", sheet: { kind: "settings" } })
           }
           lastReadOnScreen={lastReadOnScreen}
+          actions={topBarActions}
         />
       ) : null}
       {chrome.visible ? (
@@ -318,6 +322,8 @@ const Reader = ({
 interface QuranReaderScreenProps {
   /** Actions other features add to an ayah's sheet, composed by the route. */
   ayahActions?: AyahActions;
+  /** Buttons other features add to the top bar, composed by the route. */
+  topBarActions?: ReactNode;
 }
 
 /**
@@ -325,7 +331,10 @@ interface QuranReaderScreenProps {
  * header or status bar. A tap shows the controls; a long-press on an ayah
  * opens its sheet.
  */
-export const QuranReaderScreen = ({ ayahActions }: QuranReaderScreenProps) => {
+export const QuranReaderScreen = ({
+  ayahActions,
+  topBarActions,
+}: QuranReaderScreenProps) => {
   const params = useLocalSearchParams<ReaderParams>();
   const fontLoaded = useQuranFont();
   const settings = useQuranReaderSettings();
@@ -349,6 +358,7 @@ export const QuranReaderScreen = ({ ayahActions }: QuranReaderScreenProps) => {
           width={size.width}
           height={size.height}
           ayahActions={ayahActions}
+          topBarActions={topBarActions}
         />
       ) : (
         <View className="flex-1 items-center justify-center">
