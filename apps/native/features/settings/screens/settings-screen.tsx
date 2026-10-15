@@ -11,6 +11,10 @@ import {
 } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
+import { AboutCard } from "../components/about-card";
+import { TabsCard } from "../components/tabs-card";
+import { TextSizeCard } from "../components/text-size-card";
+
 export const SettingsScreen = () => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
@@ -75,6 +79,9 @@ export const SettingsScreen = () => {
           </RadioGroup>
         </Card.Content>
       </Card>
+      <TextSizeCard />
+      <TabsCard />
+      <AboutCard />
     </Screen>
   );
 };
