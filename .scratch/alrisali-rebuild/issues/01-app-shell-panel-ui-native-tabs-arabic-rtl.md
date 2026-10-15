@@ -8,8 +8,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] Demo/heroui-native screens and dependencies removed; Panel UI provider in place
-- [ ] Five native tabs render with Arabic labels and mirrored layout; English switch flips to LTR after relaunch
-- [ ] Light/dark follow the system and a manual override
-- [ ] Typed i18n keys: a missing key fails type-check
-- [ ] `check` and `build` pass
+- [x] Demo/heroui-native screens and dependencies removed; Panel UI provider in place
+- [ ] Five native tabs render with Arabic labels and mirrored layout; English switch flips to LTR after relaunch (code complete; pending simulator verification)
+- [ ] Light/dark follow the system and a manual override (code complete; pending simulator verification)
+- [x] Typed i18n keys: a missing key fails type-check
+- [x] `check` and `build` pass
