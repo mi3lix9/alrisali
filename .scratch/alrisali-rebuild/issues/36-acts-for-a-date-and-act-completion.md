@@ -6,7 +6,7 @@
 
 **Blocked by:** 35 (Official Programs and Subscriptions)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
 - [x] Domain tests: visibility per frequency and grouping
 - [x] Act Completion persists and can be undone
