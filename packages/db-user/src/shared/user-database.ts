@@ -35,6 +35,11 @@ export interface OpenUserDatabaseOptions {
   connect: (options: ConnectOptions) => Promise<SyncedConnection>;
   /** Defaults to the migrations bundled from packages/db-user/migrations. */
   migrations?: readonly Migration[];
+  /**
+   * Called after each statement written through `db` (migrations and sync
+   * excluded), so the device can push the Believer's records soon after.
+   */
+  onWrite?: () => void;
 }
 
 export type SyncOutcome =
@@ -61,10 +66,14 @@ export interface UserDatabase {
 const CLIENT_NAME = "alrisali";
 
 // The binding returns rows only; Drizzle's proxy wants `get` as one row.
-const toDrizzle = (connection: SyncedConnection): UserDb =>
+const toDrizzle = (
+  connection: SyncedConnection,
+  onWrite?: () => void
+): UserDb =>
   drizzle(async (sql, params: SqlValue[], method) => {
     if (method === "run") {
       await connection.execute(sql, params);
+      onWrite?.();
       return { rows: [] };
     }
     const rows = await connection.query(sql, params);
@@ -82,6 +91,7 @@ export const openUserDatabase = async ({
   authToken,
   connect,
   migrations = bundledMigrations,
+  onWrite,
 }: OpenUserDatabaseOptions): Promise<UserDatabase> => {
   const connection = await connect({
     path,
@@ -110,7 +120,7 @@ export const openUserDatabase = async ({
   };
 
   return {
-    db: toDrizzle(connection),
+    db: toDrizzle(connection, onWrite),
     schemaVersion,
     sync,
     close: () => connection.close(),

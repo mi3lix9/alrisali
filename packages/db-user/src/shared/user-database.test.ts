@@ -33,6 +33,7 @@ const open = async (
   overrides: {
     remoteUrl?: () => string | null;
     connect?: (options: ConnectOptions) => Promise<SyncedConnection>;
+    onWrite?: () => void;
   } = {}
 ): Promise<UserDatabase> => {
   const database = await openUserDatabase({
@@ -40,6 +41,7 @@ const open = async (
     remoteUrl: overrides.remoteUrl ?? (() => null),
     connect: overrides.connect ?? connectNode,
     migrations,
+    ...(overrides.onWrite ? { onWrite: overrides.onWrite } : {}),
   });
   opened.push(database);
   return database;
@@ -101,6 +103,21 @@ describe(openUserDatabase, () => {
       await expect(
         rows(database, sql`SELECT body FROM notes`)
       ).resolves.toStrictEqual([["guest"]]);
+    });
+  });
+
+  describe("writing", () => {
+    it("reports each write, but not reads or migrations, so sync can follow", async () => {
+      const onWrite = vi.fn<() => void>();
+      const database = await open([NOTES], { onWrite });
+      expect(onWrite).not.toHaveBeenCalled();
+
+      await database.db.run(
+        sql`INSERT INTO notes (id, body) VALUES ('n1', 'first')`
+      );
+      await rows(database, sql`SELECT body FROM notes`);
+
+      expect(onWrite).toHaveBeenCalledOnce();
     });
   });
 
