@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "d376747f-94b2-4f5f-a9f0-3f77af4e7ccd",
-  "prevIds": ["08aa5448-6dbf-4cf7-89a9-68a661ec288c"],
+  "id": "81cd035e-8631-4e48-80c6-a71c0129c876",
+  "prevIds": ["f6b9e1cd-5c37-45f5-8520-634e6e41ea5a"],
   "ddl": [
     {
       "name": "mood_check_ins",
@@ -10,6 +10,14 @@
     },
     {
       "name": "believer_settings",
+      "entityType": "tables"
+    },
+    {
+      "name": "dhikr_sessions",
+      "entityType": "tables"
+    },
+    {
+      "name": "tasbih",
       "entityType": "tables"
     },
     {
@@ -103,6 +111,96 @@
       "table": "believer_settings"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "dhikr_sessions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "tasbih_id",
+      "entityType": "columns",
+      "table": "dhikr_sessions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "count",
+      "entityType": "columns",
+      "table": "dhikr_sessions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "completed_at",
+      "entityType": "columns",
+      "table": "dhikr_sessions"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "kind",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "count",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "step",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "mood_check_ins_pk",
@@ -114,6 +212,20 @@
       "nameExplicit": false,
       "name": "believer_settings_pk",
       "table": "believer_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "dhikr_sessions_pk",
+      "table": "dhikr_sessions",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "tasbih_pk",
+      "table": "tasbih",
       "entityType": "pks"
     },
     {
@@ -129,6 +241,20 @@
       "name": "mood_check_ins_checked_in_at_idx",
       "entityType": "indexes",
       "table": "mood_check_ins"
+    },
+    {
+      "columns": [
+        {
+          "value": "completed_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "dhikr_sessions_completed_at",
+      "entityType": "indexes",
+      "table": "dhikr_sessions"
     }
   ],
   "renames": []

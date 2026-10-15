@@ -10,7 +10,15 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015190247_mood_check_ins",
+    tag: "20261015190106_tasbih",
+    statements: [
+      "CREATE TABLE `dhikr_sessions` (\n\t`id` text PRIMARY KEY,\n\t`tasbih_id` text NOT NULL,\n\t`count` integer NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `tasbih` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`name` text,\n\t`count` integer DEFAULT 0 NOT NULL,\n\t`step` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
+    ],
+  },
+  {
+    tag: "20261015191949_mood_check_ins",
     statements: [
       "CREATE TABLE `mood_check_ins` (\n\t`id` text PRIMARY KEY,\n\t`mood` text NOT NULL,\n\t`remedy_id` text NOT NULL,\n\t`checked_in_at` integer NOT NULL\n);",
       "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",

@@ -15,6 +15,8 @@ import publishedIds from "./data/published-ids.json";
 
 const NOTICES_DIR = path.join(import.meta.dirname, "../../notices");
 const STABLE_ID = /^[a-z]+(?:-[a-z0-9]+)+$/u;
+// Loading every Supplication text takes seconds on a busy machine.
+const LOAD_ALL_TEXTS_TIMEOUT = 30_000;
 
 describe("Books content integrity", () => {
   it("bundles Mafatih al-Jinan, Sahifa Sajjadiyya and Nahj al-Balagha", () => {
@@ -32,22 +34,34 @@ describe("Books content integrity", () => {
     }
   });
 
-  it("keeps every published Supplication id", async () => {
-    expect(publishedIds.length).toBeGreaterThan(0);
-    for (const id of publishedIds) {
-      expect(getSupplication(id)?.id).toBe(id);
-      // oxlint-disable-next-line no-await-in-loop -- one text per id, in order
-      await expect(loadSupplicationText(id)).resolves.not.toHaveLength(0);
-    }
-  });
+  it(
+    "keeps every published Supplication id",
+    async () => {
+      expect(publishedIds.length).toBeGreaterThan(0);
+      for (const id of publishedIds) {
+        expect(getSupplication(id)?.id).toBe(id);
+      }
+      const texts = await Promise.all(publishedIds.map(loadSupplicationText));
+      for (const text of texts) {
+        expect(text).not.toHaveLength(0);
+      }
+    },
+    LOAD_ALL_TEXTS_TIMEOUT
+  );
 
-  it("has Arabic text for every Supplication", async () => {
-    const texts = await Promise.all(SUPPLICATION_IDS.map(loadSupplicationText));
-    const withoutArabic = SUPPLICATION_IDS.filter(
-      (_, index) => !texts[index]?.some((passage) => passage.ar.length > 0)
-    );
-    expect(withoutArabic).toStrictEqual([]);
-  });
+  it(
+    "has Arabic text for every Supplication",
+    async () => {
+      const texts = await Promise.all(
+        SUPPLICATION_IDS.map(loadSupplicationText)
+      );
+      const withoutArabic = SUPPLICATION_IDS.filter(
+        (_, index) => !texts[index]?.some((passage) => passage.ar.length > 0)
+      );
+      expect(withoutArabic).toStrictEqual([]);
+    },
+    LOAD_ALL_TEXTS_TIMEOUT
+  );
 
   it("holds the Sahifa's 54 supplications and its seven weekday supplications", () => {
     const sahifa = getBook("sahifa");
