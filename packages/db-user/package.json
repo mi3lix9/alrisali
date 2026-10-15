@@ -9,7 +9,8 @@
   },
   "scripts": {
     "check-types": "tsc -b",
-    "db:generate": "drizzle-kit generate && bun scripts/bundle-migrations.ts && oxfmt src/shared/migrations.ts"
+    "db:generate": "drizzle-kit generate",
+    "db:bundle": "bun scripts/bundle-migrations.ts && oxfmt src/shared/migrations.ts"
   },
   "dependencies": {
     "@alrisali/domain": "workspace:*",
