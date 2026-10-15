@@ -8,6 +8,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Events batched and retried offline
-- [ ] Admin reports computed server-side (server tests)
-- [ ] No third-party analytics
+- [x] Events batched and retried offline
+- [x] Admin reports computed server-side (server tests)
+- [x] No third-party analytics

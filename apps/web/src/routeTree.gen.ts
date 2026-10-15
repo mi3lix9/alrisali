@@ -18,6 +18,7 @@ import { Route as Char123LocaleChar125ContactRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$locale}/privacy'
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
+import { Route as AdminAuthedAnalyticsRouteImport } from './routes/admin/_authed/analytics'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
 
 const Char123LocaleChar125RouteRoute =
@@ -70,6 +71,11 @@ const AdminAuthedIndexRoute = AdminAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
+const AdminAuthedAnalyticsRoute = AdminAuthedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedHijriAdjustmentRoute =
   AdminAuthedHijriAdjustmentRouteImport.update({
     id: '/hijri-adjustment',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/': typeof AdminAuthedIndexRoute
 }
@@ -96,6 +103,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin': typeof AdminAuthedIndexRoute
 }
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/_authed/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
 }
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/analytics'
     | '/admin/hijri-adjustment'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}'
+    | '/admin/analytics'
     | '/admin/hijri-adjustment'
     | '/admin'
   id:
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/_authed/analytics'
     | '/admin/_authed/hijri-adjustment'
     | '/admin/_authed/'
   fileRoutesById: FileRoutesById
@@ -221,6 +233,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedIndexRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/analytics': {
+      id: '/admin/_authed/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAuthedAnalyticsRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/hijri-adjustment': {
       id: '/admin/_authed/hijri-adjustment'
       path: '/hijri-adjustment'
@@ -252,11 +271,13 @@ const Char123LocaleChar125RouteRouteWithChildren =
   )
 
 interface AdminAuthedRouteRouteChildren {
+  AdminAuthedAnalyticsRoute: typeof AdminAuthedAnalyticsRoute
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
 }
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
+  AdminAuthedAnalyticsRoute: AdminAuthedAnalyticsRoute,
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
 }

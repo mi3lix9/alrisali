@@ -51,7 +51,7 @@ export const en: LegalDocuments = {
       {
         heading: "Usage analytics and error reports",
         paragraphs: [
-          "The app sends us usage events — which screens and features are used — with an anonymous device identifier, your account identifier if you are signed in, and basic device information. We use them only to improve the app and never share them with advertising or analytics companies. Crash and error reports are sent to Sentry so we can fix problems.",
+          "The app sends us usage events — which screens and features are used — with an anonymous device identifier, your account identifier if you are signed in, basic device information, and your birth year if you choose to give it in Settings. We use them only to improve the app and never share them with advertising or analytics companies. Crash and error reports are sent to Sentry so we can fix problems.",
         ],
       },
       {

@@ -1,4 +1,5 @@
 import { accountRouter } from "@/features/account";
+import { analyticsRouter } from "@/features/analytics";
 import { hijriAdjustmentRouter } from "@/features/hijri-adjustment";
 import { quranRouter } from "@/features/quran";
 import { contentReplica } from "@/shared/lib/content-replica";
@@ -9,6 +10,7 @@ export const appRouter = os.router({
   healthCheck,
   contentReplica,
   account: accountRouter,
+  analytics: analyticsRouter,
   hijriAdjustment: hijriAdjustmentRouter,
   quran: quranRouter,
 });

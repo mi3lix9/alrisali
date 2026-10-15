@@ -2,6 +2,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { UsageAnalytics } from "@/features/analytics";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
@@ -36,6 +37,7 @@ const RootStack = () => {
 const Layout = () => (
   <AppProviders>
     <ReminderScheduler />
+    <UsageAnalytics />
     <RootStack />
   </AppProviders>
 );
