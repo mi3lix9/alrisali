@@ -21,4 +21,13 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `occasions` (\n\t`id` text PRIMARY KEY,\n\t`month` integer NOT NULL,\n\t`day` integer NOT NULL,\n\t`type` text NOT NULL,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`created_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015203817_gatherings",
+    statements: [
+      "CREATE TABLE `gatherings` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`description_ar` text DEFAULT '' NOT NULL,\n\t`description_en` text DEFAULT '' NOT NULL,\n\t`type` text NOT NULL,\n\t`date` text NOT NULL,\n\t`start_time` text NOT NULL,\n\t`end_time` text,\n\t`venue_name_ar` text NOT NULL,\n\t`venue_name_en` text DEFAULT '' NOT NULL,\n\t`venue_address` text DEFAULT '' NOT NULL,\n\t`latitude` real NOT NULL,\n\t`longitude` real NOT NULL,\n\t`speaker_id` text,\n\t`livestream_url` text,\n\t`attendance` text NOT NULL,\n\t`active` integer DEFAULT true NOT NULL\n);",
+      "CREATE TABLE `speakers` (\n\t`id` text PRIMARY KEY,\n\t`name_ar` text NOT NULL,\n\t`name_en` text DEFAULT '' NOT NULL,\n\t`photo_key` text\n);",
+      "CREATE INDEX `gatherings_date` ON `gatherings` (`date`);",
+      "CREATE INDEX `gatherings_speaker` ON `gatherings` (`speaker_id`);",
+    ],
+  },
 ];

@@ -20,6 +20,12 @@ const SECTIONS = [
     description:
       "Add, edit and delete the Occasions shown beside the built-in ones.",
   },
+  {
+    to: "/admin/gatherings",
+    title: "Gatherings",
+    description:
+      "Publish majalis, lectures and other Gatherings, and the Speakers who lead them.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

@@ -43,6 +43,13 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => (
           >
             Occasions
           </Link>
+          <Link
+            to="/admin/gatherings"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Gatherings
+          </Link>
         </nav>
         <UserMenu />
       </div>

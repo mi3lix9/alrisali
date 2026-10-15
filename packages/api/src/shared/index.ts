@@ -1,6 +1,17 @@
 import { oc } from "@orpc/contract";
 import { z } from "zod";
 
+import { createUploadContract } from "./uploads";
+
+export {
+  FILES_PATH,
+  fileUrl,
+  UPLOAD_RULES,
+  uploadRequestSchema,
+  uploadSchema,
+} from "./uploads";
+export type { Upload, UploadPurpose, UploadRequest } from "./uploads";
+
 /** Procedures no single feature owns. */
 export const sharedContract = {
   healthCheck: oc.output(z.literal("OK")),
@@ -16,4 +27,9 @@ export const sharedContract = {
       expiresAt: z.number().int(),
     })
   ),
+  /**
+   * A presigned upload of one file to the files bucket (Speaker photos,
+   * Slides, Library Assets). Admins only.
+   */
+  createUpload: createUploadContract,
 };

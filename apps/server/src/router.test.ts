@@ -5,6 +5,7 @@ import type { AddressInfo } from "node:net";
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import type { Auth } from "@alrisali/auth";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
+import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
 import {
   ContentReplicaReadOnlyError,
   createGlobalSettingsRepository,
@@ -43,6 +44,13 @@ import { z } from "zod";
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
+import {
+  FAKE_S3_CREDENTIALS,
+  startFakeS3,
+} from "@/shared/lib/fake-s3.test-helper";
+import type { FakeS3 } from "@/shared/lib/fake-s3.test-helper";
+import { createS3FileBucket } from "@/shared/lib/file-bucket";
+import type { FileBucket } from "@/shared/lib/file-bucket";
 import type { RecitationSource } from "@/shared/lib/recitation-source";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
@@ -64,6 +72,26 @@ const occasionDetails = (
 
 const publishedOccasions = z.object({ occasions: z.array(occasionSchema) });
 
+/** A Gathering as an Admin fills it in, without a Speaker. */
+const gatheringInput = (overrides: Record<string, unknown> = {}) => ({
+  title: { ar: "مجلس عزاء", en: "Majlis" },
+  description: { ar: "", en: "" },
+  type: "majlis",
+  date: "2026-10-20",
+  startTime: "19:30",
+  endTime: "21:00",
+  venue: {
+    name: { ar: "حسينية الرسول", en: "" },
+    address: "Qatif",
+    latitude: 26.56,
+    longitude: 50.01,
+  },
+  speakerId: null,
+  livestreamUrl: "https://www.youtube.com/live/abc",
+  attendance: "everyone",
+  active: true,
+  ...overrides,
+});
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
  * the router is listed here: adding one without its rule fails the suite.
@@ -79,6 +107,21 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "dailyContent.set": {
     access: "admin",
     input: { weekday: "friday", supplicationId: "sahifa-weekday-friday" },
+  },
+  createUpload: {
+    access: "admin",
+    input: { purpose: "speaker-photo", contentType: "image/png", size: 68 },
+  },
+  "gatherings.list": { access: "admin" },
+  "gatherings.save": { access: "admin", input: gatheringInput() },
+  "gatherings.remove": { access: "admin", input: { id: "gathering-1" } },
+  "gatherings.speakers.save": {
+    access: "admin",
+    input: { name: { ar: "الشيخ", en: "" }, photoKey: null },
+  },
+  "gatherings.speakers.remove": {
+    access: "admin",
+    input: { id: "speaker-1" },
   },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
@@ -163,6 +206,25 @@ let db: Database;
 let auth: Auth;
 let userDatabases: UserDatabaseHost;
 let content: ContentDatabase;
+let files: FileBucket;
+
+// An in-process stand-in for the Railway files bucket, started by the tests
+// that upload. Presigning needs no bucket, so the rest point nowhere.
+let bucket: FakeS3 | undefined;
+const FILES_BUCKET = "alrisali-files";
+const NO_BUCKET = "http://127.0.0.1:9";
+
+const startBucket = async () => {
+  bucket = await startFakeS3();
+};
+
+const stopBucket = async () => {
+  await bucket?.stop();
+  bucket = undefined;
+};
+
+const storedFile = (key: string) =>
+  bucket?.objects.get(`${FILES_BUCKET}/${key}`);
 
 // A local `tursodb --sync-server` stands in for Turso Cloud.
 let syncServer: SyncServer;
@@ -193,6 +255,14 @@ const setUp = async (host?: UserDatabaseHost) => {
   content = createContentDatabase({
     host: userDatabases,
     name: `content-${process.pid}-${contentDatabases}`,
+  });
+  files = createS3FileBucket({
+    bucket: FILES_BUCKET,
+    endpoint: bucket?.endpoint ?? NO_BUCKET,
+    region: FAKE_S3_CREDENTIALS.region,
+    accessKeyId: FAKE_S3_CREDENTIALS.accessKeyId,
+    secretAccessKey: FAKE_S3_CREDENTIALS.secretAccessKey,
+    pathStyle: true,
   });
 };
 
@@ -229,6 +299,7 @@ const callAs = async (headers: Headers, path: string, input?: unknown) => {
     userDatabases,
     content,
     recitation,
+    files,
     headers,
   });
   return call(entry[1], input ?? ACCESS[path]?.input, { context });
@@ -809,6 +880,241 @@ describe("Occasions managed by Admins", () => {
     await expect(
       createOccasionsRepository(replica.db).list()
     ).resolves.toStrictEqual([]);
+    await replica.close();
+  });
+});
+
+interface UploadOutput {
+  key: string;
+  url: string;
+  method: string;
+  headers: Record<string, string>;
+  expiresAt: number;
+}
+
+// The smallest valid PNG: 68 bytes.
+const PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
+  "base64"
+);
+
+const requestUpload = async (admin: Headers, input?: unknown) =>
+  (await callAs(admin, "createUpload", input)) as UploadOutput;
+
+/** What the admin web does with a presigned upload. */
+const putFile = (
+  upload: UploadOutput,
+  body: Buffer,
+  headers = upload.headers
+) => fetch(upload.url, { method: upload.method, headers, body });
+
+describe("uploads", () => {
+  beforeAll(async () => {
+    await startLocalCloud();
+    await startBucket();
+  });
+  beforeEach(() => setUp());
+
+  afterAll(async () => {
+    await stopBucket();
+    await stopLocalCloud();
+  });
+
+  it("lets an Admin upload a Speaker photo straight to the bucket", async () => {
+    const upload = await requestUpload(await signInAsAdmin());
+
+    expect(upload.key).toMatch(/^speaker-photo\/[\da-f-]{36}\.png$/u);
+    expect(upload.expiresAt).toBeGreaterThan(Date.now());
+    const response = await putFile(upload, PNG);
+
+    expect(response.status).toBe(200);
+    expect(storedFile(upload.key)).toStrictEqual({
+      body: PNG,
+      contentType: "image/png",
+    });
+  });
+
+  it("gives every upload its own key", async () => {
+    const admin = await signInAsAdmin();
+    const first = await requestUpload(admin);
+    const second = await requestUpload(admin);
+
+    expect(first.key).not.toBe(second.key);
+  });
+
+  it("refuses an anonymous caller and a Believer who is not an Admin", async () => {
+    await expect(requestUpload(new Headers())).rejects.toMatchObject({
+      code: "UNAUTHORIZED",
+    });
+    const believer = await signIn("google", idToken(googleBeliever));
+    await expect(requestUpload(believer)).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
+  });
+
+  it.each([
+    ["a type a Speaker photo cannot be", { contentType: "application/pdf" }],
+    ["a photo over 5 MiB", { size: 5 * 1024 * 1024 + 1 }],
+  ])("refuses %s", async (_, overrides) => {
+    await expect(
+      requestUpload(await signInAsAdmin(), {
+        purpose: "speaker-photo",
+        contentType: "image/png",
+        size: PNG.length,
+        ...overrides,
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("binds the presigned URL to the declared type and size", async () => {
+    const upload = await requestUpload(await signInAsAdmin());
+
+    const otherType = await putFile(upload, PNG, {
+      "content-type": "text/html",
+    });
+    const otherSize = await putFile(upload, Buffer.concat([PNG, PNG]));
+
+    expect(otherType.status).toBe(403);
+    expect(otherSize.status).toBe(403);
+    expect(storedFile(upload.key)).toBeUndefined();
+  });
+});
+
+/** A device's view of the Gatherings it pulled. */
+const pulledGatherings = async (directory: TemporaryDirectory) => {
+  const { replica } = await openDeviceReplica(directory, () => true);
+  await replica.sync();
+  const repository = createGatheringsRepository(replica.db);
+  const pulled = {
+    gatherings: await repository.gatherings(),
+    speakers: await repository.speakers(),
+  };
+  await replica.close();
+  return pulled;
+};
+
+describe("Gatherings and Speakers", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(async () => {
+    await startLocalCloud();
+    await startBucket();
+  });
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(async () => {
+    await stopBucket();
+    await stopLocalCloud();
+  });
+
+  it("publishes a Speaker with an uploaded photo and their Gathering to devices", async () => {
+    const admin = await signInAsAdmin();
+    const upload = await requestUpload(admin);
+    await putFile(upload, PNG);
+    const speaker = await callAs(admin, "gatherings.speakers.save", {
+      name: { ar: "الشيخ علي", en: "Sheikh Ali" },
+      photoKey: upload.key,
+    });
+    const gathering = await callAs(
+      admin,
+      "gatherings.save",
+      gatheringInput({ speakerId: (speaker as { id: string }).id })
+    );
+
+    await expect(pulledGatherings(device)).resolves.toStrictEqual({
+      gatherings: [gathering],
+      speakers: [speaker],
+    });
+  });
+
+  it("updates a Gathering in place and removes it", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "gatherings.save",
+      gatheringInput()
+    )) as {
+      id: string;
+    };
+
+    await callAs(
+      admin,
+      "gatherings.save",
+      gatheringInput({ id, active: false })
+    );
+    await expect(callAs(admin, "gatherings.list")).resolves.toMatchObject({
+      gatherings: [{ id, active: false }],
+    });
+    await callAs(admin, "gatherings.remove", { id });
+    await expect(callAs(admin, "gatherings.list")).resolves.toStrictEqual({
+      gatherings: [],
+      speakers: [],
+    });
+  });
+
+  it("refuses a Gathering whose Speaker does not exist", async () => {
+    await expect(
+      callAs(
+        await signInAsAdmin(),
+        "gatherings.save",
+        gatheringInput({ speakerId: "nobody" })
+      )
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("refuses a Gathering that ends before it starts", async () => {
+    await expect(
+      callAs(
+        await signInAsAdmin(),
+        "gatherings.save",
+        gatheringInput({ startTime: "20:00", endTime: "19:00" })
+      )
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("takes only a photo uploaded as a Speaker photo", async () => {
+    await expect(
+      callAs(await signInAsAdmin(), "gatherings.speakers.save", {
+        name: { ar: "الشيخ", en: "" },
+        photoKey: "library-asset/00000000-0000-4000-8000-000000000000.png",
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("keeps a Speaker while a Gathering names them", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(admin, "gatherings.speakers.save", {
+      name: { ar: "الشيخ", en: "" },
+      photoKey: null,
+    })) as { id: string };
+    const gathering = (await callAs(
+      admin,
+      "gatherings.save",
+      gatheringInput({ speakerId: id })
+    )) as { id: string };
+
+    await expect(
+      callAs(admin, "gatherings.speakers.remove", { id })
+    ).rejects.toMatchObject({ code: "CONFLICT" });
+    await callAs(admin, "gatherings.remove", { id: gathering.id });
+    await expect(
+      callAs(admin, "gatherings.speakers.remove", { id })
+    ).resolves.toStrictEqual({ id });
+  });
+
+  it("shows devices nothing before their first pull", async () => {
+    const { replica } = await openDeviceReplica(device, () => false);
+    const repository = createGatheringsRepository(replica.db);
+
+    await expect(repository.gatherings()).resolves.toStrictEqual([]);
+    await expect(repository.speakers()).resolves.toStrictEqual([]);
     await replica.close();
   });
 });

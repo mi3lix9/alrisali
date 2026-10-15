@@ -19,6 +19,7 @@ import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
 import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
+import { Route as AdminAuthedGatheringsRouteImport } from './routes/admin/_authed/gatherings'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
 import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
 
@@ -77,6 +78,11 @@ const AdminAuthedDailyContentRoute = AdminAuthedDailyContentRouteImport.update({
   path: '/daily-content',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
+const AdminAuthedGatheringsRoute = AdminAuthedGatheringsRouteImport.update({
+  id: '/gatherings',
+  path: '/gatherings',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedHijriAdjustmentRoute =
   AdminAuthedHijriAdjustmentRouteImport.update({
     id: '/hijri-adjustment',
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
+  '/admin/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/': typeof AdminAuthedIndexRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
+  '/admin/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin': typeof AdminAuthedIndexRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
+  '/admin/_authed/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}/'
     | '/admin/daily-content'
+    | '/admin/gatherings'
     | '/admin/hijri-adjustment'
     | '/admin/occasions'
     | '/admin/'
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}'
     | '/admin/daily-content'
+    | '/admin/gatherings'
     | '/admin/hijri-adjustment'
     | '/admin/occasions'
     | '/admin'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}/'
     | '/admin/_authed/daily-content'
+    | '/admin/_authed/gatherings'
     | '/admin/_authed/hijri-adjustment'
     | '/admin/_authed/occasions'
     | '/admin/_authed/'
@@ -252,6 +264,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedDailyContentRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/gatherings': {
+      id: '/admin/_authed/gatherings'
+      path: '/gatherings'
+      fullPath: '/admin/gatherings'
+      preLoaderRoute: typeof AdminAuthedGatheringsRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/hijri-adjustment': {
       id: '/admin/_authed/hijri-adjustment'
       path: '/hijri-adjustment'
@@ -291,6 +310,7 @@ const Char123LocaleChar125RouteRouteWithChildren =
 
 interface AdminAuthedRouteRouteChildren {
   AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
+  AdminAuthedGatheringsRoute: typeof AdminAuthedGatheringsRoute
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
   AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
@@ -298,6 +318,7 @@ interface AdminAuthedRouteRouteChildren {
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
+  AdminAuthedGatheringsRoute: AdminAuthedGatheringsRoute,
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
   AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,

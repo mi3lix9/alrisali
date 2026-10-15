@@ -40,6 +40,7 @@ export type {
   HijriYearMonth,
   Weekday,
 } from "./hijri";
+export { fileKeySchema } from "./files";
 export { distanceKm, LOCATION_REFRESH_KM, locationSchema } from "./location";
 export type { Location } from "./location";
 export {

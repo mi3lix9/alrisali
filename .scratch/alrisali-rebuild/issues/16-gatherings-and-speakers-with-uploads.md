@@ -6,8 +6,9 @@
 
 **Blocked by:** 13 (Admin web foundation and content replica)
 
-**Status:** ready-for-agent
+**Status:** done — pending env: FILES_BUCKET, FILES_BUCKET_ENDPOINT, FILES_BUCKET_REGION, FILES_BUCKET_ACCESS_KEY_ID, FILES_BUCKET_SECRET_ACCESS_KEY, GOOGLE_MAPS_ANDROID_API_KEY; pending simulator verification
 
-- [ ] Uploads require an Admin (server test)
-- [ ] Device views list/day/week/month and an expo-maps map
-- [ ] Speaker filter and detail with livestream link work
+- [x] Uploads require an Admin (server test)
+- [x] Device views list/day/week/month and an expo-maps map
+- [x] Speaker filter and detail with livestream link work
+- [ ] Live upload to the Railway bucket (tested against an in-process S3 fake): pending env: FILES_BUCKET, FILES_BUCKET_ENDPOINT, FILES_BUCKET_REGION, FILES_BUCKET_ACCESS_KEY_ID, FILES_BUCKET_SECRET_ACCESS_KEY; Android map needs GOOGLE_MAPS_ANDROID_API_KEY; screens pending simulator verification
