@@ -17,6 +17,7 @@
   "dependencies": {
     "@alrisali/api": "workspace:*",
     "@alrisali/content": "workspace:*",
+    "@alrisali/db-content": "workspace:*",
     "@alrisali/db-user": "workspace:*",
     "@alrisali/domain": "workspace:*",
     "@alrisali/i18n": "workspace:*",

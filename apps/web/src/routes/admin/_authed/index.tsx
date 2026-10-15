@@ -2,10 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { DashboardScreen } from "@/features/admin";
 
-const RouteComponent = () => (
+const DashboardRoute = () => (
   <DashboardScreen session={Route.useRouteContext().session} />
 );
 
-export const Route = createFileRoute("/_auth/dashboard")({
-  component: RouteComponent,
+export const Route = createFileRoute("/admin/_authed/")({
+  component: DashboardRoute,
 });

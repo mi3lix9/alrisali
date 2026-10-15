@@ -6,7 +6,7 @@
 
 **Blocked by:** 23 (Quran reader: Page Mode, Surah Mode, full-screen controls)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Reader model tests: return position, scrubber domains, search
-- [ ] All navigation works offline
+- [x] Reader model tests: return position, scrubber domains, search
+- [x] All navigation works offline

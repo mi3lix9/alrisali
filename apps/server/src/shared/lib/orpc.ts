@@ -1,4 +1,5 @@
 import { contract } from "@alrisali/api";
+import { isAdmin } from "@alrisali/auth";
 import { ORPCError, implement } from "@orpc/server";
 
 import type { Context } from "../../context";
@@ -16,4 +17,16 @@ export const authed = os.use(({ context, next }) => {
       session: context.session,
     },
   });
+});
+
+/**
+ * Procedures for Admins only: a signed-in Believer without the Admin role is
+ * refused. The role is read from the session's user on every request, so
+ * revoking it takes effect at once.
+ */
+export const admin = authed.use(({ context, next }) => {
+  if (!isAdmin(context.session.user)) {
+    throw new ORPCError("FORBIDDEN");
+  }
+  return next();
 });

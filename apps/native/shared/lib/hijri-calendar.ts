@@ -15,17 +15,12 @@ import { useTranslation } from "react-i18next";
 import type { Temporal } from "temporal-polyfill";
 
 import { useBelieverSettings } from "./believer-settings";
+import { useGlobalHijriAdjustment } from "./content-database";
 import { launchLanguage } from "./preferences";
 
 // Probes this engine's Intl for Umm al-Qura once; Hermes may not honour it,
 // and then every Hijri Date comes from the arithmetic calendar.
 const converter = defaultHijriConverter();
-
-/**
- * The Admins' Hijri Adjustment. It is published through the content replica,
- * which does not reach devices yet, so it adds nothing for now.
- */
-const ADMIN_HIJRI_ADJUSTMENT = 0;
 
 /**
  * The Hijri calendar every screen shows dates from, shifted by the Admins'
@@ -34,7 +29,7 @@ const ADMIN_HIJRI_ADJUSTMENT = 0;
 export const useHijriCalendar = (): HijriCalendar => {
   const { data: settings } = useBelieverSettings();
   const adjustment = effectiveHijriAdjustment({
-    admin: ADMIN_HIJRI_ADJUSTMENT,
+    admin: useGlobalHijriAdjustment(),
     believer: settings?.hijriAdjustment ?? DEFAULT_HIJRI_ADJUSTMENT,
   });
   return useMemo(

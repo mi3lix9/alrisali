@@ -8,6 +8,6 @@ const LoginRoute = () => (
   </AdminLayout>
 );
 
-export const Route = createFileRoute("/login")({
+export const Route = createFileRoute("/admin/login")({
   component: LoginRoute,
 });

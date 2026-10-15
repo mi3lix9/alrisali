@@ -10,6 +10,7 @@
     "check-types": "tsc -b"
   },
   "dependencies": {
+    "@alrisali/domain": "workspace:*",
     "@orpc/contract": "catalog:",
     "zod": "catalog:"
   },
