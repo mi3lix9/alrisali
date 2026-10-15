@@ -74,4 +74,11 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `prayer_logs_date_idx` ON `prayer_logs` (`date`);",
     ],
   },
+  {
+    tag: "20261015195759_reminder_settings_and_message_style",
+    statements: [
+      "CREATE TABLE `reminder_settings` (\n\t`id` text PRIMARY KEY,\n\t`salah_rules` text,\n\t`imsak_rule` text,\n\t`quiet_hours_enabled` integer,\n\t`quiet_hours_start` integer,\n\t`quiet_hours_end` integer\n);",
+      "ALTER TABLE `believer_settings` ADD `message_style` text;",
+    ],
+  },
 ];

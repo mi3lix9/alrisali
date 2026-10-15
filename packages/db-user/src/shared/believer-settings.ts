@@ -2,15 +2,18 @@ import {
   calculationMethodSchema,
   DEFAULT_CALCULATION_METHOD,
   DEFAULT_HIJRI_ADJUSTMENT,
+  DEFAULT_MESSAGE_STYLE,
   hijriAdjustmentSchema,
   DEFAULT_IMSAK_MINUTES,
   imsakMinutesSchema,
   locationSchema,
+  messageStyleSchema,
   timeFormatSchema,
 } from "@alrisali/domain/shared";
 import type {
   CalculationMethod,
   Location,
+  MessageStyle,
   TimeFormat,
 } from "@alrisali/domain/shared";
 import { eq } from "drizzle-orm";
@@ -30,6 +33,8 @@ export interface BelieverSettings {
   imsakMinutes: number;
   /** 12- or 24-hour times; null follows the device's clock setting. */
   timeFormat: TimeFormat | null;
+  /** Classic (scriptural sources) or Modern (gentle coaching). */
+  messageStyle: MessageStyle;
 }
 
 /** The settings to change; anything left out keeps its saved value. */
@@ -51,34 +56,48 @@ const changeSchema = z.object({
   locationFollowsDevice: z.boolean().optional(),
   imsakMinutes: imsakMinutesSchema.optional(),
   timeFormat: timeFormatSchema.nullable().optional(),
+  messageStyle: messageStyleSchema.optional(),
 });
 
 type Row = typeof believerSettings.$inferSelect;
 
+/** A stored value if this app knows it, else the fallback. */
+const known = <T>(schema: z.ZodType<T>, stored: unknown, fallback: T): T => {
+  const parsed = schema.safeParse(stored);
+  return parsed.success ? parsed.data : fallback;
+};
+
 const toSettings = (row: Row | undefined): BelieverSettings => {
   // A newer app may have synced values this one does not know.
-  const method = calculationMethodSchema.safeParse(row?.calculationMethod);
-  const adjustment = hijriAdjustmentSchema.safeParse(row?.hijriAdjustment);
-  const imsakMinutes = imsakMinutesSchema.safeParse(row?.imsakMinutes);
-  const timeFormat = timeFormatSchema.safeParse(row?.timeFormat);
   const latitude = row?.locationLatitude ?? null;
   const longitude = row?.locationLongitude ?? null;
   return {
-    calculationMethod: method.success
-      ? method.data
-      : DEFAULT_CALCULATION_METHOD,
+    calculationMethod: known(
+      calculationMethodSchema,
+      row?.calculationMethod,
+      DEFAULT_CALCULATION_METHOD
+    ),
     location:
       latitude === null || longitude === null
         ? null
         : { latitude, longitude, name: row?.locationName ?? null },
-    hijriAdjustment: adjustment.success
-      ? adjustment.data
-      : DEFAULT_HIJRI_ADJUSTMENT,
+    hijriAdjustment: known(
+      hijriAdjustmentSchema,
+      row?.hijriAdjustment,
+      DEFAULT_HIJRI_ADJUSTMENT
+    ),
     locationFollowsDevice: row?.locationFollowsDevice ?? true,
-    imsakMinutes: imsakMinutes.success
-      ? imsakMinutes.data
-      : DEFAULT_IMSAK_MINUTES,
-    timeFormat: timeFormat.success ? timeFormat.data : null,
+    imsakMinutes: known(
+      imsakMinutesSchema,
+      row?.imsakMinutes,
+      DEFAULT_IMSAK_MINUTES
+    ),
+    timeFormat: known(timeFormatSchema.nullable(), row?.timeFormat, null),
+    messageStyle: known(
+      messageStyleSchema,
+      row?.messageStyle,
+      DEFAULT_MESSAGE_STYLE
+    ),
   };
 };
 
@@ -89,6 +108,7 @@ const toColumns = ({
   locationFollowsDevice,
   imsakMinutes,
   timeFormat,
+  messageStyle,
 }: BelieverSettings) => ({
   calculationMethod,
   locationLatitude: location?.latitude ?? null,
@@ -98,6 +118,7 @@ const toColumns = ({
   locationFollowsDevice,
   imsakMinutes,
   timeFormat,
+  messageStyle,
 });
 
 export const createBelieverSettingsRepository = (
@@ -129,6 +150,7 @@ export const createBelieverSettingsRepository = (
         parsed.timeFormat === undefined
           ? current.timeFormat
           : parsed.timeFormat,
+      messageStyle: parsed.messageStyle ?? current.messageStyle,
     };
     const columns = toColumns(next);
     await db
