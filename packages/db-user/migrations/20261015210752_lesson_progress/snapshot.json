@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "64af559f-230d-48ab-8e51-8d22ef4add59",
-  "prevIds": ["605399b3-62e9-489f-8b4a-60602877f38c"],
+  "id": "28937fc8-8795-4c77-b072-0e65cea3d6de",
+  "prevIds": ["cfebc5ea-ebb0-44d7-a207-20b0f4cbfc7d"],
   "ddl": [
     {
       "name": "favorites",
@@ -45,7 +45,15 @@
       "entityType": "tables"
     },
     {
+      "name": "act_completions",
+      "entityType": "tables"
+    },
+    {
       "name": "program_subscriptions",
+      "entityType": "tables"
+    },
+    {
+      "name": "seen_programs",
       "entityType": "tables"
     },
     {
@@ -524,6 +532,56 @@
       "generated": null,
       "name": "id",
       "entityType": "columns",
+      "table": "act_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "program_id",
+      "entityType": "columns",
+      "table": "act_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "act_id",
+      "entityType": "columns",
+      "table": "act_completions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "act_completions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "completed_at",
+      "entityType": "columns",
+      "table": "act_completions"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
       "table": "program_subscriptions"
     },
     {
@@ -555,6 +613,26 @@
       "name": "subscribed_at",
       "entityType": "columns",
       "table": "program_subscriptions"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "seen_programs"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "seen_at",
+      "entityType": "columns",
+      "table": "seen_programs"
     },
     {
       "type": "text",
@@ -1019,8 +1097,22 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
+      "name": "act_completions_pk",
+      "table": "act_completions",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
       "name": "program_subscriptions_pk",
       "table": "program_subscriptions",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "seen_programs_pk",
+      "table": "seen_programs",
       "entityType": "pks"
     },
     {
@@ -1155,6 +1247,20 @@
       "name": "prayer_logs_date_idx",
       "entityType": "indexes",
       "table": "prayer_logs"
+    },
+    {
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "act_completions_date_idx",
+      "entityType": "indexes",
+      "table": "act_completions"
     },
     {
       "columns": [

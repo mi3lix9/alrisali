@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 /**
  * The Believer's Subscriptions. The id is the Program's id, so subscribing on
@@ -11,4 +11,31 @@ export const programSubscriptions = sqliteTable("program_subscriptions", {
   paused: integer("paused", { mode: "boolean" }).notNull().default(false),
   /** Milliseconds since the epoch. */
   subscribedAt: integer("subscribed_at").notNull(),
+});
+
+/**
+ * One row per Act the Believer completed on a date; undoing deletes it. The
+ * id is `<programId>:<actId>:<date>`, so the same Act Completion made on two
+ * devices is one row.
+ */
+export const actCompletions = sqliteTable(
+  "act_completions",
+  {
+    id: text("id").primaryKey(),
+    programId: text("program_id").notNull(),
+    actId: text("act_id").notNull(),
+    /** ISO calendar date (`YYYY-MM-DD`) in the Believer's local time. */
+    date: text("date").notNull(),
+    completedAt: integer("completed_at", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [index("act_completions_date_idx").on(table.date)]
+);
+
+/**
+ * The Programs the Believer has opened (id = Program id); the others carry a
+ * "new" badge.
+ */
+export const seenPrograms = sqliteTable("seen_programs", {
+  id: text("id").primaryKey(),
+  seenAt: integer("seen_at", { mode: "timestamp_ms" }).notNull(),
 });

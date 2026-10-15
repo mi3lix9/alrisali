@@ -117,7 +117,15 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015205741_lesson_progress",
+    tag: "20261015205608_act_completions",
+    statements: [
+      "CREATE TABLE `act_completions` (\n\t`id` text PRIMARY KEY,\n\t`program_id` text NOT NULL,\n\t`act_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `seen_programs` (\n\t`id` text PRIMARY KEY,\n\t`seen_at` integer NOT NULL\n);",
+      "CREATE INDEX `act_completions_date_idx` ON `act_completions` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015210752_lesson_progress",
     statements: [
       "CREATE TABLE `lesson_progress` (\n\t`lesson_id` text PRIMARY KEY,\n\t`current_slide` integer NOT NULL,\n\t`furthest_slide` integer NOT NULL,\n\t`completed_at` integer,\n\t`updated_at` integer NOT NULL\n);",
     ],
