@@ -3,6 +3,7 @@ import {
   CUSTOM_PACE_LIMITS,
   PACES,
   RAKAH_COUNT,
+  RECOGNITION_MODES,
 } from "@alrisali/domain/prayer-assistant";
 import type { PrayerAssistantSettings } from "@alrisali/domain/prayer-assistant";
 import { SALAH } from "@alrisali/domain/shared";
@@ -21,7 +22,10 @@ interface SalahSetupProps {
   onStart: (salah: Salah) => void;
 }
 
-/** Choose the Salah, the Pace and the bow sensitivity, then start. */
+/**
+ * Choose the Salah, the Recognition Mode, the Pace and the bow sensitivity,
+ * then start.
+ */
 export const SalahSetup = ({
   settings,
   onChange,
@@ -53,6 +57,35 @@ export const SalahSetup = ({
                   name: t(`salah.${option}`),
                   count: RAKAH_COUNT[option],
                 })}
+              />
+            ))}
+          </RadioGroup>
+        </Card.Content>
+      </Card>
+      <Card>
+        <Card.Header>
+          <Card.Title>{t("setup.recognitionMode")}</Card.Title>
+          <Card.Description>
+            {t("setup.recognitionModeDescription")}
+          </Card.Description>
+        </Card.Header>
+        <Card.Content>
+          <RadioGroup
+            value={settings.recognitionMode}
+            onValueChange={(value) => {
+              const recognitionMode = RECOGNITION_MODES.find(
+                (candidate) => candidate === value
+              );
+              if (recognitionMode) {
+                onChange({ recognitionMode });
+              }
+            }}
+          >
+            {RECOGNITION_MODES.map((option) => (
+              <RadioGroup.Item
+                key={option}
+                value={option}
+                label={t(`mode.${option}`)}
               />
             ))}
           </RadioGroup>

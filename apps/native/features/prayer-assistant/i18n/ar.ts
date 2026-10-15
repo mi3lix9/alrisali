@@ -9,6 +9,8 @@ export const ar = {
     salahRakahs_two: "{{name}} · ركعتان",
     salahRakahs_few: "{{name}} · {{count}} ركعات",
     salahRakahs_other: "{{name}} · {{count}} ركعة",
+    recognitionMode: "طريقة التعرّف",
+    recognitionModeDescription: "كيف يعرف المساعد أنك انتقلت إلى الركن التالي.",
     pace: "الوتيرة",
     paceDescription: "كم ينتظر المساعد في كل ركن قبل أن يمضي.",
     customHold: "مدة كل ركن",
@@ -26,6 +28,13 @@ export const ar = {
     normal: "معتدلة",
     fast: "سريعة",
     custom: "مخصّصة",
+  },
+  mode: {
+    tap: "باللمس",
+    camera: "الكاميرا",
+    "head-height": "ارتفاع الرأس",
+    sound: "الصوت (التكبير)",
+    mat: "السجادة",
   },
   salah: {
     fajr: "الفجر",

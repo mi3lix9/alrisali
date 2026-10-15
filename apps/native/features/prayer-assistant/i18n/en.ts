@@ -16,6 +16,9 @@ export const en: Catalog<typeof ar> = {
     salahRakahs_two: "{{name}} · {{count}} Rak'ahs",
     salahRakahs_few: "{{name}} · {{count}} Rak'ahs",
     salahRakahs_other: "{{name}} · {{count}} Rak'ahs",
+    recognitionMode: "Recognition mode",
+    recognitionModeDescription:
+      "How the assistant knows you moved to the next Position.",
     pace: "Pace",
     paceDescription: "How long the assistant waits in each Position.",
     customHold: "Each Position",
@@ -33,6 +36,13 @@ export const en: Catalog<typeof ar> = {
     normal: "Normal",
     fast: "Fast",
     custom: "Custom",
+  },
+  mode: {
+    tap: "Tap",
+    camera: "Camera",
+    "head-height": "Head height",
+    sound: "Sound (Takbir)",
+    mat: "Mat",
   },
   salah: {
     fajr: "Fajr",
