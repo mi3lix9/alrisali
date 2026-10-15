@@ -19,7 +19,7 @@ const RootStack = () => {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="settings"
-        options={{ title: t("settings"), presentation: "modal" }}
+        options={{ headerShown: false, presentation: "modal" }}
       />
       <Stack.Screen
         name="account"
