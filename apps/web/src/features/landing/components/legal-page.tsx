@@ -1,4 +1,4 @@
-import type { LegalDocument } from "../i18n/copy";
+import type { LegalDocument } from "@alrisali/i18n/legal";
 
 export const LegalPage = ({ document }: { document: LegalDocument }) => (
   <article className="container mx-auto max-w-3xl px-4 py-10">

@@ -25,6 +25,7 @@
       "version": "1.0.0",
       "dependencies": {
         "@alrisali/api": "workspace:*",
+        "@alrisali/content": "workspace:*",
         "@alrisali/db-user": "workspace:*",
         "@alrisali/domain": "workspace:*",
         "@alrisali/i18n": "workspace:*",

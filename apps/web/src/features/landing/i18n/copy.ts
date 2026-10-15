@@ -1,15 +1,4 @@
-export interface LegalSection {
-  heading: string;
-  paragraphs: readonly string[];
-  items?: readonly string[];
-}
-
-export interface LegalDocument {
-  title: string;
-  description: string;
-  lastUpdated: string;
-  sections: readonly LegalSection[];
-}
+import type { LegalDocument } from "@alrisali/i18n/legal";
 
 export interface SiteCopy {
   appName: string;
