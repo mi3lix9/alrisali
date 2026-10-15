@@ -20,7 +20,8 @@ bunx e2e run tests/native/prayer-log.e2e.ts --target ios   # one file
 
 - The iOS build reads `apps/native/.env` (prebuild needs `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID`). Change JavaScript only and Metro serves it; rebuild only after native changes (a new native module, `app.config.ts`).
 - `E2E_IOS_APP_PATH` points at another `.app`; `E2E_IOS_DEVICE` picks another simulator.
-- Free the disk afterwards: `rm -rf apps/native/ios/build ~/Library/Developer/Xcode/DerivedData/alrsaly-*`.
+- Free the disk afterwards: `rm -rf apps/native/ios ~/Library/Developer/Xcode/DerivedData/alrsaly-*` (prebuild regenerates `ios/`).
+- Metro writes `apps/native/.expo/types/router.d.ts`. After pulling new routes it goes stale and `bun run check` fails on unknown hrefs; delete `apps/native/.expo/types`.
 - A failed test writes a trace page under `.e2e/results/<test>/trace.md` with the screen as the engine read it and a screenshot.
 
 ## Write a journey
