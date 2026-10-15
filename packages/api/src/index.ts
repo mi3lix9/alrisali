@@ -1,6 +1,7 @@
 import type { ContractRouterClient } from "@orpc/contract";
 
 import { accountContract } from "./account";
+import { quranContract } from "./quran";
 import { sharedContract } from "./shared";
 
 // The whole oRPC API: each feature's contract under its own key. The server
@@ -8,6 +9,7 @@ import { sharedContract } from "./shared";
 export const contract = {
   ...sharedContract,
   account: accountContract,
+  quran: quranContract,
 };
 
 export type AppRouterClient = ContractRouterClient<typeof contract>;

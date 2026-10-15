@@ -43,3 +43,20 @@ export type {
   ReaderAction,
   ReaderMode,
 } from "./reader";
+export {
+  createRecitationCache,
+  nextAyah,
+  RECITATION_CACHE_MAX_AGE_MS,
+  recitationPlayback,
+  recitationStart,
+  verseOfTheDay,
+} from "./recitation";
+export type {
+  CachedRecitation,
+  RecitationCache,
+  RecitationCacheOptions,
+  RecitationCacheStore,
+  RecitationEvent,
+  RecitationPlayback,
+  RecitedAyah,
+} from "./recitation";

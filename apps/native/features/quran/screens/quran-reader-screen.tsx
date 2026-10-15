@@ -5,6 +5,7 @@ import {
   openReader,
   pagePosition,
   readerReducer,
+  recitationStart,
 } from "@alrisali/domain/quran";
 import type { QuranReaderSettings } from "@alrisali/domain/quran";
 import { router, Stack, useLocalSearchParams } from "expo-router";
@@ -22,6 +23,7 @@ import type { AyahActions } from "../components/ayah-sheet";
 import { PageMode } from "../components/page-mode";
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
+import { RecitationPill } from "../components/recitation-pill";
 import { SurahMode } from "../components/surah-mode";
 import {
   useQuranReaderSettings,
@@ -38,6 +40,9 @@ interface ReaderParams {
   surah?: string;
   [key: string]: string | undefined;
 }
+
+/** Space between the recitation pill and the screen's bottom edge. */
+const RECITATION_PILL_GAP = 24;
 
 const ReaderHint = () => {
   const { t } = useTranslation("quran");
@@ -166,6 +171,14 @@ const Reader = ({
           }
         />
       ) : null}
+      <RecitationPill
+        start={recitationStart(state)}
+        reciterId={settings.reciterId}
+        chromeVisible={chrome.visible}
+        bottom={insets.bottom + RECITATION_PILL_GAP}
+        onReciterChange={(reciterId) => update.mutate({ reciterId })}
+        onInteract={() => send({ type: "interact" })}
+      />
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}

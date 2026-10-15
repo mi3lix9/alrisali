@@ -33,6 +33,8 @@ export const quranReaderSettingsSchema = z.object({
     .int()
     .min(SURAH_FONT_SIZE.min)
     .max(SURAH_FONT_SIZE.max),
+  /** The Quran Foundation recitation the reader and Verse of the Day play. */
+  reciterId: z.number().int().positive(),
 });
 
 /** How the Believer likes to read; kept in their database. */
@@ -42,6 +44,8 @@ export const DEFAULT_QURAN_READER_SETTINGS: QuranReaderSettings = {
   mode: "page",
   pageNav: "horizontal",
   surahFontSize: 26,
+  /** Mishari Rashid al-Afasy (Murattal). */
+  reciterId: 7,
 };
 
 export interface QuranReaderState {

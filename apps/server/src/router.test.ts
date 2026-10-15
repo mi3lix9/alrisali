@@ -23,6 +23,7 @@ import {
 } from "vitest";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
+import type { RecitationSource } from "@/shared/lib/recitation-source";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 import { createContext } from "./context";
@@ -39,6 +40,11 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "account.privateData": { access: "believer" },
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
+  "quran.reciters": { access: "anonymous" },
+  "quran.surahAudio": {
+    access: "anonymous",
+    input: { reciterId: 7, surah: 1 },
+  },
 };
 
 const proceduresOf = (
@@ -78,6 +84,25 @@ const TEST_ENV = {
   CORS_ORIGIN: "http://localhost:3001",
   GOOGLE_CLIENT_IDS: "web-client.apps.googleusercontent.com",
   APPLE_BUNDLE_IDS: "com.alrisali.app",
+};
+
+// Stand-in for the Quran Foundation audio API.
+const recitation: RecitationSource = {
+  reciters: () =>
+    Promise.resolve([
+      {
+        id: 7,
+        name: { ar: "مشاري العفاسي", en: "Mishary Alafasy" },
+        style: null,
+      },
+    ]),
+  surahAudio: (reciterId, surah) =>
+    Promise.resolve([
+      {
+        ayah: `${surah}:1`,
+        url: `https://verses.quran.foundation/${reciterId}/001001.mp3`,
+      },
+    ]),
 };
 
 const pathsFor = (access: Access): string[] =>
@@ -140,7 +165,13 @@ const callAs = async (headers: Headers, path: string) => {
   if (!entry) {
     throw new Error(`No procedure ${path}`);
   }
-  const context = await createContext({ auth, db, userDatabases, headers });
+  const context = await createContext({
+    auth,
+    db,
+    userDatabases,
+    recitation,
+    headers,
+  });
   return call(entry[1], ACCESS[path]?.input, { context });
 };
 
