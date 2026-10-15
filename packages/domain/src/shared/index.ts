@@ -5,6 +5,12 @@ export {
 } from "./calculation-method";
 export type { CalculationMethod } from "./calculation-method";
 export {
+  habitScheduleSchema,
+  isHabitDueOn,
+  serialiseHabitSchedule,
+} from "./habit-schedule";
+export type { HabitReminderPlan, HabitSchedule } from "./habit-schedule";
+export {
   addHijriMonths,
   createHijriCalendar,
   createUmmAlQuraConverter,

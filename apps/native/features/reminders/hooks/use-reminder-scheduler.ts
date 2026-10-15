@@ -1,7 +1,8 @@
-import { planReminders } from "@alrisali/domain/reminders";
+import { habitReminderSource, planReminders } from "@alrisali/domain/reminders";
 import type { ReminderSettings } from "@alrisali/domain/reminders";
 import type {
   CalculationMethod,
+  HabitReminderPlan,
   Location,
   MessageStyle,
 } from "@alrisali/domain/shared";
@@ -37,6 +38,7 @@ interface PlanningSettings {
 const planAndSync = async (
   believer: PlanningSettings,
   settings: ReminderSettings,
+  habits: readonly HabitReminderPlan[],
   t: TFunction<"reminders">
 ): Promise<void> => {
   const { location, calculationMethod, imsakMinutes, messageStyle } = believer;
@@ -55,6 +57,7 @@ const planAndSync = async (
       : null,
     settings,
     messageStyle,
+    sources: [habitReminderSource(habits, messageStyle)],
   });
   try {
     await syncReminders(
@@ -71,10 +74,14 @@ const planAndSync = async (
 /**
  * Keeps the rolling window of Reminders scheduled: on launch, whenever the
  * app returns to the foreground (topping it up and following a new time
- * zone), as soon as any setting it depends on changes, and when
+ * zone), as soon as any setting or Habit it depends on changes, and when
  * notifications are allowed (in onboarding or on the Reminders screen).
+ * `habits` is undefined while they load, so their Reminders are not cancelled
+ * meanwhile.
  */
-export const useReminderScheduler = (): void => {
+export const useReminderScheduler = (
+  habits: readonly HabitReminderPlan[] | undefined
+): void => {
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
@@ -91,15 +98,15 @@ export const useReminderScheduler = (): void => {
   );
 
   useEffect(() => {
-    if (!believer || !settings || granted === undefined) {
+    if (!believer || !settings || !habits || granted === undefined) {
       return;
     }
-    void planAndSync(believer, settings, t);
+    void planAndSync(believer, settings, habits, t);
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void planAndSync(believer, settings, t);
+        void planAndSync(believer, settings, habits, t);
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, t, granted]);
+  }, [believer, settings, habits, t, granted]);
 };

@@ -10,8 +10,9 @@ import { View } from "react-native";
 import type { Temporal } from "temporal-polyfill";
 
 import { launchLanguage } from "@/shared/lib/preferences";
+import { useToday } from "@/shared/lib/today";
 
-import { usePrayerLog, useToday } from "../hooks/use-prayer-log";
+import { usePrayerLog } from "../hooks/use-prayer-log";
 import { PrayerStreak } from "./prayer-streak";
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {

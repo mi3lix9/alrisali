@@ -94,4 +94,14 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `khushu_date_idx` ON `khushu` (`date`);",
     ],
   },
+  {
+    tag: "20261015202636_habits",
+    statements: [
+      "CREATE TABLE `habit_completions` (\n\t`id` text PRIMARY KEY,\n\t`habit_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `habit_seeds` (\n\t`id` text PRIMARY KEY,\n\t`seeded_at` integer NOT NULL\n);",
+      "CREATE TABLE `habits` (\n\t`id` text PRIMARY KEY,\n\t`name` text,\n\t`preset` text,\n\t`schedule` text NOT NULL,\n\t`reminder_at` integer,\n\t`archived_at` integer,\n\t`created_at` integer NOT NULL\n);",
+      "CREATE INDEX `habit_completions_habit_id_idx` ON `habit_completions` (`habit_id`);",
+      "CREATE INDEX `habit_completions_date_idx` ON `habit_completions` (`date`);",
+    ],
+  },
 ];

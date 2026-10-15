@@ -1,42 +1,11 @@
 import { prayerStreak } from "@alrisali/domain/prayer-log";
 import type { PrayerLog } from "@alrisali/domain/prayer-log";
 import type { Salah } from "@alrisali/domain/shared";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AppState } from "react-native";
-import { Temporal } from "temporal-polyfill";
+import { Alert } from "react-native";
+import type { Temporal } from "temporal-polyfill";
 
 import { usePrayerLogs, useSetSalahPerformed } from "../data/prayer-logs";
-
-const MINUTE_MS = 60_000;
-
-/**
- * The device's local date, checked every minute and on return to the
- * foreground, so midnight starts a new day without a relaunch.
- */
-export const useToday = (): Temporal.PlainDate => {
-  const [today, setToday] = useState(() => Temporal.Now.plainDateISO());
-
-  useEffect(() => {
-    const check = () =>
-      setToday((shown) => {
-        const now = Temporal.Now.plainDateISO();
-        return now.equals(shown) ? shown : now;
-      });
-    const timer = setInterval(check, MINUTE_MS);
-    const subscription = AppState.addEventListener("change", (state) => {
-      if (state === "active") {
-        check();
-      }
-    });
-    return () => {
-      clearInterval(timer);
-      subscription.remove();
-    };
-  }, []);
-
-  return today;
-};
 
 export interface PrayerLogView {
   log: PrayerLog;

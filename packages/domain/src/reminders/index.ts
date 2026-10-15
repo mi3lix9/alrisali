@@ -1,3 +1,5 @@
+export { habitReminderSource } from "./habit-reminders";
+export type { HabitReminderMessage } from "./habit-reminders";
 export {
   diffSchedule,
   PENDING_REMINDER_LIMIT,

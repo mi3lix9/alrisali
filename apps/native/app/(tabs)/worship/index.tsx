@@ -1,1 +1,1 @@
-export { Screen as default } from "@/shared/ui/screen";
+export { HabitsScreen as default } from "@/features/habits";

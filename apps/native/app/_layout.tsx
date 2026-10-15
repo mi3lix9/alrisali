@@ -2,6 +2,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
 import { ReminderScheduler } from "@/features/reminders";
@@ -50,7 +51,9 @@ const RootStack = () => {
 // ticked from Home or the Prayer tab.
 const Layout = () => (
   <AppProviders>
-    <ReminderScheduler />
+    <HabitReminderPlans>
+      {(habits) => <ReminderScheduler habits={habits} />}
+    </HabitReminderPlans>
     <RootStack />
     <KhushuSheet />
   </AppProviders>

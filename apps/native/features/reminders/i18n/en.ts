@@ -25,6 +25,11 @@ export const en: Catalog<typeof ar> = {
     imsakBefore: "Imsak in {{minutes}}",
     imsakNow: "It's Imsak: the fast begins",
     saying: "{{text}}\n— {{source}}",
+    habit: {
+      classic:
+        "“The deeds most beloved to Allah are those a servant keeps up, even if small.”\n— Imam al-Sadiq (a), al-Kafi",
+      modern: "A small step today keeps your Habit going. It's time.",
+    },
     modern: {
       fajr: "A fresh start is waiting. Begin your morning with Allah.",
       dhuhr: "Take a short pause from your day and reconnect with Allah.",
