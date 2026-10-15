@@ -130,6 +130,7 @@ describe("Guest → Believer sync", () => {
     ).resolves.toStrictEqual({
       calculationMethod: "jafari",
       location: KARBALA,
+      hijriAdjustment: 0,
     });
   });
 
@@ -148,7 +149,11 @@ describe("Guest → Believer sync", () => {
     await tablet.sync();
     await phone.sync();
 
-    const mashhad = { calculationMethod: "jafari", location: MASHHAD };
+    const mashhad = {
+      calculationMethod: "jafari",
+      location: MASHHAD,
+      hijriAdjustment: 0,
+    };
     await expect(onPhone.get()).resolves.toStrictEqual(mashhad);
     await expect(onTablet.get()).resolves.toStrictEqual(mashhad);
     await expect(cloudSettings()).resolves.toStrictEqual([
