@@ -2,6 +2,7 @@ import type { Auth, Session } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
 import type { ContentDatabase } from "./shared/lib/content-database";
+import type { RecitationSource } from "./shared/lib/recitation-source";
 import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
 /** What every oRPC procedure receives. */
@@ -12,6 +13,8 @@ export interface Context {
   userDatabases: UserDatabaseHost;
   /** The shared content database Admins publish to. */
   content: ContentDatabase;
+  /** Recitation from the Quran Foundation audio API. */
+  recitation: RecitationSource;
 }
 
 export interface CreateContextOptions {
@@ -19,6 +22,7 @@ export interface CreateContextOptions {
   db: Database;
   userDatabases: UserDatabaseHost;
   content: ContentDatabase;
+  recitation: RecitationSource;
   headers: Headers;
 }
 
@@ -28,10 +32,12 @@ export const createContext = async ({
   db,
   userDatabases,
   content,
+  recitation,
   headers,
 }: CreateContextOptions): Promise<Context> => ({
   db,
   userDatabases,
   content,
+  recitation,
   session: await auth.api.getSession({ headers }),
 });

@@ -6,6 +6,7 @@ import {
   openReader,
   pagePosition,
   readerReducer,
+  recitationStart,
   scrubberValue,
 } from "@alrisali/domain/quran";
 import type {
@@ -36,9 +37,13 @@ import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
 import { QuranSearchSheet } from "../components/quran-search-sheet";
-import { ReaderBottomBar } from "../components/reader-bottom-bar";
+import {
+  READER_BOTTOM_BAR_HEIGHT,
+  ReaderBottomBar,
+} from "../components/reader-bottom-bar";
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
+import { RecitationPill } from "../components/recitation-pill";
 import { SurahMode } from "../components/surah-mode";
 import { useQuranLastRead, useSetQuranLastRead } from "../data/last-read";
 import {
@@ -57,6 +62,9 @@ interface ReaderParams {
   surah?: string;
   [key: string]: string | undefined;
 }
+
+/** Space between the recitation pill and the screen's bottom edge. */
+const RECITATION_PILL_GAP = 24;
 
 const ReaderHint = () => {
   const { t } = useTranslation("quran");
@@ -251,6 +259,18 @@ const Reader = ({
           onJump={jumpTo}
         />
       ) : null}
+      <RecitationPill
+        start={recitationStart(state)}
+        reciterId={settings.reciterId}
+        chromeVisible={chrome.visible}
+        bottom={
+          insets.bottom +
+          RECITATION_PILL_GAP +
+          (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
+        }
+        onReciterChange={(reciterId) => update.mutate({ reciterId })}
+        onInteract={() => send({ type: "interact" })}
+      />
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}

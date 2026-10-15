@@ -1,0 +1,1 @@
+ALTER TABLE `quran_reader_settings` ADD `reciter_id` integer DEFAULT 7 NOT NULL;

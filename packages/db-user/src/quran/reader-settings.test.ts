@@ -35,13 +35,15 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "page",
       pageNav: "horizontal",
       surahFontSize: 26,
+      reciterId: 7,
     });
   });
 
-  it("keeps the mode, page navigation and font size across a relaunch", async () => {
+  it("keeps the mode, page navigation, font size and reciter across a relaunch", async () => {
     const settings = createQuranReaderSettingsRepository(database.db);
     await settings.update({ pageNav: "vertical" });
     await settings.update({ mode: "surah", surahFontSize: 30 });
+    await settings.update({ reciterId: 1 });
 
     await database.close();
     database = await launch();
@@ -52,6 +54,7 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "surah",
       pageNav: "vertical",
       surahFontSize: 30,
+      reciterId: 1,
     });
   });
 
@@ -73,6 +76,7 @@ describe(createQuranReaderSettingsRepository, () => {
       mode: "page",
       pageNav: "vertical",
       surahFontSize: 26,
+      reciterId: 7,
     });
   });
 });

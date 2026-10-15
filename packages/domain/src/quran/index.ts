@@ -51,3 +51,20 @@ export { scrubberDomain, scrubberTarget, scrubberValue } from "./scrubber";
 export type { ScrubberDomain } from "./scrubber";
 export { normalizeArabic, searchQuran } from "./search";
 export type { QuranSearchOptions, QuranSearchResult } from "./search";
+export {
+  createRecitationCache,
+  nextAyah,
+  RECITATION_CACHE_MAX_AGE_MS,
+  recitationPlayback,
+  recitationStart,
+  verseOfTheDay,
+} from "./recitation";
+export type {
+  CachedRecitation,
+  RecitationCache,
+  RecitationCacheOptions,
+  RecitationCacheStore,
+  RecitationEvent,
+  RecitationPlayback,
+  RecitedAyah,
+} from "./recitation";

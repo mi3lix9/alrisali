@@ -8,7 +8,7 @@ import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
-import { auth, content, db, userDatabases } from "./services";
+import { auth, content, db, recitation, userDatabases } from "./services";
 import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
 import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
 
@@ -55,6 +55,7 @@ app.use("/*", async (c, next) => {
     db,
     userDatabases,
     content,
+    recitation,
     headers: c.req.raw.headers,
   });
 

@@ -81,4 +81,10 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `believer_settings` ADD `message_style` text;",
     ],
   },
+  {
+    tag: "20261015200354_quran_reciter",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `reciter_id` integer DEFAULT 7 NOT NULL;",
+    ],
+  },
 ];

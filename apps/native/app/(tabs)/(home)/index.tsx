@@ -5,7 +5,7 @@ import { Platform } from "react-native";
 import { HijriTodayCard } from "@/features/calendar";
 import { PrayerLogQuickTicks } from "@/features/prayer-log";
 import { NextPrayerCard } from "@/features/prayer-times";
-import { ContinueReadingCard } from "@/features/quran";
+import { ContinueReadingCard, VerseOfTheDayCard } from "@/features/quran";
 import { Screen } from "@/shared/ui/screen";
 
 // SF Symbols exist only on iOS; elsewhere the button shows its label.
@@ -38,6 +38,7 @@ const HomeRoute = () => {
         <HijriTodayCard />
         <ContinueReadingCard />
         <PrayerLogQuickTicks />
+        <VerseOfTheDayCard />
       </Screen>
     </>
   );
