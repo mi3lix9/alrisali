@@ -8,14 +8,18 @@
     "./*": "./src/*/index.ts"
   },
   "scripts": {
-    "check-types": "tsc -b"
+    "check-types": "tsc -b",
+    "db:generate": "drizzle-kit generate && bun scripts/bundle-migrations.ts && oxfmt src/shared/migrations.ts"
   },
   "dependencies": {
+    "@alrisali/domain": "workspace:*",
     "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",
+    "@tursodatabase/sync": "0.8.3",
+    "drizzle-kit": "1.0.0-rc.4",
     "typescript": "^6.0.3"
   }
 }
