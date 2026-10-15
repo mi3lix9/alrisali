@@ -35,6 +35,8 @@ bun run check:fix
 bun run test
 ```
 
+`bun run --cwd apps/server test:turso-cloud` runs the ADR-0001 checks against real Turso Cloud (`src/turso-cloud.live.test.ts`: database creation, Guest → Believer push, two devices, the read-only content token, token expiry, account deletion). It reads `TURSO_ORG`, `TURSO_API_TOKEN` and `TURSO_GROUP` from `apps/server/.env`, creates its databases in that group and destroys them afterwards; `bun run test` (and CI) skips it when those are unset.
+
 The native app is a development build (not Expo Go). `APP_VARIANT=production` switches the bundle id from `com.alrisali.app.dev` to `com.alrisali.app`.
 
 ## CI

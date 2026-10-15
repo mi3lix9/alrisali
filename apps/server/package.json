@@ -14,7 +14,8 @@
     "ota:prepare": "bun src/scripts/ota-prepare.ts",
     "files:prepare": "bun src/scripts/files-prepare.ts",
     "deploy:migrate": "bun run --cwd ../../packages/db-server db:migrate:deploy && bun run ota:prepare && bun run files:prepare",
-    "admin:grant": "varlock run -- bun src/scripts/grant-admin.ts"
+    "admin:grant": "varlock run -- bun src/scripts/grant-admin.ts",
+    "test:turso-cloud": "bun --env-file=.env run vitest run src/turso-cloud.live.test.ts"
   },
   "dependencies": {
     "@alrisali/api": "workspace:*",
