@@ -6,7 +6,7 @@
 
 **Blocked by:** 01 (App shell: Panel UI, native tabs, Arabic RTL)
 
-**Status:** done — pending env: GOOGLE_CLIENT_IDS, EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, Apple Sign in with Apple capability; device-DB wipe pending ticket 02
+**Status:** done — pending env: GOOGLE_CLIENT_IDS, EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID, Apple Sign in with Apple capability; pending simulator verification; sign-out device-DB wipe completes with ticket 02
 
 - [ ] Native Apple and Google sign-in succeed on a dev build — full path built (expo-apple-authentication / google-signin sheets → `signIn.social({ idToken })` → better-auth Apple/Google ID-token verification); server path tested with a fake ID-token verifier; iOS JS bundle exports and the prebuild config carries the Apple entitlement and Google URL scheme. pending env: GOOGLE_CLIENT_IDS, EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID, EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID (+ Apple capability) and a dev build
 - [ ] Session survives relaunch — session cookie and session cache live in SecureStore (`expoClient`), restored on launch before any network call. pending simulator verification
