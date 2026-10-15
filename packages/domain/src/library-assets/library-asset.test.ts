@@ -93,6 +93,16 @@ describe(libraryShelves, () => {
     ]);
   });
 
+  it("keeps what else the assets carry, such as whether Admins published them", () => {
+    const [shelf] = libraryShelves([
+      { ...asset({ id: "a" }), published: false },
+    ]);
+
+    expect(shelf?.assets).toStrictEqual([
+      { ...asset({ id: "a" }), published: false },
+    ]);
+  });
+
   it("orders Library Assets of the same order by Arabic title", () => {
     const [shelf] = libraryShelves([
       asset({ id: "b", title: { ar: "ب", en: "" } }),

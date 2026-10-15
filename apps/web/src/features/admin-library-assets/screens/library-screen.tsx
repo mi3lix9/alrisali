@@ -1,4 +1,5 @@
 import type { ManagedLibraryAsset } from "@alrisali/api/library-assets";
+import { libraryShelves } from "@alrisali/domain/library-assets";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ import {
 import { AssetDialog } from "../components/asset-dialog";
 import { ConfirmDeleteDialog } from "../components/confirm-delete-dialog";
 import { CATEGORY_LABELS, KIND_LABELS } from "../utils/labels";
-import { formatFileSize, libraryTable } from "../utils/library-table";
+import { formatFileSize } from "../utils/library-table";
 
 /**
  * Every Library Asset, unpublished ones too, by category and order: add,
@@ -84,7 +85,7 @@ export const LibraryScreen = () => {
   }
 
   const { assets, previews } = list.data;
-  const shelves = libraryTable(assets);
+  const shelves = libraryShelves(assets);
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 p-6">

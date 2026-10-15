@@ -86,9 +86,9 @@ export const libraryAssetSchema = withFileOfItsKind(libraryAssetFieldsSchema);
 export type LibraryAsset = z.infer<typeof libraryAssetSchema>;
 
 /** One category's Library Assets, in the Admins' order. */
-export interface LibraryShelf {
+export interface LibraryShelf<T extends LibraryAsset = LibraryAsset> {
   category: LibraryCategory;
-  assets: LibraryAsset[];
+  assets: T[];
 }
 
 const byOrderThenTitle = (a: LibraryAsset, b: LibraryAsset): number =>
@@ -97,14 +97,17 @@ const byOrderThenTitle = (a: LibraryAsset, b: LibraryAsset): number =>
   a.id.localeCompare(b.id);
 
 /** The Library Assets in the Admins' order: by `order`, then Arabic title. */
-export const sortLibraryAssets = (
-  assets: readonly LibraryAsset[]
-): LibraryAsset[] => assets.toSorted(byOrderThenTitle);
+export const sortLibraryAssets = <T extends LibraryAsset>(
+  assets: readonly T[]
+): T[] => assets.toSorted(byOrderThenTitle);
 
-/** The non-empty shelves, in `LIBRARY_CATEGORIES` order. */
-export const libraryShelves = (
-  assets: readonly LibraryAsset[]
-): LibraryShelf[] => {
+/**
+ * The non-empty shelves, in `LIBRARY_CATEGORIES` order. Admins' assets keep
+ * their extra fields (whether published).
+ */
+export const libraryShelves = <T extends LibraryAsset>(
+  assets: readonly T[]
+): LibraryShelf<T>[] => {
   const sorted = sortLibraryAssets(assets);
   return LIBRARY_CATEGORIES.flatMap((category) => {
     const onShelf = sorted.filter((asset) => asset.category === category);
