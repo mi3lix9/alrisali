@@ -12,6 +12,7 @@ import {
   ToggleButtonGroup,
 } from "panelui-native";
 import { MinusIcon, PlusIcon } from "panelui-native/icons";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
 
@@ -123,8 +124,18 @@ const PassageView = ({
   );
 };
 
-/** Reads one Supplication in Arabic, English or both, at the chosen size. */
-export const SupplicationReaderScreen = () => {
+/**
+ * Reads one Supplication in Arabic, English or both, at the chosen size. A
+ * route can add other features' controls for the Supplication: `headerRight`
+ * in the header, `footer` after the text.
+ */
+export const SupplicationReaderScreen = ({
+  headerRight,
+  footer,
+}: {
+  headerRight?: (supplicationId: string) => ReactNode;
+  footer?: (supplicationId: string) => ReactNode;
+}) => {
   const { t } = useTranslation("books");
   const { id } = useLocalSearchParams<{ id: string }>();
   const supplication = getSupplication(id);
@@ -150,6 +161,9 @@ export const SupplicationReaderScreen = () => {
         options={{
           title: supplication.title[launchLanguage],
           headerLargeTitle: false,
+          ...(headerRight && {
+            headerRight: () => headerRight(supplication.id),
+          }),
         }}
       />
       <FlatList
@@ -160,6 +174,11 @@ export const SupplicationReaderScreen = () => {
         keyExtractor={(_, index) => String(index)}
         extraData={`${language}-${fontSize}`}
         ListHeaderComponent={ReaderControls}
+        ListFooterComponent={
+          text.data && footer ? (
+            <View className="pt-6 pb-4">{footer(supplication.id)}</View>
+          ) : undefined
+        }
         ListEmptyComponent={
           text.isError ? (
             <Text muted>{t("reader.loadError")}</Text>

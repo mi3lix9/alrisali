@@ -9,4 +9,13 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190206_favorites_and_reading_completions",
+    statements: [
+      "CREATE TABLE `favorites` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`key` text NOT NULL,\n\t`favorited_at` text NOT NULL\n);",
+      "CREATE TABLE `reading_completions` (\n\t`id` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` text NOT NULL\n);",
+      "CREATE INDEX `favorites_favorited_at` ON `favorites` (`favorited_at`);",
+      "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
+    ],
+  },
 ];
