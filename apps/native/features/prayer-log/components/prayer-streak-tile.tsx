@@ -16,7 +16,7 @@ export const PrayerStreakTile = () => {
   const { t } = useTranslation("prayer-log");
   const today = useToday();
   const view = usePrayerLog(today, today);
-  const days = view ? t("streak.days", { count: view.streak }) : "—";
+  const days = view ? t("streak.days", { count: view.streak.days }) : "—";
 
   return (
     <WidgetTile

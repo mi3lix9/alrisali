@@ -1,6 +1,6 @@
 import type { PrayerLog } from "@alrisali/domain/prayer-log";
-import { prayerStreak } from "@alrisali/domain/shared";
-import type { Salah } from "@alrisali/domain/shared";
+import { displayedPrayerStreak } from "@alrisali/domain/shared";
+import type { DisplayedPrayerStreak, Salah } from "@alrisali/domain/shared";
 import { useTranslation } from "react-i18next";
 import { Alert } from "react-native";
 import type { Temporal } from "temporal-polyfill";
@@ -9,8 +9,11 @@ import { usePrayerLogs, useSetSalahPerformed } from "../data/prayer-logs";
 
 export interface PrayerLogView {
   log: PrayerLog;
-  /** The Prayer Streak ending today. */
-  streak: number;
+  /**
+   * The Prayer Streak shown today: including today once all five are logged,
+   * until then the run that ended yesterday.
+   */
+  streak: DisplayedPrayerStreak;
   /** Ticks at once; un-ticking asks the Believer to confirm first. */
   toggle: (salah: Salah) => void;
   /** The last change could not be saved (and was undone). */
@@ -53,7 +56,7 @@ export const usePrayerLog = (
 
   return {
     log,
-    streak: prayerStreak(logs, today),
+    streak: displayedPrayerStreak(logs, today),
     toggle,
     saveFailed: isError,
   };

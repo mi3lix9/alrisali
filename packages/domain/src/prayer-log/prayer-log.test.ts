@@ -1,7 +1,7 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
-import { prayerStreak } from "../shared";
+import { displayedPrayerStreak, prayerStreak } from "../shared";
 import { canLogDate, setSalahPerformed } from "./prayer-log";
 import type { PrayerLog } from "./prayer-log";
 
@@ -120,6 +120,51 @@ describe(prayerStreak, () => {
     );
 
     expect(prayerStreak(logs, day("2026-10-15"))).toBe(1);
+  });
+});
+
+describe(displayedPrayerStreak, () => {
+  const TODAY = day("2026-10-15");
+
+  it("shows the run that ended yesterday while today is incomplete", () => {
+    const logs = [
+      complete("2026-10-13"),
+      complete("2026-10-14"),
+      partial("2026-10-15"),
+    ];
+
+    expect(displayedPrayerStreak(logs, TODAY)).toStrictEqual({
+      days: 2,
+      todayComplete: false,
+    });
+  });
+
+  it("shows yesterday's run when today has no Prayer Log yet", () => {
+    expect(
+      displayedPrayerStreak([complete("2026-10-14")], TODAY)
+    ).toStrictEqual({ days: 1, todayComplete: false });
+  });
+
+  it("includes today once all five are logged", () => {
+    const logs = [
+      complete("2026-10-13"),
+      complete("2026-10-14"),
+      complete("2026-10-15"),
+    ];
+
+    expect(displayedPrayerStreak(logs, TODAY)).toStrictEqual({
+      days: 3,
+      todayComplete: true,
+    });
+  });
+
+  it("is 0 when yesterday broke the run and today is open", () => {
+    const logs = [complete("2026-10-13"), partial("2026-10-14")];
+
+    expect(displayedPrayerStreak(logs, TODAY)).toStrictEqual({
+      days: 0,
+      todayComplete: false,
+    });
   });
 });
 

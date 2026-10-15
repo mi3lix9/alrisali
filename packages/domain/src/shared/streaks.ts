@@ -37,6 +37,35 @@ export const prayerStreak = (
   return streak;
 };
 
+/** The Prayer Streak as shown to the Believer on `today`. */
+export interface DisplayedPrayerStreak {
+  /**
+   * Including today once all five Salah are logged; until then the run that
+   * ended yesterday, so an open today does not show as a broken streak.
+   */
+  days: number;
+  /** Whether all five Salah are logged today. */
+  todayComplete: boolean;
+}
+
+/** The Prayer Streak to display on `today`; the streak rule is unchanged. */
+export const displayedPrayerStreak = (
+  logs: Iterable<{
+    date: Temporal.PlainDate;
+    performed: readonly Salah[];
+  }>,
+  today: Temporal.PlainDate
+): DisplayedPrayerStreak => {
+  const all = [...logs];
+  const todayStreak = prayerStreak(all, today);
+  return todayStreak > 0
+    ? { days: todayStreak, todayComplete: true }
+    : {
+        days: prayerStreak(all, today.subtract({ days: 1 })),
+        todayComplete: false,
+      };
+};
+
 /** A Habit's run of completed occurrences. */
 export interface HabitStreak {
   /**

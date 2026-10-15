@@ -1,6 +1,11 @@
 import { Temporal } from "temporal-polyfill";
 
-import { habitStreak, isHabitDueOn, prayerStreak, SALAH } from "../shared";
+import {
+  displayedPrayerStreak,
+  habitStreak,
+  isHabitDueOn,
+  SALAH,
+} from "../shared";
 import type { HabitSchedule, HabitStreak, Salah } from "../shared";
 
 /*
@@ -348,14 +353,11 @@ const overviewFrom = (
   const previousKhushu = average(lastWeek.flatMap((day) => day.khushuLevels));
   const habitsDue = sum(thisWeek.map((day) => day.habitsDue));
   const habitsDone = sum(thisWeek.map((day) => day.habitsDone));
-  const todayStreak = prayerStreak(sources.prayerLogs, today);
+  const streak = displayedPrayerStreak(sources.prayerLogs, today);
 
   return {
-    prayerStreak:
-      todayStreak > 0
-        ? todayStreak
-        : prayerStreak(sources.prayerLogs, today.subtract({ days: 1 })),
-    todayComplete: todayStreak > 0,
+    prayerStreak: streak.days,
+    todayComplete: streak.todayComplete,
     salahLogged: sum(thisWeek.map((day) => day.salah)),
     salahPossible: INSIGHTS_WEEK_DAYS * SALAH.length,
     averageKhushu,

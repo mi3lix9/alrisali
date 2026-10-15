@@ -11,8 +11,8 @@ export {
   serialiseHabitSchedule,
 } from "./habit-schedule";
 export type { HabitReminderPlan, HabitSchedule } from "./habit-schedule";
-export { habitStreak, prayerStreak } from "./streaks";
-export type { HabitStreak } from "./streaks";
+export { displayedPrayerStreak, habitStreak, prayerStreak } from "./streaks";
+export type { DisplayedPrayerStreak, HabitStreak } from "./streaks";
 export {
   addHijriMonths,
   createHijriCalendar,
