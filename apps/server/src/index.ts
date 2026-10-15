@@ -1,8 +1,3 @@
-import { OpenAPIHandler } from "@orpc/openapi/fetch";
-import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
-import { onError } from "@orpc/server";
-import { RPCHandler } from "@orpc/server/fetch";
-import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -11,8 +6,18 @@ import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
 import { auth } from "./services";
+import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
+import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
+
+initMonitoring({ dsn: ENV.SENTRY_DSN, environment: ENV.NODE_ENV });
 
 const app = new Hono();
+
+// oxlint-disable-next-line promise/prefer-await-to-callbacks -- Hono's error hook is callback-based
+app.onError((error, c) => {
+  reportServerError(error);
+  return c.text("Internal Server Error", 500);
+});
 
 app.use(logger());
 app.use(
@@ -26,28 +31,9 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
-export const apiHandler = new OpenAPIHandler(appRouter, {
-  plugins: [
-    new OpenAPIReferencePlugin({
-      schemaConverters: [new ZodToJsonSchemaConverter()],
-    }),
-  ],
-  interceptors: [
-    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
-});
 
-export const rpcHandler = new RPCHandler(appRouter, {
-  interceptors: [
-    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
-});
+const apiHandler = createApiHandler(appRouter);
+const rpcHandler = createRpcHandler(appRouter);
 
 app.use("/*", async (c, next) => {
   const context = await createContext({ context: c });
@@ -74,5 +60,12 @@ app.use("/*", async (c, next) => {
 });
 
 app.get("/", (c) => c.text("OK"));
+
+if (ENV.NODE_ENV !== "production") {
+  // Forced error for checking that Sentry receives server errors.
+  app.get("/debug/sentry", () => {
+    throw new Error("Sentry test error (server)");
+  });
+}
 
 export default app;

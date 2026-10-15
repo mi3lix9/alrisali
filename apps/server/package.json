@@ -18,6 +18,7 @@
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/zod": "catalog:",
+    "@sentry/node": "^11.8.0",
     "better-auth": "catalog:",
     "hono": "^4.13.7",
     "libsql": "catalog:",

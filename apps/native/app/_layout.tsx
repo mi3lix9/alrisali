@@ -6,7 +6,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 
 import { AppThemeProvider } from "@/shared/lib/app-theme";
+import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
 import { queryClient } from "@/shared/lib/orpc";
+
+initMonitoring();
 
 export const unstable_settings = {
   initialRouteName: "(drawer)",
@@ -36,4 +39,4 @@ const Layout = () => (
   </QueryClientProvider>
 );
 
-export default Layout;
+export default withMonitoring(Layout);

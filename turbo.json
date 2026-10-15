@@ -47,14 +47,20 @@
     "CORS_ORIGIN",
     "DATABASE_AUTH_TOKEN",
     "DATABASE_URL",
+    "EXPO_PUBLIC_SENTRY_DSN",
     "EXPO_PUBLIC_SERVER_URL",
     "NODE_ENV",
+    "SENTRY_DSN",
+    "SENTRY_ORG",
+    "SENTRY_PROJECT",
     "VERCEL",
     "VERCEL_ENV",
     "VERCEL_PROJECT_PRODUCTION_URL",
     "VERCEL_URL",
+    "VITE_SENTRY_DSN",
     "VITE_SERVER_URL",
     "_VARLOCK_ENV_KEY"
   ],
-  "globalDependencies": [".env*", "apps/*/.env*", "packages/*/.env*"]
+  "globalDependencies": [".env*", "apps/*/.env*", "packages/*/.env*"],
+  "globalPassThroughEnv": ["SENTRY_AUTH_TOKEN"]
 }

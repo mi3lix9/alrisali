@@ -22,6 +22,7 @@
     "@gorhom/bottom-sheet": "^5.2.14",
     "@orpc/client": "catalog:",
     "@orpc/tanstack-query": "catalog:",
+    "@sentry/react-native": "~8.31.0",
     "@tanstack/react-form": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@varlock/expo-integration": "1.2.1",
