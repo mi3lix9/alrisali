@@ -142,4 +142,11 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `library_asset_positions` (\n\t`asset_id` text PRIMARY KEY,\n\t`position` real NOT NULL,\n\t`saved_at` text NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015212913_companion",
+    statements: [
+      "CREATE TABLE `companion` (\n\t`id` text PRIMARY KEY,\n\t`theme` text NOT NULL\n);",
+      "CREATE TABLE `companion_xp_awards` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`xp` integer NOT NULL,\n\t`awarded_at` integer NOT NULL\n);",
+    ],
+  },
 ];
