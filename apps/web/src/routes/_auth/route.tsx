@@ -1,9 +1,15 @@
 import { Outlet, createFileRoute } from "@tanstack/react-router";
 
-import { requireSession } from "@/features/admin";
+import { AdminLayout, requireSession } from "@/features/admin";
+
+const AuthRoute = () => (
+  <AdminLayout>
+    <Outlet />
+  </AdminLayout>
+);
 
 export const Route = createFileRoute("/_auth")({
   ssr: false,
-  component: Outlet,
+  component: AuthRoute,
   beforeLoad: requireSession,
 });
