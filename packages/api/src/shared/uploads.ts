@@ -17,6 +17,26 @@ export const UPLOAD_RULES = {
     },
     maxBytes: 5 * MEBIBYTE,
   },
+  /** A Library Asset's file: its extension decides its kind. */
+  "library-asset": {
+    contentTypes: {
+      "application/pdf": "pdf",
+      "audio/mpeg": "mp3",
+      "audio/mp4": "m4a",
+      "audio/x-m4a": "m4a",
+      "video/mp4": "mp4",
+      "application/json": "json",
+    },
+    maxBytes: 500 * MEBIBYTE,
+  },
+  "library-cover": {
+    contentTypes: {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    },
+    maxBytes: 5 * MEBIBYTE,
+  },
 } as const satisfies Record<
   string,
   { contentTypes: Record<string, string>; maxBytes: number }

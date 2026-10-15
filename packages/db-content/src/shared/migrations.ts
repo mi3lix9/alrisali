@@ -44,4 +44,11 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `announcement` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text DEFAULT '' NOT NULL,\n\t`body_ar` text DEFAULT '' NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`body_en` text DEFAULT '' NOT NULL,\n\t`audience` text DEFAULT 'all' NOT NULL,\n\t`status` text DEFAULT 'draft' NOT NULL,\n\t`scheduled_at` integer,\n\t`sent_at` integer,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015205917_library_assets",
+    statements: [
+      "CREATE TABLE `library_assets` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`author_ar` text DEFAULT '' NOT NULL,\n\t`author_en` text DEFAULT '' NOT NULL,\n\t`description_ar` text DEFAULT '' NOT NULL,\n\t`description_en` text DEFAULT '' NOT NULL,\n\t`category` text NOT NULL,\n\t`kind` text NOT NULL,\n\t`file_key` text NOT NULL,\n\t`file_size` integer NOT NULL,\n\t`cover_key` text,\n\t`display_order` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `library_assets_category` ON `library_assets` (`category`);",
+    ],
+  },
 ];

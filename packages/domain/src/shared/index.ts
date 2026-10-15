@@ -41,6 +41,12 @@ export type {
   Weekday,
 } from "./hijri";
 export { fileKeySchema } from "./files";
+export {
+  localized,
+  localizedTextSchema,
+  optionalLocalizedTextSchema,
+} from "./localized-text";
+export type { LocalizedText } from "./localized-text";
 export { distanceKm, LOCATION_REFRESH_KM, locationSchema } from "./location";
 export type { Location } from "./location";
 export {
