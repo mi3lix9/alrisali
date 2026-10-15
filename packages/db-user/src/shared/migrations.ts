@@ -26,4 +26,11 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
     ],
   },
+  {
+    tag: "20261015192436_open_tasbih",
+    statements: [
+      "ALTER TABLE `tasbih` ADD `target` integer;",
+      "ALTER TABLE `tasbih` ADD `notes` text;",
+    ],
+  },
 ];
