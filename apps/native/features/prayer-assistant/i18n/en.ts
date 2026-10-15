@@ -16,6 +16,9 @@ export const en: Catalog<typeof ar> = {
     salahRakahs_two: "{{name}} · {{count}} Rak'ahs",
     salahRakahs_few: "{{name}} · {{count}} Rak'ahs",
     salahRakahs_other: "{{name}} · {{count}} Rak'ahs",
+    recognitionMode: "Recognition mode",
+    recognitionModeDescription:
+      "How the assistant knows you moved to the next Position.",
     pace: "Pace",
     paceDescription: "How long the assistant waits in each Position.",
     customHold: "Each Position",
@@ -33,6 +36,13 @@ export const en: Catalog<typeof ar> = {
     normal: "Normal",
     fast: "Fast",
     custom: "Custom",
+  },
+  mode: {
+    tap: "Tap",
+    camera: "Camera",
+    "head-height": "Head height",
+    sound: "Sound (Takbir)",
+    mat: "Mat",
   },
   salah: {
     fajr: "Fajr",
@@ -68,5 +78,29 @@ export const en: Catalog<typeof ar> = {
     stopMessage: "This Salah won't be logged.",
     stopCancel: "Keep going",
     stopConfirm: "Stop",
+  },
+  sound: {
+    checking: "Getting the microphone ready…",
+    sayOpening: "Say “Allahu Akbar” to begin the Salah.",
+    listening:
+      "Listening for your Takbir: each “Allahu Akbar” moves to the next Position.",
+    network:
+      "Arabic isn't available offline on this device, so your voice is sent over the internet to be recognised.",
+    unavailable: {
+      "no-recognizer":
+        "Arabic speech recognition isn't available on this device.",
+      "service-off":
+        "Speech recognition is turned off on this device. Turn on Dictation in Settings.",
+      denied:
+        "Microphone or speech recognition access isn't allowed. Allow both in Settings to hear your Takbir.",
+      restricted: "Speech recognition is restricted on this device.",
+      offline:
+        "Arabic recognition on this device needs the internet, and the device is offline.",
+      failing: "Listening kept stopping without hearing anything.",
+    },
+    fallback:
+      "Carry on by tap: tap the screen as you move to the next Position.",
+    retry: "Try again",
+    openSettings: "Open Settings",
   },
 };

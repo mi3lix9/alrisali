@@ -1,9 +1,10 @@
 import { HabitsScreen } from "@/features/habits";
 import { InsightsLinkCard } from "@/features/insights";
-import { ProgramsLinkCard } from "@/features/programs";
+import { ActsDayCard, ProgramsLinkCard } from "@/features/programs";
 
 const WorshipRoute = () => (
   <HabitsScreen>
+    <ActsDayCard />
     <ProgramsLinkCard />
     <InsightsLinkCard />
   </HabitsScreen>

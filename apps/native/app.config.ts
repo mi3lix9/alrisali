@@ -125,12 +125,12 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-speech-recognition",
       {
-        // Recite-Along by voice (and later the Prayer Assistant's Takbir).
-        // Listening happens only while the screen is open.
+        // Recite-Along by voice and the Prayer Assistant's Sound mode
+        // (Takbir). Listening happens only while the screen is open.
         microphonePermission:
-          "يستمع الرسالي إلى تلاوتك ليُتابع الكلمات معك. Al-Risali listens to your recitation to follow the words with you.",
+          "يستمع الرسالي إلى تلاوتك ليُتابع الكلمات معك، وإلى تكبيرك ليُتابع صلاتك. Al-Risali listens to your recitation to follow the words with you, and to your Takbir to follow your Salah.",
         speechRecognitionPermission:
-          "يتعرّف الرسالي على كلماتك العربية ليُتابع النص معك. Al-Risali recognises your Arabic words to follow the text with you.",
+          "يتعرّف الرسالي على كلماتك العربية ليُتابع النص معك ويسمع تكبيرك في الصلاة. Al-Risali recognises your Arabic words to follow the text with you and to hear your Takbir in Salah.",
         // Lets Android report which locales the on-device service holds.
         androidSpeechServicePackages: [
           "com.google.android.as",
