@@ -36,8 +36,10 @@ export const en: Catalog<typeof ar> = {
   },
   sheet: {
     title: "{{surah}} · Ayah {{ayah}}",
-    copyHint: "Long-press the text to copy it.",
     share: "Share",
+    play: "Play from here",
+    copy: "Copy",
+    copied: "Ayah copied",
   },
   lastRead: {
     set: "Set as last read",

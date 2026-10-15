@@ -31,8 +31,10 @@ export const ar = {
   },
   sheet: {
     title: "سورة {{surah}} · الآية {{ayah}}",
-    copyHint: "اضغط مطوّلًا على النص لنسخه.",
     share: "مشاركة",
+    play: "استمع من هنا",
+    copy: "نسخ",
+    copied: "نُسخت الآية",
   },
   lastRead: {
     set: "اجعلها آخر ما قرأت",
