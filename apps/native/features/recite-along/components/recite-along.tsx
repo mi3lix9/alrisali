@@ -1,5 +1,9 @@
 import "../i18n";
-import { tokenizeText } from "@alrisali/domain/recite-along";
+import {
+  tokenizeText,
+  usesVoice,
+  withoutVoice,
+} from "@alrisali/domain/recite-along";
 import type { ReciteToken } from "@alrisali/domain/recite-along";
 import { Direction } from "panelui-native";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -10,6 +14,7 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 import { useRecitePreferences } from "../hooks/use-recite-preferences";
 import { useReciteProgress } from "../hooks/use-recite-progress";
+import { useVoiceFollow, useVoiceSupport } from "../hooks/use-voice";
 import { ReciteControls } from "./recite-controls";
 import { ReciteLine } from "./recite-line";
 import type { LineRow } from "./recite-line";
@@ -51,15 +56,20 @@ export interface ReciteAlongProps {
 }
 
 /**
- * Highlights each Arabic word as the Believer recites, by holding the text or
- * at a timed pace, and keeps the word being written in view.
+ * Highlights each Arabic word as the Believer recites, by holding the text, at
+ * a timed pace, by voice or by voice and hold together, and keeps the word
+ * being written in view.
  */
 export const ReciteAlong = ({ text, fontSize, header }: ReciteAlongProps) => {
   const { t } = useTranslation("recite-along");
-  const { mode, pace } = useRecitePreferences();
+  const { mode: chosen, pace } = useRecitePreferences();
+  const voice = useVoiceSupport(usesVoice(chosen));
+  // Without speech the voice methods fall back to holding the text.
+  const mode = voice.support?.usable === false ? withoutVoice(chosen) : chosen;
   const { lines, words } = useMemo(() => tokenizeText(text), [text]);
   const places = useMemo(() => placeWords(lines), [lines]);
   const [progress, dispatch] = useReciteProgress(mode, pace, words.length);
+  useVoiceFollow({ words, progress, dispatch, voice });
   const { count } = progress;
 
   const scroll = useRef<ComponentRef<typeof ScrollView>>(null);
@@ -163,7 +173,7 @@ export const ReciteAlong = ({ text, fontSize, header }: ReciteAlongProps) => {
           </Pressable>
         </Direction>
       </ScrollView>
-      <ReciteControls progress={progress} dispatch={dispatch} />
+      <ReciteControls progress={progress} dispatch={dispatch} voice={voice} />
     </View>
   );
 };
