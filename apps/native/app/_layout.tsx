@@ -8,6 +8,7 @@ import { PushDeviceRegistration } from "@/features/announcements";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
+import { CompletedSalahLogger } from "@/features/prayer-log";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
@@ -40,6 +41,7 @@ const RootStack = () => {
         />
         <Stack.Screen name="calendar" />
         <Stack.Screen name="qibla" />
+        <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
@@ -51,7 +53,8 @@ const RootStack = () => {
 };
 
 // The Khushu sheet is mounted once, above every tab, because a Salah can be
-// ticked from Home or the Prayer tab.
+// ticked from Home or the Prayer tab, or logged when the Prayer Assistant
+// finishes one (which the Prayer Log hears at the root).
 const Layout = () => (
   <AppProviders>
     <HabitReminderPlans>
@@ -59,6 +62,7 @@ const Layout = () => (
     </HabitReminderPlans>
     <UsageAnalytics />
     <PushDeviceRegistration />
+    <CompletedSalahLogger />
     <RootStack />
     <KhushuSheet />
   </AppProviders>
