@@ -201,7 +201,7 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
 108. As a Believer, I want to choose which tabs appear (Home is always shown), so that the app fits my routine.
 109. As a Believer, I want to set my own Hijri Adjustment, the Prayer Assistant's Pace and sensitivity, and the Quran's page navigation, so that the app matches my practice.
 110. As a Believer using VoiceOver or TalkBack, I want every control labelled and every text readable, so that the app is accessible.
-111. As a Believer, I want a Sources & Credits screen (KFGQPC, Thaqalayn, Quran.Foundation and others), plus Privacy and Terms, so that I know where the content comes from and how my data is treated.
+111. As a Believer, I want a Sources & Credits screen (KFGQPC, Thaqalayn, alquran.cloud, EveryAyah.com and others), plus Privacy and Terms, so that I know where the content comes from and how my data is treated.
 112. As a Believer, I want to send the team a Contact Message, even as a Guest, with validation and abuse protection, so that I can give feedback.
 
 ### Admin web app
@@ -399,7 +399,7 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
   - Arabic and English come from Thaqalayn (CC BY 4.0) at build time and are bundled as static data with stable Supplication ids.
   - The content database refers to Supplications only by id (for example, Daily Content).
   - The al-islam.org data scraped by the old app is not used.
-- **Recitation:** streamed from the Quran Foundation audio API and cached for at most 7 days. Verse of the Day uses the same source.
+- **Recitation:** streamed straight to the device from free, key-less sources (alquran.cloud / Islamic Network first, EveryAyah.com for reciters it lacks) with a bundled reciter list, and cached for at most 7 days. Verse of the Day uses the same source.
 - **Attribution:** each source gets a notice in the content package and an entry on the in-app Sources & Credits screen.
 
 ### Defects not carried over
@@ -480,7 +480,6 @@ A from-scratch rebuild as an offline-first native app for iOS and Android, plus 
   - The Panel UI right-to-left spike was cancelled. The known workarounds are listed above.
 - **External actions:**
   - Confirm the Thaqalayn translation rights (including Sayed Ali Raza's Nahj al-Balagha).
-  - Create a Quran Foundation developer account for audio.
 - **The UX was validated in the throwaway prototype** on branch `prototype/full-ux`. It covers every feature, three Home variants, and the full-screen Quran reader. Don't port prototype code. The winning Home variant is still to be chosen. One open design question: Panel UI's dark theme turns the primary colour white, so the dark-mode accent needs choosing.
 - **Child specs:**
   - 0001: Quran reader.

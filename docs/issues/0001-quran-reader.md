@@ -78,7 +78,7 @@ A full-screen, offline Quran reader with two reading modes and one shared readin
 45. As a Guest, I want my Last-Read Ayah and favourite ayat kept on my device, so that I can use the reader fully without signing in.
 46. As a Believer who signs in, I want my Last-Read Ayah and favourite ayat to sync to my own database, so that they follow me to my other devices.
 47. As a Believer using two devices, I want the most recent Last-Read Ayah to win, so that resuming always uses my latest position.
-48. As a Believer, I want the app to credit KFGQPC and Quran.Foundation in Sources & Credits, so that the sources are acknowledged.
+48. As a Believer, I want the app to credit KFGQPC and the recitation sources (alquran.cloud, EveryAyah.com) in Sources & Credits, so that the sources are acknowledged.
 49. As a Believer with accessibility needs, I want controls labelled for screen readers and ayah text readable by VoiceOver/TalkBack, so that I can use the reader without seeing it.
 50. As a Believer, I want page turns and scrolling to stay smooth across all 604 pages, so that reading never stutters.
 
@@ -137,7 +137,7 @@ A full-screen, offline Quran reader with two reading modes and one shared readin
   - Sheets: ayah sheet, reader settings, index, page jump, search.
   - RTL is set with expo-localization `forcesRTL`. Directional icons are mirrored per locale.
 - **Recitation:**
-  - Stream from the Quran Foundation audio API, with a reciter list.
+  - Stream straight from alquran.cloud (EveryAyah.com for reciters it lacks), with a bundled reciter list; no key, no server.
   - Played files are cached for at most 7 days.
   - Playback starts at the first visible ayah.
   - The pill is shown with the chrome and stays visible while audio plays.
