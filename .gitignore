@@ -13,9 +13,16 @@ apps/web/src/routeTree.gen.ts
 local.db
 local.db-*
 
-# Environment variables
-.env
-.env*.local
+# Environment variables and secrets
+.env*
+!.env.schema
+*.p8
+*.p12
+*.pem
+*.key
+*.jks
+*.keystore
+*.mobileprovision
 
 # IDEs and editors
 .vscode/*

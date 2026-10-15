@@ -1,0 +1,20 @@
+{
+  "name": "@alrisali/i18n",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Arabic and English catalogs.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "i18next": "catalog:"
+  },
+  "devDependencies": {
+    "@alrisali/config": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}

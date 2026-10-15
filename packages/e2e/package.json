@@ -1,0 +1,17 @@
+{
+  "name": "@alrisali/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "description": "End-to-end tests (tester.army) for web, iOS and Android.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc -b"
+  },
+  "devDependencies": {
+    "@alrisali/config": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}

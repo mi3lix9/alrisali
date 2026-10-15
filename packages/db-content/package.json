@@ -1,0 +1,21 @@
+{
+  "name": "@alrisali/db-content",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Drizzle schema and migrations for the shared content database.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "drizzle-orm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@alrisali/config": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}

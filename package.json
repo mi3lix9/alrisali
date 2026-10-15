@@ -23,7 +23,12 @@
       "@orpc/client": "^1.15.6",
       "@tanstack/react-form": "^1.33.5",
       "@better-auth/expo": "1.7.7",
-      "drizzle-orm": "1.0.0-rc.4"
+      "drizzle-orm": "1.0.0-rc.4",
+      "i18next": "^26.4.5",
+      "react-i18next": "^17.0.16",
+      "temporal-polyfill": "^1.0.6",
+      "vitest": "^5.0.4",
+      "zustand": "^5.0.15"
     }
   },
   "type": "module",
@@ -41,7 +46,11 @@
     "db:local": "turbo run db:local -F @alrisali/db-server --",
     "env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db-server/",
     "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db-server/",
-    "auth:generate": "cd apps/server && bun run auth:generate"
+    "auth:generate": "cd apps/server && bun run auth:generate",
+    "check": "uncheck",
+    "check:fix": "uncheck --fix",
+    "test": "vitest run --passWithNoTests",
+    "prepare": "uncheck prepare --pre-commit || exit 0"
   },
   "dependencies": {
     "zod": "catalog:"
@@ -49,9 +58,15 @@
   "devDependencies": {
     "@alrisali/config": "workspace:*",
     "@types/bun": "catalog:",
+    "oxfmt": "^0.71.0",
+    "oxlint": "^1.86.0",
+    "sherif": "^1.13.0",
     "turbo": "^2.11.7",
     "typescript": "^6.0.3",
-    "varlock": "catalog:"
+    "ultracite": "8.0.1",
+    "uncheck": "^0.1.1",
+    "varlock": "catalog:",
+    "vitest": "catalog:"
   },
   "packageManager": "bun@1.4.2"
 }
