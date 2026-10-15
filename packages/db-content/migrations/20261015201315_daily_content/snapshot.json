@@ -1,0 +1,71 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "c546db28-6005-43ce-aa01-a669133e7e08",
+  "prevIds": ["9faf409b-dbb1-4d2a-a4c2-0fe907b18102"],
+  "ddl": [
+    {
+      "name": "daily_content",
+      "entityType": "tables"
+    },
+    {
+      "name": "global_settings",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "weekday",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "supplication_id",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "global_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "hijri_adjustment",
+      "entityType": "columns",
+      "table": "global_settings"
+    },
+    {
+      "columns": ["weekday"],
+      "nameExplicit": false,
+      "name": "daily_content_pk",
+      "table": "daily_content",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "global_settings_pk",
+      "table": "global_settings",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

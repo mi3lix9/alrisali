@@ -8,5 +8,5 @@
 
 **Status:** ready-for-agent
 
-- [ ] Admin picker only offers valid Supplication ids
-- [ ] Home card opens the right Supplication offline
+- [x] Admin picker only offers valid Supplication ids
+- [x] Home card opens the right Supplication offline (replica + domain tested; on-device visual pending simulator verification)

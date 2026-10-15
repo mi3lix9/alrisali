@@ -9,4 +9,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `global_settings` (\n\t`id` text PRIMARY KEY,\n\t`hijri_adjustment` integer DEFAULT 0 NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015201315_daily_content",
+    statements: [
+      "CREATE TABLE `daily_content` (\n\t`weekday` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL\n);",
+    ],
+  },
 ];
