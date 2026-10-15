@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { UsageAnalytics } from "@/features/analytics";
+import { PushDeviceRegistration } from "@/features/announcements";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
@@ -57,6 +58,7 @@ const Layout = () => (
       {(habits) => <ReminderScheduler habits={habits} />}
     </HabitReminderPlans>
     <UsageAnalytics />
+    <PushDeviceRegistration />
     <RootStack />
     <KhushuSheet />
   </AppProviders>

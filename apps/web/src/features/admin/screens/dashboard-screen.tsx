@@ -16,6 +16,12 @@ const SECTIONS = [
       "Active users, popular sections, feature usage, retention, Guests, devices and ages.",
   },
   {
+    to: "/admin/announcements",
+    title: "Announcements",
+    description:
+      "Write, schedule and send push notices in Arabic and English, to everyone, active or new Believers.",
+  },
+  {
     to: "/admin/daily-content",
     title: "Daily Content",
     description: "Choose the Supplication Home features on each weekday.",

@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 
+import { startAnnouncementScheduler } from "@/features/announcements";
 import { clientIpOf } from "@/features/contact";
 import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
@@ -14,6 +15,7 @@ import {
   content,
   db,
   files,
+  push,
   recitation,
   userDatabases,
 } from "./services";
@@ -58,6 +60,10 @@ if (otaConfig) {
 // Published files (Speaker photos, Slides, Library Assets) from the private
 // files bucket.
 mountFiles(app, files);
+// Sends scheduled Announcements when they fall due (Expo Push).
+if (ENV.NODE_ENV !== "test") {
+  startAnnouncementScheduler({ content, db, push });
+}
 
 const apiHandler = createApiHandler(appRouter);
 const rpcHandler = createRpcHandler(appRouter);
@@ -70,6 +76,7 @@ app.use("/*", async (c, next) => {
     content,
     recitation,
     files,
+    push,
     headers: c.req.raw.headers,
     clientIp: clientIpOf(c.req.raw, c.env),
     // The auth secret doubles as the IP hash key: one secret less to manage.

@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import "@/features/announcements";
 import "@/features/settings";
 
 // The Settings modal has its own stack, so Sources & Credits, Privacy,
@@ -8,6 +9,7 @@ import "@/features/settings";
 const SettingsLayout = () => {
   const { t: tShell } = useTranslation();
   const { t } = useTranslation("settings");
+  const { t: tAnnouncements } = useTranslation("announcements");
 
   return (
     <Stack>
@@ -15,6 +17,10 @@ const SettingsLayout = () => {
       <Stack.Screen
         name="reminders"
         options={{ title: t("reminders.title") }}
+      />
+      <Stack.Screen
+        name="announcements"
+        options={{ title: tAnnouncements("title") }}
       />
       <Stack.Screen name="sources" options={{ title: t("sources.title") }} />
       <Stack.Screen name="privacy" options={{ title: t("about.privacy") }} />

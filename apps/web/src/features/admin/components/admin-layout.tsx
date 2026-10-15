@@ -44,6 +44,13 @@ export const AdminLayout = ({
             Usage analytics
           </Link>
           <Link
+            to="/admin/announcements"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Announcements
+          </Link>
+          <Link
             to="/admin/daily-content"
             className={NAV_LINK}
             activeProps={{ className: ACTIVE_LINK }}

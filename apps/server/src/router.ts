@@ -1,5 +1,6 @@
 import { accountRouter } from "@/features/account";
 import { analyticsRouter } from "@/features/analytics";
+import { announcementsRouter } from "@/features/announcements";
 import { contactRouter } from "@/features/contact";
 import { dailyContentRouter } from "@/features/daily-content";
 import { gatheringsRouter } from "@/features/gatherings";
@@ -19,6 +20,7 @@ export const appRouter = os.router({
   account: accountRouter,
   contact: contactRouter,
   analytics: analyticsRouter,
+  announcements: announcementsRouter,
   dailyContent: dailyContentRouter,
   gatherings: gatheringsRouter,
   hijriAdjustment: hijriAdjustmentRouter,

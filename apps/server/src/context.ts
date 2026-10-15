@@ -3,6 +3,7 @@ import type { Database } from "@alrisali/db-server";
 
 import type { ContentDatabase } from "./shared/lib/content-database";
 import type { FileBucket } from "./shared/lib/file-bucket";
+import type { PushTransport } from "./shared/lib/push-transport";
 import type { RecitationSource } from "./shared/lib/recitation-source";
 import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
@@ -28,6 +29,8 @@ export interface Context {
   client: RequestClient;
   /** Secret key IP addresses are hashed with before they are stored. */
   ipHashKey: string;
+  /** Where Announcements are sent: Expo Push. */
+  push: PushTransport;
 }
 
 export interface CreateContextOptions {
@@ -37,6 +40,7 @@ export interface CreateContextOptions {
   content: ContentDatabase;
   recitation: RecitationSource;
   files: FileBucket;
+  push: PushTransport;
   headers: Headers;
   clientIp: string | null;
   ipHashKey: string;
@@ -50,6 +54,7 @@ export const createContext = async ({
   content,
   recitation,
   files,
+  push,
   headers,
   clientIp,
   ipHashKey,
@@ -61,5 +66,6 @@ export const createContext = async ({
   files,
   client: { ip: clientIp, userAgent: headers.get("user-agent") },
   ipHashKey,
+  push,
   session: await auth.api.getSession({ headers }),
 });

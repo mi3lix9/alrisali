@@ -6,9 +6,10 @@
 
 **Blocked by:** 09 (Reminders for Prayer Times and Imsak), 13 (Admin web foundation and content replica)
 
-**Status:** ready-for-agent
+**Status:** done — pending env: EAS_PROJECT_ID, EXPO_ACCESS_TOKEN; pending simulator verification
 
-- [ ] Scheduler publishes due Announcements (server test with fake push transport)
-- [ ] Audience and language selection honoured
-- [ ] Dead tokens pruned
-- [ ] Inbox lists received Announcements; opt-out stops delivery
+- [x] Scheduler publishes due Announcements (server test with fake push transport)
+- [x] Audience and language selection honoured
+- [x] Dead tokens pruned
+- [x] Inbox lists received Announcements; opt-out stops delivery
+- [ ] Live delivery through Expo Push to a device: pending env: EAS_PROJECT_ID (push tokens), EXPO_ACCESS_TOKEN (only if push security is on); pending simulator/device verification of the native inbox, opt-out and tap-to-open
