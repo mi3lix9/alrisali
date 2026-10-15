@@ -69,9 +69,9 @@ export const CompanionCard = () => {
             />
             <View className="flex-row justify-between gap-2">
               <Text muted testID="companion-xp">
-                {t("xp", { xp: companion.xp })}
+                {t("xp", { count: companion.xp })}
               </Text>
-              <Text muted>{t("xpToNextLevel", { xp: xpToNextLevel })}</Text>
+              <Text muted>{t("xpToNextLevel", { count: xpToNextLevel })}</Text>
             </View>
           </View>
         </View>

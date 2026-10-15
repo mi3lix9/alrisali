@@ -22,6 +22,6 @@ test(
     await expect(fajr).toBeSelected();
 
     await screen.scrollUntilVisible(xp, { direction: "down" });
-    await expect(xp).toHaveText("10 نقطة");
+    await expect(xp).toHaveText("10 نقاط");
   }
 );
