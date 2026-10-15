@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+
 import { sql } from "drizzle-orm";
 import type { SQL } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -99,6 +101,25 @@ describe(openUserDatabase, () => {
       await expect(
         rows(database, sql`SELECT body FROM notes`)
       ).resolves.toStrictEqual([["guest"]]);
+    });
+  });
+
+  describe("signing out", () => {
+    it("deletes the database from the device, so the next Believer starts empty", async () => {
+      const believer = await open([NOTES]);
+      await believer.db.run(
+        sql`INSERT INTO notes (id, body) VALUES ('n1', 'private')`
+      );
+      opened.splice(opened.indexOf(believer), 1);
+
+      await believer.wipe();
+
+      expect(readdirSync(directory.path)).toStrictEqual([]);
+      const next = await open([NOTES]);
+      await expect(versionOf(next)).resolves.toBe(1);
+      await expect(
+        rows(next, sql`SELECT count(*) FROM notes`)
+      ).resolves.toStrictEqual([[0]]);
     });
   });
 

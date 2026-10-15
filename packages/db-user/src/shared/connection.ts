@@ -16,4 +16,13 @@ export interface SyncedConnection {
   /** Pushes local changes. */
   push: () => Promise<void>;
   close: () => Promise<void>;
+  /** Closes the connection and deletes the database's files on this device. */
+  destroy: () => Promise<void>;
 }
+
+/**
+ * Whether a file belongs to the database stored at `databaseFile`: the sync
+ * engine keeps it plus `<file>-wal`, `-info`, `-changes` and others beside it.
+ */
+export const isDatabaseFile = (fileName: string, databaseFile: string) =>
+  fileName === databaseFile || fileName.startsWith(`${databaseFile}-`);

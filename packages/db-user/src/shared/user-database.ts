@@ -44,6 +44,11 @@ export interface UserDatabase {
    */
   sync: () => Promise<SyncOutcome>;
   close: () => Promise<void>;
+  /**
+   * Sign-out: closes the database and deletes it from the device, so nothing
+   * recorded reaches the next Believer (ADR-0002). The cloud copy is untouched.
+   */
+  wipe: () => Promise<void>;
 }
 
 const CLIENT_NAME = "alrisali";
@@ -100,5 +105,6 @@ export const openUserDatabase = async ({
     schemaVersion,
     sync,
     close: () => connection.close(),
+    wipe: () => connection.destroy(),
   };
 };

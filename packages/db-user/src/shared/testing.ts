@@ -1,11 +1,12 @@
 // Seam 2 test support: the same Turso sync engine as the device, through the
 // Node binding, behind the same SyncedConnection interface. Tests only.
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { connect } from "@tursodatabase/sync";
 
+import { isDatabaseFile } from "./connection";
 import type { SyncedConnection } from "./connection";
 import type { ConnectOptions } from "./user-database";
 
@@ -25,6 +26,16 @@ export const connectNode = async (
     pull: () => database.pull(),
     push: () => database.push(),
     close: () => database.close(),
+    destroy: async () => {
+      await database.close();
+      const directory = path.dirname(options.path);
+      const file = path.basename(options.path);
+      for (const name of readdirSync(directory)) {
+        if (isDatabaseFile(name, file)) {
+          rmSync(path.join(directory, name), { force: true });
+        }
+      }
+    },
   };
 };
 

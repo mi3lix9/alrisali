@@ -4,6 +4,7 @@ export type {
   BelieverSettingsChange,
   BelieverSettingsRepository,
 } from "./believer-settings";
+export { isDatabaseFile } from "./connection";
 export type { SqlValue, SyncedConnection } from "./connection";
 export type { Migration } from "./migrate";
 export { openUserDatabase } from "./user-database";
