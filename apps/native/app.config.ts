@@ -36,6 +36,15 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     [
+      "@sentry/react-native/expo",
+      {
+        organization: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        // Source maps and debug symbols upload only when a token is present.
+        disableAutoUpload: !process.env.SENTRY_AUTH_TOKEN,
+      },
+    ],
+    [
       "expo-splash-screen",
       {
         image: "./assets/images/splash-icon.png",
