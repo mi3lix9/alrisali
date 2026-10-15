@@ -14,6 +14,8 @@ import { Uniwind } from "uniwind";
 import { z } from "zod";
 import { create } from "zustand";
 
+import { deviceEntry } from "./device-entries";
+
 // Device preferences the shell needs before its first frame: the language
 // (and with it the layout direction), the theme, the text size and the
 // hidden tabs. They are read synchronously at startup, so they live in a
@@ -24,7 +26,7 @@ import { create } from "zustand";
 // Believer to a new phone: once the per-user database is in place they belong
 // in its settings, with this entry kept as the startup cache.
 
-const STORAGE_KEY = "alrisali.preferences";
+const STORAGE_KEY = deviceEntry("alrisali.preferences");
 
 export const THEME_PREFERENCES = ["system", "light", "dark"] as const;
 

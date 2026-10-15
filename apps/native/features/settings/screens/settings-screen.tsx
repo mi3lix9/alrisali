@@ -2,6 +2,7 @@ import "../i18n";
 import { LANGUAGES } from "@alrisali/i18n";
 import { reloadAppAsync } from "expo";
 import { Button, Card, RadioGroup } from "panelui-native";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -18,7 +19,11 @@ import { LocationCard } from "../components/location-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
-export const SettingsScreen = () => {
+/**
+ * The Settings modal. `children` come after the app's own settings: the
+ * route adds what other features own there (account deletion).
+ */
+export const SettingsScreen = ({ children }: { children?: ReactNode }) => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
 
@@ -88,6 +93,7 @@ export const SettingsScreen = () => {
       <TextSizeCard />
       <TabsCard />
       <AboutCard />
+      {children}
     </Screen>
   );
 };
