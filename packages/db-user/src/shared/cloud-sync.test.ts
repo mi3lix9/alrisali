@@ -131,6 +131,9 @@ describe("Guest → Believer sync", () => {
       calculationMethod: "jafari",
       location: KARBALA,
       hijriAdjustment: 0,
+      locationFollowsDevice: true,
+      imsakMinutes: 10,
+      timeFormat: null,
     });
   });
 
@@ -153,6 +156,9 @@ describe("Guest → Believer sync", () => {
       calculationMethod: "jafari",
       location: MASHHAD,
       hijriAdjustment: 0,
+      locationFollowsDevice: true,
+      imsakMinutes: 10,
+      timeFormat: null,
     };
     await expect(onPhone.get()).resolves.toStrictEqual(mashhad);
     await expect(onTablet.get()).resolves.toStrictEqual(mashhad);

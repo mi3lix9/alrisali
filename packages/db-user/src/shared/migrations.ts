@@ -32,4 +32,13 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
     ],
   },
+  {
+    tag: "20261015192630_prayer_times_settings",
+    statements: [
+      "CREATE TABLE `prayer_times_settings` (\n\t`id` text PRIMARY KEY,\n\t`hidden_prayer_times` text\n);",
+      "ALTER TABLE `believer_settings` ADD `location_follows_device` integer DEFAULT true NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `imsak_minutes` integer DEFAULT 10 NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `time_format` text;",
+    ],
+  },
 ];

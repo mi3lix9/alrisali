@@ -6,9 +6,9 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Domain tests: known-good times for fixed cities/dates per method, DST day, high-latitude Maghrib fallback
-- [ ] Changing method or location updates the timetable immediately, offline
-- [ ] Hidden Prayer Times respected by timetable and countdown
-- [ ] Location refreshes on app resume after moving
+- [x] Domain tests: known-good times for fixed cities/dates per method, DST day, high-latitude Maghrib fallback (`packages/domain/src/shared/prayer-times.test.ts`: Qatif, Najaf, Karbala, London per method against api.aladhan.com within a minute; London spring-forward and fall-back days; Reykjavik midsummer Ja'fari Maghrib → Sunset; Fajr/Isha/Imsak/Midnight null where the sun never reaches the angle; Imsak minutes; Midnight on the next date)
+- [x] Changing method or location updates the timetable immediately, offline (timetable and countdown compute on the device from the `["user-data", "believer-settings"]` query, which every settings save invalidates; the per-user DB is local; method/location/Imsak/time-format persistence tested in `believer-settings.test.ts`. On-device look pending simulator verification)
+- [x] Hidden Prayer Times respected by timetable and countdown (`nextPrayerTime`/`currentPrayerTime` take the hidden list, tested; the timetable lists only shown times; persistence tested in `db-user/src/prayer-times/repository.test.ts`)
+- [ ] Location refreshes on app resume after moving — built (`useFollowDeviceLocation`: on launch and each foreground, a GPS-followed location is replaced after a ≥ 1 km move, never prompting; a searched or typed location stays put). Pending simulator verification: needs a native build with the new `expo-location` module (Simulator › Features › Location to move)

@@ -1,6 +1,7 @@
 import {
   DEFAULT_CALCULATION_METHOD,
   DEFAULT_HIJRI_ADJUSTMENT,
+  DEFAULT_IMSAK_MINUTES,
 } from "@alrisali/domain/shared";
 import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
@@ -22,4 +23,15 @@ export const believerSettings = sqliteTable("believer_settings", {
   hijriAdjustment: integer("hijri_adjustment")
     .notNull()
     .default(DEFAULT_HIJRI_ADJUSTMENT),
+  /** Whether the location follows the device's GPS, or was chosen by hand. */
+  locationFollowsDevice: integer("location_follows_device", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(true),
+  imsakMinutes: integer("imsak_minutes")
+    .notNull()
+    .default(DEFAULT_IMSAK_MINUTES),
+  /** "12h" or "24h"; null follows the device's clock setting. */
+  timeFormat: text("time_format"),
 });

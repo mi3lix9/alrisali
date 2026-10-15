@@ -1,1 +1,1 @@
-export { Screen as default } from "@/shared/ui/screen";
+export { PrayerTimesScreen as default } from "@/features/prayer-times";

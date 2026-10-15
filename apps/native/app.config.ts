@@ -55,6 +55,18 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     ["expo-localization", { supportsRTL: true, forcesRTL: true }],
     "expo-apple-authentication",
     [
+      "expo-location",
+      {
+        // Foreground only: Prayer Times and the Qibla need the place, never
+        // a trail of it.
+        locationWhenInUsePermission:
+          "يستخدم الرسالي موقعك لحساب أوقات الصلاة واتجاه القبلة. Al-Risali uses your location to calculate Prayer Times and the Qibla.",
+        isIosBackgroundLocationEnabled: false,
+        isAndroidBackgroundLocationEnabled: false,
+        isAndroidForegroundServiceEnabled: false,
+      },
+    ],
+    [
       "@react-native-google-signin/google-signin",
       { iosUrlScheme: googleIosUrlScheme() },
     ],

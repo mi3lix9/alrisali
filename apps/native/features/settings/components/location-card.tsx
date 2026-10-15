@@ -29,7 +29,8 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
     });
     setInvalid(!location.success);
     if (location.success) {
-      update({ location: location.data });
+      // Typed by hand, so it stays put when the Believer travels.
+      update({ location: location.data, locationFollowsDevice: false });
     }
   };
 
