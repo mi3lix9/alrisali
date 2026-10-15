@@ -72,12 +72,17 @@ The server reports unexpected errors only; oRPC errors below 500 (`UNAUTHORIZED`
 
 ## Sign-in
 
-Believers sign in with the native Apple (iOS) and Google sheets; the app sends the sheet's ID token to better-auth (`authClient.signIn.social({ provider, idToken })`) and keeps the session in SecureStore. Admins sign in to the web with email and password.
+Believers sign in with the native Apple (iOS) and Google sheets; the app sends the sheet's ID token to better-auth (`authClient.signIn.social({ provider, idToken })`) and keeps the session in SecureStore. Admins sign in to the web with the same providers through the OAuth redirect, so an Admin has one account on the phone and the web; the sign-in page shows a button for each provider the server has web credentials for (`account.webSignInProviders`). There is no email and password sign-in.
+
+Deleting an account revokes the Believer's Sign in with Apple (Apple's REST `auth/revoke`): the app shows Apple's sheet once more for a fresh authorization code, which the server exchanges for the token it revokes. Without the Apple key the server skips the revocation and logs a warning.
 
 | Variable | Where | Value |
 | --- | --- | --- |
-| `GOOGLE_CLIENT_IDS` | server | Comma-separated Google OAuth client IDs whose ID tokens are accepted: the web client ID, plus the iOS and Android ones |
+| `GOOGLE_CLIENT_IDS` | server | Comma-separated Google OAuth client IDs whose ID tokens are accepted: the web client ID first (the Admin web uses it), then the iOS and Android ones |
+| `GOOGLE_CLIENT_SECRET` | server | The web client's secret; turns on the Admin web's Google sign-in |
 | `APPLE_BUNDLE_IDS` | server | The app's bundle IDs (defaults to `com.alrisali.app,com.alrisali.app.dev`) |
+| `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` | server | The Sign in with Apple key (.p8): token revocation on account deletion, and the Admin web's Apple sign-in |
+| `APPLE_WEB_SERVICES_ID` | server | The Services ID of the Admin web's Sign in with Apple (needs the Apple key) |
 | `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` | native | The Google web client ID, passed as `webClientId` |
 | `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` | native | The Google iOS client ID; `app.config.ts` derives the iOS URL scheme from it |
 

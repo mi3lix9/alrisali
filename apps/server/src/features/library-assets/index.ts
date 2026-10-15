@@ -140,12 +140,23 @@ const setPublished = admin.libraryAssets.setPublished.handler(
   }
 );
 
-/** The files stay in the bucket but are no longer served (`/files`). */
+/**
+ * The files stay in the bucket but are no longer served (`/files`). Devices'
+ * copy goes first: if the content database fails, the server's row stays and
+ * the Admin removes it again.
+ */
 const remove = admin.libraryAssets.remove.handler(
   async ({ context, input: { id } }) => {
+    try {
+      const index = createLibraryAssetsRepository(await context.content.db());
+      await index.remove(id);
+    } catch (error) {
+      throw new ORPCError("SERVICE_UNAVAILABLE", {
+        message: "Could not take the Library Asset off devices; try again",
+        cause: error,
+      });
+    }
     await context.db.delete(libraryAsset).where(eq(libraryAsset.id, id));
-    const index = createLibraryAssetsRepository(await context.content.db());
-    await index.remove(id);
     return { id };
   }
 );

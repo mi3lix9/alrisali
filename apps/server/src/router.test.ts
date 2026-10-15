@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
-import type { Auth } from "@alrisali/auth";
+import type { Auth, WebSignInProvider } from "@alrisali/auth";
 import { createAnnouncementsRepository } from "@alrisali/db-content/announcements";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
@@ -56,6 +56,7 @@ import { z } from "zod";
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { runAnnouncementScheduler } from "@/features/announcements";
 import { servesLibraryFile } from "@/features/library-assets";
+import type { AppleGrant, AppleRevoker } from "@/shared/lib/apple-revoker";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
 import {
@@ -292,6 +293,7 @@ const ACCESS: Record<
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "account.webSignInProviders": { access: "anonymous" },
   "analytics.track": { access: "anonymous", input: analyticsBatch() },
   "analytics.summary": { access: "admin" },
   "analytics.popularSections": { access: "admin", input: { days: 7 } },
@@ -522,6 +524,13 @@ let auth: Auth;
 let userDatabases: UserDatabaseHost;
 let content: ContentDatabase;
 let files: FileBucket;
+// Stands in for Apple's revocation; records what it was asked to revoke.
+let appleRevocations: {
+  grant: AppleGrant;
+  authorizationCode: string | undefined;
+}[];
+let apple: AppleRevoker;
+let webSignInProviders: WebSignInProvider[];
 
 // An in-process stand-in for the Railway files bucket, started by the tests
 // that upload. Presigning needs no bucket, so the rest point nowhere.
@@ -567,6 +576,14 @@ const setUp = async (host?: UserDatabaseHost) => {
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
   push = fakePush();
+  webSignInProviders = [];
+  appleRevocations = [];
+  apple = {
+    revoke: (grant, authorizationCode) => {
+      appleRevocations.push({ grant, authorizationCode });
+      return Promise.resolve();
+    },
+  };
   // A fresh content database per test, so no test sees another's content.
   contentDatabases += 1;
   content = createContentDatabase({
@@ -624,6 +641,8 @@ const callAs = async (
     recitation,
     files,
     push,
+    apple,
+    webSignInProviders,
     headers,
     clientIp,
     ipHashKey: TEST_ENV.BETTER_AUTH_SECRET,
@@ -740,6 +759,14 @@ describe("auth guards", () => {
     await expect(callAs(again, "account.privateData")).resolves.toMatchObject({
       user: { email: "ali@privaterelay.appleid.com", name: "Ali Hasan" },
     });
+  });
+
+  it("tells the Admin web which providers it can sign in with", async () => {
+    webSignInProviders = ["google"];
+
+    await expect(
+      callAs(new Headers(), "account.webSignInProviders")
+    ).resolves.toStrictEqual({ providers: ["google"] });
   });
 
   it("refuses an ID token the provider did not sign", async () => {
@@ -1588,6 +1615,34 @@ describe("Library Assets", () => {
     });
   });
 
+  it("keeps a Library Asset the Admin can remove again when the content database fails", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ published: true })
+    )) as { id: string };
+
+    const working = content;
+    content = {
+      ...working,
+      db: () => Promise.reject(new Error("content database unreachable")),
+    };
+    await expect(
+      callAs(admin, "libraryAssets.remove", { id })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+    content = working;
+
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [{ id }],
+    });
+    await callAs(admin, "libraryAssets.remove", { id });
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [],
+    });
+  });
+
   it("publishes structured text only when its file is in the structured-text format", async () => {
     const admin = await signInAsAdmin();
     const good = await uploadLibraryFile(
@@ -2109,6 +2164,58 @@ describe("account deletion on the local sync server", () => {
     await expect(userIdOf(again)).resolves.not.toBe(beforeId);
     expect(newDatabase).not.toBe(oldDatabase);
     await expect(tablesIn(newDatabase)).resolves.toStrictEqual([]);
+  });
+
+  it("revokes Sign in with Apple with the fresh authorization code", async () => {
+    const appleToken = idToken({
+      sub: "apple-002",
+      aud: "com.alrisali.app",
+      email: "maryam@privaterelay.appleid.com",
+      email_verified: "true",
+    });
+    const headers = await signIn("apple", appleToken);
+    const userId = await userIdOf(headers);
+
+    await callAs(headers, "account.deleteAccount", {
+      appleAuthorizationCode: "fresh-code",
+    });
+
+    expect(appleRevocations).toStrictEqual([
+      {
+        grant: { idToken: appleToken, accessToken: null, refreshToken: null },
+        authorizationCode: "fresh-code",
+      },
+    ]);
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
+  });
+
+  it("does not ask Apple to revoke anything for a Google account", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+
+    await callAs(headers, "account.deleteAccount");
+
+    expect(appleRevocations).toStrictEqual([]);
+  });
+
+  it("keeps the account when Apple refuses the revocation", async () => {
+    const headers = await signIn(
+      "apple",
+      idToken({ sub: "apple-003", email: "ali@privaterelay.appleid.com" })
+    );
+    const userId = await userIdOf(headers);
+    await ensure(headers);
+    apple = {
+      revoke: () =>
+        Promise.reject(new Error("Apple /auth/revoke answered 400")),
+    };
+
+    await expect(
+      callAs(headers, "account.deleteAccount", {
+        appleAuthorizationCode: "expired-code",
+      })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(ONE_ROW_EACH);
   });
 
   it("keeps the account when the cloud database cannot be destroyed", async () => {
