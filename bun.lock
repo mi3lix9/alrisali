@@ -108,6 +108,7 @@
         "@alrisali/auth": "workspace:*",
         "@alrisali/db-content": "workspace:*",
         "@alrisali/db-server": "workspace:*",
+        "@alrisali/domain": "workspace:*",
         "@hot-updater/aws": "1.0.7",
         "@hot-updater/plugin-core": "1.0.7",
         "@hot-updater/server": "1.0.7",
@@ -127,6 +128,7 @@
         "@alrisali/config": "workspace:*",
         "@alrisali/db-user": "workspace:*",
         "@types/bun": "catalog:",
+        "temporal-polyfill": "catalog:",
         "tsdown": "^0.23.0",
         "typescript": "^6.0.3",
       },
@@ -136,6 +138,7 @@
       "dependencies": {
         "@alrisali/api": "workspace:*",
         "@alrisali/auth": "workspace:*",
+        "@alrisali/content": "workspace:*",
         "@alrisali/domain": "workspace:*",
         "@alrisali/i18n": "workspace:*",
         "@alrisali/ui": "workspace:*",

@@ -11,6 +11,11 @@ export interface AppEvents {
   /** The signed-in Believer signed out on this device. */
   SignedOut: undefined;
   /**
+   * The Believer finished the first run on this device: their settings are
+   * in place and notifications were offered, so Reminders can be planned.
+   */
+  OnboardingCompleted: undefined;
+  /**
    * A Dhikr Session was recorded on this device. `sessionId` is stable, so a
    * listener (Companion XP) can award once per session.
    */
