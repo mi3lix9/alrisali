@@ -27,6 +27,9 @@ export type LineRow =
   | readonly ["b", number, string]
   | readonly [number, number];
 
+/** Every surah header band reads "سُورَةُ" then the surah's Arabic name. */
+export const SURAH_HEADER_PREFIX = "سُورَةُ ";
+
 export interface HafsDataset {
   source: {
     release: string;

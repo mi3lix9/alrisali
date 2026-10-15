@@ -12,6 +12,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
+import { SURAH_HEADER_PREFIX } from "../../src/quran/dataset";
 import type { HafsDataset, LineRow } from "../../src/quran/dataset";
 import { deriveLines } from "./derive-lines";
 import type { DerivedLine } from "./derive-lines";
@@ -34,7 +35,6 @@ const DATA_DIR = path.join(PACKAGE_ROOT, "src/quran/data");
 const NOTICE_PATH = path.join(PACKAGE_ROOT, "notices/kfgqpc.md");
 const FONT_FILE = "kfgqpc_hafs_v30.ttf";
 const SURAH_COUNT = 114;
-const HEADER_PREFIX = "سُورَةُ ";
 /** Base letters only: KFGQPC orders the marks of some basmalas differently. */
 const letters = (text: string): string =>
   [...text].filter((char) => isCountedChar(char)).join("");
@@ -72,7 +72,7 @@ const toLineRows = (
     return lines.map((line, lineIndex): LineRow => {
       const text = typed[lineIndex] ?? "";
       if (line.kind === "surah-header") {
-        const expected = `${HEADER_PREFIX}${names[line.surah - 1]?.[0]}`;
+        const expected = `${SURAH_HEADER_PREFIX}${names[line.surah - 1]?.[0]}`;
         if (text !== expected) {
           throw new Error(
             `${where(lineIndex)}: header "${text}" ≠ "${expected}"`

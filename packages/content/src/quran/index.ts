@@ -2,6 +2,7 @@
 // layout, every ayah verbatim, and surah and juz metadata. The font ships as
 // `@alrisali/content/quran/font.ttf`; the notice as `KFGQPC_NOTICE`.
 import { HAFS } from "./data/hafs";
+import { SURAH_HEADER_PREFIX } from "./dataset";
 
 export const PAGE_COUNT = 604;
 export const SURAH_COUNT = 114;
@@ -37,7 +38,8 @@ export interface QuranWord {
 }
 
 export type QuranLine =
-  | { kind: "surah-header"; surah: number }
+  /** `text` is the band's title as KFGQPC sets it: "سُورَةُ" and the name. */
+  | { kind: "surah-header"; surah: number; text: string }
   | { kind: "basmala"; surah: number; text: string }
   | { kind: "ayah"; words: QuranWord[] };
 
@@ -91,7 +93,12 @@ export const getQuranPage = (page: number): QuranPage => {
   }
   const lines = rows.map((row): QuranLine => {
     if (row[0] === "h") {
-      return { kind: "surah-header", surah: row[1] };
+      const name = HAFS.surahs[row[1] - 1]?.[0] ?? "";
+      return {
+        kind: "surah-header",
+        surah: row[1],
+        text: `${SURAH_HEADER_PREFIX}${name}`,
+      };
     }
     if (row[0] === "b") {
       return { kind: "basmala", surah: row[1], text: row[2] };
