@@ -1,0 +1,135 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "d376747f-94b2-4f5f-a9f0-3f77af4e7ccd",
+  "prevIds": ["08aa5448-6dbf-4cf7-89a9-68a661ec288c"],
+  "ddl": [
+    {
+      "name": "mood_check_ins",
+      "entityType": "tables"
+    },
+    {
+      "name": "believer_settings",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "mood",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "remedy_id",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "checked_in_at",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'jafari'",
+      "generated": null,
+      "name": "calculation_method",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_latitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_longitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_name",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "mood_check_ins_pk",
+      "table": "mood_check_ins",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "believer_settings_pk",
+      "table": "believer_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "checked_in_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "mood_check_ins_checked_in_at_idx",
+      "entityType": "indexes",
+      "table": "mood_check_ins"
+    }
+  ],
+  "renames": []
+}

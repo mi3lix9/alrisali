@@ -9,4 +9,11 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190247_mood_check_ins",
+    statements: [
+      "CREATE TABLE `mood_check_ins` (\n\t`id` text PRIMARY KEY,\n\t`mood` text NOT NULL,\n\t`remedy_id` text NOT NULL,\n\t`checked_in_at` integer NOT NULL\n);",
+      "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",
+    ],
+  },
 ];

@@ -6,7 +6,7 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification (card not yet on Home); live cloud sync pending ticket 11 remoteUrl + env
 
-- [ ] Mood Check-ins persist and sync
-- [ ] Remedy shown per mood in both languages
+- [x] Mood Check-ins persist and sync — `mood_check_ins` table (uuid ids, additive migration) + `createMoodCheckInRepository` in `@alrisali/db-user/mood`; persistence across relaunch tested at seam 2; two-device push/pull verified by hand against a local `tursodb --sync-server` (Node binding). Live Turso Cloud sync pending env (signed-in `remoteUrl`, ticket 11)
+- [x] Remedy shown per mood in both languages — 4 Remedies per mood in ar/en with sources in `@alrisali/domain/mood` (from the old app's duaRemedies + getSayingForMood themes); `MoodCheckInCard` exported from `@/features/mood` shows today's Remedy in the launch language. Visual check pending simulator verification
