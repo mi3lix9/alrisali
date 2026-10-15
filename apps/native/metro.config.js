@@ -9,6 +9,8 @@ const {
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getSentryExpoConfig(__dirname);
+// The Prayer Assistant's MoveNet pose model ships as an asset.
+config.resolver.assetExts.push("tflite");
 
 const uniwindConfig = withUniwindConfig(wrapWithReanimatedMetroConfig(config), {
   cssEntryFile: "./global.css",
