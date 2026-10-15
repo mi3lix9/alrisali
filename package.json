@@ -1,0 +1,57 @@
+{
+  "name": "alrisali",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "zod": "^4.5.4",
+      "@types/bun": "^1.4.2",
+      "varlock": "1.18.0",
+      "libsql": "0.5.29",
+      "@orpc/server": "^1.15.6",
+      "@orpc/openapi": "^1.15.6",
+      "@orpc/zod": "^1.15.6",
+      "better-auth": "1.7.7",
+      "@tanstack/react-query": "^5.104.2",
+      "next-themes": "^0.4.6",
+      "sonner": "^2.0.8",
+      "tailwindcss": "^4.3.3",
+      "@orpc/tanstack-query": "^1.15.6",
+      "@orpc/client": "^1.15.6",
+      "@tanstack/react-form": "^1.33.5",
+      "@better-auth/expo": "1.7.7",
+      "drizzle-orm": "1.0.0-rc.4"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:native": "turbo run dev -F native --",
+    "dev:web": "turbo run dev -F web --",
+    "dev:server": "turbo run dev -F server --",
+    "db:push": "turbo run db:push -F @alrisali/db --",
+    "db:studio": "turbo run db:studio -F @alrisali/db --",
+    "db:generate": "turbo run db:generate -F @alrisali/db --",
+    "db:migrate": "turbo run db:migrate -F @alrisali/db --",
+    "db:local": "turbo run db:local -F @alrisali/db --",
+    "env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db/",
+    "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db/",
+    "auth:generate": "cd apps/server && bun run auth:generate"
+  },
+  "dependencies": {
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@alrisali/config": "workspace:*",
+    "@types/bun": "catalog:",
+    "turbo": "^2.11.7",
+    "typescript": "^6.0.3",
+    "varlock": "catalog:"
+  },
+  "packageManager": "bun@1.4.2"
+}

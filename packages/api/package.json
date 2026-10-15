@@ -1,0 +1,25 @@
+{
+  "name": "@alrisali/api",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "check-types": "tsc -b"
+  },
+  "dependencies": {
+    "@alrisali/auth": "workspace:*",
+    "@alrisali/db": "workspace:*",
+    "@orpc/client": "catalog:",
+    "@orpc/openapi": "catalog:",
+    "@orpc/server": "catalog:",
+    "@orpc/zod": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@alrisali/config": "workspace:*",
+    "typescript": "^6.0.3"
+  }
+}
