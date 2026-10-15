@@ -1,0 +1,1 @@
+ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;

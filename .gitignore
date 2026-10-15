@@ -62,3 +62,6 @@ coverage
 .cache
 tmp
 temp
+
+# Local tursodb --sync-server databases (bun run db:sync-server)
+.sync-server/

@@ -10,6 +10,12 @@ import { Directory, File } from "expo-file-system";
 import { useEffect } from "react";
 import { AppState } from "react-native";
 
+import {
+  cloudDatabaseToken,
+  cloudDatabaseUrl,
+  connectCloudDatabase,
+  disconnectCloudDatabase,
+} from "./cloud-database";
 import { events } from "./events";
 import { queryClient } from "./orpc";
 
@@ -21,12 +27,6 @@ const DATABASE_FILE = "believer.db";
 
 /** Every query over the Believer's database lives under this key. */
 export const USER_DATA_QUERY_KEY = ["user-data"] as const;
-
-/**
- * The Believer's cloud database URL. Null while they are a Guest, which keeps
- * the database in sync mode with sync paused; sign-in supplies the URL.
- */
-const remoteUrl = (): string | null => null;
 
 // sync-react-native 0.8.3 returns rows as objects only (no raw mode), so
 // `Object.values` restores column order. Alias duplicate column names in
@@ -69,7 +69,10 @@ const open = async (): Promise<UserDatabase> => {
   try {
     return await openUserDatabase({
       path: DATABASE_FILE,
-      remoteUrl,
+      // Null while the Believer is a Guest: the database stays in sync mode
+      // with sync paused, and sign-in switches it on.
+      remoteUrl: cloudDatabaseUrl,
+      authToken: cloudDatabaseToken,
       connect: connectReactNative,
     });
   } catch (error) {
@@ -100,6 +103,7 @@ const wipeUserData = async (): Promise<void> => {
 };
 
 events.on("SignedOut", async () => {
+  disconnectCloudDatabase();
   try {
     await wipeUserData();
   } catch (error) {
@@ -113,20 +117,36 @@ events.on("SignedOut", async () => {
  */
 const syncUserData = async (): Promise<void> => {
   const database = await getUserDatabase();
+  await connectCloudDatabase();
   const outcome = await database.sync();
   if (outcome.status === "synced" && outcome.pulledChanges) {
     await queryClient.invalidateQueries({ queryKey: USER_DATA_QUERY_KEY });
   }
 };
 
-const syncReportingErrors = async (): Promise<void> => {
-  try {
-    await syncUserData();
-  } catch (error) {
-    // Offline or a failed sync is retried on the next foreground.
-    captureException(error);
-  }
+let lastSync: Promise<void> = Promise.resolve();
+
+/**
+ * Runs one sync after any already running: launch, foreground and sign-in
+ * can overlap, and a sign-in must not be skipped behind a paused Guest sync.
+ */
+const syncReportingErrors = (): Promise<void> => {
+  const previous = lastSync;
+  lastSync = (async () => {
+    await previous;
+    try {
+      await syncUserData();
+    } catch (error) {
+      // Offline or a failed sync is retried on the next foreground.
+      captureException(error);
+    }
+  })();
+  return lastSync;
 };
+
+// Sign-in creates the Believer's cloud database (first time only) and pushes
+// everything they recorded as a Guest; a second device receives their data.
+events.on("SignedIn", syncReportingErrors);
 
 /** Opens the database at launch and syncs on launch and on every foreground. */
 export const useUserDataSync = (): void => {

@@ -28,6 +28,7 @@ packages/e2e      end-to-end tests
 ```sh
 bun install
 bun run db:local     # local SQLite (turso dev) for the server database
+bun run db:sync-server  # local tursodb --sync-server for Believers' databases (stands in for Turso Cloud)
 bun run dev          # all apps
 bun run check        # oxlint, oxfmt, tsc and sherif via uncheck
 bun run check:fix

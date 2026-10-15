@@ -9,4 +9,36 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190106_tasbih",
+    statements: [
+      "CREATE TABLE `dhikr_sessions` (\n\t`id` text PRIMARY KEY,\n\t`tasbih_id` text NOT NULL,\n\t`count` integer NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `tasbih` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`name` text,\n\t`count` integer DEFAULT 0 NOT NULL,\n\t`step` integer DEFAULT 0 NOT NULL\n);",
+      "CREATE INDEX `dhikr_sessions_completed_at` ON `dhikr_sessions` (`completed_at`);",
+    ],
+  },
+  {
+    tag: "20261015191918_favorites_and_reading_completions",
+    statements: [
+      "CREATE TABLE `favorites` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`key` text NOT NULL,\n\t`favorited_at` text NOT NULL\n);",
+      "CREATE TABLE `reading_completions` (\n\t`id` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` text NOT NULL\n);",
+      "CREATE INDEX `favorites_favorited_at` ON `favorites` (`favorited_at`);",
+      "CREATE INDEX `reading_completions_date` ON `reading_completions` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015192400_hijri_adjustment",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
+    ],
+  },
+  {
+    tag: "20261015192630_prayer_times_settings",
+    statements: [
+      "CREATE TABLE `prayer_times_settings` (\n\t`id` text PRIMARY KEY,\n\t`hidden_prayer_times` text\n);",
+      "ALTER TABLE `believer_settings` ADD `location_follows_device` integer DEFAULT true NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `imsak_minutes` integer DEFAULT 10 NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `time_format` text;",
+    ],
+  },
 ];

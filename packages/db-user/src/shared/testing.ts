@@ -52,3 +52,6 @@ export const temporaryDirectory = (): TemporaryDirectory => {
     remove: () => rmSync(directory, { force: true, recursive: true }),
   };
 };
+
+export { startSyncServer } from "./sync-server";
+export type { SyncServer } from "./sync-server";
