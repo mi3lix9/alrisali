@@ -155,4 +155,16 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `personal_programs` (\n\t`id` text PRIMARY KEY,\n\t`name` text NOT NULL,\n\t`description` text DEFAULT '' NOT NULL,\n\t`acts` text DEFAULT '[]' NOT NULL,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015222403_shell_preferences",
+    statements: [
+      "CREATE TABLE `shell_preferences` (\n\t`id` text PRIMARY KEY,\n\t`language` text,\n\t`theme` text,\n\t`text_size` text,\n\t`hidden_tabs` text\n);",
+    ],
+  },
+  {
+    tag: "20261015224555_quran_reciter_key",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `reciter` text DEFAULT 'ar.alafasy' NOT NULL;",
+    ],
+  },
 ];

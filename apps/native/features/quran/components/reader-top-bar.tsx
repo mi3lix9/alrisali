@@ -8,6 +8,7 @@ import {
   ListIcon,
   SearchIcon,
 } from "panelui-native/icons";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
@@ -27,6 +28,8 @@ interface ReaderTopBarProps {
   onSettings: () => void;
   /** Whether the Last-Read Ayah is on the page shown: fills the bookmark. */
   lastReadOnScreen: boolean;
+  /** Buttons another feature adds before search, composed by the route. */
+  actions?: ReactNode;
 }
 
 /**
@@ -44,6 +47,7 @@ export const ReaderTopBar = ({
   onSearch,
   onSettings,
   lastReadOnScreen,
+  actions,
 }: ReaderTopBarProps) => {
   const { t, i18n } = useTranslation("quran");
   const accent = useCSSVariable("--color-info");
@@ -70,6 +74,7 @@ export const ReaderTopBar = ({
         <Button
           variant="ghost"
           size="icon"
+          testID="quran-reader-back"
           accessibilityLabel={t("chrome.back")}
           onPress={onBack}
         >
@@ -78,6 +83,7 @@ export const ReaderTopBar = ({
         <Button
           variant="ghost"
           size="icon"
+          testID="quran-reader-index"
           accessibilityLabel={t("navigation.index")}
           onPress={onIndex}
         >
@@ -106,6 +112,7 @@ export const ReaderTopBar = ({
               : {})}
           />
         </View>
+        {actions}
         <Button
           variant="ghost"
           size="icon"

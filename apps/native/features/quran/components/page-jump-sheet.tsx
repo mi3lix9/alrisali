@@ -26,6 +26,7 @@ const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
   return (
     <View className="gap-4">
       <Input
+        testID="quran-page-jump-input"
         label={t("navigation.pageNumber")}
         value={text}
         onChangeText={setText}
@@ -47,7 +48,7 @@ const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
             })
           : " "}
       </Text>
-      <Button disabled={!page} onPress={open}>
+      <Button testID="quran-page-jump-open" disabled={!page} onPress={open}>
         {t("navigation.open")}
       </Button>
     </View>

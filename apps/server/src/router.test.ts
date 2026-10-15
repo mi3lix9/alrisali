@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
-import type { Auth } from "@alrisali/auth";
+import type { Auth, SignInOptions } from "@alrisali/auth";
 import { createAnnouncementsRepository } from "@alrisali/db-content/announcements";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
@@ -56,6 +56,7 @@ import { z } from "zod";
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { runAnnouncementScheduler } from "@/features/announcements";
 import { servesLibraryFile } from "@/features/library-assets";
+import type { AppleGrant, AppleRevoker } from "@/shared/lib/apple-revoker";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
 import {
@@ -71,7 +72,6 @@ import type {
   PushTicket,
   PushTransport,
 } from "@/shared/lib/push-transport";
-import type { RecitationSource } from "@/shared/lib/recitation-source";
 import { mountFiles } from "@/shared/lib/uploads";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
@@ -292,6 +292,7 @@ const ACCESS: Record<
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "account.signInOptions": { access: "anonymous" },
   "analytics.track": { access: "anonymous", input: analyticsBatch() },
   "analytics.summary": { access: "admin" },
   "analytics.popularSections": { access: "admin", input: { days: 7 } },
@@ -402,11 +403,6 @@ const ACCESS: Record<
   "programs.save": { access: "admin", input: dailyNawafil },
   "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
   "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
-  "quran.reciters": { access: "anonymous" },
-  "quran.surahAudio": {
-    access: "anonymous",
-    input: { reciterId: 7, surah: 1 },
-  },
 };
 
 const proceduresOf = (
@@ -446,25 +442,6 @@ const TEST_ENV = {
   CORS_ORIGIN: "http://localhost:3001",
   GOOGLE_CLIENT_IDS: "web-client.apps.googleusercontent.com",
   APPLE_BUNDLE_IDS: "com.alrisali.app",
-};
-
-// Stand-in for the Quran Foundation audio API.
-const recitation: RecitationSource = {
-  reciters: () =>
-    Promise.resolve([
-      {
-        id: 7,
-        name: { ar: "مشاري العفاسي", en: "Mishary Alafasy" },
-        style: null,
-      },
-    ]),
-  surahAudio: (reciterId, surah) =>
-    Promise.resolve([
-      {
-        ayah: `${surah}:1`,
-        url: `https://verses.quran.foundation/${reciterId}/001001.mp3`,
-      },
-    ]),
 };
 
 const pathsFor = (...access: Access[]): string[] =>
@@ -522,6 +499,13 @@ let auth: Auth;
 let userDatabases: UserDatabaseHost;
 let content: ContentDatabase;
 let files: FileBucket;
+// Stands in for Apple's revocation; records what it was asked to revoke.
+let appleRevocations: {
+  grant: AppleGrant;
+  authorizationCode: string | undefined;
+}[];
+let apple: AppleRevoker;
+let signInOptions: SignInOptions;
 
 // An in-process stand-in for the Railway files bucket, started by the tests
 // that upload. Presigning needs no bucket, so the rest point nowhere.
@@ -567,6 +551,14 @@ const setUp = async (host?: UserDatabaseHost) => {
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
   push = fakePush();
+  signInOptions = { providers: [], emailPassword: false };
+  appleRevocations = [];
+  apple = {
+    revoke: (grant, authorizationCode) => {
+      appleRevocations.push({ grant, authorizationCode });
+      return Promise.resolve();
+    },
+  };
   // A fresh content database per test, so no test sees another's content.
   contentDatabases += 1;
   content = createContentDatabase({
@@ -621,9 +613,10 @@ const callAs = async (
     db,
     userDatabases,
     content,
-    recitation,
     files,
     push,
+    apple,
+    signInOptions,
     headers,
     clientIp,
     ipHashKey: TEST_ENV.BETTER_AUTH_SECRET,
@@ -740,6 +733,14 @@ describe("auth guards", () => {
     await expect(callAs(again, "account.privateData")).resolves.toMatchObject({
       user: { email: "ali@privaterelay.appleid.com", name: "Ali Hasan" },
     });
+  });
+
+  it("tells clients how they may sign in", async () => {
+    signInOptions = { providers: ["google"], emailPassword: true };
+
+    await expect(
+      callAs(new Headers(), "account.signInOptions")
+    ).resolves.toStrictEqual({ providers: ["google"], emailPassword: true });
   });
 
   it("refuses an ID token the provider did not sign", async () => {
@@ -1588,6 +1589,34 @@ describe("Library Assets", () => {
     });
   });
 
+  it("keeps a Library Asset the Admin can remove again when the content database fails", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ published: true })
+    )) as { id: string };
+
+    const working = content;
+    content = {
+      ...working,
+      db: () => Promise.reject(new Error("content database unreachable")),
+    };
+    await expect(
+      callAs(admin, "libraryAssets.remove", { id })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+    content = working;
+
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [{ id }],
+    });
+    await callAs(admin, "libraryAssets.remove", { id });
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [],
+    });
+  });
+
   it("publishes structured text only when its file is in the structured-text format", async () => {
     const admin = await signInAsAdmin();
     const good = await uploadLibraryFile(
@@ -2109,6 +2138,58 @@ describe("account deletion on the local sync server", () => {
     await expect(userIdOf(again)).resolves.not.toBe(beforeId);
     expect(newDatabase).not.toBe(oldDatabase);
     await expect(tablesIn(newDatabase)).resolves.toStrictEqual([]);
+  });
+
+  it("revokes Sign in with Apple with the fresh authorization code", async () => {
+    const appleToken = idToken({
+      sub: "apple-002",
+      aud: "com.alrisali.app",
+      email: "maryam@privaterelay.appleid.com",
+      email_verified: "true",
+    });
+    const headers = await signIn("apple", appleToken);
+    const userId = await userIdOf(headers);
+
+    await callAs(headers, "account.deleteAccount", {
+      appleAuthorizationCode: "fresh-code",
+    });
+
+    expect(appleRevocations).toStrictEqual([
+      {
+        grant: { idToken: appleToken, accessToken: null, refreshToken: null },
+        authorizationCode: "fresh-code",
+      },
+    ]);
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
+  });
+
+  it("does not ask Apple to revoke anything for a Google account", async () => {
+    const headers = await signIn("google", idToken(googleBeliever));
+
+    await callAs(headers, "account.deleteAccount");
+
+    expect(appleRevocations).toStrictEqual([]);
+  });
+
+  it("keeps the account when Apple refuses the revocation", async () => {
+    const headers = await signIn(
+      "apple",
+      idToken({ sub: "apple-003", email: "ali@privaterelay.appleid.com" })
+    );
+    const userId = await userIdOf(headers);
+    await ensure(headers);
+    apple = {
+      revoke: () =>
+        Promise.reject(new Error("Apple /auth/revoke answered 400")),
+    };
+
+    await expect(
+      callAs(headers, "account.deleteAccount", {
+        appleAuthorizationCode: "expired-code",
+      })
+    ).rejects.toMatchObject({ code: "SERVICE_UNAVAILABLE" });
+
+    await expect(rowCountsOf(userId)).resolves.toStrictEqual(ONE_ROW_EACH);
   });
 
   it("keeps the account when the cloud database cannot be destroyed", async () => {

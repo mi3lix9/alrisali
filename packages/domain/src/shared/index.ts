@@ -11,8 +11,8 @@ export {
   serialiseHabitSchedule,
 } from "./habit-schedule";
 export type { HabitReminderPlan, HabitSchedule } from "./habit-schedule";
-export { habitStreak, prayerStreak } from "./streaks";
-export type { HabitStreak } from "./streaks";
+export { displayedPrayerStreak, habitStreak, prayerStreak } from "./streaks";
+export type { DisplayedPrayerStreak, HabitStreak } from "./streaks";
 export {
   addHijriMonths,
   createHijriCalendar,
@@ -88,6 +88,12 @@ export type { Salah } from "./salah";
 export { DEFAULT_TEXT_SIZE, TEXT_SCALE, TEXT_SIZES } from "./text-size";
 export type { TextSize } from "./text-size";
 export {
+  DEFAULT_THEME_PREFERENCE,
+  THEME_PREFERENCES,
+  themePreferenceSchema,
+} from "./theme";
+export type { ThemePreference } from "./theme";
+export {
   calculatePrayerTimes,
   currentPrayerTime,
   DEFAULT_HIDDEN_PRAYER_TIMES,
@@ -111,3 +117,14 @@ export type {
   PrayerTimesSettings,
   TimeFormat,
 } from "./prayer-times";
+export type {
+  DhikrSessionSource,
+  HabitCompletionSource,
+  InsightsHabit,
+  InsightsSources,
+  KhushuRating,
+  LoggedDay,
+  MoodCheckInSource,
+  TasbihLabel,
+} from "./insights-sources";
+export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";

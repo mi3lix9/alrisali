@@ -12,13 +12,14 @@ import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
 import {
+  apple,
   auth,
   content,
   db,
   files,
   push,
-  recitation,
   userDatabases,
+  signInOptions,
 } from "./services";
 import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
 import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
@@ -75,9 +76,10 @@ app.use("/*", async (c, next) => {
     db,
     userDatabases,
     content,
-    recitation,
     files,
     push,
+    apple,
+    signInOptions,
     headers: c.req.raw.headers,
     clientIp: clientIpOf(c.req.raw, c.env),
     // The auth secret doubles as the IP hash key: one secret less to manage.

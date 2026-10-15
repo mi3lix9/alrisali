@@ -31,8 +31,10 @@ export const ar = {
   },
   sheet: {
     title: "سورة {{surah}} · الآية {{ayah}}",
-    copyHint: "اضغط مطوّلًا على النص لنسخه.",
     share: "مشاركة",
+    play: "استمع من هنا",
+    copy: "نسخ",
+    copied: "نُسخت الآية",
   },
   lastRead: {
     set: "اجعلها آخر ما قرأت",
@@ -103,11 +105,10 @@ export const ar = {
     position: "سورة {{surah}} · الآية {{ayah}}",
     chooseReciter: "اختيار القارئ",
     reciters: "القرّاء",
-    recitersFailed: "تعذّر تحميل قائمة القرّاء.",
     style: {
-      Murattal: "مرتّل",
-      Mujawwad: "مجوّد",
-      Muallim: "معلّم",
+      murattal: "مرتّل",
+      mujawwad: "مجوّد",
+      muallim: "معلّم",
     },
   },
   verseOfTheDay: {

@@ -11,6 +11,7 @@ import {
   SURAH_COUNT,
 } from "./mushaf";
 import type { Ayah, AyahKey } from "./mushaf";
+import { DEFAULT_RECITER, findReciter } from "./reciters";
 
 // The Quran reader's position and how it moves. The UI renders the state and
 // forwards what the Believer did as actions.
@@ -33,8 +34,10 @@ export const quranReaderSettingsSchema = z.object({
     .int()
     .min(SURAH_FONT_SIZE.min)
     .max(SURAH_FONT_SIZE.max),
-  /** The Quran Foundation recitation the reader and Verse of the Day play. */
-  reciterId: z.number().int().positive(),
+  /** The bundled reciter the reader and Verse of the Day play. */
+  reciter: z
+    .string()
+    .refine((key) => findReciter(key) !== undefined, "No such reciter"),
 });
 
 /** How the Believer likes to read; kept in their database. */
@@ -44,8 +47,7 @@ export const DEFAULT_QURAN_READER_SETTINGS: QuranReaderSettings = {
   mode: "page",
   pageNav: "horizontal",
   surahFontSize: 26,
-  /** Mishari Rashid al-Afasy (Murattal). */
-  reciterId: 7,
+  reciter: DEFAULT_RECITER,
 };
 
 export interface QuranReaderState {

@@ -69,6 +69,7 @@ export const PersonalProgramScreen = () => {
             <Badge
               size="sm"
               variant={subscription.paused ? "warning" : "success"}
+              testID="programs-subscription-state"
             >
               {subscription.paused ? t("paused") : t("subscribed")}
             </Badge>

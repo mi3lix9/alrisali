@@ -1,19 +1,9 @@
-import type { Reciter } from "@alrisali/api/quran";
-import { BottomSheet, Button, Spinner, Text } from "panelui-native";
+import { RECITERS } from "@alrisali/domain/quran";
+import type { Reciter } from "@alrisali/domain/quran";
+import { BottomSheet, Text } from "panelui-native";
 import { CheckIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, View } from "react-native";
-
-import { useReciters } from "../data/reciters";
-
-const STYLE_KEYS: Record<
-  string,
-  `recitation.style.${"Murattal" | "Mujawwad" | "Muallim"}`
-> = {
-  Murattal: "recitation.style.Murattal",
-  Mujawwad: "recitation.style.Mujawwad",
-  Muallim: "recitation.style.Muallim",
-};
 
 /** A reciter's name in the UI language. */
 export const useReciterName = () => {
@@ -24,20 +14,19 @@ export const useReciterName = () => {
 
 interface ReciterSheetProps {
   open: boolean;
-  reciterId: number;
-  onSelect: (reciterId: number) => void;
+  reciter: string;
+  onSelect: (reciter: string) => void;
   onClose: () => void;
 }
 
-/** The Quran Foundation reciters, the chosen one ticked. */
+/** The reciters bundled with the app, the chosen one ticked. */
 export const ReciterSheet = ({
   open,
-  reciterId,
+  reciter: chosen,
   onSelect,
   onClose,
 }: ReciterSheetProps) => {
   const { t } = useTranslation("quran");
-  const reciters = useReciters();
   const nameOf = useReciterName();
 
   return (
@@ -52,43 +41,24 @@ export const ReciterSheet = ({
       <BottomSheet.Content>
         <BottomSheet.Header title={t("recitation.reciters")} />
         <BottomSheet.Body className="pb-6">
-          {reciters.isPending ? (
-            <View className="items-center py-6">
-              <Spinner />
-            </View>
-          ) : null}
-          {reciters.isError ? (
-            <View className="items-start gap-3 py-2">
-              <Text muted>{t("recitation.recitersFailed")}</Text>
-              <Button variant="outline" onPress={() => reciters.refetch()}>
-                {t("recitation.retry")}
-              </Button>
-            </View>
-          ) : null}
           <ScrollView style={{ maxHeight: 420 }}>
-            {reciters.data?.map((reciter) => {
-              const selected = reciter.id === reciterId;
-              const styleKey = reciter.style
-                ? STYLE_KEYS[reciter.style]
-                : undefined;
-              const style = styleKey ? t(styleKey) : reciter.style;
+            {RECITERS.map((reciter) => {
+              const selected = reciter.key === chosen;
               return (
                 <Pressable
-                  key={reciter.id}
+                  key={reciter.key}
                   accessibilityRole="radio"
                   accessibilityState={{ selected }}
-                  onPress={() => onSelect(reciter.id)}
+                  onPress={() => onSelect(reciter.key)}
                   className="border-border flex-row items-center gap-3 border-b py-3"
                 >
                   <View className="flex-1">
                     <Text weight={selected ? "semibold" : "normal"}>
                       {nameOf(reciter)}
                     </Text>
-                    {style ? (
-                      <Text size="xs" muted>
-                        {style}
-                      </Text>
-                    ) : null}
+                    <Text size="xs" muted>
+                      {t(`recitation.style.${reciter.style}`)}
+                    </Text>
                   </View>
                   {selected ? <CheckIcon size={20} /> : null}
                 </Pressable>

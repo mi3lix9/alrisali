@@ -13,6 +13,7 @@ export type {
   ReaderSheet,
 } from "./chrome";
 export {
+  ayahNumber,
   ayatOfSurah,
   ayatOnPage,
   findAyah,
@@ -49,8 +50,15 @@ export type {
 } from "./reader";
 export { scrubberDomain, scrubberTarget, scrubberValue } from "./scrubber";
 export type { ScrubberDomain } from "./scrubber";
-export { normalizeArabic, searchQuran } from "./search";
+export { searchQuran, searchSurahs } from "./search";
 export type { QuranSearchOptions, QuranSearchResult } from "./search";
+export {
+  DEFAULT_RECITER,
+  findReciter,
+  RECITERS,
+  recitationUrl,
+} from "./reciters";
+export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
 export {
   createRecitationCache,
   nextAyah,

@@ -4,6 +4,7 @@ import type { Temporal } from "temporal-polyfill";
 import { ayatOfSurah, findAyah, firstAyahOfPage } from "./mushaf";
 import type { Ayah, AyahKey } from "./mushaf";
 import type { QuranReaderState } from "./reader";
+import { recitationUrl } from "./reciters";
 
 // Recitation: which ayah it starts at, the order it plays in, and how long a
 // played file is kept on the device.
@@ -44,14 +45,15 @@ export const nextAyah = (key: AyahKey): AyahKey | null => {
 /** How long a played file stays on the device. */
 export const RECITATION_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
-/** One ayah as one reciter recites it. */
+/** One ayah as one bundled reciter recites it. */
 export interface RecitedAyah {
-  reciterId: number;
+  /** A bundled reciter's key, e.g. `ar.alafasy`. */
+  reciter: string;
   ayah: AyahKey;
 }
 
 export interface CachedRecitation {
-  /** `<reciterId>/<sss><aaa>`, e.g. `7/002255`. */
+  /** `<reciter>/<sss><aaa>`, e.g. `ar.alafasy/002255`. */
   key: string;
   /** Where the file is on the device. */
   uri: string;
@@ -76,21 +78,18 @@ export interface RecitationCacheOptions {
 export interface RecitationCache {
   /**
    * Where to play an ayah from: its file on the device while under 7 days
-   * old, otherwise the stream `remote` resolves (only asked for then).
+   * old, otherwise its reciter's stream.
    */
-  source: (
-    recited: RecitedAyah,
-    remote: () => Promise<string>
-  ) => Promise<string>;
-  /** Keeps a played file for 7 days from its download. */
-  keep: (recited: RecitedAyah, url: string) => Promise<void>;
+  source: (recited: RecitedAyah) => Promise<string>;
+  /** Downloads a played ayah from its reciter's stream and keeps it 7 days. */
+  keep: (recited: RecitedAyah) => Promise<void>;
   /** Deletes every file 7 days old or older. */
   prune: () => Promise<void>;
 }
 
-const cacheKey = ({ reciterId, ayah }: RecitedAyah): string => {
+const cacheKey = ({ reciter, ayah }: RecitedAyah): string => {
   const [surah = "", number = ""] = ayah.split(":");
-  return `${reciterId}/${surah.padStart(3, "0")}${number.padStart(3, "0")}`;
+  return `${reciter}/${surah.padStart(3, "0")}${number.padStart(3, "0")}`;
 };
 
 /** Played recitation files, kept on the device for at most 7 days. */
@@ -102,7 +101,7 @@ export const createRecitationCache = ({
     now() - savedAt < RECITATION_CACHE_MAX_AGE_MS;
 
   return {
-    source: async (recited, remote) => {
+    source: async (recited) => {
       const key = cacheKey(recited);
       const entry = await store.get(key);
       if (entry && isFresh(entry)) {
@@ -111,15 +110,15 @@ export const createRecitationCache = ({
       if (entry) {
         await store.remove(key);
       }
-      return remote();
+      return recitationUrl(recited.reciter, recited.ayah);
     },
-    keep: async (recited, url) => {
+    keep: async (recited) => {
       const key = cacheKey(recited);
       const entry = await store.get(key);
       if (entry && isFresh(entry)) {
         return;
       }
-      await store.save(key, url);
+      await store.save(key, recitationUrl(recited.reciter, recited.ayah));
     },
     prune: async () => {
       const entries = await store.list();
@@ -138,14 +137,14 @@ export type RecitationPlayback =
   | {
       status: "loading" | "playing" | "paused" | "error";
       ayah: AyahKey;
-      reciterId: number;
+      reciter: string;
       /** The last ayah to play; null plays on to the end of the Quran. */
       until: AyahKey | null;
     };
 
 export type RecitationEvent =
   /** Start at an ayah, replacing whatever was playing. */
-  | { type: "play"; ayah: AyahKey; reciterId: number; until?: AyahKey }
+  | { type: "play"; ayah: AyahKey; reciter: string; until?: AyahKey }
   /** The current ayah's audio loaded and started. */
   | { type: "ready" }
   /** The current ayah's audio ended. */
@@ -166,7 +165,7 @@ export const recitationPlayback = (
     return {
       status: "loading",
       ayah: event.ayah,
-      reciterId: event.reciterId,
+      reciter: event.reciter,
       until: event.until ?? null,
     };
   }

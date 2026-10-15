@@ -32,12 +32,21 @@ export const CONTENT_SOURCES = [
     },
   },
   {
-    id: "quran-foundation",
-    name: "Quran.Foundation",
-    url: "https://quran.foundation",
+    id: "alquran-cloud",
+    name: "alquran.cloud / Islamic Network",
+    url: "https://alquran.cloud",
     licence: {
-      name: "Quran Foundation Developer Terms",
-      url: "https://api-docs.quran.foundation/legal/developer-terms/",
+      name: "alquran.cloud terms: free redistribution; recordings' copyrights belong to the reciters",
+      url: "https://alquran.cloud/terms-and-conditions",
+    },
+  },
+  {
+    id: "everyayah",
+    name: "EveryAyah.com",
+    url: "https://everyayah.com",
+    licence: {
+      name: "Recordings' copyrights belong to the reciters",
+      url: "https://everyayah.com",
     },
   },
   {
@@ -51,11 +60,11 @@ export const CONTENT_SOURCES = [
   },
   {
     id: "adhan-recording",
-    name: "“Adhan wiki.oga” by Jarih, Wikimedia Commons",
-    url: "https://commons.wikimedia.org/wiki/File:Adhan_wiki.oga",
+    name: "“AzaanMaahur.ogg” by Saeed Hatamzadeh-Varmazyar, Wikimedia Commons",
+    url: "https://commons.wikimedia.org/wiki/File:AzaanMaahur.ogg",
     licence: {
-      name: "CC BY-SA 3.0 (converted to WAV)",
-      url: "https://creativecommons.org/licenses/by-sa/3.0/",
+      name: "CC BY-SA 4.0 (opening excerpt, converted to WAV)",
+      url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },
 ] as const satisfies readonly ContentSource[];

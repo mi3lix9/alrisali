@@ -11,6 +11,12 @@ export interface AppEvents {
   /** The signed-in Believer signed out on this device. */
   SignedOut: undefined;
   /**
+   * The Believer's database may hold different data: it was opened or synced
+   * (launch, foreground, sign-in), or sign-out wiped it for a fresh Guest
+   * database. Readers kept outside queries (the shell preferences) re-read.
+   */
+  UserDatabaseChanged: undefined;
+  /**
    * The Believer finished the first run on this device: their settings are
    * in place and notifications were offered, so Reminders can be planned.
    */
@@ -66,6 +72,12 @@ export interface AppEvents {
    * (Companion XP, the Prayer Assistant) can react once per logged Salah.
    */
   SalahLogged: { date: string; salah: Salah; loggedAt: number };
+  /**
+   * The Believer un-ticked a Salah in their Prayer Log, for today or a past
+   * `date` (ISO `YYYY-MM-DD`). A listener (Khushu) drops what it kept for
+   * that `date` + `salah`, so nothing counts for a Salah no longer logged.
+   */
+  SalahUnlogged: { date: string; salah: Salah; unloggedAt: number };
   /**
    * The Prayer Assistant followed the Believer to the end of a Salah, on
    * `date` (ISO `YYYY-MM-DD`). The Prayer Log ticks it, which then emits

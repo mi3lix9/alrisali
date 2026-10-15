@@ -73,11 +73,12 @@ describe(nextAyah, () => {
 });
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const REMOTE = "https://verses.quran.foundation/Alafasy/mp3/002255.mp3";
+const REMOTE = "https://cdn.islamic.network/quran/audio/128/ar.alafasy/262.mp3";
 
 /** An in-memory stand-in for the device's audio files. */
 const memoryStore = () => {
   const files = new Map<string, number>();
+  const downloads: string[] = [];
   let clock = 0;
   const store: RecitationCacheStore = {
     get: (key) => {
@@ -96,7 +97,8 @@ const memoryStore = () => {
           savedAt,
         }))
       ),
-    save: (key) => {
+    save: (key, url) => {
+      downloads.push(url);
       files.set(key, clock);
       return Promise.resolve();
     },
@@ -108,14 +110,12 @@ const memoryStore = () => {
   return {
     store,
     files,
+    downloads,
     setClock: (time: number) => {
       clock = time;
     },
   };
 };
-
-const remote = () => Promise.resolve(REMOTE);
-const offline = () => Promise.reject(new Error("offline"));
 
 const setUpCache = () => {
   const memory = memoryStore();
@@ -131,65 +131,73 @@ const setUpCache = () => {
 };
 
 describe(createRecitationCache, () => {
-  it("streams an ayah that was never played", async () => {
+  it("streams an ayah that was never played from the reciter's source", async () => {
     const { cache } = setUpCache();
     await expect(
-      cache.source({ reciterId: 7, ayah: "2:255" }, remote)
+      cache.source({ reciter: "ar.alafasy", ayah: "2:255" })
     ).resolves.toBe(REMOTE);
   });
 
-  it("plays a kept ayah from the device without asking for its address", async () => {
+  it("downloads a kept ayah from the reciter's source", async () => {
+    const { cache, memory } = setUpCache();
+    await cache.keep({ reciter: "ar.alafasy", ayah: "2:255" });
+    expect(memory.downloads).toStrictEqual([REMOTE]);
+  });
+
+  it("plays a kept ayah from the device, and only for its reciter", async () => {
     const { cache } = setUpCache();
-    await cache.keep({ reciterId: 7, ayah: "2:255" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "2:255" });
 
     await expect(
-      cache.source({ reciterId: 7, ayah: "2:255" }, offline)
-    ).resolves.toBe("file:///7/002255.mp3");
+      cache.source({ reciter: "ar.alafasy", ayah: "2:255" })
+    ).resolves.toBe("file:///ar.alafasy/002255.mp3");
     await expect(
-      cache.source({ reciterId: 1, ayah: "2:255" }, remote)
-    ).resolves.toBe(REMOTE);
+      cache.source({ reciter: "everyayah.minshawy-murattal", ayah: "2:255" })
+    ).resolves.toBe(
+      "https://everyayah.com/data/Minshawy_Murattal_128kbps/002255.mp3"
+    );
   });
 
   it("keeps a played file for under 7 days, then streams it again", async () => {
     const { cache, at, start } = setUpCache();
-    await cache.keep({ reciterId: 7, ayah: "2:255" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "2:255" });
 
     at(start + 7 * DAY_MS - 1);
     await expect(
-      cache.source({ reciterId: 7, ayah: "2:255" }, remote)
-    ).resolves.toBe("file:///7/002255.mp3");
+      cache.source({ reciter: "ar.alafasy", ayah: "2:255" })
+    ).resolves.toBe("file:///ar.alafasy/002255.mp3");
 
     at(start + 7 * DAY_MS);
     await expect(
-      cache.source({ reciterId: 7, ayah: "2:255" }, remote)
+      cache.source({ reciter: "ar.alafasy", ayah: "2:255" })
     ).resolves.toBe(REMOTE);
   });
 
   it("does not extend a file's week when it is played again", async () => {
     const { cache, at, memory, start } = setUpCache();
-    await cache.keep({ reciterId: 7, ayah: "1:1" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:1" });
     at(start + 3 * DAY_MS);
-    await cache.keep({ reciterId: 7, ayah: "1:1" }, REMOTE);
-    expect(memory.files.get("7/001001")).toBe(start);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:1" });
+    expect(memory.files.get("ar.alafasy/001001")).toBe(start);
   });
 
   it("downloads an expired file again when it is kept", async () => {
     const { cache, at, memory, start } = setUpCache();
-    await cache.keep({ reciterId: 7, ayah: "1:1" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:1" });
     at(start + 8 * DAY_MS);
-    await cache.keep({ reciterId: 7, ayah: "1:1" }, REMOTE);
-    expect(memory.files.get("7/001001")).toBe(start + 8 * DAY_MS);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:1" });
+    expect(memory.files.get("ar.alafasy/001001")).toBe(start + 8 * DAY_MS);
   });
 
   it("deletes files 7 days old and keeps younger ones", async () => {
     const { cache, at, memory, start } = setUpCache();
-    await cache.keep({ reciterId: 7, ayah: "1:1" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:1" });
     at(start + 2 * DAY_MS);
-    await cache.keep({ reciterId: 7, ayah: "1:2" }, REMOTE);
+    await cache.keep({ reciter: "ar.alafasy", ayah: "1:2" });
 
     at(start + 7 * DAY_MS);
     await cache.prune();
-    expect([...memory.files.keys()]).toStrictEqual(["7/001002"]);
+    expect([...memory.files.keys()]).toStrictEqual(["ar.alafasy/001002"]);
   });
 });
 
@@ -205,11 +213,15 @@ const idle: RecitationPlayback = { status: "idle" };
 
 describe(recitationPlayback, () => {
   it("loads the first ayah, then plays it once it is ready", () => {
-    const loading = play(idle, { type: "play", ayah: "1:1", reciterId: 7 });
+    const loading = play(idle, {
+      type: "play",
+      ayah: "1:1",
+      reciter: "ar.alafasy",
+    });
     expect(loading).toStrictEqual({
       status: "loading",
       ayah: "1:1",
-      reciterId: 7,
+      reciter: "ar.alafasy",
       until: null,
     });
     expect(play(loading, { type: "ready" })).toMatchObject({
@@ -221,7 +233,7 @@ describe(recitationPlayback, () => {
   it("moves on to the next ayah, across surahs, when one finishes", () => {
     const state = play(
       idle,
-      { type: "play", ayah: "1:7", reciterId: 7 },
+      { type: "play", ayah: "1:7", reciter: "ar.alafasy" },
       { type: "ready" },
       { type: "finished" }
     );
@@ -231,7 +243,7 @@ describe(recitationPlayback, () => {
   it("stops after the last ayah it was asked to play", () => {
     const state = play(
       idle,
-      { type: "play", ayah: "2:255", reciterId: 7, until: "2:255" },
+      { type: "play", ayah: "2:255", reciter: "ar.alafasy", until: "2:255" },
       { type: "ready" },
       { type: "finished" }
     );
@@ -241,7 +253,7 @@ describe(recitationPlayback, () => {
   it("stops after the last ayah of the Quran", () => {
     const state = play(
       idle,
-      { type: "play", ayah: "114:6", reciterId: 7 },
+      { type: "play", ayah: "114:6", reciter: "ar.alafasy" },
       { type: "ready" },
       { type: "finished" }
     );
@@ -251,7 +263,7 @@ describe(recitationPlayback, () => {
   it("pauses and resumes at the same ayah", () => {
     const paused = play(
       idle,
-      { type: "play", ayah: "18:1", reciterId: 7 },
+      { type: "play", ayah: "18:1", reciter: "ar.alafasy" },
       { type: "ready" },
       { type: "pause" }
     );
@@ -271,13 +283,13 @@ describe(recitationPlayback, () => {
   it("keeps the ayah when its audio fails, so a retry loads it again", () => {
     const failed = play(
       idle,
-      { type: "play", ayah: "2:1", reciterId: 7 },
+      { type: "play", ayah: "2:1", reciter: "ar.alafasy" },
       { type: "failed" }
     );
     expect(failed).toStrictEqual({
       status: "error",
       ayah: "2:1",
-      reciterId: 7,
+      reciter: "ar.alafasy",
       until: null,
     });
     expect(play(failed, { type: "resume" })).toMatchObject({
@@ -290,7 +302,7 @@ describe(recitationPlayback, () => {
     expect(
       play(
         idle,
-        { type: "play", ayah: "1:1", reciterId: 7 },
+        { type: "play", ayah: "1:1", reciter: "ar.alafasy" },
         { type: "stop" },
         { type: "ready" },
         { type: "finished" }
@@ -301,14 +313,14 @@ describe(recitationPlayback, () => {
   it("starts over at a new ayah with a new reciter", () => {
     const state = play(
       idle,
-      { type: "play", ayah: "1:1", reciterId: 7 },
+      { type: "play", ayah: "1:1", reciter: "ar.alafasy" },
       { type: "ready" },
-      { type: "play", ayah: "36:1", reciterId: 1 }
+      { type: "play", ayah: "36:1", reciter: "everyayah.minshawy-murattal" }
     );
     expect(state).toMatchObject({
       status: "loading",
       ayah: "36:1",
-      reciterId: 1,
+      reciter: "everyayah.minshawy-murattal",
     });
   });
 });

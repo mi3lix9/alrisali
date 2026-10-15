@@ -26,7 +26,7 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
   - Quiet hours hold back only non-essential Reminders; Salah and Imsak Reminders are essential. Habit Reminders (ticket 34) join through the planner's `sources` input.
   - Message Style is a Believer setting (default Classic). Classic Reminders carry a rotating Qur'an or hadith saying with its source; Modern ones carry a short coaching line.
   - The Adhan voice is a 27-second CC BY-SA 3.0 recording from Wikimedia Commons, credited in Sources & Credits; the chime and bell tones are synthesised for the app.
-- Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams from Quran Foundation and is cached for at most 7 days (ADR-0004).
+- Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams straight to the device from alquran.cloud (Islamic Network), and from EveryAyah.com for reciters alquran.cloud lacks; the reciter list is bundled, no key or server is involved, and played files are cached for at most 7 days (ADR-0004).
 - Books (Mafatih, Sahifa, Nahj): bundled static data with stable Supplication ids. The content database refers to Supplications by those ids. Arabic and English texts are re-sourced from Thaqalayn (CC BY 4.0).
 
 ## Stack
@@ -107,7 +107,6 @@ Reports: `docs/rebuild/spikes/`.
 ## External actions (owner: you)
 
 - Email info@thaqalayn.net to confirm the rights to the translations, including Sayed Ali Raza's Nahj translation.
-- Create a Quran Foundation developer account (for streaming audio).
 
 ## Known old-app defects not to carry over
 

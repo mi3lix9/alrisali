@@ -21,6 +21,9 @@ export interface ProviderIdToken {
 
 const APPLE_CANCELLED = "ERR_REQUEST_CANCELED";
 
+const isAppleCancel = (error: unknown): boolean =>
+  error instanceof Error && "code" in error && error.code === APPLE_CANCELLED;
+
 GoogleSignin.configure({
   webClientId: ENV.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
   iosClientId: ENV.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
@@ -51,11 +54,27 @@ export const appleIdToken = async (): Promise<ProviderIdToken | null> => {
         : {}),
     };
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      error.code === APPLE_CANCELLED
-    ) {
+    if (isAppleCancel(error)) {
+      return null;
+    }
+    throw error;
+  }
+};
+
+/**
+ * Shows Apple's sheet again before account deletion: its authorization code
+ * is what the server exchanges for the token Apple revokes. Resolves `null`
+ * when the Believer cancels.
+ */
+export const appleAuthorizationCode = async (): Promise<string | null> => {
+  try {
+    const { authorizationCode } = await signInAsync();
+    if (!authorizationCode) {
+      throw new Error("Apple returned no authorization code");
+    }
+    return authorizationCode;
+  } catch (error) {
+    if (isAppleCancel(error)) {
       return null;
     }
     throw error;

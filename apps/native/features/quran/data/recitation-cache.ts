@@ -6,8 +6,9 @@ import type {
 import { Directory, File, Paths } from "expo-file-system";
 
 // Played recitation files in the app's cache directory, one folder per
-// reciter: `recitation/7/002255.mp3`. A file's modification time is when it
-// was downloaded.
+// reciter: `recitation/ar.alafasy/002255.mp3`. A file's modification time is
+// when it was downloaded; files under an older app's numeric reciter folders
+// expire with the rest.
 
 const root = new Directory(Paths.cache, "recitation");
 

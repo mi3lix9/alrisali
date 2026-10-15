@@ -101,6 +101,7 @@ const Builder = ({ program }: { program: PersonalProgram | null }) => {
         }}
       />
       <Input
+        testID="programs-builder-name"
         label={t("builder.name")}
         placeholder={t("builder.namePlaceholder")}
         value={name}
@@ -195,7 +196,11 @@ const Builder = ({ program }: { program: PersonalProgram | null }) => {
           {t("builder.failed")}
         </Text>
       ) : null}
-      <Button onPress={submit} loading={isPending}>
+      <Button
+        testID="programs-builder-submit"
+        onPress={submit}
+        loading={isPending}
+      >
         {program ? t("builder.save") : t("builder.create")}
       </Button>
 

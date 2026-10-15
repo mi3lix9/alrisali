@@ -1,0 +1,1 @@
+ALTER TABLE `quran_reader_settings` ADD `reciter` text DEFAULT 'ar.alafasy' NOT NULL;

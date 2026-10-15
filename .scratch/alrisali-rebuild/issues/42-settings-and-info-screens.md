@@ -9,4 +9,4 @@
 **Status:** done — pending simulator verification
 
 - [ ] Tab changes apply immediately (code complete: Settings → Tabs switches update the native tab bar through the preferences store, Home's switch is locked on; domain rules tested in `packages/domain/src/shared/tabs.test.ts`; pending simulator verification)
-- [x] Sources & Credits lists every bundled source (renders every `CONTENT_SOURCES` entry from `@alrisali/content` — KFGQPC, Thaqalayn, Quran.Foundation — plus Panel UI and Expo/React Native; a source without a credit line fails type-check)
+- [x] Sources & Credits lists every bundled source (renders every `CONTENT_SOURCES` entry from `@alrisali/content` — KFGQPC, Thaqalayn, alquran.cloud, EveryAyah.com — plus Panel UI and Expo/React Native; a source without a credit line fails type-check)

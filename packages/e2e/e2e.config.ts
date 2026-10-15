@@ -19,6 +19,8 @@ const IOS_APP_PATH =
 
 const METRO_PORT = "8081";
 
+const { E2E_GOOGLE_EMAIL, E2E_GOOGLE_PASSWORD } = process.env;
+
 export default {
   tests: "tests/**/*.e2e.ts",
   targets: [
@@ -79,4 +81,16 @@ export default {
     },
   ],
   workers: 1,
+  // The Google test account the sign-in journeys use
+  // (tests/native/support/google-sign-in.ts); they skip without it.
+  ...(E2E_GOOGLE_EMAIL && E2E_GOOGLE_PASSWORD
+    ? {
+        credentials: {
+          google: {
+            username: E2E_GOOGLE_EMAIL,
+            password: E2E_GOOGLE_PASSWORD,
+          },
+        },
+      }
+    : {}),
 } satisfies E2EConfig;

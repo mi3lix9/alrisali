@@ -2,6 +2,19 @@ import { oc } from "@orpc/contract";
 import { z } from "zod";
 
 export const accountContract = {
+  /**
+   * Anyone: how clients may sign in. `providers` are those the Admin web
+   * offers, the ones the server has OAuth credentials for: the same as the
+   * app's, so an Admin signs in to the web with the account they use on their
+   * phone. `emailPassword` is email and password sign-in and sign-up, on only
+   * in local development (`AUTH_DEV_EMAIL_PASSWORD`).
+   */
+  signInOptions: oc.output(
+    z.object({
+      providers: z.array(z.enum(["apple", "google"])),
+      emailPassword: z.boolean(),
+    })
+  ),
   /** Answers only a signed-in Believer. */
   privateData: oc.output(
     z.object({
@@ -27,9 +40,19 @@ export const accountContract = {
     z.object({ token: z.string().min(1), expiresAt: z.number().int() })
   ),
   /**
-   * Deletes the caller's account for good: their cloud database first, then
-   * their user, sessions and linked sign-ins. The session it was called with
-   * stops working. Signing in again starts a new, empty account.
+   * Deletes the caller's account for good: their Sign in with Apple is
+   * revoked, then their cloud database goes, then their user, sessions and
+   * linked sign-ins. The session it was called with stops working. Signing
+   * in again starts a new, empty account. A Believer signed in with Apple
+   * passes a fresh `appleAuthorizationCode` from Apple's sheet: the server
+   * exchanges it for the token Apple revokes. `SERVICE_UNAVAILABLE` when
+   * Apple refuses; nothing is deleted then.
    */
-  deleteAccount: oc.output(z.object({ deleted: z.literal(true) })),
+  deleteAccount: oc
+    .input(
+      z
+        .object({ appleAuthorizationCode: z.string().min(1).optional() })
+        .optional()
+    )
+    .output(z.object({ deleted: z.literal(true) })),
 };

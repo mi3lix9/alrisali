@@ -3,7 +3,7 @@
 // tolerated, and a window of upcoming words lets it skip a missed word so it
 // never gets stuck. It only moves forward unless explicitly sought back.
 
-import { normalizeArabic } from "./normalize";
+import { normalizeSearchText } from "../shared";
 
 /** How many upcoming words a heard word may match (skip tolerance). */
 const LOOKAHEAD = 8;
@@ -126,7 +126,7 @@ export const createReciteMatcher = (
     },
     feed: (transcript, isFinal) => {
       let reached = anchor;
-      for (const heard of normalizeArabic(transcript).split(" ")) {
+      for (const heard of normalizeSearchText(transcript).split(" ")) {
         if (reached >= words.length) {
           break;
         }

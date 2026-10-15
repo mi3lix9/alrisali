@@ -9,7 +9,6 @@ import { lessonsRouter } from "@/features/lessons";
 import { libraryAssetsRouter } from "@/features/library-assets";
 import { occasionsRouter } from "@/features/occasions";
 import { programsRouter } from "@/features/programs";
-import { quranRouter } from "@/features/quran";
 import { contentReplica } from "@/shared/lib/content-replica";
 import { healthCheck } from "@/shared/lib/health-check";
 import { os } from "@/shared/lib/orpc";
@@ -30,5 +29,4 @@ export const appRouter = os.router({
   libraryAssets: libraryAssetsRouter,
   occasions: occasionsRouter,
   programs: programsRouter,
-  quran: quranRouter,
 });

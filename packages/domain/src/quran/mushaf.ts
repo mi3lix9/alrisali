@@ -43,6 +43,12 @@ export const isSurah = (surah: number): boolean =>
 /** The ayah a key names, or undefined when the Quran has no such ayah. */
 export const findAyah = (key: string): Ayah | undefined => ayahByKey.get(key);
 
+/** The ayah's place in the whole Quran, 1:1 → 1 through 114:6 → 6236; undefined when there is no such ayah. */
+export const ayahNumber = (key: string): number | undefined => {
+  const index = ayahIndex.get(key);
+  return index === undefined ? undefined : index + 1;
+};
+
 /** The ayah a juz opens with, as KFGQPC divides the juz. */
 export const firstAyahOfJuz = (juz: number): Ayah => {
   const first = juzStarts[juz - 1];

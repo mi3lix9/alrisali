@@ -43,6 +43,7 @@ export const ProgramsLinkCard = () => {
         </Text>
         <Button
           variant="outline"
+          testID="programs-open"
           onPress={() => router.push("/worship/programs")}
         >
           {t("link.open")}

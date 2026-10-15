@@ -1,10 +1,10 @@
-import type { Auth, Session } from "@alrisali/auth";
+import type { Auth, Session, SignInOptions } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
+import type { AppleRevoker } from "./shared/lib/apple-revoker";
 import type { ContentDatabase } from "./shared/lib/content-database";
 import type { FileBucket } from "./shared/lib/file-bucket";
 import type { PushTransport } from "./shared/lib/push-transport";
-import type { RecitationSource } from "./shared/lib/recitation-source";
 import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
 /** Who sent the request, as far as the server can tell. */
@@ -22,8 +22,6 @@ export interface Context {
   userDatabases: UserDatabaseHost;
   /** The shared content database Admins publish to. */
   content: ContentDatabase;
-  /** Recitation from the Quran Foundation audio API. */
-  recitation: RecitationSource;
   /** The bucket Admins upload files to. */
   files: FileBucket;
   client: RequestClient;
@@ -31,6 +29,10 @@ export interface Context {
   ipHashKey: string;
   /** Where Announcements are sent: Expo Push. */
   push: PushTransport;
+  /** Revokes Sign in with Apple when a Believer deletes their account. */
+  apple: AppleRevoker;
+  /** How clients may sign in (`account.signInOptions`). */
+  signInOptions: SignInOptions;
 }
 
 export interface CreateContextOptions {
@@ -38,9 +40,10 @@ export interface CreateContextOptions {
   db: Database;
   userDatabases: UserDatabaseHost;
   content: ContentDatabase;
-  recitation: RecitationSource;
   files: FileBucket;
   push: PushTransport;
+  apple: AppleRevoker;
+  signInOptions: SignInOptions;
   headers: Headers;
   clientIp: string | null;
   ipHashKey: string;
@@ -52,9 +55,10 @@ export const createContext = async ({
   db,
   userDatabases,
   content,
-  recitation,
   files,
   push,
+  apple,
+  signInOptions,
   headers,
   clientIp,
   ipHashKey,
@@ -62,10 +66,11 @@ export const createContext = async ({
   db,
   userDatabases,
   content,
-  recitation,
   files,
   client: { ip: clientIp, userAgent: headers.get("user-agent") },
   ipHashKey,
   push,
+  apple,
+  signInOptions,
   session: await auth.api.getSession({ headers }),
 });

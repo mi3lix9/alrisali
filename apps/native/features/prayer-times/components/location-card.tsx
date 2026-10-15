@@ -65,7 +65,12 @@ export const LocationCard = ({
         </Card.Description>
       </Card.Header>
       <Card.Content className="gap-3">
-        <Button variant="outline" onPress={() => locate()} loading={locating}>
+        <Button
+          variant="outline"
+          testID="prayer-times-locate"
+          onPress={() => locate()}
+          loading={locating}
+        >
           {locating ? t("location.locating") : t("location.useDevice")}
         </Button>
         {outcome === "denied" || outcome === "unavailable" ? (

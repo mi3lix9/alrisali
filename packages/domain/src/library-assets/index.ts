@@ -17,3 +17,4 @@ export type {
 export { FINISHED_MARGIN_SECONDS, resumePosition } from "./position";
 export { structuredTextBlocks, structuredTextSchema } from "./structured-text";
 export type { StructuredText, StructuredTextBlock } from "./structured-text";
+export { searchLibraryAssets } from "./search";

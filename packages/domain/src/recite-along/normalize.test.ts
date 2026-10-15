@@ -1,40 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeArabic, tokenizeText } from "./normalize";
-
-describe("Arabic normalisation", () => {
-  it("strips diacritics", () => {
-    expect(normalizeArabic("الْحَمْدُ لِلَّهِ")).toBe("الحمد لله");
-  });
-
-  it("unifies alef forms", () => {
-    expect(normalizeArabic("أَإِآٱ")).toBe("اااا");
-  });
-
-  it("turns taa marbuta into haa", () => {
-    expect(normalizeArabic("رَحْمَة")).toBe("رحمه");
-  });
-
-  it("turns alef maqsura into yaa", () => {
-    expect(normalizeArabic("عَلَى")).toBe("علي");
-  });
-
-  it("unifies hamza seats", () => {
-    expect(normalizeArabic("مُؤْمِن سَيِّئَة")).toBe("مومن سييه");
-  });
-
-  it("strips tatweel", () => {
-    expect(normalizeArabic("الرحمـــن")).toBe("الرحمن");
-  });
-
-  it("strips punctuation", () => {
-    expect(normalizeArabic("«الحمد، لله؛»")).toBe("الحمد لله");
-  });
-
-  it("strips the right-to-left mark speech transcripts begin with", () => {
-    expect(normalizeArabic("\u200Fالحمد لله")).toBe("الحمد لله");
-  });
-});
+import { tokenizeText } from "./normalize";
 
 describe("tokenising a text for Recite-Along", () => {
   const text = "الْحَمْدُ لِلَّهِ رَبِّ الْعالَمِينَ\n\nوَصَلَّى اللهُ عَلَيْهِ (1)";
