@@ -185,7 +185,11 @@ export const SurahMode = ({
             >
               <Text
                 className="text-center"
-                style={{ fontFamily: QURAN_FONT, fontSize: fontSize * 1.1 }}
+                style={{
+                  fontFamily: QURAN_FONT,
+                  fontSize: fontSize * 1.1,
+                  lineHeight: fontSize * 1.1 * LINE_HEIGHT,
+                }}
               >
                 {opening.header}
               </Text>
