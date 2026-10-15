@@ -33,6 +33,8 @@ export const en: Catalog<typeof ar> = {
     noTarget: "No target",
     targetReached: "Target reached!",
     sessionSaved: "Dhikr Session saved. Counting starts again.",
+    sessionFailed:
+      "Couldn't save the Dhikr Session. Your count is back; try again.",
     saveSession: "Save session",
     edit: "Edit",
     reset: {

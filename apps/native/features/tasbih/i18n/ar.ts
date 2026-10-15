@@ -29,6 +29,7 @@ export const ar = {
     noTarget: "بلا هدف",
     targetReached: "بلغتَ الهدف!",
     sessionSaved: "حُفظت الجلسة وبدأ العدّ من جديد.",
+    sessionFailed: "تعذّر حفظ الجلسة. أُعيد العدّ كما كان، فحاول مجددًا.",
     saveSession: "حفظ الجلسة",
     edit: "تعديل",
     reset: {

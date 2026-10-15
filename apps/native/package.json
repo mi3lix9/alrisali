@@ -96,10 +96,12 @@
     "@alrisali/config": "workspace:*",
     "@hot-updater/aws": "1.0.7",
     "@hot-updater/standalone": "1.0.7",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.4.1",
     "@types/react": "catalog:",
     "babel-preset-expo": "~58.0.0",
     "hot-updater": "1.0.7",
+    "jsdom": "^30.1.2",
     "typescript": "^6.0.3"
   }
 }

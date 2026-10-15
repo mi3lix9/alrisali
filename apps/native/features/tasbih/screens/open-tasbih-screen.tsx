@@ -19,6 +19,13 @@ import type { OpenTasbihNotice } from "../hooks/use-open-tasbih";
 const NOTICE_KEY = {
   "target-reached": "open.targetReached",
   "session-saved": "open.sessionSaved",
+  "session-failed": "open.sessionFailed",
+} as const;
+
+const NOTICE_VARIANT = {
+  "target-reached": "success",
+  "session-saved": "info",
+  "session-failed": "destructive",
 } as const;
 
 const Notice = ({ notice }: { notice: OpenTasbihNotice }) => {
@@ -35,7 +42,7 @@ const Notice = ({ notice }: { notice: OpenTasbihNotice }) => {
     <View className="min-h-14 w-full max-w-80 justify-center">
       {message ? (
         <Alert
-          variant={notice === "target-reached" ? "success" : "info"}
+          variant={notice ? NOTICE_VARIANT[notice] : "info"}
           accessibilityLiveRegion="polite"
         >
           <Alert.Indicator />

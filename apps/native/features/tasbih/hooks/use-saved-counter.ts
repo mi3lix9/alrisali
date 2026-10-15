@@ -20,6 +20,24 @@ const writeAfter = async (
   }
 };
 
+/** Runs `write` after the previous write; a failure reaches the caller. */
+const writeOrFail = async (
+  previous: Promise<void>,
+  write: () => Promise<unknown>
+): Promise<void> => {
+  await previous;
+  await write();
+};
+
+/** Waits for `written` to settle; whoever committed it handles a failure. */
+const settle = async (written: Promise<void>): Promise<void> => {
+  try {
+    await written;
+  } catch {
+    // Later saves still run after a failed one.
+  }
+};
+
 export interface SavedCounter<T> {
   /** What the counter shows; null only while the saved value is first read. */
   value: T | null;
@@ -30,9 +48,10 @@ export interface SavedCounter<T> {
   /**
    * Shows `next` at once, drops the save still waiting, and runs `write`
    * after every earlier save (e.g. recording a Dhikr Session that also
-   * resets the stored count).
+   * resets the stored count). Settles as `write` does, so the caller can
+   * confirm it or bring the count back.
    */
-  commit: (next: T, write: () => Promise<unknown>) => void;
+  commit: (next: T, write: () => Promise<unknown>) => Promise<void>;
 }
 
 /**
@@ -101,11 +120,13 @@ export const useSavedCounter = <T>({
   );
 
   const commit = useCallback(
-    (next: T, write: () => Promise<unknown>) => {
+    async (next: T, write: () => Promise<unknown>): Promise<void> => {
       show(next);
       cancelSaveRef.current();
       unsavedRef.current = null;
-      writingRef.current = writeAfter(writingRef.current, write);
+      const written = writeOrFail(writingRef.current, write);
+      writingRef.current = settle(written);
+      await written;
     },
     [show]
   );
