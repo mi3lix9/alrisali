@@ -8,6 +8,7 @@ import type {
   HijriCalendar,
   HijriDate,
   HijriMonth,
+  HijriMonthDay,
   HijriYearMonth,
 } from "@alrisali/domain/shared";
 import { useCallback, useMemo } from "react";
@@ -52,6 +53,19 @@ const MONTH_KEYS = {
   11: "dhuAlQadah",
   12: "dhuAlHijjah",
 } as const satisfies Record<HijriMonth, string>;
+
+/** Writes a recurring Hijri day in the app's language: "1 Ramadan". */
+export const useFormatHijriMonthDay = () => {
+  const { t } = useTranslation();
+  return useCallback(
+    ({ month, day }: HijriMonthDay) =>
+      t("hijri.dayMonth", {
+        day,
+        month: t(`hijri.months.${MONTH_KEYS[month]}`),
+      }),
+    [t]
+  );
+};
 
 /**
  * Writes a Hijri Date in the app's language ("4 Jumada al-Ula 1448 AH"), or

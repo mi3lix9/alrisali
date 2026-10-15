@@ -6,6 +6,7 @@ import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import type { Auth } from "@alrisali/auth";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
+import { createProgramsRepository } from "@alrisali/db-content/programs";
 import {
   ContentReplicaReadOnlyError,
   createGlobalSettingsRepository,
@@ -25,6 +26,7 @@ import {
   todaysDailyContent,
   WEEKDAYS,
 } from "@alrisali/domain/daily-content";
+import type { OfficialProgram } from "@alrisali/domain/programs";
 import { occasionSchema } from "@alrisali/domain/shared";
 import type { OccasionDetails } from "@alrisali/domain/shared";
 import { call, isProcedure } from "@orpc/server";
@@ -92,6 +94,49 @@ const gatheringInput = (overrides: Record<string, unknown> = {}) => ({
   active: true,
   ...overrides,
 });
+
+const NO_TEXT = { ar: "", en: "" };
+
+/** A General Official Program with a prayer Act and a dua Act. */
+const dailyNawafil: OfficialProgram = {
+  id: "daily-nawafil",
+  category: "general",
+  name: { ar: "النوافل اليومية", en: "Daily nawafil" },
+  description: NO_TEXT,
+  active: true,
+  acts: [
+    {
+      id: "fajr-nafila",
+      name: { ar: "نافلة الفجر", en: "Fajr nafila" },
+      description: NO_TEXT,
+      schedule: { kind: "daily" },
+      salah: { salah: "fajr", timing: "before" },
+      detail: {
+        type: "prayer",
+        preset: "fajr-nafila",
+        rakahs: 2,
+        steps: NO_TEXT,
+        adhkar: NO_TEXT,
+        requiresWudu: true,
+      },
+    },
+    {
+      id: "friday-dua",
+      name: { ar: "دعاء كميل", en: "Dua Kumayl" },
+      description: NO_TEXT,
+      schedule: { kind: "weekdays", weekdays: [4] },
+      salah: { salah: "isha", timing: "after" },
+      detail: {
+        type: "dua",
+        arabic: "اللهم إني أسألك برحمتك التي وسعت كل شيء",
+        transliteration: "",
+        translation: "O Allah, I ask You by Your mercy",
+        instructions: NO_TEXT,
+        audioUrl: null,
+      },
+    },
+  ],
+};
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
  * the router is listed here: adding one without its rule fails the suite.
@@ -132,6 +177,11 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
     input: { id: "missing", ...occasionDetails() },
   },
   "occasions.delete": { access: "admin", input: { id: "missing" } },
+  "programs.list": { access: "admin" },
+  "programs.get": { access: "admin", input: { id: "daily-nawafil" } },
+  "programs.save": { access: "admin", input: dailyNawafil },
+  "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
+  "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
   "quran.reciters": { access: "anonymous" },
   "quran.surahAudio": {
     access: "anonymous",
@@ -1116,6 +1166,160 @@ describe("Gatherings and Speakers", () => {
     await expect(repository.gatherings()).resolves.toStrictEqual([]);
     await expect(repository.speakers()).resolves.toStrictEqual([]);
     await replica.close();
+  });
+});
+
+const ramadan: OfficialProgram = {
+  id: "ramadan",
+  category: "seasonal",
+  name: { ar: "برنامج رمضان", en: "Ramadan" },
+  description: { ar: "أعمال شهر رمضان", en: "Acts of the month of Ramadan" },
+  active: true,
+  window: { start: { month: 9, day: 1 }, end: { month: 9, day: 30 } },
+  acts: [
+    {
+      id: "iftar-dua",
+      name: { ar: "دعاء الإفطار", en: "Iftar dua" },
+      description: NO_TEXT,
+      schedule: { kind: "daily" },
+      salah: { salah: "maghrib", timing: "after" },
+      detail: { type: "regular" },
+    },
+  ],
+};
+
+describe("Official Programs", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(stopLocalCloud);
+
+  const deviceAfterPull = async () => {
+    const { replica } = await openDeviceReplica(device, () => true);
+    await replica.sync();
+    return { replica, programs: createProgramsRepository(replica.db) };
+  };
+
+  it("lists nothing on a device that has never pulled", async () => {
+    const { replica } = await openDeviceReplica(device, () => false);
+
+    await expect(
+      createProgramsRepository(replica.db).list()
+    ).resolves.toStrictEqual([]);
+    await replica.close();
+  });
+
+  it("publishes Programs and their Acts, in order, to devices", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "programs.save", dailyNawafil);
+    await callAs(admin, "programs.save", ramadan);
+
+    const { replica, programs } = await deviceAfterPull();
+
+    await expect(programs.list()).resolves.toStrictEqual([
+      dailyNawafil,
+      ramadan,
+    ]);
+    await expect(programs.get("ramadan")).resolves.toStrictEqual(ramadan);
+    await expect(programs.get("gone")).resolves.toBeNull();
+    await replica.close();
+  });
+
+  it("replaces a Program's Acts when an Admin edits it", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "programs.save", dailyNawafil);
+    const { replica, programs } = await deviceAfterPull();
+
+    const [, kumayl] = dailyNawafil.acts;
+    const edited: OfficialProgram = {
+      ...dailyNawafil,
+      name: { ar: "النوافل", en: "Nawafil" },
+      acts: kumayl ? [kumayl] : [],
+    };
+    await callAs(admin, "programs.save", edited);
+
+    await expect(
+      callAs(admin, "programs.get", { id: dailyNawafil.id })
+    ).resolves.toStrictEqual(edited);
+    await replica.sync();
+    await expect(programs.list()).resolves.toStrictEqual([edited]);
+    await replica.close();
+  });
+
+  it("hides an inactive Program from devices but not from Admins", async () => {
+    const admin = await signInAsAdmin();
+    const paused = { ...ramadan, active: false };
+    await callAs(admin, "programs.save", dailyNawafil);
+    await callAs(admin, "programs.save", paused);
+
+    const { replica, programs } = await deviceAfterPull();
+
+    await expect(programs.list()).resolves.toStrictEqual([dailyNawafil]);
+    await expect(callAs(admin, "programs.list")).resolves.toStrictEqual([
+      dailyNawafil,
+      paused,
+    ]);
+    await replica.close();
+  });
+
+  it("orders and deletes Programs", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "programs.save", dailyNawafil);
+    await callAs(admin, "programs.save", ramadan);
+
+    await callAs(admin, "programs.reorder", {
+      ids: ["ramadan", "daily-nawafil"],
+    });
+    await expect(callAs(admin, "programs.list")).resolves.toStrictEqual([
+      ramadan,
+      dailyNawafil,
+    ]);
+    // An edit keeps the Program's place.
+    await callAs(admin, "programs.save", { ...ramadan, active: false });
+    await callAs(admin, "programs.remove", { id: "ramadan" });
+
+    const { replica, programs } = await deviceAfterPull();
+    await expect(programs.list()).resolves.toStrictEqual([dailyNawafil]);
+    await expect(programs.get("ramadan")).resolves.toBeNull();
+    await replica.close();
+  });
+
+  it("saves a Program and its Acts all or nothing", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "programs.save", dailyNawafil);
+    await callAs(admin, "programs.save", ramadan);
+
+    // An Act id already used by another Program fails the insert.
+    const [fajr] = dailyNawafil.acts;
+    await expect(
+      callAs(admin, "programs.save", {
+        ...ramadan,
+        name: { ar: "x", en: "x" },
+        acts: fajr ? [fajr] : [],
+      })
+    ).rejects.toBeDefined();
+
+    await expect(
+      callAs(admin, "programs.get", { id: "ramadan" })
+    ).resolves.toStrictEqual(ramadan);
+  });
+
+  it("refuses a Seasonal Program without its Hijri window", async () => {
+    const admin = await signInAsAdmin();
+    const { window: _window, ...withoutWindow } = ramadan;
+
+    await expect(
+      callAs(admin, "programs.save", withoutWindow)
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 

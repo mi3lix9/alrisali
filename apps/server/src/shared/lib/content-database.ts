@@ -97,7 +97,7 @@ export const createContentDatabase = ({
       },
     });
     await migrateContent(writer, migrations);
-    return createContentDb(writer.execute);
+    return createContentDb(writer.execute, writer.transaction);
   });
 
   return {

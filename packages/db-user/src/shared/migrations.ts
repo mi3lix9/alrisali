@@ -104,4 +104,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `habit_completions_date_idx` ON `habit_completions` (`date`);",
     ],
   },
+  {
+    tag: "20261015204056_program_subscriptions",
+    statements: [
+      "CREATE TABLE `program_subscriptions` (\n\t`id` text PRIMARY KEY,\n\t`program_kind` text NOT NULL,\n\t`paused` integer DEFAULT false NOT NULL,\n\t`subscribed_at` integer NOT NULL\n);",
+    ],
+  },
 ];

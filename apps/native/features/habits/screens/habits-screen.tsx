@@ -1,6 +1,7 @@
 import "../i18n";
 import { router } from "expo-router";
 import { Button, Spinner } from "panelui-native";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
@@ -10,8 +11,11 @@ import { HabitDayCard } from "../components/habit-day-card";
 import { HabitListCard } from "../components/habit-list-card";
 import { useHabitData } from "../data/habits";
 
-/** The Worship tab's Habits: tick today's (or a past day's), manage them all. */
-export const HabitsScreen = () => {
+/**
+ * The Worship tab's Habits: tick today's (or a past day's), manage them all.
+ * `children` are the tab's other cards, which the route composes below.
+ */
+export const HabitsScreen = ({ children }: { children?: ReactNode }) => {
   const { t } = useTranslation("habits");
   const { data } = useHabitData();
 
@@ -30,6 +34,7 @@ export const HabitsScreen = () => {
         {t("form.newHabit")}
       </Button>
       <HabitListCard habits={data.habits} />
+      {children}
     </Screen>
   );
 };

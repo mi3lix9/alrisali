@@ -26,6 +26,12 @@ const SECTIONS = [
     description:
       "Publish majalis, lectures and other Gatherings, and the Speakers who lead them.",
   },
+  {
+    to: "/admin/programs",
+    title: "Official Programs",
+    description:
+      "Create, order and activate the General and Seasonal Programs and their Acts.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (
