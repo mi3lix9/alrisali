@@ -4,7 +4,7 @@
 import { grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import { createDb } from "@alrisali/db-server";
 
-import { ENV } from "../src/env.server";
+import { ENV } from "@/env.server";
 
 const [email, flag] = process.argv.slice(2);
 if (!email || (flag !== undefined && flag !== "--revoke")) {

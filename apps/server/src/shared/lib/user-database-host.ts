@@ -17,6 +17,11 @@ export interface UserDatabaseHost {
     name: string,
     access?: DatabaseAccess
   ) => Promise<{ token: string; expiresAt: number }>;
+  /**
+   * Destroys the database and everything in it (account deletion). Calling
+   * it for a database that is already gone is harmless.
+   */
+  destroy: (name: string) => Promise<void>;
 }
 
 /** What a minted token allows; Believers' own databases get full access. */

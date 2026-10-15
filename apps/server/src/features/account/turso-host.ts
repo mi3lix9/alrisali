@@ -14,6 +14,7 @@ export interface TursoHostOptions {
   baseUrl?: string;
 }
 
+const HTTP_NOT_FOUND = 404;
 const HTTP_CONFLICT = 409;
 
 /** Believers' cloud databases on Turso Cloud, via the Platform API. */
@@ -52,6 +53,16 @@ export const createTursoHost = ({
         authorization: access,
       });
       return { token: jwt, expiresAt };
+    },
+    destroy: async (name) => {
+      try {
+        await turso.databases.delete(name);
+      } catch (error) {
+        // Already destroyed (a retried deletion): nothing left to do.
+        if ((error as Partial<TursoClientError>).status !== HTTP_NOT_FOUND) {
+          throw error;
+        }
+      }
     },
   };
 };

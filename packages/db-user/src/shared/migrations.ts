@@ -48,4 +48,23 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",
     ],
   },
+  {
+    tag: "20261015193142_quran_reader_settings",
+    statements: [
+      "CREATE TABLE `quran_reader_settings` (\n\t`id` text PRIMARY KEY,\n\t`mode` text DEFAULT 'page' NOT NULL,\n\t`page_nav` text DEFAULT 'horizontal' NOT NULL,\n\t`surah_font_size` integer DEFAULT 26 NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261015193622_open_tasbih",
+    statements: [
+      "ALTER TABLE `tasbih` ADD `target` integer;",
+      "ALTER TABLE `tasbih` ADD `notes` text;",
+    ],
+  },
+  {
+    tag: "20261015194503_quran_last_read",
+    statements: [
+      "CREATE TABLE `quran_last_read` (\n\t`id` text PRIMARY KEY,\n\t`ayah` text NOT NULL,\n\t`set_at` text NOT NULL\n);",
+    ],
+  },
 ];

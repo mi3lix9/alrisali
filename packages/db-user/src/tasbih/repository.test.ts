@@ -72,9 +72,9 @@ describe(createTasbihRepository, () => {
     const tasbih = createTasbihRepository(database.db);
     await tasbih.saveTasbihAlZahraProgress({ step: 1, count: 3 });
 
-    await expect(tasbih.rename(TASBIH_AL_ZAHRA_ID, "Mine")).rejects.toThrow(
-      TasbihAlZahraIsPermanentError
-    );
+    await expect(
+      tasbih.editOpenTasbih(TASBIH_AL_ZAHRA_ID, { name: "Mine", target: null })
+    ).rejects.toThrow(TasbihAlZahraIsPermanentError);
     await expect(tasbih.remove(TASBIH_AL_ZAHRA_ID)).rejects.toThrow(
       TasbihAlZahraIsPermanentError
     );
@@ -125,5 +125,140 @@ describe(createTasbihRepository, () => {
       })
     ).rejects.toThrow("count");
     await expect(tasbih.listDhikrSessions()).resolves.toStrictEqual([]);
+  });
+
+  it("creates Open Tasbih with a name, target and notes, after Tasbih al-Zahra, by name", async () => {
+    const tasbih = createTasbihRepository(database.db);
+
+    const salawat = await tasbih.createOpenTasbih("open-1", {
+      name: " Salawat ",
+      target: 100,
+      notes: "After Fajr",
+    });
+    await tasbih.createOpenTasbih("open-2", {
+      name: "Istighfar",
+      target: null,
+    });
+    await relaunch();
+
+    expect(salawat).toStrictEqual({
+      id: "open-1",
+      kind: "open",
+      name: "Salawat",
+      target: 100,
+      notes: "After Fajr",
+      count: 0,
+    });
+    await expect(
+      createTasbihRepository(database.db).list()
+    ).resolves.toStrictEqual([
+      {
+        id: TASBIH_AL_ZAHRA_ID,
+        kind: "tasbih-al-zahra",
+        progress: { step: 0, count: 0 },
+      },
+      {
+        id: "open-2",
+        kind: "open",
+        name: "Istighfar",
+        target: null,
+        notes: null,
+        count: 0,
+      },
+      salawat,
+    ]);
+  });
+
+  it("rejects an Open Tasbih with no name or a target of zero", async () => {
+    const tasbih = createTasbihRepository(database.db);
+
+    await expect(
+      tasbih.createOpenTasbih("open-1", { name: "  ", target: null })
+    ).rejects.toThrow("name");
+    await expect(
+      tasbih.createOpenTasbih("open-1", { name: "Salawat", target: 0 })
+    ).rejects.toThrow("target");
+    await expect(tasbih.list()).resolves.toHaveLength(1);
+  });
+
+  it("edits an Open Tasbih's name, target and notes, and keeps its count", async () => {
+    const tasbih = createTasbihRepository(database.db);
+    await tasbih.createOpenTasbih("open-1", {
+      name: "Salawat",
+      target: 100,
+      notes: "After Fajr",
+    });
+    await tasbih.saveOpenTasbihCount("open-1", 12);
+
+    await tasbih.editOpenTasbih("open-1", { name: "Salawat 2", target: null });
+
+    await expect(tasbih.getOpenTasbih("open-1")).resolves.toStrictEqual({
+      id: "open-1",
+      kind: "open",
+      name: "Salawat 2",
+      target: null,
+      notes: null,
+      count: 12,
+    });
+  });
+
+  it("keeps an Open Tasbih's count across a relaunch", async () => {
+    await createTasbihRepository(database.db).createOpenTasbih("open-1", {
+      name: "Salawat",
+      target: null,
+    });
+    await createTasbihRepository(database.db).saveOpenTasbihCount("open-1", 7);
+
+    await relaunch();
+
+    await expect(
+      createTasbihRepository(database.db).getOpenTasbih("open-1")
+    ).resolves.toMatchObject({ count: 7 });
+  });
+
+  it("finds no Open Tasbih for an unknown id or for Tasbih al-Zahra", async () => {
+    const tasbih = createTasbihRepository(database.db);
+    await tasbih.saveTasbihAlZahraProgress({ step: 1, count: 3 });
+
+    await expect(tasbih.getOpenTasbih("missing")).resolves.toBeNull();
+    await expect(tasbih.getOpenTasbih(TASBIH_AL_ZAHRA_ID)).resolves.toBeNull();
+  });
+
+  it("saves an Open Tasbih's count as a Dhikr Session and starts it again", async () => {
+    const tasbih = createTasbihRepository(database.db);
+    await tasbih.createOpenTasbih("open-1", { name: "Salawat", target: 33 });
+    await tasbih.saveOpenTasbihCount("open-1", 40);
+    const session = {
+      id: randomUUID(),
+      tasbihId: "open-1",
+      count: 40,
+      completedAt: Date.UTC(2026, 9, 15, 18, 0),
+    };
+
+    await expect(tasbih.saveOpenTasbihSession(session)).resolves.toStrictEqual(
+      session
+    );
+
+    await expect(tasbih.listDhikrSessions()).resolves.toStrictEqual([session]);
+    await expect(tasbih.getOpenTasbih("open-1")).resolves.toMatchObject({
+      count: 0,
+    });
+  });
+
+  it("deletes an Open Tasbih and keeps its Dhikr Sessions", async () => {
+    const tasbih = createTasbihRepository(database.db);
+    await tasbih.createOpenTasbih("open-1", { name: "Salawat", target: null });
+    const session = {
+      id: randomUUID(),
+      tasbihId: "open-1",
+      count: 5,
+      completedAt: Date.now(),
+    };
+    await tasbih.saveOpenTasbihSession(session);
+
+    await tasbih.remove("open-1");
+
+    await expect(tasbih.list()).resolves.toHaveLength(1);
+    await expect(tasbih.listDhikrSessions()).resolves.toStrictEqual([session]);
   });
 });

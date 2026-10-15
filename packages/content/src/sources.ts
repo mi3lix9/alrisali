@@ -40,6 +40,15 @@ export const CONTENT_SOURCES = [
       url: "https://api-docs.quran.foundation/legal/developer-terms/",
     },
   },
+  {
+    id: "tanzil",
+    name: "Tanzil Quran Metadata",
+    url: "https://tanzil.net/docs/quran_metadata",
+    licence: {
+      name: "CC BY 3.0",
+      url: "https://creativecommons.org/licenses/by/3.0/",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];
