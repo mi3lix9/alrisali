@@ -2,6 +2,7 @@ import { createAuth } from "@alrisali/auth";
 import { createDb } from "@alrisali/db-server";
 
 import { createUserDatabaseHost } from "@/features/account";
+import { createExpoPushTransport } from "@/features/announcements";
 import { createRecitationSource } from "@/features/quran";
 import { createContentDatabase } from "@/shared/lib/content-database";
 
@@ -15,3 +16,6 @@ export const content = createContentDatabase({
   name: ENV.CONTENT_DATABASE_NAME,
 });
 export const recitation = createRecitationSource(ENV);
+export const push = createExpoPushTransport({
+  accessToken: ENV.EXPO_ACCESS_TOKEN,
+});

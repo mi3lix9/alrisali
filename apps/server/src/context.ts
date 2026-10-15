@@ -2,6 +2,7 @@ import type { Auth, Session } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
 import type { ContentDatabase } from "./shared/lib/content-database";
+import type { PushTransport } from "./shared/lib/push-transport";
 import type { RecitationSource } from "./shared/lib/recitation-source";
 import type { UserDatabaseHost } from "./shared/lib/user-database-host";
 
@@ -15,6 +16,8 @@ export interface Context {
   content: ContentDatabase;
   /** Recitation from the Quran Foundation audio API. */
   recitation: RecitationSource;
+  /** Where Announcements are sent: Expo Push. */
+  push: PushTransport;
 }
 
 export interface CreateContextOptions {
@@ -23,6 +26,7 @@ export interface CreateContextOptions {
   userDatabases: UserDatabaseHost;
   content: ContentDatabase;
   recitation: RecitationSource;
+  push: PushTransport;
   headers: Headers;
 }
 
@@ -33,11 +37,13 @@ export const createContext = async ({
   userDatabases,
   content,
   recitation,
+  push,
   headers,
 }: CreateContextOptions): Promise<Context> => ({
   db,
   userDatabases,
   content,
   recitation,
+  push,
   session: await auth.api.getSession({ headers }),
 });

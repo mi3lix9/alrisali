@@ -8,7 +8,8 @@
 
 **Status:** ready-for-agent
 
-- [ ] Scheduler publishes due Announcements (server test with fake push transport)
-- [ ] Audience and language selection honoured
-- [ ] Dead tokens pruned
-- [ ] Inbox lists received Announcements; opt-out stops delivery
+- [x] Scheduler publishes due Announcements (server test with fake push transport)
+- [x] Audience and language selection honoured
+- [x] Dead tokens pruned
+- [x] Inbox lists received Announcements; opt-out stops delivery
+- [ ] Live delivery through Expo Push to a device: pending env: EAS_PROJECT_ID (push tokens), EXPO_ACCESS_TOKEN (only if push security is on); pending simulator/device verification of the native inbox, opt-out and tap-to-open

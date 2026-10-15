@@ -3,12 +3,13 @@ import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
 
+import { startAnnouncementScheduler } from "@/features/announcements";
 import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
 import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
-import { auth, content, db, recitation, userDatabases } from "./services";
+import { auth, content, db, push, recitation, userDatabases } from "./services";
 import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
 import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
 
@@ -46,6 +47,11 @@ if (otaConfig) {
   mountOta(app, createOtaServer(otaConfig, db), otaConfig.adminToken);
 }
 
+// Sends scheduled Announcements when they fall due (Expo Push).
+if (ENV.NODE_ENV !== "test") {
+  startAnnouncementScheduler({ content, db, push });
+}
+
 const apiHandler = createApiHandler(appRouter);
 const rpcHandler = createRpcHandler(appRouter);
 
@@ -56,6 +62,7 @@ app.use("/*", async (c, next) => {
     userDatabases,
     content,
     recitation,
+    push,
     headers: c.req.raw.headers,
   });
 

@@ -19,6 +19,8 @@ import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
+import { Route as AdminAuthedAnnouncementsIndexRouteImport } from './routes/admin/_authed/announcements/index'
+import { Route as AdminAuthedAnnouncementsIdRouteImport } from './routes/admin/_authed/announcements/$id'
 
 const Char123LocaleChar125RouteRoute =
   Char123LocaleChar125RouteRouteImport.update({
@@ -76,6 +78,18 @@ const AdminAuthedHijriAdjustmentRoute =
     path: '/hijri-adjustment',
     getParentRoute: () => AdminAuthedRouteRoute,
   } as any)
+const AdminAuthedAnnouncementsIndexRoute =
+  AdminAuthedAnnouncementsIndexRouteImport.update({
+    id: '/announcements/',
+    path: '/announcements/',
+    getParentRoute: () => AdminAuthedRouteRoute,
+  } as any)
+const AdminAuthedAnnouncementsIdRoute =
+  AdminAuthedAnnouncementsIdRouteImport.update({
+    id: '/announcements/$id',
+    path: '/announcements/$id',
+    getParentRoute: () => AdminAuthedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
@@ -88,6 +102,8 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/': typeof AdminAuthedIndexRoute
+  '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/announcements/': typeof AdminAuthedAnnouncementsIndexRoute
 }
 export interface FileRoutesByTo {
   '/admin/login': typeof AdminLoginRoute
@@ -98,6 +114,8 @@ export interface FileRoutesByTo {
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin': typeof AdminAuthedIndexRoute
+  '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/announcements': typeof AdminAuthedAnnouncementsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -111,6 +129,8 @@ export interface FileRoutesById {
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
+  '/admin/_authed/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/_authed/announcements/': typeof AdminAuthedAnnouncementsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,6 +145,8 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/admin/hijri-adjustment'
     | '/admin/'
+    | '/admin/announcements/$id'
+    | '/admin/announcements/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/admin/login'
@@ -135,6 +157,8 @@ export interface FileRouteTypes {
     | '/{-$locale}'
     | '/admin/hijri-adjustment'
     | '/admin'
+    | '/admin/announcements/$id'
+    | '/admin/announcements'
   id:
     | '__root__'
     | '/{-$locale}'
@@ -147,6 +171,8 @@ export interface FileRouteTypes {
     | '/{-$locale}/'
     | '/admin/_authed/hijri-adjustment'
     | '/admin/_authed/'
+    | '/admin/_authed/announcements/$id'
+    | '/admin/_authed/announcements/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -228,6 +254,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedHijriAdjustmentRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/announcements/': {
+      id: '/admin/_authed/announcements/'
+      path: '/announcements'
+      fullPath: '/admin/announcements/'
+      preLoaderRoute: typeof AdminAuthedAnnouncementsIndexRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/announcements/$id': {
+      id: '/admin/_authed/announcements/$id'
+      path: '/announcements/$id'
+      fullPath: '/admin/announcements/$id'
+      preLoaderRoute: typeof AdminAuthedAnnouncementsIdRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
   }
 }
 
@@ -254,11 +294,15 @@ const Char123LocaleChar125RouteRouteWithChildren =
 interface AdminAuthedRouteRouteChildren {
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
+  AdminAuthedAnnouncementsIdRoute: typeof AdminAuthedAnnouncementsIdRoute
+  AdminAuthedAnnouncementsIndexRoute: typeof AdminAuthedAnnouncementsIndexRoute
 }
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
+  AdminAuthedAnnouncementsIdRoute: AdminAuthedAnnouncementsIdRoute,
+  AdminAuthedAnnouncementsIndexRoute: AdminAuthedAnnouncementsIndexRoute,
 }
 
 const AdminAuthedRouteRouteWithChildren =

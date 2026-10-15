@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import type { Auth } from "@alrisali/auth";
+import { createAnnouncementsRepository } from "@alrisali/db-content/announcements";
 import {
   ContentReplicaReadOnlyError,
   createGlobalSettingsRepository,
@@ -14,11 +15,14 @@ import { connectNodeReplica } from "@alrisali/db-content/testing";
 import { createDb } from "@alrisali/db-server";
 import type { Database } from "@alrisali/db-server";
 import { migrateDb } from "@alrisali/db-server/migrate";
+import { pushDevice } from "@alrisali/db-server/schema/announcements";
+import { user as userTable } from "@alrisali/db-server/schema/auth";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
 import { startSyncServer, temporaryDirectory } from "@alrisali/db-user/testing";
 import type { SyncServer, TemporaryDirectory } from "@alrisali/db-user/testing";
 import { call, isProcedure } from "@orpc/server";
 import type { AnyProcedure } from "@orpc/server";
+import { eq } from "drizzle-orm";
 import {
   afterAll,
   afterEach,
@@ -30,8 +34,15 @@ import {
 } from "vitest";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
+import { runAnnouncementScheduler } from "@/features/announcements";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
+import type {
+  PushMessage,
+  PushReceipt,
+  PushTicket,
+  PushTransport,
+} from "@/shared/lib/push-transport";
 import type { RecitationSource } from "@/shared/lib/recitation-source";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
@@ -40,17 +51,97 @@ import { appRouter } from "./router";
 
 type Access = "anonymous" | "believer" | "admin";
 
+/** An Expo push token for a test device. */
+const pushTokenOf = (device: string) => `ExponentPushToken[${device}]`;
+
+const RAMADAN = {
+  ar: { title: "رمضان كريم", body: "تقبل الله صيامكم" },
+  en: { title: "Ramadan Kareem", body: "May God accept your fasting" },
+};
+
+/** What a function preparing a procedure's input gets. */
+interface Prepared {
+  content: ContentDatabase;
+}
+
 /**
- * Who may call each procedure, and a valid input for it. Every procedure in
- * the router is listed here: adding one without its rule fails the suite.
+ * An Announcement stored straight in the content database, for procedures
+ * that act on one: `{ id }` of a publishable draft, or a scheduled one.
  */
-const ACCESS: Record<string, { access: Access; input?: unknown }> = {
+const storedAnnouncement =
+  (scheduled = false) =>
+  async ({ content }: Prepared): Promise<{ id: string }> => {
+    const announcements = createAnnouncementsRepository(await content.db());
+    const { id } = await announcements.create(
+      { text: RAMADAN, audience: "all" },
+      Date.now()
+    );
+    if (scheduled) {
+      await announcements.schedule(id, Date.now() + 60_000, Date.now());
+    }
+    return { id };
+  };
+
+/**
+ * Who may call each procedure, and a valid input for it (or a function
+ * preparing one). Every procedure in the router is listed here: adding one
+ * without its rule fails the suite.
+ */
+const ACCESS: Record<
+  string,
+  {
+    access: Access;
+    input?: unknown | ((prepared: Prepared) => Promise<unknown>);
+  }
+> = {
   healthCheck: { access: "anonymous" },
   contentReplica: { access: "anonymous" },
   "account.privateData": { access: "believer" },
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "announcements.list": { access: "admin" },
+  "announcements.get": { access: "admin", input: storedAnnouncement() },
+  "announcements.create": {
+    access: "admin",
+    input: { text: RAMADAN, audience: "all" },
+  },
+  "announcements.update": {
+    access: "admin",
+    input: async (prepared: Prepared) => ({
+      ...(await storedAnnouncement()(prepared)),
+      text: RAMADAN,
+      audience: "new",
+    }),
+  },
+  "announcements.schedule": {
+    access: "admin",
+    input: async (prepared: Prepared) => ({
+      ...(await storedAnnouncement()(prepared)),
+      at: Date.now() + 60_000,
+    }),
+  },
+  "announcements.unschedule": {
+    access: "admin",
+    input: storedAnnouncement(true),
+  },
+  "announcements.publishNow": { access: "admin", input: storedAnnouncement() },
+  "announcements.duplicate": { access: "admin", input: storedAnnouncement() },
+  "announcements.remove": { access: "admin", input: storedAnnouncement() },
+  "announcements.sendTest": { access: "admin", input: storedAnnouncement() },
+  "announcements.registerDevice": {
+    access: "anonymous",
+    input: {
+      pushToken: pushTokenOf("guard"),
+      platform: "ios",
+      language: "ar",
+      enabled: true,
+    },
+  },
+  "announcements.inbox": {
+    access: "anonymous",
+    input: { pushToken: pushTokenOf("guard") },
+  },
   "hijriAdjustment.get": { access: "admin" },
   "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
   "quran.reciters": { access: "anonymous" },
@@ -123,10 +214,56 @@ const pathsFor = (...access: Access[]): string[] =>
     access.includes(ACCESS[path]?.access ?? "admin")
   );
 
+/**
+ * Stand-in for Expo Push: records every message, answers
+ * DeviceNotRegistered for the tokens in `dead`, and gives the receipts set
+ * in `receiptsById`.
+ */
+interface FakePush extends PushTransport {
+  sent: PushMessage[];
+  dead: Set<string>;
+  receiptsById: Map<string, PushReceipt>;
+}
+
+const fakePush = (): FakePush => {
+  const sent: PushMessage[] = [];
+  const dead = new Set<string>();
+  const receiptsById = new Map<string, PushReceipt>();
+  return {
+    sent,
+    dead,
+    receiptsById,
+    send: (messages) => {
+      const tickets = messages.map((message): PushTicket => {
+        if (dead.has(message.to)) {
+          return {
+            status: "error",
+            message: `${message.to} is not a registered push notification recipient`,
+            error: "DeviceNotRegistered",
+          };
+        }
+        sent.push(message);
+        return { status: "ok", id: `ticket-${sent.length}` };
+      });
+      return Promise.resolve(tickets);
+    },
+    receipts: (ticketIds) =>
+      Promise.resolve(
+        new Map(
+          ticketIds.flatMap((id) => {
+            const receipt = receiptsById.get(id);
+            return receipt ? [[id, receipt] as const] : [];
+          })
+        )
+      ),
+  };
+};
+
 let db: Database;
 let auth: Auth;
 let userDatabases: UserDatabaseHost;
 let content: ContentDatabase;
+let push: FakePush;
 
 // A local `tursodb --sync-server` stands in for Turso Cloud.
 let syncServer: SyncServer;
@@ -152,6 +289,7 @@ const setUp = async (host?: UserDatabaseHost) => {
       Promise.resolve(token.endsWith(`.${PROVIDER_SIGNATURE}`)),
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
+  push = fakePush();
   // A fresh content database per test, so no test sees another's content.
   contentDatabases += 1;
   content = createContentDatabase({
@@ -193,9 +331,17 @@ const callAs = async (headers: Headers, path: string, input?: unknown) => {
     userDatabases,
     content,
     recitation,
+    push,
     headers,
   });
-  return call(entry[1], input ?? ACCESS[path]?.input, { context });
+  const given = input ?? ACCESS[path]?.input;
+  return call(
+    entry[1],
+    typeof given === "function" ? await given({ content }) : given,
+    {
+      context,
+    }
+  );
 };
 
 const adminBeliever = {
@@ -826,5 +972,373 @@ describe("Believer cloud databases on Turso Cloud (Platform API)", () => {
       callAs(headers, "account.deleteAccount")
     ).resolves.toStrictEqual({ deleted: true });
     await expect(rowCountsOf(userId)).resolves.toStrictEqual(NO_ROWS);
+  });
+});
+
+interface StoredAnnouncement {
+  id: string;
+  status: string;
+  sentAt: number | null;
+}
+
+const registerDevice = async (
+  headers: Headers,
+  device: string,
+  { language = "ar", enabled = true } = {}
+) => {
+  await callAs(headers, "announcements.registerDevice", {
+    pushToken: pushTokenOf(device),
+    platform: "ios",
+    language,
+    enabled,
+  });
+};
+
+const inboxOf = async (device: string) =>
+  (
+    (await callAs(new Headers(), "announcements.inbox", {
+      pushToken: pushTokenOf(device),
+    })) as { announcements: { title: string; body: string }[] }
+  ).announcements;
+
+const MINUTE = 60 * 1000;
+const DAY = 24 * 60 * MINUTE;
+
+/** Sets when a device last checked in and first registered. */
+const ageDevice = async (
+  device: string,
+  { lastSeenDaysAgo = 0, registeredDaysAgo = 0 }
+) => {
+  await db
+    .update(pushDevice)
+    .set({
+      lastSeenAt: new Date(Date.now() - lastSeenDaysAgo * DAY),
+      createdAt: new Date(Date.now() - registeredDaysAgo * DAY),
+    })
+    .where(eq(pushDevice.token, pushTokenOf(device)));
+};
+
+const createAnnouncement = async (admin: Headers, draft?: unknown) =>
+  (await callAs(
+    admin,
+    "announcements.create",
+    draft ?? { text: RAMADAN, audience: "all" }
+  )) as StoredAnnouncement;
+
+const scheduleIn = async (admin: Headers, id: string, minutes: number) =>
+  (await callAs(admin, "announcements.schedule", {
+    id,
+    at: Date.now() + minutes * MINUTE,
+  })) as StoredAnnouncement;
+
+/** One scheduler pass, `minutes` from now. */
+const runSchedulerIn = (minutes: number) =>
+  runAnnouncementScheduler(
+    { content, db, push },
+    Date.now() + minutes * MINUTE
+  );
+
+const sentTo = () =>
+  push.sent.map(({ to, title }) => [to.slice(18, -1), title]).toSorted();
+
+describe("Announcements via Expo Push", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(() => setUp());
+
+  afterAll(stopLocalCloud);
+
+  it("sends a scheduled Announcement once it is due, and only once", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "guest");
+    const { id } = await createAnnouncement(admin);
+    await scheduleIn(admin, id, 10);
+
+    await runSchedulerIn(5);
+    expect(push.sent).toStrictEqual([]);
+
+    await runSchedulerIn(11);
+    await runSchedulerIn(12);
+    expect(push.sent).toStrictEqual([
+      {
+        to: pushTokenOf("guest"),
+        title: RAMADAN.ar.title,
+        body: RAMADAN.ar.body,
+        data: { announcementId: id },
+      },
+    ]);
+    await expect(
+      callAs(admin, "announcements.get", { id })
+    ).resolves.toMatchObject({ status: "sent", sentAt: expect.any(Number) });
+  });
+
+  it("sends each device the Announcement in its own language", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "arabic", { language: "ar" });
+    await registerDevice(new Headers(), "english", { language: "en" });
+    const { id } = await createAnnouncement(admin);
+
+    await expect(
+      callAs(admin, "announcements.publishNow", { id })
+    ).resolves.toMatchObject({ announcement: { status: "sent" }, devices: 2 });
+
+    expect(sentTo()).toStrictEqual([
+      ["arabic", RAMADAN.ar.title],
+      ["english", RAMADAN.en.title],
+    ]);
+    await expect(inboxOf("english")).resolves.toStrictEqual([
+      { id, ...RAMADAN.en, sentAt: expect.any(Number) },
+    ]);
+    await expect(inboxOf("arabic")).resolves.toMatchObject([RAMADAN.ar]);
+  });
+
+  it("follows the language a device checked in with last", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "phone", { language: "ar" });
+    await registerDevice(new Headers(), "phone", { language: "en" });
+    const { id } = await createAnnouncement(admin);
+
+    await callAs(admin, "announcements.publishNow", { id });
+
+    expect(sentTo()).toStrictEqual([["phone", RAMADAN.en.title]]);
+  });
+
+  it("reaches only active Believers with the Active audience", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "daily");
+    await registerDevice(new Headers(), "lapsed");
+    await ageDevice("daily", { lastSeenDaysAgo: 1, registeredDaysAgo: 300 });
+    await ageDevice("lapsed", { lastSeenDaysAgo: 40, registeredDaysAgo: 300 });
+    const { id } = await createAnnouncement(admin, {
+      text: RAMADAN,
+      audience: "active",
+    });
+
+    await callAs(admin, "announcements.publishNow", { id });
+
+    expect(sentTo()).toStrictEqual([["daily", RAMADAN.ar.title]]);
+  });
+
+  it("reaches only new Believers with the New audience, not old ones on a new phone", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "newcomer");
+    await registerDevice(new Headers(), "veteran");
+    await ageDevice("veteran", { registeredDaysAgo: 200 });
+    const believer = await signIn("google", idToken(googleBeliever));
+    await registerDevice(believer, "new-phone");
+    await db
+      .update(userTable)
+      .set({ createdAt: new Date(Date.now() - 400 * DAY) })
+      .where(eq(userTable.email, googleBeliever.email));
+    const { id } = await createAnnouncement(admin, {
+      text: RAMADAN,
+      audience: "new",
+    });
+
+    await callAs(admin, "announcements.publishNow", { id });
+
+    expect(sentTo()).toStrictEqual([["newcomer", RAMADAN.ar.title]]);
+  });
+
+  it("stops sending to a device that turned Announcements off", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "quiet");
+    await registerDevice(new Headers(), "listening");
+    const first = await createAnnouncement(admin);
+    await callAs(admin, "announcements.publishNow", { id: first.id });
+
+    await registerDevice(new Headers(), "quiet", { enabled: false });
+    const second = await createAnnouncement(admin, {
+      text: {
+        ar: { title: "عيد مبارك", body: "كل عام وأنتم بخير" },
+        en: { title: "Eid Mubarak", body: "Blessed Eid" },
+      },
+      audience: "all",
+    });
+    await callAs(admin, "announcements.publishNow", { id: second.id });
+
+    expect(sentTo()).toStrictEqual([
+      ["listening", "رمضان كريم"],
+      ["listening", "عيد مبارك"],
+      ["quiet", "رمضان كريم"],
+    ]);
+    // The inbox keeps what arrived before.
+    await expect(inboxOf("quiet")).resolves.toMatchObject([RAMADAN.ar]);
+    await expect(inboxOf("listening")).resolves.toMatchObject([
+      { title: "عيد مبارك" },
+      RAMADAN.ar,
+    ]);
+  });
+
+  it("prunes a device Expo calls unregistered when sending", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "uninstalled");
+    await registerDevice(new Headers(), "kept");
+    push.dead.add(pushTokenOf("uninstalled"));
+    const { id } = await createAnnouncement(admin);
+
+    await expect(
+      callAs(admin, "announcements.publishNow", { id })
+    ).resolves.toMatchObject({ devices: 1 });
+
+    const tokens = await db
+      .select({ token: pushDevice.token })
+      .from(pushDevice);
+    expect(tokens).toStrictEqual([{ token: pushTokenOf("kept") }]);
+  });
+
+  it("prunes a device whose receipt says it is unregistered", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "uninstalled");
+    await registerDevice(new Headers(), "kept");
+    const { id } = await createAnnouncement(admin);
+    await scheduleIn(admin, id, 1);
+    await runSchedulerIn(2);
+    const deadTicket = `ticket-${
+      push.sent.findIndex(({ to }) => to === pushTokenOf("uninstalled")) + 1
+    }`;
+    push.receiptsById.set(deadTicket, {
+      status: "error",
+      message: "The device is not registered",
+      error: "DeviceNotRegistered",
+    });
+
+    // Receipts are read a quarter of an hour after sending.
+    await runSchedulerIn(5);
+    await expect(db.select().from(pushDevice)).resolves.toHaveLength(2);
+    await runSchedulerIn(20);
+
+    const tokens = await db
+      .select({ token: pushDevice.token })
+      .from(pushDevice);
+    expect(tokens).toStrictEqual([{ token: pushTokenOf("kept") }]);
+    await expect(inboxOf("uninstalled")).resolves.toStrictEqual([]);
+  });
+
+  it("sends a test only to the Admin's own devices and records nothing", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(admin, "admin-phone", { language: "en" });
+    await registerDevice(new Headers(), "guest");
+    const { id } = await createAnnouncement(admin);
+
+    await expect(
+      callAs(admin, "announcements.sendTest", { id })
+    ).resolves.toStrictEqual({ devices: 1 });
+
+    expect(sentTo()).toStrictEqual([["admin-phone", RAMADAN.en.title]]);
+    await expect(inboxOf("admin-phone")).resolves.toStrictEqual([]);
+    await expect(
+      callAs(admin, "announcements.get", { id })
+    ).resolves.toMatchObject({ status: "draft" });
+  });
+
+  it("keeps drafts, edits, duplicates and deletes them", async () => {
+    const admin = await signInAsAdmin();
+    const draft = await createAnnouncement(admin, {
+      text: { ar: { title: "مسودة", body: "" }, en: { title: "", body: "" } },
+      audience: "all",
+    });
+    expect(draft).toMatchObject({ status: "draft", scheduledAt: null });
+
+    const edited = await callAs(admin, "announcements.update", {
+      id: draft.id,
+      text: RAMADAN,
+      audience: "active",
+    });
+    expect(edited).toMatchObject({ text: RAMADAN, audience: "active" });
+
+    const copy = (await callAs(admin, "announcements.duplicate", {
+      id: draft.id,
+    })) as StoredAnnouncement;
+    expect(copy).toMatchObject({
+      status: "draft",
+      text: RAMADAN,
+      audience: "active",
+    });
+    expect(copy.id).not.toBe(draft.id);
+
+    await callAs(admin, "announcements.remove", { id: draft.id });
+    const { announcements } = (await callAs(admin, "announcements.list")) as {
+      announcements: StoredAnnouncement[];
+    };
+    expect(announcements.map(({ id }) => id)).toStrictEqual([copy.id]);
+  });
+
+  it("refuses to schedule or publish until both languages are written", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = await createAnnouncement(admin, {
+      text: { ar: RAMADAN.ar, en: { title: "Ramadan", body: "" } },
+      audience: "all",
+    });
+
+    await expect(scheduleIn(admin, id, 5)).rejects.toMatchObject({
+      code: "BAD_REQUEST",
+    });
+    await expect(
+      callAs(admin, "announcements.publishNow", { id })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("returns a scheduled Announcement to a draft, which the scheduler leaves alone", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "guest");
+    const { id } = await createAnnouncement(admin);
+    await scheduleIn(admin, id, 1);
+
+    await expect(
+      callAs(admin, "announcements.unschedule", { id })
+    ).resolves.toMatchObject({ status: "draft", scheduledAt: null });
+    await runSchedulerIn(5);
+
+    expect(push.sent).toStrictEqual([]);
+  });
+
+  it("freezes an Announcement once sent, but lets it be duplicated", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = await createAnnouncement(admin);
+    await callAs(admin, "announcements.publishNow", { id });
+
+    const conflict = { code: "CONFLICT" };
+    await expect(
+      callAs(admin, "announcements.update", {
+        id,
+        text: RAMADAN,
+        audience: "new",
+      })
+    ).rejects.toMatchObject(conflict);
+    await expect(scheduleIn(admin, id, 5)).rejects.toMatchObject(conflict);
+    await expect(
+      callAs(admin, "announcements.publishNow", { id })
+    ).rejects.toMatchObject(conflict);
+    await expect(
+      callAs(admin, "announcements.remove", { id })
+    ).rejects.toMatchObject(conflict);
+    await expect(
+      callAs(admin, "announcements.duplicate", { id })
+    ).resolves.toMatchObject({ status: "draft", text: RAMADAN });
+  });
+
+  it("answers NOT_FOUND for an unknown Announcement", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "announcements.get", { id: "missing" })
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    await expect(
+      callAs(admin, "announcements.remove", { id: "missing" })
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("ties a device to the Believer signed in on it, and keeps it as a Guest's after account deletion", async () => {
+    const believer = await signIn("google", idToken(googleBeliever));
+    await registerDevice(believer, "phone");
+    const userId = await userIdOf(believer);
+
+    await expect(
+      db.select({ userId: pushDevice.userId }).from(pushDevice)
+    ).resolves.toStrictEqual([{ userId }]);
+    await callAs(believer, "account.deleteAccount");
+    await expect(
+      db.select({ userId: pushDevice.userId }).from(pushDevice)
+    ).resolves.toStrictEqual([{ userId: null }]);
   });
 });
