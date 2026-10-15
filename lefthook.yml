@@ -1,0 +1,17 @@
+# Git hooks for every clone (installed by `bun install` via the prepare script).
+# pre-commit: fast, staged files only, auto-fixes and re-stages.
+# pre-push: whole repo — lint/format/types, tests, build — so main never breaks.
+pre-commit:
+  commands:
+    uncheck:
+      run: bunx --no-install uncheck staged --fix
+
+pre-push:
+  piped: true
+  commands:
+    1_check:
+      run: bun run check
+    2_test:
+      run: bun run test
+    3_build:
+      run: bun run build
