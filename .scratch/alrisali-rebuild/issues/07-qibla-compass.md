@@ -6,7 +6,7 @@
 
 **Blocked by:** 04 (Prayer Times timetable and next-Salah countdown)
 
-**Status:** ready-for-agent
+**Status:** done — pending device verification
 
 - [x] Domain tests: bearing/distance for known cities
 - [x] Compass uses device heading with permission handling (live heading needs a physical device: pending device verification)
