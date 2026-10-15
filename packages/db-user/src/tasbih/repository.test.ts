@@ -4,6 +4,7 @@ import {
   TASBIH_AL_ZAHRA_ID,
   TasbihAlZahraIsPermanentError,
 } from "@alrisali/domain/tasbih";
+import { sql } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { connectNode, temporaryDirectory } from "../shared/testing";
@@ -242,6 +243,32 @@ describe(createTasbihRepository, () => {
     await expect(tasbih.listDhikrSessions()).resolves.toStrictEqual([session]);
     await expect(tasbih.getOpenTasbih("open-1")).resolves.toMatchObject({
       count: 0,
+    });
+  });
+
+  it("records no Dhikr Session when the Open Tasbih cannot start again", async () => {
+    const tasbih = createTasbihRepository(database.db);
+    await tasbih.createOpenTasbih("open-1", { name: "Salawat", target: 33 });
+    await tasbih.saveOpenTasbihCount("open-1", 40);
+    // Every later count change fails, as a failing write on the device would.
+    await database.db.run(
+      sql.raw(
+        "CREATE TRIGGER refuse_count BEFORE UPDATE ON tasbih BEGIN SELECT RAISE(ABORT, 'refused'); END"
+      )
+    );
+
+    await expect(
+      tasbih.saveOpenTasbihSession({
+        id: randomUUID(),
+        tasbihId: "open-1",
+        count: 40,
+        completedAt: Date.UTC(2026, 9, 15, 18, 0),
+      })
+    ).rejects.toThrow(/Failed query: update "tasbih"/u);
+
+    await expect(tasbih.listDhikrSessions()).resolves.toStrictEqual([]);
+    await expect(tasbih.getOpenTasbih("open-1")).resolves.toMatchObject({
+      count: 40,
     });
   });
 
