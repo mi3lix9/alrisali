@@ -9,8 +9,15 @@ import { useToday } from "@/shared/lib/today";
 import { usePrayerLog } from "../hooks/use-prayer-log";
 import { PrayerStreak } from "./prayer-streak";
 
-/** Home's quick ticks for today's Salah, with the Prayer Streak. */
-export const PrayerLogQuickTicks = () => {
+/**
+ * Home's quick ticks for today's Salah, with the Prayer Streak unless
+ * `showStreak` is off (Home's grid gives the streak its own tile).
+ */
+export const PrayerLogQuickTicks = ({
+  showStreak = true,
+}: {
+  showStreak?: boolean;
+}) => {
   const { t } = useTranslation("prayer-log");
   const today = useToday();
   const view = usePrayerLog(today, today);
@@ -41,7 +48,7 @@ export const PrayerLogQuickTicks = () => {
         {view.saveFailed ? (
           <Text className="text-destructive">{t("saveError")}</Text>
         ) : null}
-        <PrayerStreak streak={view.streak} />
+        {showStreak ? <PrayerStreak streak={view.streak} /> : null}
       </Card.Content>
     </Card>
   );

@@ -20,6 +20,7 @@ export const ar = {
     days_many: "{{count}} يومًا",
     days_other: "{{count}} يوم",
     hint: "أكمل الصلوات الخمس اليوم لتستمر سلسلتك.",
+    today: "اليوم {{performed}} من {{total}}",
   },
   untick: {
     title: "إلغاء تسجيل صلاة {{name}}؟",

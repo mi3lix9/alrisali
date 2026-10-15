@@ -6,7 +6,7 @@
 
 **Blocked by:** 04 (Prayer Times timetable and next-Salah countdown), 05 (Prayer Log and Prayer Streak), 08 (Hijri calendar with Occasions), 24 (Last-Read Ayah, Continue reading, favourite ayat), 26 (Recitation streaming and Verse of the Day), 31 (Daily Content), 38 (Mood Check-in and Remedy), 39 (Companion XP)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Uses the Home variant the owner selects
-- [ ] All cards deep-link correctly
+- [x] Uses the Home variant the owner selects
+- [x] All cards deep-link correctly

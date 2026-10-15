@@ -4,6 +4,7 @@ export const ar = {
     title: "اليوم",
     noOccasions: "لا مناسبة اليوم.",
     openCalendar: "فتح التقويم",
+    separator: "، ",
   },
   month: {
     previous: "الشهر السابق",
