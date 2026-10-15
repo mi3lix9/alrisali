@@ -1,12 +1,12 @@
-import { Button } from "@alrisali/ui/components/button";
-import { Input } from "@alrisali/ui/components/input";
-import { Label } from "@alrisali/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { authClient } from "@/shared/lib/auth-client";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import Loader from "@/shared/ui/loader";
 
 const SignInForm = ({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) => {
@@ -29,7 +29,7 @@ const SignInForm = ({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) => {
         {
           onSuccess: () => {
             navigate({
-              to: "/dashboard",
+              to: "/admin",
             });
             toast.success("Sign in successful");
           },

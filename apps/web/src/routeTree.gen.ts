@@ -9,35 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteRouteImport } from './routes/_auth/route'
-import { Route as LoginRouteImport } from './routes/login'
 import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$locale}/route'
-import { Route as AuthDashboardRouteImport } from './routes/_auth/dashboard'
+import { Route as AdminAuthedRouteRouteImport } from './routes/admin/_authed/route'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as DebugSentryRouteImport } from './routes/debug.sentry'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125ContactRouteImport } from './routes/{-$locale}/contact'
 import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$locale}/privacy'
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
+import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
+import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
 
-const AuthRouteRoute = AuthRouteRouteImport.update({
-  id: '/_auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const Char123LocaleChar125RouteRoute =
   Char123LocaleChar125RouteRouteImport.update({
     id: '/{-$locale}',
     path: '/{-$locale}',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AuthDashboardRoute = AuthDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AuthRouteRoute,
+const AdminAuthedRouteRoute = AdminAuthedRouteRouteImport.update({
+  id: '/admin/_authed',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DebugSentryRoute = DebugSentryRouteImport.update({
   id: '/debug/sentry',
@@ -68,98 +65,99 @@ const Char123LocaleChar125TermsRoute =
     path: '/terms',
     getParentRoute: () => Char123LocaleChar125RouteRoute,
   } as any)
+const AdminAuthedIndexRoute = AdminAuthedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
+const AdminAuthedHijriAdjustmentRoute =
+  AdminAuthedHijriAdjustmentRouteImport.update({
+    id: '/hijri-adjustment',
+    path: '/hijri-adjustment',
+    getParentRoute: () => AdminAuthedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthRouteRouteWithChildren
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
-  '/login': typeof LoginRoute
-  '/dashboard': typeof AuthDashboardRoute
+  '/admin': typeof AdminAuthedRouteRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/': typeof AdminAuthedIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthRouteRouteWithChildren
-  '/login': typeof LoginRoute
-  '/dashboard': typeof AuthDashboardRoute
+  '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin': typeof AdminAuthedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_auth': typeof AuthRouteRouteWithChildren
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
-  '/login': typeof LoginRoute
-  '/_auth/dashboard': typeof AuthDashboardRoute
+  '/admin/_authed': typeof AdminAuthedRouteRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/_authed/': typeof AdminAuthedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/{-$locale}'
-    | '/login'
-    | '/dashboard'
+    | '/admin'
+    | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/hijri-adjustment'
+    | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/login'
-    | '/dashboard'
+    | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}'
+    | '/admin/hijri-adjustment'
+    | '/admin'
   id:
     | '__root__'
-    | '/_auth'
     | '/{-$locale}'
-    | '/login'
-    | '/_auth/dashboard'
+    | '/admin/_authed'
+    | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/_authed/hijri-adjustment'
+    | '/admin/_authed/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   Char123LocaleChar125RouteRoute: typeof Char123LocaleChar125RouteRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  AdminAuthedRouteRoute: typeof AdminAuthedRouteRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   DebugSentryRoute: typeof DebugSentryRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/{-$locale}': {
       id: '/{-$locale}'
       path: '/{-$locale}'
@@ -167,12 +165,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125RouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth/dashboard': {
-      id: '/_auth/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof AuthDashboardRouteImport
-      parentRoute: typeof AuthRouteRoute
+    '/admin/_authed': {
+      id: '/admin/_authed'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAuthedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/debug/sentry': {
       id: '/debug/sentry'
@@ -209,20 +214,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125TermsRouteImport
       parentRoute: typeof Char123LocaleChar125RouteRoute
     }
+    '/admin/_authed/': {
+      id: '/admin/_authed/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminAuthedIndexRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/hijri-adjustment': {
+      id: '/admin/_authed/hijri-adjustment'
+      path: '/hijri-adjustment'
+      fullPath: '/admin/hijri-adjustment'
+      preLoaderRoute: typeof AdminAuthedHijriAdjustmentRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
   }
 }
-
-interface AuthRouteRouteChildren {
-  AuthDashboardRoute: typeof AuthDashboardRoute
-}
-
-const AuthRouteRouteChildren: AuthRouteRouteChildren = {
-  AuthDashboardRoute: AuthDashboardRoute,
-}
-
-const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
-  AuthRouteRouteChildren,
-)
 
 interface Char123LocaleChar125RouteRouteChildren {
   Char123LocaleChar125ContactRoute: typeof Char123LocaleChar125ContactRoute
@@ -244,10 +251,23 @@ const Char123LocaleChar125RouteRouteWithChildren =
     Char123LocaleChar125RouteRouteChildren,
   )
 
+interface AdminAuthedRouteRouteChildren {
+  AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
+  AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
+}
+
+const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
+  AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
+  AdminAuthedIndexRoute: AdminAuthedIndexRoute,
+}
+
+const AdminAuthedRouteRouteWithChildren =
+  AdminAuthedRouteRoute._addFileChildren(AdminAuthedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  AuthRouteRoute: AuthRouteRouteWithChildren,
   Char123LocaleChar125RouteRoute: Char123LocaleChar125RouteRouteWithChildren,
-  LoginRoute: LoginRoute,
+  AdminAuthedRouteRoute: AdminAuthedRouteRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   DebugSentryRoute: DebugSentryRoute,
 }
 export const routeTree = rootRouteImport
