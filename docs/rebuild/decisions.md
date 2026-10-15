@@ -69,11 +69,31 @@ packages/config shared tsconfig/lint
 packages/e2e    e2e tests
 ```
 
-## Spikes before building
+## Spike results (2026-10-15, iOS simulator only; Android skipped)
 
-1. Turso sync on an SDK 58 dev build, iOS and Android. A Guest database opened with a null url and `bootstrapIfEmpty: false` must, after sign-in, push its rows and newly created tables into a fresh, empty cloud database. Also test a pull-only replica of the content database using a read-only token. (Gates ADR-0001.)
-2. Panel UI under `I18nManager.forceRTL`.
-3. VisionCamera v5 + fast-tflite MoveNet + expo-speech-recognition on SDK 58, including whether Arabic recognition works on-device.
+Reports: `docs/rebuild/spikes/`.
+
+1. **Turso sync: partial pass.** All 6 cases passed against a local `tursodb --sync-server`:
+   - A Guest database pushed its rows and newly created tables into a fresh, empty server database.
+   - A second device bootstrapped; on a conflict, the last push won.
+   - A pull-only content database worked.
+   - The async `authToken` function was called.
+   - Drizzle sqlite-proxy queries worked.
+
+   `@tursodatabase/sync-react-native` 0.8.3 does not compile on RN 0.88. It needs `docs/rebuild/spikes/@tursodatabase%2Fsync-react-native@0.8.3.patch`, applied via bun `patchedDependencies`, until upstream fixes it. Still open: a run against Turso Cloud with a real read-only token, and Android.
+
+2. **Panel UI RTL: cancelled by user** after partial results. Adopt Panel UI, with these workarounds:
+   - Set RTL via expo-localization `forcesRTL: true`, not with JS `forceRTL` (expo-localization resets that on every launch).
+   - Segmented Tabs lose their highlight in RTL; there's an unverified patch.
+   - The `calendar="islamic"` grid shows Gregorian days, so we build our own Hijri grid.
+   - Input placeholders need `textAlign` set to the start side.
+   - Native tabs and the `@expo/ui` BottomSheet follow the device language, not forced RTL.
+3. **Prayer Assistant: go with risks.**
+   - The iOS build needs the Xcode Metal Toolchain, on dev machines and in CI.
+   - MoveNet float16 on CPU is correct, at 5.7 ms. The CoreML delegate corrupted the float16 output on the simulator, so CPU is the default.
+   - Arabic network speech worked. Transcripts start with U+200F (right-to-left mark), and iOS needs a restart loop.
+   - On-device ar-SA was unavailable on the simulator.
+   - The camera frame path still needs a physical device.
 
 ## External actions (owner: you)
 

@@ -1,5 +1,5 @@
 ---
-status: proposed (pending sync spike)
+status: proposed. The local iOS spike passed (docs/rebuild/spikes/turso-sync.md). Still pending a Turso Cloud read-only token check and Android.
 ---
 
 # Each Believer has their own Turso database, synced with one on the device
