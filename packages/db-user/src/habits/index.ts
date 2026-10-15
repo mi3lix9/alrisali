@@ -4,3 +4,7 @@ export type {
   HabitRepository,
   SetHabitCompleted,
 } from "./repository";
+export {
+  readHabitCompletionsInsightsSource,
+  readHabitsInsightsSource,
+} from "./insights-source";

@@ -1,4 +1,5 @@
 import "../i18n";
+import type { InsightsSourceReaders } from "@alrisali/db-user/shared";
 import { insights } from "@alrisali/domain/insights";
 import { Stack } from "expo-router";
 import { Spinner, Text } from "panelui-native";
@@ -17,12 +18,17 @@ import { useInsightsSources } from "../data/insights";
 
 /**
  * The Believer's Insights, worked out on the device from their own records,
- * so they need no account and no connection.
+ * so they need no account and no connection. The route passes each
+ * feature's reader in as `readers`.
  */
-export const InsightsScreen = () => {
+export const InsightsScreen = ({
+  readers,
+}: {
+  readers: InsightsSourceReaders;
+}) => {
   const { t } = useTranslation("insights");
   const today = useToday();
-  const { data: sources, isError } = useInsightsSources();
+  const { data: sources, isError } = useInsightsSources(readers);
   const found = sources ? insights(sources, today) : null;
 
   let body = (
