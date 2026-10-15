@@ -5,10 +5,12 @@
   "description": "Bundled Quran and book data, with a NOTICE per source.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./books": "./src/books/index.ts"
   },
   "scripts": {
-    "check-types": "tsc -b"
+    "check-types": "tsc -b",
+    "books:build": "bun scripts/books/build-books.ts"
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",
