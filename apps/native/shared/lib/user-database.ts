@@ -88,24 +88,34 @@ export const getUserDatabase = (): Promise<UserDatabase> => {
   return opening;
 };
 
+let wiping: Promise<void> | undefined;
+
 /**
- * Sign-out deletes the database from the device (ADR-0002); the next read
- * opens a fresh Guest database.
+ * Deletes the database from the device (ADR-0002); the next read opens a
+ * fresh Guest database. Sign-out starts it; account deletion waits for the
+ * same wipe before it restarts the app.
  */
-const wipeUserData = async (): Promise<void> => {
-  const current = opening;
-  opening = undefined;
-  if (current) {
-    const database = await current;
-    await database.wipe();
-  }
-  await queryClient.resetQueries({ queryKey: USER_DATA_QUERY_KEY });
+export const wipeUserDatabase = (): Promise<void> => {
+  wiping ??= (async () => {
+    try {
+      const current = opening;
+      opening = undefined;
+      if (current) {
+        const database = await current;
+        await database.wipe();
+      }
+      await queryClient.resetQueries({ queryKey: USER_DATA_QUERY_KEY });
+    } finally {
+      wiping = undefined;
+    }
+  })();
+  return wiping;
 };
 
 events.on("SignedOut", async () => {
   disconnectCloudDatabase();
   try {
-    await wipeUserData();
+    await wipeUserDatabase();
   } catch (error) {
     captureException(error);
   }

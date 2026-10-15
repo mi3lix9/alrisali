@@ -1,4 +1,4 @@
-import { PAGE_COUNT } from "@alrisali/domain/quran";
+import { findAyah, PAGE_COUNT } from "@alrisali/domain/quran";
 import type { PageNav } from "@alrisali/domain/quran";
 import { Direction } from "panelui-native";
 import { useCallback } from "react";
@@ -41,9 +41,11 @@ export const PageMode = ({
   onTap,
   onLongPressAyah,
   selectedAyah,
+  lastReadAyah,
 }: PageModeProps) => {
   const horizontal = pageNav === "horizontal";
   const length = horizontal ? width : height;
+  const lastReadPage = lastReadAyah ? findAyah(lastReadAyah)?.page : undefined;
 
   // FlatList does not support swapping this callback, so the screen passes a
   // stable `onPageShown`.
@@ -77,7 +79,7 @@ export const PageMode = ({
         maxToRenderPerBatch={2}
         windowSize={horizontal ? 3 : 5}
         keyExtractor={String}
-        extraData={selectedAyah}
+        extraData={`${selectedAyah}|${lastReadAyah}`}
         viewabilityConfig={VIEWABILITY}
         onViewableItemsChanged={onViewableItemsChanged}
         onScrollBeginDrag={onScrollStart}
@@ -91,6 +93,8 @@ export const PageMode = ({
             onTap={onTap}
             onLongPressAyah={onLongPressAyah}
             selectedAyah={selectedAyah}
+            // Only its own page redraws when the Last-Read Ayah moves.
+            lastReadAyah={item === lastReadPage ? lastReadAyah : null}
           />
         )}
       />

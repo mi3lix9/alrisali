@@ -1,10 +1,15 @@
 import { SURAHS } from "@alrisali/content/quran";
 import type { PagePosition, ReaderMode } from "@alrisali/domain/quran";
 import { Button, Text } from "panelui-native";
-import { ChevronLeftIcon, EllipsisIcon } from "panelui-native/icons";
+import {
+  BookmarkIcon,
+  ChevronLeftIcon,
+  EllipsisIcon,
+} from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
+import { useCSSVariable } from "uniwind";
 
 import { formatNumber } from "../utils/format";
 
@@ -16,11 +21,14 @@ interface ReaderTopBarProps {
   insetTop: number;
   onBack: () => void;
   onSettings: () => void;
+  /** Whether the Last-Read Ayah is on the page shown: fills the bookmark. */
+  lastReadOnScreen: boolean;
 }
 
 /**
  * The reader's top bar, laid over the page (no layout shift) while the chrome
- * shows: back, the surah with its juz and page, and the reader settings.
+ * shows: back, the surah with its juz and page, the last-read bookmark and
+ * the reader settings.
  */
 export const ReaderTopBar = ({
   mode,
@@ -29,8 +37,10 @@ export const ReaderTopBar = ({
   insetTop,
   onBack,
   onSettings,
+  lastReadOnScreen,
 }: ReaderTopBarProps) => {
   const { t, i18n } = useTranslation("quran");
+  const accent = useCSSVariable("--color-info");
   const entry = SURAHS[surah - 1];
   const format = (value: number) => formatNumber(i18n.language, value);
   const subtitle =
@@ -66,6 +76,21 @@ export const ReaderTopBar = ({
           <Text size="xs" muted numberOfLines={1}>
             {subtitle}
           </Text>
+        </View>
+        <View
+          className="size-10 items-center justify-center"
+          // Only announced when it marks the page shown.
+          accessible={lastReadOnScreen}
+          accessibilityRole="image"
+          accessibilityLabel={t("lastRead.bookmarkHere")}
+        >
+          <BookmarkIcon
+            size={22}
+            filled={lastReadOnScreen}
+            {...(lastReadOnScreen && typeof accent === "string"
+              ? { color: accent }
+              : {})}
+          />
         </View>
         <Button
           variant="ghost"

@@ -79,6 +79,57 @@ Believers sign in with the native Apple (iOS) and Google sheets; the app sends t
 
 Google Cloud Console needs a web client, an iOS client for each bundle ID, and an Android client per package name and signing SHA-1. The Apple Developer account needs the Sign in with Apple capability on each App ID. Native sign-in needs a dev build (not Expo Go). Signing out asks for confirmation, then emits `SignedOut` on the event bus; the device database wipes itself on that event.
 
+## Deploy
+
+### Railway (server and web)
+
+One Railway project with two services built from this repository, a bucket for over-the-air updates, and the Turso server database outside Railway.
+
+| Service | Root directory | Config file                 | Branch |
+| ------- | -------------- | --------------------------- | ------ |
+| server  | `/`            | `/apps/server/railway.json` | `main` |
+| web     | `/`            | `/apps/web/railway.json`    | `main` |
+
+Both build with Railpack (`bun install`, then `turbo run build --filter=<app>`) and check `/` before taking traffic. The server's pre-deploy step (`bun run --cwd apps/server deploy:migrate`) applies the server database migrations, then `ota:prepare`: Hot Updater's schema settings and the app's client API key. The web runs TanStack Start's build with `srvx` (`apps/web` `start`).
+
+Set `NODE_ENV=production` on both services, every variable in `apps/server/.env.schema` on the server, and every variable in `apps/web/.env.schema` on the web (`VITE_*` are read at build time). On the server, point `HOT_UPDATER_BUCKET`, `HOT_UPDATER_BUCKET_ENDPOINT`, `HOT_UPDATER_BUCKET_REGION`, `HOT_UPDATER_BUCKET_ACCESS_KEY_ID` and `HOT_UPDATER_BUCKET_SECRET_ACCESS_KEY` at the bucket's `BUCKET`, `ENDPOINT`, `REGION`, `ACCESS_KEY_ID` and `SECRET_ACCESS_KEY` with reference variables (`${{ota-bundles.BUCKET}}`). Generate the two Hot Updater keys once:
+
+```sh
+openssl rand -hex 32                              # HOT_UPDATER_ADMIN_TOKEN (server, and the deploy machine)
+openssl rand -base64 32 | tr '+/' '-_' | tr -d =  # HOT_UPDATER_CLIENT_API_KEY (server) = EXPO_PUBLIC_HOT_UPDATER_API_KEY (EAS)
+```
+
+### EAS (native builds)
+
+`apps/native/eas.json` has two build profiles. `APP_VARIANT` picks the bundle id and the Hot Updater channel:
+
+| Profile | Bundle id / package | OTA channel | Distribution |
+| --- | --- | --- | --- |
+| `development` | `com.alrisali.app.dev` | `development` | internal (dev client) |
+| `production` | `com.alrisali.app` | `production` | store, build number auto-incremented remotely |
+
+Once: `eas init` in `apps/native`, then set `EAS_PROJECT_ID` (in the shell and as an EAS variable). Each EAS environment (`development`, `production`) needs the `EXPO_PUBLIC_*` variables from `apps/native/.env.schema` (production also needs `EXPO_PUBLIC_HOT_UPDATER_API_KEY`), plus the Sentry build variables.
+
+```sh
+cd apps/native
+eas build --profile development --platform ios
+eas build --profile production --platform all
+eas submit --profile production --platform ios     # Android goes to the internal track as a draft
+```
+
+### Over-the-air updates (Hot Updater)
+
+Release builds check the server's `/hot-updater` routes at launch, download a matching update in the background, and apply it on the next launch (a release marked force-update reloads at once). Updates match by app version (`updateStrategy: "appVersion"`), so a change to native code needs a new store build instead.
+
+Deploy from `apps/native`, with `EXPO_PUBLIC_SERVER_URL` and the `HOT_UPDATER_*` bucket variables and admin token set (in `apps/native/.env` or the shell):
+
+```sh
+bun run ota:deploy -p ios -c production -t 1.0.x
+bun run ota:deploy -p android -c production -t 1.0.x
+```
+
+`hot-updater bundle list`, `hot-updater console` and the other CLI commands use the same configuration (`apps/native/hot-updater.config.ts`). After upgrading Hot Updater, run `bun run --cwd apps/server ota:schema`, then `bun run db:generate`, and keep the two sides' versions equal.
+
 ## License
 
 Code: [MIT](LICENSE). Bundled content keeps its own licences.

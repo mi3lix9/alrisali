@@ -45,3 +45,5 @@ uniwind-types.d.ts
 
 !.env.schema
 /src/env.ts
+# hot-updater
+.hot-updater/output

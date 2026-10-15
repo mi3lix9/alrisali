@@ -191,3 +191,66 @@ describe("reader navigation", () => {
     ).toStrictEqual({ ...state, pageNav: "vertical" });
   });
 });
+
+describe("Last-Read Ayah", () => {
+  it("reopens at the saved Last-Read Ayah when no target is given, in either mode", () => {
+    expect(
+      openReader({ settings: pageMode, lastReadAyah: "18:10" })
+    ).toStrictEqual({
+      mode: "page",
+      pageNav: "horizontal",
+      currentPage: findAyah("18:10")?.page,
+      currentSurah: 18,
+      lastReadAyah: "18:10",
+    });
+    expect(
+      openReader({ settings: surahMode, lastReadAyah: "18:10" })
+    ).toMatchObject({ mode: "surah", currentSurah: 18, lastReadAyah: "18:10" });
+  });
+
+  it("opens at the start with no Last-Read Ayah, and an explicit target wins over it", () => {
+    expect(openReader({ settings: pageMode })).toMatchObject({
+      currentPage: 1,
+      lastReadAyah: null,
+    });
+    expect(
+      openReader({ settings: pageMode, page: 100, lastReadAyah: "18:10" })
+    ).toMatchObject({ currentPage: 100, lastReadAyah: "18:10" });
+  });
+
+  it("sets the Last-Read Ayah explicitly without moving the reader", () => {
+    const state = openReader({ settings: pageMode, page: 42 });
+    expect(run(state, { type: "set-last-read", ayah: "2:257" })).toStrictEqual({
+      ...state,
+      lastReadAyah: "2:257",
+    });
+    expect(run(state, { type: "set-last-read", ayah: "2:999" })).toBe(state);
+  });
+
+  it("lets paging override an explicit set", () => {
+    const state = run(
+      openReader({ settings: pageMode, page: 42 }),
+      { type: "set-last-read", ayah: "2:257" },
+      { type: "next-page" }
+    );
+    expect(state.lastReadAyah).toBe(ayatOnPage(43)[0]?.key);
+  });
+
+  it("keeps an explicitly set ayah across a mode switch in both directions", () => {
+    const set = run(openReader({ settings: pageMode, page: 42 }), {
+      type: "set-last-read",
+      ayah: "2:255",
+    });
+    const flowing = run(set, { type: "switch-mode", mode: "surah" });
+    expect(flowing).toMatchObject({
+      mode: "surah",
+      currentSurah: 2,
+      lastReadAyah: "2:255",
+    });
+    expect(run(flowing, { type: "switch-mode", mode: "page" })).toMatchObject({
+      mode: "page",
+      currentPage: 42,
+      lastReadAyah: "2:255",
+    });
+  });
+});
