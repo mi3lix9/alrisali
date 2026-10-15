@@ -1,5 +1,5 @@
 ---
-status: proposed. The local iOS spike passed (docs/rebuild/spikes/turso-sync.md), and so does the production code path against a local sync server (Evidence below). Still pending a Turso Cloud run (with a read-only token check) and Android.
+status: accepted. The local iOS spike passed (docs/rebuild/spikes/turso-sync.md), and the production code path passes against a local sync server and against Turso Cloud, read-only content token included (Evidence below). Android is still unverified.
 ---
 
 # Each Believer has their own Turso database, synced with one on the device
@@ -31,8 +31,15 @@ Local, 2026-10-15 (ticket 11), against `tursodb --sync-server` 0.8.0 (npm `@turs
   - The same row edited on two devices ends as the last push on both devices and on the server.
 - `apps/server/src/router.test.ts`, all pass: `account.ensureUserDatabase` creates one database per Believer however often (and concurrently) it is called, on the local server and through the Platform API client (`@tursodatabase/api` 2.0.5, against an in-process stand-in that answers 409 to a second create). `account.userDatabaseToken` mints tokens only for the caller's own database (60-minute, full-access).
 
-Not yet verified (pending env: `TURSO_ORG`, `TURSO_API_TOKEN`, `TURSO_GROUP`):
+Turso Cloud, 2026-10-16 (org `mi3lix9`, group `alrisali`, region aws-eu-west-1), with the same Node `@tursodatabase/sync` 0.8.3 binding and the production server paths (`createTursoHost` on `@tursodatabase/api` 2.0.5, the oRPC procedures, the content database): `apps/server/src/turso-cloud.live.test.ts` (`bun run --cwd apps/server test:turso-cloud`; skipped unless `TURSO_ORG`, `TURSO_API_TOKEN`, `TURSO_GROUP` are set). All 6 pass; every database it creates is destroyed afterwards and checked gone (404).
 
-- The same flow against a database created on Turso Cloud through the Platform API, with Cloud-minted tokens. Whether Cloud needs the database created on the new engine (`use_tursodb`, undocumented in the public API reference) for deferred bootstrap is unknown.
-- A Turso Cloud read-only token: bootstrap and pull allowed, push refused.
+1. `account.ensureUserDatabase`, called twice concurrently and once more, plus a direct second `host.ensure` (Cloud answers 409, the host returns the existing database), gives one `b-<hash>` database in group `alrisali`, readable over `/v2/pipeline`.
+2. A Guest database (URL null, `bootstrapIfEmpty: false`), migrated, with rows in `believer_settings`, `favorites` and `mood_check_ins`: paused, no token requested, the cloud database has no app table. After sign-in, one `sync()` puts every app table (the device's table list equals Cloud's), the rows and `schema_version` into the fresh, empty Cloud database. The database was created with the Platform API defaults: no `use_tursodb` (new engine) flag is needed for deferred bootstrap or push. That flag is in fact refused for this org (`tursodb is not enabled for organization`), and the creation parameters stay as they are.
+3. A second device, opened as a Guest and migrated, gets `pulledChanges: true` and the Believer's settings on its first signed-in sync. The same row edited on both devices ends as the last push on both devices and on Cloud.
+4. An Admin's `hijriAdjustment.set` writes the content database on Cloud over Hrana. A device replica (`openContentReplica`) pulls it with the `contentReplica` read-only token, and pulls a later change. With that token, Cloud refuses both a sync-engine push of a local change (`Operation was blocked: SQL write operations are forbidden (current session doesn't have write permission)`, code `BLOCKED`) and a direct `/v2/pipeline` write (the same message). The Admin's value is unchanged afterwards.
+5. A one-minute Cloud token (the same `createToken` call the host makes): once expired, sending it again fails (`status=401 … invalid JWT token: token expired`). The async `authToken` function then fetches a new token, and the next sync pushes the change made in between.
+6. `account.deleteAccount` destroys the Believer's Cloud database: the Platform API answers 404 for it, and the device's next sync fails (`status=404`, namespace does not exist).
+
+Not yet verified:
+
 - Android: not built or run (disk constraints).
