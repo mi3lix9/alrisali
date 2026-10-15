@@ -28,7 +28,10 @@ export {
   bowSensitivitySchema,
   DEFAULT_BOW_SENSITIVITY,
   DEFAULT_PRAYER_ASSISTANT_SETTINGS,
+  DEFAULT_RECOGNITION_MODE,
   paceChoice,
   prayerAssistantSettingsSchema,
+  RECOGNITION_MODES,
+  recognitionModeSchema,
 } from "./settings";
-export type { PrayerAssistantSettings } from "./settings";
+export type { PrayerAssistantSettings, RecognitionMode } from "./settings";

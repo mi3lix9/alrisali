@@ -16,5 +16,7 @@ export const prayerAssistantSettings = sqliteTable(
     tashahhudMs: integer("tashahhud_ms"),
     /** 0 (deep bow) to 100 (shallow bow counts as Ruku). */
     bowSensitivity: integer("bow_sensitivity"),
+    /** tap | camera | head-height | sound | mat. */
+    recognitionMode: text("recognition_mode"),
   }
 );

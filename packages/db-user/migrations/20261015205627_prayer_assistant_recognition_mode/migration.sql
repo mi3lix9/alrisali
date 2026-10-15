@@ -1,0 +1,1 @@
+ALTER TABLE `prayer_assistant_settings` ADD `recognition_mode` text;
