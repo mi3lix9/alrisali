@@ -50,6 +50,7 @@
     "db:generate": "turbo run db:generate -F @alrisali/db-server --",
     "db:migrate": "turbo run db:migrate -F @alrisali/db-server --",
     "db:local": "turbo run db:local -F @alrisali/db-server --",
+    "db:sync-server": "bun run --filter @alrisali/db-user sync-server",
     "env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db-server/",
     "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./apps/native/ && varlock codegen --path ./packages/db-server/",
     "auth:generate": "cd apps/server && bun run auth:generate",

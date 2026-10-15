@@ -27,7 +27,29 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015192436_open_tasbih",
+    tag: "20261015192400_hijri_adjustment",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `hijri_adjustment` integer DEFAULT 0 NOT NULL;",
+    ],
+  },
+  {
+    tag: "20261015192630_prayer_times_settings",
+    statements: [
+      "CREATE TABLE `prayer_times_settings` (\n\t`id` text PRIMARY KEY,\n\t`hidden_prayer_times` text\n);",
+      "ALTER TABLE `believer_settings` ADD `location_follows_device` integer DEFAULT true NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `imsak_minutes` integer DEFAULT 10 NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `time_format` text;",
+    ],
+  },
+  {
+    tag: "20261015192812_mood_check_ins",
+    statements: [
+      "CREATE TABLE `mood_check_ins` (\n\t`id` text PRIMARY KEY,\n\t`mood` text NOT NULL,\n\t`remedy_id` text NOT NULL,\n\t`checked_in_at` integer NOT NULL\n);",
+      "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",
+    ],
+  },
+  {
+    tag: "20261015193221_open_tasbih",
     statements: [
       "ALTER TABLE `tasbih` ADD `target` integer;",
       "ALTER TABLE `tasbih` ADD `notes` text;",

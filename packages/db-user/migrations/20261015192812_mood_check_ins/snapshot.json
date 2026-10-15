@@ -1,11 +1,19 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "5e0c6b73-9580-49ed-81c7-504ce28b9b17",
-  "prevIds": ["844b0a5c-2e8e-4998-8f2c-09e947e8df4b"],
+  "id": "0340ea4d-f784-4250-8ace-f8c0fa8c532f",
+  "prevIds": ["405da86f-6c46-4b33-bfe7-29f11932a8be"],
   "ddl": [
     {
       "name": "favorites",
+      "entityType": "tables"
+    },
+    {
+      "name": "mood_check_ins",
+      "entityType": "tables"
+    },
+    {
+      "name": "prayer_times_settings",
       "entityType": "tables"
     },
     {
@@ -63,6 +71,66 @@
       "name": "favorited_at",
       "entityType": "columns",
       "table": "favorites"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "mood",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "remedy_id",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "checked_in_at",
+      "entityType": "columns",
+      "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hidden_prayer_times",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
     },
     {
       "type": "text",
@@ -151,6 +219,46 @@
       "default": null,
       "generated": null,
       "name": "location_name",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "hijri_adjustment",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "true",
+      "generated": null,
+      "name": "location_follows_device",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "10",
+      "generated": null,
+      "name": "imsak_minutes",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "time_format",
       "entityType": "columns",
       "table": "believer_settings"
     },
@@ -245,30 +353,24 @@
       "table": "tasbih"
     },
     {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "target",
-      "entityType": "columns",
-      "table": "tasbih"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "notes",
-      "entityType": "columns",
-      "table": "tasbih"
-    },
-    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "favorites_pk",
       "table": "favorites",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "mood_check_ins_pk",
+      "table": "mood_check_ins",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "prayer_times_settings_pk",
+      "table": "prayer_times_settings",
       "entityType": "pks"
     },
     {
@@ -312,6 +414,20 @@
       "name": "favorites_favorited_at",
       "entityType": "indexes",
       "table": "favorites"
+    },
+    {
+      "columns": [
+        {
+          "value": "checked_in_at",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "mood_check_ins_checked_in_at_idx",
+      "entityType": "indexes",
+      "table": "mood_check_ins"
     },
     {
       "columns": [

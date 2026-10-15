@@ -2,6 +2,8 @@ import { router, Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
+import { HijriTodayCard } from "@/features/calendar";
+import { NextPrayerCard } from "@/features/prayer-times";
 import { Screen } from "@/shared/ui/screen";
 
 // SF Symbols exist only on iOS; elsewhere the button shows its label.
@@ -29,7 +31,10 @@ const HomeRoute = () => {
           {t("settings")}
         </Stack.Toolbar.Button>
       </Stack.Toolbar>
-      <Screen />
+      <Screen>
+        <NextPrayerCard />
+        <HijriTodayCard />
+      </Screen>
     </>
   );
 };

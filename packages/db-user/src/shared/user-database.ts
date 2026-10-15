@@ -14,6 +14,8 @@ export interface ConnectOptions {
   path: string;
   /** Null while the Believer is a Guest: sync stays paused. */
   url: () => string | null;
+  /** A short-lived token for the Believer's cloud database, per request. */
+  authToken?: () => Promise<string>;
   /** A Guest database starts empty; it never downloads on open. */
   bootstrapIfEmpty: false;
   clientName: string;
@@ -24,6 +26,11 @@ export interface OpenUserDatabaseOptions {
   path: string;
   /** The Believer's cloud database, or null for a Guest. */
   remoteUrl: () => string | null;
+  /**
+   * Fetches a token scoped to the Believer's cloud database. The sync engine
+   * asks for one on every request, so it should cache until expiry.
+   */
+  authToken?: () => Promise<string>;
   /** Opens the Turso sync binding (React Native on the device, Node in tests). */
   connect: (options: ConnectOptions) => Promise<SyncedConnection>;
   /** Defaults to the migrations bundled from packages/db-user/migrations. */
@@ -72,12 +79,14 @@ const toDrizzle = (connection: SyncedConnection): UserDb =>
 export const openUserDatabase = async ({
   path,
   remoteUrl,
+  authToken,
   connect,
   migrations = bundledMigrations,
 }: OpenUserDatabaseOptions): Promise<UserDatabase> => {
   const connection = await connect({
     path,
     url: remoteUrl,
+    ...(authToken ? { authToken } : {}),
     bootstrapIfEmpty: false,
     clientName: CLIENT_NAME,
   });
