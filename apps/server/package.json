@@ -12,7 +12,8 @@
     "auth:generate": "varlock run -- bun x auth@latest generate --config src/services.ts --output ../../packages/db-server/src/schema/auth.ts --yes",
     "ota:schema": "bun src/scripts/ota-schema.ts",
     "ota:prepare": "bun src/scripts/ota-prepare.ts",
-    "deploy:migrate": "bun run --cwd ../../packages/db-server db:migrate:deploy && bun run ota:prepare",
+    "files:prepare": "bun src/scripts/files-prepare.ts",
+    "deploy:migrate": "bun run --cwd ../../packages/db-server db:migrate:deploy && bun run ota:prepare && bun run files:prepare",
     "admin:grant": "varlock run -- bun src/scripts/grant-admin.ts"
   },
   "dependencies": {
@@ -20,6 +21,9 @@
     "@alrisali/auth": "workspace:*",
     "@alrisali/db-content": "workspace:*",
     "@alrisali/db-server": "workspace:*",
+    "@alrisali/domain": "workspace:*",
+    "@aws-sdk/client-s3": "3.1066.0",
+    "@aws-sdk/s3-request-presigner": "3.1066.0",
     "@hot-updater/aws": "1.0.7",
     "@hot-updater/plugin-core": "1.0.7",
     "@hot-updater/server": "1.0.7",

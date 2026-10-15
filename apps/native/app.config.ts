@@ -20,6 +20,15 @@ const googleIosUrlScheme = (): string => {
   return `com.googleusercontent.apps.${clientId.replace(GOOGLE_CLIENT_ID_SUFFIX, "")}`;
 };
 
+/**
+ * Android draws Gatherings' maps with Google Maps, which needs an API key at
+ * build time. Without one the build still succeeds; Android maps stay blank.
+ */
+const googleMapsAndroid = (): { googleMaps?: { apiKey: string } } => {
+  const apiKey = process.env.GOOGLE_MAPS_ANDROID_API_KEY;
+  return apiKey ? { googleMaps: { apiKey } } : {};
+};
+
 const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: APP_NAME,
@@ -46,6 +55,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     // Reminders fire at the Prayer Time itself; without it Android may
     // deliver them minutes late (features/reminders asks for it).
     permissions: ["android.permission.SCHEDULE_EXACT_ALARM"],
+    config: googleMapsAndroid(),
   },
   web: {
     bundler: "metro",
@@ -87,6 +97,9 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
       "@react-native-google-signin/google-signin",
       { iosUrlScheme: googleIosUrlScheme() },
     ],
+    // Gatherings' venue maps: Apple Maps on iOS, Google Maps on Android. No
+    // location permission: the maps show venues, never the Believer.
+    "expo-maps",
     ["@hot-updater/expo", { channel: OTA_CHANNEL }],
     [
       "@sentry/react-native/expo",

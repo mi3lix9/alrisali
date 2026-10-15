@@ -88,7 +88,8 @@ const open = async (): Promise<ContentReplica> => {
   }
 };
 
-const getContentReplica = (): Promise<ContentReplica> => {
+/** The replica content features read from, opened once per launch. */
+export const getContentReplica = (): Promise<ContentReplica> => {
   opening ??= open();
   return opening;
 };

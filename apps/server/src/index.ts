@@ -8,9 +8,17 @@ import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { appRouter } from "./router";
-import { auth, content, db, recitation, userDatabases } from "./services";
+import {
+  auth,
+  content,
+  db,
+  files,
+  recitation,
+  userDatabases,
+} from "./services";
 import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
 import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
+import { mountFiles } from "./shared/lib/uploads";
 
 initMonitoring({ dsn: ENV.SENTRY_DSN, environment: ENV.NODE_ENV });
 
@@ -46,6 +54,10 @@ if (otaConfig) {
   mountOta(app, createOtaServer(otaConfig, db), otaConfig.adminToken);
 }
 
+// Published files (Speaker photos, Slides, Library Assets) from the private
+// files bucket.
+mountFiles(app, files);
+
 const apiHandler = createApiHandler(appRouter);
 const rpcHandler = createRpcHandler(appRouter);
 
@@ -56,6 +68,7 @@ app.use("/*", async (c, next) => {
     userDatabases,
     content,
     recitation,
+    files,
     headers: c.req.raw.headers,
   });
 
