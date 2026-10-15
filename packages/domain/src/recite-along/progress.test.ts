@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { initialProgress, isAdvancing, PACE_MS, reciteStep } from "./progress";
+import { createReciteMatcher } from "./matcher";
+import {
+  initialProgress,
+  isAdvancing,
+  isListening,
+  PACE_MS,
+  reciteStep,
+  usesVoice,
+  withoutVoice,
+} from "./progress";
 import type { ReciteEvent, ReciteProgress } from "./progress";
 
 const run = (progress: ReciteProgress, events: ReciteEvent[]) => {
@@ -96,5 +105,85 @@ describe("restarting and switching mode", () => {
       ...initialProgress("hold", 5),
       count: 1,
     });
+  });
+});
+
+describe("Recite-Along by voice", () => {
+  const start = initialProgress("voice", 4);
+
+  it("moves only with what is heard, never on its own or by touch", () => {
+    const touched = run(start, [tick, { type: "press" }, tick]);
+
+    expect(isAdvancing(start)).toBeFalsy();
+    expect(touched.count).toBe(0);
+    expect(run(touched, [{ type: "heard", count: 2 }]).count).toBe(2);
+  });
+
+  it("never moves backwards on a shorter transcript, and stops at the end", () => {
+    const heard = run(start, [
+      { type: "heard", count: 3 },
+      { type: "heard", count: 1 },
+    ]);
+
+    expect(heard.count).toBe(3);
+    expect(run(heard, [{ type: "heard", count: 9 }]).count).toBe(4);
+  });
+
+  it("ignores speech in the touch-only methods", () => {
+    expect(
+      run(initialProgress("hold", 4), [{ type: "heard", count: 2 }]).count
+    ).toBe(0);
+    expect(
+      run(initialProgress("auto", 4), [{ type: "heard", count: 2 }]).count
+    ).toBe(0);
+  });
+
+  it("pausing stops listening", () => {
+    expect(isListening(start)).toBeTruthy();
+    expect(isListening(run(start, [{ type: "togglePause" }]))).toBeFalsy();
+    expect(isListening(run(start, [{ type: "heard", count: 4 }]))).toBeFalsy();
+    expect(isListening(initialProgress("hold", 4))).toBeFalsy();
+  });
+});
+
+describe("Recite-Along by voice and touch together", () => {
+  const start = initialProgress("hybrid", 5);
+
+  it("advances by holding as well as by voice, sharing one place", () => {
+    const words = ["بسم", "الله", "الرحمن", "الرحيم", "الحمد"];
+    const matcher = createReciteMatcher(words);
+
+    const held = run(start, [{ type: "press" }, tick, { type: "release" }]);
+    matcher.seek(held.count);
+    const heard = run(held, [
+      { type: "heard", count: matcher.feed("الرحمن الرحيم", false) },
+    ]);
+
+    expect(held.count).toBe(2);
+    expect(isListening(held)).toBeTruthy();
+    expect(heard.count).toBe(4);
+  });
+
+  it("restart sends voice back to the first word too", () => {
+    const words = ["بسم", "الله", "الرحمن"];
+    const matcher = createReciteMatcher(words);
+    const heard = run(start, [
+      { type: "heard", count: matcher.feed("بسم الله", true) },
+    ]);
+    const restarted = run(heard, [{ type: "restart" }]);
+    matcher.seek(restarted.count);
+
+    expect(restarted.count).toBe(0);
+    expect(matcher.feed("بسم", false)).toBe(1);
+  });
+});
+
+describe("falling back from voice", () => {
+  it("uses holding instead of the voice methods", () => {
+    expect(withoutVoice("voice")).toBe("hold");
+    expect(withoutVoice("hybrid")).toBe("hold");
+    expect(withoutVoice("auto")).toBe("auto");
+    expect(usesVoice("hybrid")).toBeTruthy();
+    expect(usesVoice("hold")).toBeFalsy();
   });
 });

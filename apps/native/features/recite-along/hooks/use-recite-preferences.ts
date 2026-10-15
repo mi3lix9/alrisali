@@ -4,10 +4,12 @@ import * as SecureStore from "expo-secure-store";
 import { z } from "zod";
 import { create } from "zustand";
 
+import { deviceEntry } from "@/shared/lib/device-entries";
+
 // The Believer's Recite-Along method and pace, kept on the device: display
 // settings, not records.
 
-const STORAGE_KEY = "alrisali.recite-along";
+const STORAGE_KEY = deviceEntry("alrisali.recite-along");
 
 interface RecitePreferences {
   mode: ReciteMode;

@@ -94,6 +94,8 @@ export const en: Catalog<typeof ar> = {
         "Recitation audio and the Verse of the Day are streamed from Quran.Foundation. Quran data provided by Quran.Foundation.",
       "adhan-recording":
         "The Adhan voice of Prayer Time Reminders: a recording by Jarih from Wikimedia Commons, under CC BY-SA 3.0, converted to WAV.",
+      tanzil:
+        "Where each hizb quarter begins, from Tanzil's Quran metadata, corrected to the quarter signs in the KFGQPC text.",
       "panel-ui": "The app's interface components.",
       "open-source":
         "Built on Expo, React Native and other open-source libraries, each under its own licence. Al-Risali's own code is MIT-licensed.",

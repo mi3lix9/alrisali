@@ -3,7 +3,7 @@ import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 /**
  * The Believer's Tasbih counters. Tasbih al-Zahra is the row with the fixed
  * id `tasbih-al-zahra` and kind `tasbih-al-zahra`; Open Tasbih rows (kind
- * `open`) carry a name.
+ * `open`) carry a name, and optionally a target and notes.
  */
 export const tasbih = sqliteTable("tasbih", {
   id: text("id").primaryKey(),
@@ -13,6 +13,10 @@ export const tasbih = sqliteTable("tasbih", {
   count: integer("count").notNull().default(0),
   /** Tasbih al-Zahra's current step index. */
   step: integer("step").notNull().default(0),
+  /** An Open Tasbih's target, if it has one. */
+  target: integer("target"),
+  /** An Open Tasbih's notes, if it has any. */
+  notes: text("notes"),
 });
 
 /** One completed round of a Tasbih. */

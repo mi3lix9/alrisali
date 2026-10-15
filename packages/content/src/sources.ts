@@ -41,6 +41,15 @@ export const CONTENT_SOURCES = [
     },
   },
   {
+    id: "tanzil",
+    name: "Tanzil Quran Metadata",
+    url: "https://tanzil.net/docs/quran_metadata",
+    licence: {
+      name: "CC BY 3.0",
+      url: "https://creativecommons.org/licenses/by/3.0/",
+    },
+  },
+  {
     id: "adhan-recording",
     name: "“Adhan wiki.oga” by Jarih, Wikimedia Commons",
     url: "https://commons.wikimedia.org/wiki/File:Adhan_wiki.oga",

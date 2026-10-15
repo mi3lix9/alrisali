@@ -2,6 +2,7 @@ import "../i18n";
 import { LANGUAGES } from "@alrisali/i18n";
 import { reloadAppAsync } from "expo";
 import { Button, Card, RadioGroup } from "panelui-native";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -20,7 +21,12 @@ import { RemindersCard } from "../components/reminders-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
-export const SettingsScreen = () => {
+interface SettingsScreenProps {
+  /** Other features' settings cards, composed by the route. */
+  featureCards?: ReactNode;
+}
+
+export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
 
@@ -90,6 +96,7 @@ export const SettingsScreen = () => {
       <RemindersCard />
       <MessageStyleCard />
       <TextSizeCard />
+      {featureCards}
       <TabsCard />
       <AboutCard />
     </Screen>

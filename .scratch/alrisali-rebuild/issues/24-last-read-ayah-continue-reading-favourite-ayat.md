@@ -6,8 +6,8 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings), 23 (Quran reader: Page Mode, Surah Mode, full-screen controls)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification; pending env: TURSO_* for cloud sync
 
-- [ ] Reader model tests: last-read transitions incl. mode switch
-- [ ] Relaunch reopens at the Last-Read Ayah
-- [ ] Favourite ayat persist and sync
+- [x] Reader model tests: last-read transitions incl. mode switch
+- [x] Relaunch reopens at the Last-Read Ayah (saved in `quran_last_read`, `openReader` falls back to it; on-device check pending simulator verification)
+- [x] Favourite ayat persist and sync (checked against local `tursodb --sync-server`; Turso Cloud pending env)

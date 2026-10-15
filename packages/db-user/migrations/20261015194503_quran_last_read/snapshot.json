@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "3b82b942-8e66-4a6a-8233-2d67e6c1c1b9",
-  "prevIds": ["0340ea4d-f784-4250-8ace-f8c0fa8c532f"],
+  "id": "2d318ab8-5b30-47f1-8d89-98291935d039",
+  "prevIds": ["e72bbcca-0595-439e-817c-1b5d1a022ff8"],
   "ddl": [
     {
       "name": "favorites",
@@ -17,11 +17,15 @@
       "entityType": "tables"
     },
     {
-      "name": "reading_completions",
+      "name": "quran_last_read",
       "entityType": "tables"
     },
     {
-      "name": "reminder_settings",
+      "name": "quran_reader_settings",
+      "entityType": "tables"
+    },
+    {
+      "name": "reading_completions",
       "entityType": "tables"
     },
     {
@@ -144,6 +148,76 @@
       "generated": null,
       "name": "id",
       "entityType": "columns",
+      "table": "quran_last_read"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "ayah",
+      "entityType": "columns",
+      "table": "quran_last_read"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "set_at",
+      "entityType": "columns",
+      "table": "quran_last_read"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "quran_reader_settings"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'page'",
+      "generated": null,
+      "name": "mode",
+      "entityType": "columns",
+      "table": "quran_reader_settings"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'horizontal'",
+      "generated": null,
+      "name": "page_nav",
+      "entityType": "columns",
+      "table": "quran_reader_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "26",
+      "generated": null,
+      "name": "surah_font_size",
+      "entityType": "columns",
+      "table": "quran_reader_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
       "table": "reading_completions"
     },
     {
@@ -175,66 +249,6 @@
       "name": "completed_at",
       "entityType": "columns",
       "table": "reading_completions"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "id",
-      "entityType": "columns",
-      "table": "reminder_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "salah_rules",
-      "entityType": "columns",
-      "table": "reminder_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "imsak_rule",
-      "entityType": "columns",
-      "table": "reminder_settings"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "quiet_hours_enabled",
-      "entityType": "columns",
-      "table": "reminder_settings"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "quiet_hours_start",
-      "entityType": "columns",
-      "table": "reminder_settings"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "quiet_hours_end",
-      "entityType": "columns",
-      "table": "reminder_settings"
     },
     {
       "type": "text",
@@ -332,16 +346,6 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "message_style",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "dhikr_sessions"
@@ -427,6 +431,26 @@
       "table": "tasbih"
     },
     {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "target",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "notes",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "favorites_pk",
@@ -450,15 +474,22 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
-      "name": "reading_completions_pk",
-      "table": "reading_completions",
+      "name": "quran_last_read_pk",
+      "table": "quran_last_read",
       "entityType": "pks"
     },
     {
       "columns": ["id"],
       "nameExplicit": false,
-      "name": "reminder_settings_pk",
-      "table": "reminder_settings",
+      "name": "quran_reader_settings_pk",
+      "table": "quran_reader_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "reading_completions_pk",
+      "table": "reading_completions",
       "entityType": "pks"
     },
     {

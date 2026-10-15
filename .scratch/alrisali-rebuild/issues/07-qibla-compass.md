@@ -6,8 +6,8 @@
 
 **Blocked by:** 04 (Prayer Times timetable and next-Salah countdown)
 
-**Status:** ready-for-agent
+**Status:** done — pending device verification
 
-- [ ] Domain tests: bearing/distance for known cities
-- [ ] Compass uses device heading with permission handling
-- [ ] Facing-Qibla state shown within a tolerance
+- [x] Domain tests: bearing/distance for known cities
+- [x] Compass uses device heading with permission handling (live heading needs a physical device: pending device verification)
+- [x] Facing-Qibla state shown within a tolerance

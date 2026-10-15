@@ -2,11 +2,13 @@ import * as SecureStore from "expo-secure-store";
 import { z } from "zod";
 import { create } from "zustand";
 
+import { deviceEntry } from "@/shared/lib/device-entries";
+
 // How the Supplication reader shows a text, kept on the device like the
 // shell's own preferences: they are display settings, not the Believer's
 // records.
 
-const STORAGE_KEY = "alrisali.reader";
+const STORAGE_KEY = deviceEntry("alrisali.reader");
 
 export const READER_LANGUAGES = ["ar", "en", "both"] as const;
 
