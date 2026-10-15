@@ -1,1 +1,2 @@
-/* oxlint-disable unicorn/no-empty-file -- placeholder entry point until the package has code */
+export { CONTENT_SOURCES } from "./sources";
+export type { ContentSource, ContentSourceId } from "./sources";
