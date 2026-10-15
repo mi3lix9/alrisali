@@ -1,0 +1,165 @@
+import { createHash } from "node:crypto";
+
+import { describe, expect, it } from "vitest";
+
+import {
+  AYAT,
+  getQuranPage,
+  KFGQPC_NOTICE,
+  PAGE_COUNT,
+  QURAN_SOURCE,
+  SURAHS,
+} from ".";
+import type { QuranLine } from ".";
+
+/** Ayat per surah in the Kufan count that Hafs follows (6236 in all). */
+const AYAH_COUNTS = [
+  7, 286, 200, 176, 120, 165, 206, 75, 129, 109, 123, 111, 43, 52, 99, 128, 111,
+  110, 98, 135, 112, 78, 118, 64, 77, 227, 93, 88, 69, 60, 34, 30, 73, 54, 45,
+  83, 182, 88, 75, 85, 54, 53, 89, 59, 37, 35, 38, 29, 18, 45, 60, 49, 62, 55,
+  78, 96, 29, 22, 24, 13, 14, 11, 11, 18, 12, 12, 30, 52, 52, 44, 28, 28, 20,
+  56, 40, 31, 50, 40, 46, 42, 29, 19, 36, 25, 22, 17, 19, 26, 30, 20, 15, 21,
+  11, 8, 8, 19, 5, 8, 8, 11, 11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6,
+];
+const ARABIC_INDIC = "٠١٢٣٤٥٦٧٨٩";
+/** The opening pages are centred and shorter, as in the printed mushaf. */
+const OPENING_PAGES = new Set([1, 2]);
+
+const pages = Array.from({ length: PAGE_COUNT }, (_, index) =>
+  getQuranPage(index + 1)
+);
+
+interface Placed {
+  page: number;
+  line: number;
+  item: QuranLine;
+}
+const placedLines: Placed[] = pages.flatMap((page) =>
+  page.lines.map((item, index) => ({
+    page: page.number,
+    line: index + 1,
+    item,
+  }))
+);
+const placedWords = placedLines.flatMap(({ page, line, item }) =>
+  item.kind === "ayah" ? item.words.map((word) => ({ page, line, word })) : []
+);
+
+describe("Quran dataset integrity", () => {
+  it("has 604 pages of 15 lines, the two opening pages of 8", () => {
+    expect(pages).toHaveLength(604);
+    const shortPages = pages.filter((page) => page.lines.length !== 15);
+    expect(shortPages.map((page) => page.number)).toStrictEqual([
+      ...OPENING_PAGES,
+    ]);
+    expect(shortPages.map((page) => page.lines.length)).toStrictEqual([8, 8]);
+    expect(() => getQuranPage(0)).toThrow(RangeError);
+    expect(() => getQuranPage(605)).toThrow(RangeError);
+  });
+
+  it("places all 6236 ayat exactly once, in order, without gaps", () => {
+    const expected = AYAH_COUNTS.flatMap((count, index) =>
+      Array.from({ length: count }, (_, ayah) => `${index + 1}:${ayah + 1}`)
+    );
+    expect(expected).toHaveLength(6236);
+    expect(AYAT.map((ayah) => ayah.key)).toStrictEqual(expected);
+
+    // Consecutive runs of words, one run per ayah: no ayah split or repeated.
+    const runs: string[] = [];
+    for (const { word } of placedWords) {
+      const key = `${word.surah}:${word.ayah}`;
+      if (runs.at(-1) !== key) {
+        runs.push(key);
+      }
+    }
+    expect(runs).toStrictEqual(expected);
+  });
+
+  it("keeps every ayah within the lines KFGQPC gives for it", () => {
+    const placements = Map.groupBy(
+      placedWords,
+      ({ word }) => `${word.surah}:${word.ayah}`
+    );
+    const outside = AYAT.filter((ayah) => {
+      const placed = placements.get(ayah.key) ?? [];
+      return (
+        placed[0]?.line !== ayah.lineStart ||
+        placed.at(-1)?.line !== ayah.lineEnd ||
+        placed.some(
+          ({ page, line }) =>
+            page !== ayah.page || line < ayah.lineStart || line > ayah.lineEnd
+        )
+      );
+    });
+    expect(outside).toStrictEqual([]);
+  });
+
+  it("rebuilds the KFGQPC text verbatim from the words", () => {
+    const byAyah = Map.groupBy(
+      placedWords,
+      ({ word }) => `${word.surah}:${word.ayah}`
+    );
+    const rebuilt = AYAT.map((ayah) =>
+      (byAyah.get(ayah.key) ?? []).map(({ word }) => word.text).join(" ")
+    );
+    expect(rebuilt).toStrictEqual(AYAT.map((ayah) => ayah.text));
+    const digest = createHash("sha256")
+      .update(rebuilt.join("\n"))
+      .digest("hex");
+    expect(digest).toBe(QURAN_SOURCE.textSha256);
+  });
+
+  it("ends every ayah with a rosette carrying its number", () => {
+    const ends = placedWords.filter(({ word }) => word.isAyahEnd);
+    expect(ends).toHaveLength(6236);
+    for (const { word } of ends) {
+      const number = [...String(word.ayah)]
+        .map((digit) => ARABIC_INDIC[Number(digit)])
+        .join("");
+      expect(word.text).toBe(`۝${number}`);
+    }
+  });
+
+  it("opens each surah with its header, then a basmala except surahs 1 and 9", () => {
+    const openings = placedLines.flatMap(({ item }, at) => {
+      if (item.kind !== "surah-header") {
+        return [];
+      }
+      // The lines from the header down to the first ayah line.
+      const following = placedLines.slice(at + 1, at + 3);
+      const opening = following.slice(
+        0,
+        following.findIndex((next) => next.item.kind === "ayah") + 1
+      );
+      const firstAyah = opening.at(-1)?.item;
+      return [
+        {
+          surah: item.surah,
+          lines: opening.map((next) => next.item.kind),
+          samePage: opening.every(
+            (next) => next.page === placedLines[at]?.page
+          ),
+          opensWithAyah1:
+            firstAyah?.kind === "ayah" &&
+            firstAyah.words[0]?.surah === item.surah &&
+            firstAyah.words[0]?.ayah === 1,
+        },
+      ];
+    });
+    expect(openings).toStrictEqual(
+      SURAHS.map(({ number }) => ({
+        surah: number,
+        lines: number === 1 || number === 9 ? ["ayah"] : ["basmala", "ayah"],
+        samePage: true,
+        opensWithAyah1: true,
+      }))
+    );
+  });
+
+  it("ships the KFGQPC notice with the font licence", () => {
+    expect(KFGQPC_NOTICE).toContain(
+      "King Fahd Glorious Quran Printing Complex"
+    );
+    expect(KFGQPC_NOTICE).toContain("ELECTRONIC END-USER LICENSE AGREEMENT");
+  });
+});
