@@ -7,7 +7,12 @@ import vitest from "ultracite/oxlint/vitest";
 export default defineConfig({
   ...(core.env ? { env: core.env } : {}),
   extends: [core, react, tanstack, vitest],
-  ...(core.ignorePatterns ? { ignorePatterns: core.ignorePatterns } : {}),
+  // Vendored agent skills (npx skills add) keep upstream bytes.
+  ignorePatterns: [
+    ...(core.ignorePatterns ?? []),
+    ".agents/skills/**",
+    ".claude/skills/**",
+  ],
   rules: {
     // React Navigation and expo-router take render functions as options
     // (tabBarIcon, headerRight, drawerIcon).
