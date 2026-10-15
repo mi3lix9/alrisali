@@ -84,7 +84,12 @@ export const OnboardingScreen = ({
           maxValue={position.of}
           label={t("position", position)}
         />
-        <Text size="2xl" weight="bold" accessibilityRole="header">
+        <Text
+          size="2xl"
+          weight="bold"
+          accessibilityRole="header"
+          testID="onboarding-title"
+        >
           {t(`${step}.title`)}
         </Text>
         <Text muted>{t(`${step}.description`)}</Text>
@@ -100,12 +105,17 @@ export const OnboardingScreen = ({
           <Button
             className="flex-1"
             variant="outline"
+            testID="onboarding-guest"
             onPress={() => advance(step)}
           >
             {t("account.guest")}
           </Button>
         ) : (
-          <Button className="flex-1" onPress={next}>
+          <Button
+            className="flex-1"
+            testID="onboarding-continue"
+            onPress={next}
+          >
             {step === "location" && !believer?.location
               ? t("skip")
               : t("continue")}
