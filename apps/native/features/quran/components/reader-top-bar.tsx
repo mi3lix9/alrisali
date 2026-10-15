@@ -93,7 +93,13 @@ export const ReaderTopBar = ({
           <Text weight="semibold" numberOfLines={1}>
             {i18n.language === "ar" ? entry?.nameAr : entry?.nameEn}
           </Text>
-          <Text size="xs" muted numberOfLines={1}>
+          <Text
+            size="xs"
+            muted
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
             {subtitle}
           </Text>
         </View>
