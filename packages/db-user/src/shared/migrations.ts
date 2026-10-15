@@ -9,4 +9,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190710_quran_reader_settings",
+    statements: [
+      "CREATE TABLE `quran_reader_settings` (\n\t`id` text PRIMARY KEY,\n\t`mode` text DEFAULT 'page' NOT NULL,\n\t`page_nav` text DEFAULT 'horizontal' NOT NULL,\n\t`surah_font_size` integer DEFAULT 26 NOT NULL\n);",
+    ],
+  },
 ];

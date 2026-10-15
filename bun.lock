@@ -240,6 +240,7 @@
       "name": "@alrisali/domain",
       "version": "0.0.0",
       "dependencies": {
+        "@alrisali/content": "workspace:*",
         "temporal-polyfill": "catalog:",
         "zod": "catalog:",
       },
