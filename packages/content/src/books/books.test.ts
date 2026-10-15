@@ -10,6 +10,7 @@ import {
   loadSupplicationText,
   SUPPLICATION_IDS,
 } from ".";
+import { CONTENT_SOURCES } from "../sources";
 import publishedIds from "./data/published-ids.json";
 
 const NOTICES_DIR = path.join(import.meta.dirname, "../../notices");
@@ -76,8 +77,10 @@ describe("Books content integrity", () => {
     );
   });
 
-  it("ships a CC BY 4.0 notice for each Book's source", () => {
+  it("credits and ships a CC BY 4.0 notice for each Book's source", () => {
     const sources = [...new Set(BOOKS.map((book) => book.source))];
+    const credited = new Set<string>(CONTENT_SOURCES.map(({ id }) => id));
+    expect(sources.filter((source) => !credited.has(source))).toStrictEqual([]);
     const notices = sources.map((source) =>
       path.join(NOTICES_DIR, `${source}.md`)
     );
