@@ -1,4 +1,4 @@
-import type { Auth, Session } from "@alrisali/auth";
+import type { Auth, Session, WebSignInProvider } from "@alrisali/auth";
 import type { Database } from "@alrisali/db-server";
 
 import type { AppleRevoker } from "./shared/lib/apple-revoker";
@@ -34,6 +34,8 @@ export interface Context {
   push: PushTransport;
   /** Revokes Sign in with Apple when a Believer deletes their account. */
   apple: AppleRevoker;
+  /** The providers the Admin web can sign in with. */
+  webSignInProviders: readonly WebSignInProvider[];
 }
 
 export interface CreateContextOptions {
@@ -45,6 +47,7 @@ export interface CreateContextOptions {
   files: FileBucket;
   push: PushTransport;
   apple: AppleRevoker;
+  webSignInProviders: readonly WebSignInProvider[];
   headers: Headers;
   clientIp: string | null;
   ipHashKey: string;
@@ -60,6 +63,7 @@ export const createContext = async ({
   files,
   push,
   apple,
+  webSignInProviders,
   headers,
   clientIp,
   ipHashKey,
@@ -73,5 +77,6 @@ export const createContext = async ({
   ipHashKey,
   push,
   apple,
+  webSignInProviders,
   session: await auth.api.getSession({ headers }),
 });

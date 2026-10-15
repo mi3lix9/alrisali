@@ -2,6 +2,14 @@ import { oc } from "@orpc/contract";
 import { z } from "zod";
 
 export const accountContract = {
+  /**
+   * Anyone: the providers the Admin web offers sign-in with, the ones the
+   * server has OAuth credentials for. The same providers as the app's, so an
+   * Admin signs in to the web with the account they use on their phone.
+   */
+  webSignInProviders: oc.output(
+    z.object({ providers: z.array(z.enum(["apple", "google"])) })
+  ),
   /** Answers only a signed-in Believer. */
   privateData: oc.output(
     z.object({

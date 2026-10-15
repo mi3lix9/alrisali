@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
 import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
-import type { Auth } from "@alrisali/auth";
+import type { Auth, WebSignInProvider } from "@alrisali/auth";
 import { createAnnouncementsRepository } from "@alrisali/db-content/announcements";
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
@@ -293,6 +293,7 @@ const ACCESS: Record<
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "account.webSignInProviders": { access: "anonymous" },
   "analytics.track": { access: "anonymous", input: analyticsBatch() },
   "analytics.summary": { access: "admin" },
   "analytics.popularSections": { access: "admin", input: { days: 7 } },
@@ -529,6 +530,7 @@ let appleRevocations: {
   authorizationCode: string | undefined;
 }[];
 let apple: AppleRevoker;
+let webSignInProviders: WebSignInProvider[];
 
 // An in-process stand-in for the Railway files bucket, started by the tests
 // that upload. Presigning needs no bucket, so the rest point nowhere.
@@ -574,6 +576,7 @@ const setUp = async (host?: UserDatabaseHost) => {
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
   push = fakePush();
+  webSignInProviders = [];
   appleRevocations = [];
   apple = {
     revoke: (grant, authorizationCode) => {
@@ -639,6 +642,7 @@ const callAs = async (
     files,
     push,
     apple,
+    webSignInProviders,
     headers,
     clientIp,
     ipHashKey: TEST_ENV.BETTER_AUTH_SECRET,
@@ -755,6 +759,14 @@ describe("auth guards", () => {
     await expect(callAs(again, "account.privateData")).resolves.toMatchObject({
       user: { email: "ali@privaterelay.appleid.com", name: "Ali Hasan" },
     });
+  });
+
+  it("tells the Admin web which providers it can sign in with", async () => {
+    webSignInProviders = ["google"];
+
+    await expect(
+      callAs(new Headers(), "account.webSignInProviders")
+    ).resolves.toStrictEqual({ providers: ["google"] });
   });
 
   it("refuses an ID token the provider did not sign", async () => {

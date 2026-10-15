@@ -1,4 +1,4 @@
-import { createAuth } from "@alrisali/auth";
+import { createAuth, webSignInProviders as providersOf } from "@alrisali/auth";
 import { createDb } from "@alrisali/db-server";
 
 import {
@@ -25,3 +25,4 @@ export const push = createExpoPushTransport({
   accessToken: ENV.EXPO_ACCESS_TOKEN,
 });
 export const apple = createAppleRevokerFromEnv(ENV);
+export const webSignInProviders = providersOf(ENV);
