@@ -274,6 +274,7 @@ const Reader = ({
       {hint.shown ? <ReaderHint /> : null}
       <AyahSheet
         ayah={selectedAyah}
+        reciterId={settings.reciterId}
         // The sheet draws in a portal, so its actions get the context there.
         actions={
           ayahActions
