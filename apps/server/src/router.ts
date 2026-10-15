@@ -1,5 +1,6 @@
 import { accountRouter } from "@/features/account";
 import { announcementsRouter } from "@/features/announcements";
+import { dailyContentRouter } from "@/features/daily-content";
 import { hijriAdjustmentRouter } from "@/features/hijri-adjustment";
 import { quranRouter } from "@/features/quran";
 import { contentReplica } from "@/shared/lib/content-replica";
@@ -11,6 +12,7 @@ export const appRouter = os.router({
   contentReplica,
   account: accountRouter,
   announcements: announcementsRouter,
+  dailyContent: dailyContentRouter,
   hijriAdjustment: hijriAdjustmentRouter,
   quran: quranRouter,
 });

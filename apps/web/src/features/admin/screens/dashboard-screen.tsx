@@ -15,6 +15,11 @@ const SECTIONS = [
     description:
       "Write, schedule and send push notices in Arabic and English, to everyone, active or new Believers.",
   },
+  {
+    to: "/admin/daily-content",
+    title: "Daily Content",
+    description: "Choose the Supplication Home features on each weekday.",
+  },
 ] as const;
 
 export const DashboardScreen = ({ session }: { session: Session }) => (

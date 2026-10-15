@@ -127,6 +127,7 @@
         "@alrisali/config": "workspace:*",
         "@alrisali/db-user": "workspace:*",
         "@types/bun": "catalog:",
+        "temporal-polyfill": "catalog:",
         "tsdown": "^0.23.0",
         "typescript": "^6.0.3",
       },
@@ -136,6 +137,7 @@
       "dependencies": {
         "@alrisali/api": "workspace:*",
         "@alrisali/auth": "workspace:*",
+        "@alrisali/content": "workspace:*",
         "@alrisali/domain": "workspace:*",
         "@alrisali/i18n": "workspace:*",
         "@alrisali/ui": "workspace:*",

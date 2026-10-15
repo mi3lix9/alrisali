@@ -1,8 +1,10 @@
 import "../i18n";
 import { canLogDate } from "@alrisali/domain/prayer-log";
 import { SALAH } from "@alrisali/domain/shared";
+import type { Salah } from "@alrisali/domain/shared";
 import { Button, Card, Checkbox, Text } from "panelui-native";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { Temporal } from "temporal-polyfill";
@@ -19,11 +21,18 @@ const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
+/** What another feature shows beside a logged Salah, composed by the route. */
+type LoggedSalahActions = (date: Temporal.PlainDate, salah: Salah) => ReactNode;
+
+interface PrayerLogCardProps {
+  loggedSalahActions?: LoggedSalahActions | undefined;
+}
+
 /**
  * The Prayer tab's Prayer Log: tick each Salah for today or step back to
  * log or correct a past date. Future dates cannot be reached.
  */
-export const PrayerLogCard = () => {
+export const PrayerLogCard = ({ loggedSalahActions }: PrayerLogCardProps) => {
   const { t } = useTranslation("prayer-log");
   const today = useToday();
   // null follows today, so the card moves on at midnight.
@@ -67,14 +76,22 @@ export const PrayerLogCard = () => {
         {view ? (
           <>
             <View className="gap-3">
-              {SALAH.map((salah) => (
-                <Checkbox
-                  key={salah}
-                  checked={view.log.performed.includes(salah)}
-                  onCheckedChange={() => view.toggle(salah)}
-                  label={t(`salah.${salah}`)}
-                />
-              ))}
+              {SALAH.map((salah) => {
+                const performed = view.log.performed.includes(salah);
+                return (
+                  <View
+                    key={salah}
+                    className="min-h-9 flex-row items-center justify-between gap-2"
+                  >
+                    <Checkbox
+                      checked={performed}
+                      onCheckedChange={() => view.toggle(salah)}
+                      label={t(`salah.${salah}`)}
+                    />
+                    {performed ? loggedSalahActions?.(date, salah) : null}
+                  </View>
+                );
+              })}
             </View>
             {view.saveFailed ? (
               <Text className="text-destructive">{t("saveError")}</Text>

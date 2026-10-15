@@ -6,7 +6,7 @@
 
 **Blocked by:** 13 (Admin web foundation and content replica), 27 (Books data and Supplication reader)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Admin picker only offers valid Supplication ids
-- [ ] Home card opens the right Supplication offline
+- [x] Admin picker only offers valid Supplication ids
+- [x] Home card opens the right Supplication offline (replica + domain tested; on-device visual pending simulator verification)

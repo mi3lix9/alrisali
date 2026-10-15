@@ -87,4 +87,11 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `quran_reader_settings` ADD `reciter_id` integer DEFAULT 7 NOT NULL;",
     ],
   },
+  {
+    tag: "20261015200852_khushu",
+    statements: [
+      "CREATE TABLE `khushu` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`salah` text NOT NULL,\n\t`level` integer NOT NULL,\n\t`distractions` text NOT NULL,\n\t`custom_distraction` text,\n\t`rated_at` integer NOT NULL\n);",
+      "CREATE INDEX `khushu_date_idx` ON `khushu` (`date`);",
+    ],
+  },
 ];

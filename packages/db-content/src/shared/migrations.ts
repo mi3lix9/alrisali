@@ -10,7 +10,13 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015201406_announcements",
+    tag: "20261015201315_daily_content",
+    statements: [
+      "CREATE TABLE `daily_content` (\n\t`weekday` text PRIMARY KEY,\n\t`supplication_id` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261015203210_announcements",
     statements: [
       "CREATE TABLE `announcement` (\n\t`id` text PRIMARY KEY,\n\t`title_ar` text DEFAULT '' NOT NULL,\n\t`body_ar` text DEFAULT '' NOT NULL,\n\t`title_en` text DEFAULT '' NOT NULL,\n\t`body_en` text DEFAULT '' NOT NULL,\n\t`audience` text DEFAULT 'all' NOT NULL,\n\t`status` text DEFAULT 'draft' NOT NULL,\n\t`scheduled_at` integer,\n\t`sent_at` integer,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
     ],

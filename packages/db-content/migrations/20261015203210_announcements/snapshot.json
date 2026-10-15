@@ -1,11 +1,15 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "8c37b806-a62e-4bdb-859f-b12349252c35",
-  "prevIds": ["9faf409b-dbb1-4d2a-a4c2-0fe907b18102"],
+  "id": "125e4a4b-8b52-4f79-ae8f-9c738c159dcd",
+  "prevIds": ["c546db28-6005-43ce-aa01-a669133e7e08"],
   "ddl": [
     {
       "name": "announcement",
+      "entityType": "tables"
+    },
+    {
+      "name": "daily_content",
       "entityType": "tables"
     },
     {
@@ -128,6 +132,26 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "weekday",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "supplication_id",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "global_settings"
@@ -147,6 +171,13 @@
       "nameExplicit": false,
       "name": "announcement_pk",
       "table": "announcement",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["weekday"],
+      "nameExplicit": false,
+      "name": "daily_content_pk",
+      "table": "daily_content",
       "entityType": "pks"
     },
     {
