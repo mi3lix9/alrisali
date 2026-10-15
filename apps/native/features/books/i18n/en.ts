@@ -6,6 +6,11 @@ export const en: Catalog<typeof ar> = {
   books: "Books",
   notFound: "This text could not be found.",
   reader: {
+    view: {
+      label: "View",
+      read: "Read",
+      recite: "Recite-Along",
+    },
     language: {
       label: "Text language",
       ar: "العربية",
