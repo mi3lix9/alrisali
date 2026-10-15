@@ -2,7 +2,6 @@ import { createPrayerLogRepository } from "@alrisali/db-user/prayer-log";
 import type { PrayerLogRepository } from "@alrisali/db-user/prayer-log";
 import { setSalahPerformed } from "@alrisali/domain/prayer-log";
 import type { PrayerLog } from "@alrisali/domain/prayer-log";
-import type { Salah } from "@alrisali/domain/shared";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Temporal } from "temporal-polyfill";
 
@@ -12,6 +11,9 @@ import {
   getUserDatabase,
   USER_DATA_QUERY_KEY,
 } from "@/shared/lib/user-database";
+
+import { emitSalahChange } from "../utils/salah-change-events";
+import type { SalahChange } from "../utils/salah-change-events";
 
 const PRAYER_LOGS_QUERY_KEY = [...USER_DATA_QUERY_KEY, "prayer-log", "logs"];
 
@@ -30,12 +32,6 @@ export const usePrayerLogs = () =>
     },
   });
 
-export interface SalahChange {
-  date: Temporal.PlainDate;
-  salah: Salah;
-  performed: boolean;
-}
-
 /** The logs with one Salah ticked or un-ticked, a new date added in order. */
 const applyChange = (
   logs: readonly PrayerLog[],
@@ -53,8 +49,8 @@ const applyChange = (
 
 /**
  * Ticks or un-ticks one Salah. The change shows at once (so the Prayer Streak
- * follows an edit instantly) and is rolled back if saving fails. A tick emits
- * `SalahLogged`.
+ * follows an edit instantly) and is rolled back if saving fails. A saved tick
+ * emits `SalahLogged`, a saved un-tick `SalahUnlogged`.
  */
 export const useSetSalahPerformed = () =>
   useMutation({
@@ -79,14 +75,8 @@ export const useSetSalahPerformed = () =>
     onError: (_error, _change, context) => {
       queryClient.setQueryData(PRAYER_LOGS_QUERY_KEY, context?.previous);
     },
-    onSuccess: (_log, { date, salah, performed }) => {
-      if (performed) {
-        events.emit("SalahLogged", {
-          date: date.toString(),
-          salah,
-          loggedAt: Date.now(),
-        });
-      }
+    onSuccess: (_log, change) => {
+      emitSalahChange(events, change, Date.now());
     },
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: PRAYER_LOGS_QUERY_KEY });

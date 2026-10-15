@@ -67,6 +67,12 @@ export interface AppEvents {
    */
   SalahLogged: { date: string; salah: Salah; loggedAt: number };
   /**
+   * The Believer un-ticked a Salah in their Prayer Log, for today or a past
+   * `date` (ISO `YYYY-MM-DD`). A listener (Khushu) drops what it kept for
+   * that `date` + `salah`, so nothing counts for a Salah no longer logged.
+   */
+  SalahUnlogged: { date: string; salah: Salah; unloggedAt: number };
+  /**
    * The Prayer Assistant followed the Believer to the end of a Salah, on
    * `date` (ISO `YYYY-MM-DD`). The Prayer Log ticks it, which then emits
    * `SalahLogged` (and with it the Khushu sheet opens).
