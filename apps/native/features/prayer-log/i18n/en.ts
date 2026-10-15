@@ -26,6 +26,7 @@ export const en: Catalog<typeof ar> = {
     days_many: "{{count}} days",
     days_other: "{{count}} days",
     hint: "Log all five Salah today to keep your streak going.",
+    today: "Today {{performed}} of {{total}}",
   },
   untick: {
     title: "Un-tick {{name}}?",

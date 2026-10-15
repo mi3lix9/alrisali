@@ -10,18 +10,10 @@ import { Alert, Card, Text } from "panelui-native";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-import { launchLanguage } from "@/shared/lib/preferences";
-
 import { useCompass } from "../hooks/use-compass";
+import { bearingSector, wholeNumber } from "../utils/format";
 import { CompassStatus } from "./compass-status";
 import { QiblaDial } from "./qibla-dial";
-
-const DIRECTIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
-const DEGREES_PER_DIRECTION = 45;
-
-const wholeNumber = new Intl.NumberFormat(launchLanguage, {
-  maximumFractionDigits: 0,
-});
 
 const playFacingHaptic = async (): Promise<void> => {
   try {
@@ -49,11 +41,7 @@ export const QiblaCard = ({ location }: { location: Location }) => {
   }, [facing]);
 
   const degrees = wholeNumber.format(Math.round(bearing));
-  const sector =
-    DIRECTIONS[
-      Math.round(bearing / DEGREES_PER_DIRECTION) % DIRECTIONS.length
-    ] ?? "n";
-  const direction = t(`directions.${sector}`);
+  const direction = t(`directions.${bearingSector(bearing)}`);
   const distance = t("distance", {
     distance: wholeNumber.format(qiblaDistanceKm(location)),
   });

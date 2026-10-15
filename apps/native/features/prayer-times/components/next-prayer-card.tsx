@@ -1,6 +1,7 @@
 import "../i18n";
 import { nextPrayerTime } from "@alrisali/domain/shared";
-import { Button, Card, Text } from "panelui-native";
+import { router } from "expo-router";
+import { Button, Card, Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
@@ -14,7 +15,10 @@ import { formatClockTime, formatCountdown } from "../utils/format";
 
 const SECOND_MS = 1000;
 
-/** Home's countdown to the next visible Prayer Time. */
+/**
+ * Home's countdown to the next visible Prayer Time, the lead widget of its
+ * grid; opens the Prayer tab.
+ */
 export const NextPrayerCard = () => {
   const { t } = useTranslation("prayer-times");
   useFollowDeviceLocation();
@@ -67,33 +71,42 @@ export const NextPrayerCard = () => {
   const countdown = formatCountdown(next.at.since(now).total("seconds"));
 
   return (
-    <Card>
-      <Card.Header>
-        <Card.Description>{t("next.title")}</Card.Description>
-      </Card.Header>
-      <Card.Content>
-        <View
-          accessible
-          accessibilityLabel={t("next.accessibility", {
-            name,
-            time,
-            countdown,
-          })}
-          className="gap-1"
-        >
-          <Text size="2xl" weight="bold">
+    <Card className="bg-primary border-primary">
+      <Item
+        testID="next-prayer"
+        orientation="vertical"
+        className="gap-1 p-6"
+        accessibilityLabel={t("next.accessibility", {
+          name,
+          time,
+          countdown,
+        })}
+        onPress={() => router.navigate("/prayer")}
+      >
+        <Text size="sm" className="text-primary-foreground opacity-70">
+          {t("next.title")}
+        </Text>
+        <View className="w-full flex-row items-baseline justify-between gap-2">
+          <Text size="2xl" weight="bold" className="text-primary-foreground">
             {name}
           </Text>
           <Text
-            size="3xl"
             weight="semibold"
+            className="text-primary-foreground"
             style={{ fontVariant: ["tabular-nums"] }}
           >
-            {countdown}
+            {t("next.at", { time })}
           </Text>
-          <Text muted>{t("next.at", { time })}</Text>
         </View>
-      </Card.Content>
+        <Text
+          size="3xl"
+          weight="semibold"
+          className="text-primary-foreground"
+          style={{ fontVariant: ["tabular-nums"] }}
+        >
+          {countdown}
+        </Text>
+      </Item>
     </Card>
   );
 };
