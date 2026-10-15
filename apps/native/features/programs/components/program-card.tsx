@@ -77,7 +77,10 @@ export const ProgramCard = ({
         </Card.Content>
       </Pressable>
       <Card.Footer>
-        <SubscriptionActions program={program} subscription={subscription} />
+        <SubscriptionActions
+          program={{ id: program.id, kind: program.category }}
+          subscription={subscription}
+        />
       </Card.Footer>
     </Card>
   );

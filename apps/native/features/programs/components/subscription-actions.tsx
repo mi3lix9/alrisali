@@ -1,15 +1,19 @@
 import "../i18n";
 import { SubscriptionRefusedError } from "@alrisali/domain/programs";
-import type { ProgramCategory, Subscription } from "@alrisali/domain/programs";
+import type {
+  SubscribedProgramKind,
+  Subscription,
+} from "@alrisali/domain/programs";
 import { Button, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
-import { AccessibilityInfo, Alert, View } from "react-native";
+import { Alert, View } from "react-native";
 
 import {
   useSetSubscriptionPaused,
   useSubscribe,
   useUnsubscribe,
 } from "../data/subscriptions";
+import { useExplainRefusal } from "../hooks/use-explain-refusal";
 
 /**
  * Subscribe, or pause, resume and unsubscribe. A refused Subscription is
@@ -19,13 +23,14 @@ export const SubscriptionActions = ({
   program,
   subscription,
 }: {
-  program: { id: string; category: ProgramCategory };
+  program: { id: string; kind: SubscribedProgramKind };
   subscription: Subscription | undefined;
 }) => {
   const { t } = useTranslation("programs");
   const subscribe = useSubscribe();
   const setPaused = useSetSubscriptionPaused();
   const unsubscribe = useUnsubscribe();
+  const explainRefusal = useExplainRefusal();
   const busy =
     subscribe.isPending || setPaused.isPending || unsubscribe.isPending;
   const failed =
@@ -33,15 +38,6 @@ export const SubscriptionActions = ({
       !(subscribe.error instanceof SubscriptionRefusedError)) ||
     setPaused.isError ||
     unsubscribe.isError;
-
-  const explainRefusal = (error: unknown) => {
-    if (!(error instanceof SubscriptionRefusedError)) {
-      return;
-    }
-    const message = t(`refused.${error.reason}`, { limit: error.limit });
-    AccessibilityInfo.announceForAccessibility(message);
-    Alert.alert(t("refused.title"), message, [{ text: t("refused.ok") }]);
-  };
 
   const confirmUnsubscribe = () =>
     Alert.alert(t("unsubscribe.title"), t("unsubscribe.message"), [
@@ -77,10 +73,9 @@ export const SubscriptionActions = ({
         <Button
           disabled={busy}
           onPress={() =>
-            subscribe.mutate(
-              { id: program.id, kind: program.category },
-              { onError: explainRefusal }
-            )
+            subscribe.mutate(program, {
+              onError: (error) => explainRefusal(error),
+            })
           }
         >
           {t("actions.subscribe")}

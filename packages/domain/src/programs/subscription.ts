@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { PROGRAM_CATEGORIES } from "./program";
+import type { ProgramCategory } from "./program";
 
 /** What a Subscription is to: an Official General or Seasonal Program, or a Personal one. */
 export const SUBSCRIBED_PROGRAM_KINDS = [
@@ -34,6 +35,7 @@ export const SUBSCRIPTION_LIMITS = {
 
 export const SUBSCRIPTION_REFUSALS = [
   "already-subscribed",
+  "not-creator",
   "maximum-programs",
   "maximum-general",
   "maximum-seasonal",
@@ -56,13 +58,24 @@ export class SubscriptionRefusedError extends Error {
 }
 
 /**
+ * The Program a Believer asks to subscribe to. A Personal Program says
+ * whether this Believer built it: only its creator may subscribe.
+ */
+export type SubscriptionTarget =
+  | { id: string; kind: ProgramCategory }
+  | { id: string; kind: "personal"; ownedByBeliever: boolean };
+
+/**
  * Checks that the Believer, holding `subscriptions`, may subscribe to
  * `program`; throws `SubscriptionRefusedError` otherwise.
  */
 export const assertCanSubscribe = (
   subscriptions: readonly Pick<Subscription, "programId" | "programKind">[],
-  program: { id: string; kind: SubscribedProgramKind }
+  program: SubscriptionTarget
 ): void => {
+  if (program.kind === "personal" && !program.ownedByBeliever) {
+    throw new SubscriptionRefusedError("not-creator");
+  }
   if (subscriptions.some(({ programId }) => programId === program.id)) {
     throw new SubscriptionRefusedError("already-subscribed");
   }
