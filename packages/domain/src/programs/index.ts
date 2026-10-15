@@ -43,3 +43,11 @@ export type {
   Subscription,
   SubscriptionRefusal,
 } from "./subscription";
+export {
+  actsForDate,
+  assertCanCompleteAct,
+  FutureActDateError,
+  isActDueOn,
+  unseenPrograms,
+} from "./acts";
+export type { ActsForDate, DueAct, ProgramWithActs, SalahActs } from "./acts";
