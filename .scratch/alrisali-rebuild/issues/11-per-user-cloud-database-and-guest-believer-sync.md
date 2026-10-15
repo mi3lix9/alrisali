@@ -6,7 +6,7 @@
 
 **Blocked by:** 02 (Device database spine: per-user DB, migrations, settings), 10 (Sign in with Apple and Google)
 
-**Status:** ready-for-agent
+**Status:** done — pending env: TURSO_ORG, TURSO_API_TOKEN, TURSO_GROUP; Android run
 
 - [x] Guest records appear in the Believer's cloud database after sign-in — `SignedIn` → `account.ensureUserDatabase` (server creates the database) → sync switches on with the returned URL and an `authToken` function backed by `account.userDatabaseToken` (cached until a minute before expiry) → pull, migrate, push. Seam 2 (`packages/db-user/src/shared/cloud-sync.test.ts`) proves Guest tables and rows reach a fresh database on a local `tursodb --sync-server`. Device run pending simulator verification
 - [x] A second device signing in receives the data; same-row conflict resolves to last push — seam 2, local sync server: a second device opened as a Guest receives the records on its first signed-in sync; same row edited on two devices ends as the last push on both and on the server
