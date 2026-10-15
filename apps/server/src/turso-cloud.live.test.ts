@@ -152,10 +152,8 @@ describe.skipIf(!live)("Turso Cloud (ADR-0001)", () => {
       db,
       userDatabases: host,
       content,
-      recitation: {
-        reciters: () => Promise.resolve([]),
-        surahAudio: () => Promise.resolve([]),
-      },
+      apple: { revoke: () => Promise.resolve() },
+      signInOptions: { providers: ["google"], emailPassword: false },
       files: createS3FileBucket({
         bucket: "unused",
         endpoint: "http://127.0.0.1:9",
