@@ -13,5 +13,10 @@ export const initMonitoring = () => {
   });
 };
 
-/** Wraps the root layout so render errors and native crashes reach Sentry. */
-export const withMonitoring = Sentry.wrap;
+/**
+ * Wraps the root layout so render errors and native crashes reach Sentry.
+ * Without a DSN Sentry never starts, and wrapping would only warn that
+ * `Sentry.wrap` ran before `Sentry.init`.
+ */
+export const withMonitoring: typeof Sentry.wrap = (component, options) =>
+  ENV.EXPO_PUBLIC_SENTRY_DSN ? Sentry.wrap(component, options) : component;

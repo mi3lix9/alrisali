@@ -20,7 +20,7 @@ initMonitoring();
 void applyOtaUpdate();
 
 export const unstable_settings = {
-  initialRouteName: "(tabs)",
+  anchor: "(tabs)",
 };
 
 const RootStack = () => {
