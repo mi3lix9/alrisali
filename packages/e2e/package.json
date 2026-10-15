@@ -2,16 +2,19 @@
   "name": "@alrisali/e2e",
   "version": "0.0.0",
   "private": true,
-  "description": "End-to-end tests (tester.army) for web, iOS and Android.",
+  "description": "End-to-end journeys (tester.army e2e) for the web and the iOS simulator.",
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "scripts": {
-    "check-types": "tsc -b"
+    "check-types": "tsc --noEmit",
+    "e2e:web": "e2e run --target web",
+    "e2e:ios": "e2e run --target ios",
+    "build:ios": "cd ../../apps/native && CI=1 bunx expo prebuild -p ios && xcodebuild -workspace ios/alrsaly.xcworkspace -scheme alrsaly -configuration Debug -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/build ARCHS=arm64 ONLY_ACTIVE_ARCH=YES build"
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",
+    "@e2e-dev/mobile": "0.12.2",
+    "@e2e-dev/web": "0.15.1",
+    "e2e": "0.21.1",
     "typescript": "^6.0.3"
   }
 }

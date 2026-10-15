@@ -41,9 +41,11 @@ The native app is a development build (not Expo Go). `APP_VARIANT=production` sw
 
 `.github/workflows/ci.yml` runs on every push and pull request: `bun run check` (uncheck: oxlint, oxfmt, tsc, sherif; then dependency-cruiser boundaries), `bun run test` (Vitest) and `bun run build`.
 
+`.github/workflows/e2e.yml` runs the end-to-end journeys in `packages/e2e` (tester.army e2e): the web journeys on Ubuntu and the iOS journeys on a macOS runner against a simulator dev build. See [packages/e2e/README.md](packages/e2e/README.md) for running them locally and adding a journey.
+
 ### macOS runners (native jobs)
 
-Native iOS jobs (simulator builds, Maestro e2e, local release builds) run on macOS runners and need:
+Native iOS jobs (simulator builds, the iOS e2e journeys, local release builds) run on Apple-silicon macOS runners and need:
 
 - The Xcode version the app targets (currently Xcode 27).
 - The **Metal Toolchain**. Xcode 27 does not ship it, and `react-native-vision-camera-resizer` compiles `.metal` shaders, so the build fails with `cannot execute tool 'metal' due to missing Metal Toolchain` without it. Install it once per image (about 840 MB):
@@ -53,6 +55,8 @@ Native iOS jobs (simulator builds, Maestro e2e, local release builds) run on mac
   ```
 
   Cache it, or bake it into the runner image, because it is large. EAS macOS build images need the same component. See [docs/rebuild/spikes/prayer-assistant.md](docs/rebuild/spikes/prayer-assistant.md).
+
+- An arm64 simulator build (`ARCHS=arm64`): the Turso sync xcframework ships no x86_64 simulator slice, so a universal simulator build fails to link (`framework 'turso-sync-sdk-kit' not found`).
 
 ## Monitoring
 

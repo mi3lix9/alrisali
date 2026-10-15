@@ -27,6 +27,7 @@ export const PrayerLogQuickTicks = () => {
           {SALAH.map((salah) => (
             <Chip
               key={salah}
+              testID={`prayer-log-tick-${salah}`}
               selected={view.log.performed.includes(salah)}
               haptics
               onPress={() => view.toggle(salah)}
