@@ -7,6 +7,14 @@ export {
   paceSchema,
 } from "./pace";
 export type { CustomPace, Pace, PaceChoice, PaceHolds } from "./pace";
+export { decodeMoveNet, KEYPOINTS, MOVENET_INPUT_SIZE } from "./pose";
+export type { FrameOrientation, Keypoint, KeypointName, Pose } from "./pose";
+export {
+  classifyPose,
+  POSE_FRAME_MS,
+  startPoseClassifier,
+} from "./pose-classifier";
+export type { PoseClassifier, PoseEngine } from "./pose-classifier";
 export {
   completesAt,
   currentStep,
