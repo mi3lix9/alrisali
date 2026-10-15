@@ -103,4 +103,19 @@ export const en: Catalog<typeof ar> = {
     retry: "Try again",
     openSettings: "Open Settings",
   },
+  camera: {
+    asking: "Asking for the camera…",
+    starting: "Getting the camera ready…",
+    ready:
+      "The camera sees you standing. Begin and it will follow your Positions.",
+    watching: "The camera follows your Positions. Tap if it misses one.",
+    notSeen: "Stand where the camera sees your whole body.",
+    showPreview: "Show the camera",
+    unsupported: "This device can't follow your Positions with the camera.",
+    denied:
+      "Camera access isn't allowed. Allow it in Settings so the camera can follow your Positions.",
+    fallback:
+      "Carry on by tap: touch the screen as you move to the next Position.",
+    openSettings: "Open Settings",
+  },
 };

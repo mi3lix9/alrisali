@@ -1,8 +1,10 @@
 import "../i18n";
 import { paceChoice } from "@alrisali/domain/prayer-assistant";
 import type {
+  AssistantState,
   PaceChoice,
   RecognitionMode,
+  Sighting,
 } from "@alrisali/domain/prayer-assistant";
 import type { Salah } from "@alrisali/domain/shared";
 import { router, Stack } from "expo-router";
@@ -14,6 +16,7 @@ import { Temporal } from "temporal-polyfill";
 import { events } from "@/shared/lib/events";
 import { Screen } from "@/shared/ui/screen";
 
+import { PoseSensor } from "../components/pose-sensor";
 import { PrayingView } from "../components/praying-view";
 import { SalahSetup } from "../components/salah-setup";
 import { TakbirSensor } from "../components/takbir-sensor";
@@ -27,13 +30,44 @@ interface PrayingProps {
   salah: Salah;
   pace: PaceChoice;
   mode: RecognitionMode;
+  bowSensitivity: number;
 }
+
+interface SensorProps {
+  mode: RecognitionMode;
+  bowSensitivity: number;
+  state: AssistantState;
+  send: (sighting: Sighting) => void;
+}
+
+/** The Recognition Mode's sensor, feeding the machine; tap needs none. */
+const Sensor = ({ mode, bowSensitivity, state, send }: SensorProps) => {
+  switch (mode) {
+    case "camera":
+    case "head-height": {
+      return (
+        <PoseSensor
+          engine={mode}
+          bowSensitivity={bowSensitivity}
+          calibrating={state.index === 0}
+          send={send}
+        />
+      );
+    }
+    case "sound": {
+      return <TakbirSensor underWay={state.index > 0} send={send} />;
+    }
+    default: {
+      return null;
+    }
+  }
+};
 
 /**
  * Follows one Salah to its end. Finishing emits `SalahCompleted` (the Prayer
  * Log ticks it and the Khushu sheet opens) and closes the assistant.
  */
-const Praying = ({ salah, pace, mode }: PrayingProps) => {
+const Praying = ({ salah, pace, mode, bowSensitivity }: PrayingProps) => {
   const { state, send } = useRakahMachine(salah, pace);
 
   useEffect(() => {
@@ -54,9 +88,12 @@ const Praying = ({ salah, pace, mode }: PrayingProps) => {
       send={send}
       onStop={() => router.back()}
       notice={
-        mode === "sound" ? (
-          <TakbirSensor underWay={state.index > 0} send={send} />
-        ) : null
+        <Sensor
+          mode={mode}
+          bowSensitivity={bowSensitivity}
+          state={state}
+          send={send}
+        />
       }
     />
   );
@@ -77,6 +114,7 @@ export const PrayerAssistantScreen = () => {
           salah={praying.salah}
           pace={praying.pace}
           mode={praying.mode}
+          bowSensitivity={praying.bowSensitivity}
         />
       </>
     );
@@ -94,6 +132,7 @@ export const PrayerAssistantScreen = () => {
               salah,
               pace: paceChoice(settings),
               mode: settings.recognitionMode,
+              bowSensitivity: settings.bowSensitivity,
             })
           }
         />

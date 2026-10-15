@@ -8,7 +8,7 @@ import { launchLanguage } from "@/shared/lib/preferences";
 /** What the Favorites list shows for a Favorite, and where it opens. */
 export type FavoriteEntry =
   | {
-      kind: "surah" | "supplication";
+      kind: "surah" | "supplication" | "library-asset";
       title: string;
       href: Href;
     }
@@ -20,12 +20,15 @@ export type FavoriteEntry =
     };
 
 /**
- * Resolves a Favorite against the bundled content. Undefined when the content
- * is not on this device: a Supplication a newer app added, or a Library Asset
- * (Library Assets do not reach the device yet).
+ * Resolves a Favorite against the bundled content, and a Library Asset through
+ * `libraryAssetTitle` (Library Assets come from the content replica, which
+ * this feature cannot read). Undefined when the content is not on this
+ * device: a Supplication a newer app added, or a Library Asset that was
+ * unpublished or is not pulled yet.
  */
 export const favoriteEntry = (
-  favorite: Favorite
+  favorite: Favorite,
+  libraryAssetTitle?: (id: string) => string | undefined
 ): FavoriteEntry | undefined => {
   switch (favorite.kind) {
     case "surah": {
@@ -69,6 +72,19 @@ export const favoriteEntry = (
             },
           }
         : undefined;
+    }
+    case "library-asset": {
+      const title = libraryAssetTitle?.(favorite.key);
+      return title === undefined
+        ? undefined
+        : {
+            kind: "library-asset",
+            title,
+            href: {
+              pathname: "/library/asset/[id]",
+              params: { id: favorite.key },
+            },
+          };
     }
     default: {
       return undefined;

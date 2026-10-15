@@ -137,7 +137,13 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015212317_personal_programs",
+    tag: "20261015211413_library_asset_positions",
+    statements: [
+      "CREATE TABLE `library_asset_positions` (\n\t`asset_id` text PRIMARY KEY,\n\t`position` real NOT NULL,\n\t`saved_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261015213028_personal_programs",
     statements: [
       "CREATE TABLE `personal_programs` (\n\t`id` text PRIMARY KEY,\n\t`name` text NOT NULL,\n\t`description` text DEFAULT '' NOT NULL,\n\t`acts` text DEFAULT '[]' NOT NULL,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
     ],

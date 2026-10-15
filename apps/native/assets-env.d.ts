@@ -3,3 +3,9 @@ declare module "*.ttf" {
   const asset: number;
   export default asset;
 }
+
+// Metro turns a TensorFlow Lite model into an asset id for fast-tflite.
+declare module "*.tflite" {
+  const asset: number;
+  export default asset;
+}

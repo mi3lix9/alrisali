@@ -22,6 +22,7 @@ import { Route as AdminAuthedAnalyticsRouteImport } from './routes/admin/_authed
 import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
 import { Route as AdminAuthedGatheringsRouteImport } from './routes/admin/_authed/gatherings'
 import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_authed/hijri-adjustment'
+import { Route as AdminAuthedLibraryRouteImport } from './routes/admin/_authed/library'
 import { Route as AdminAuthedMessagesRouteImport } from './routes/admin/_authed/messages'
 import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
 import { Route as AdminAuthedAnnouncementsIndexRouteImport } from './routes/admin/_authed/announcements/index'
@@ -102,6 +103,11 @@ const AdminAuthedHijriAdjustmentRoute =
     path: '/hijri-adjustment',
     getParentRoute: () => AdminAuthedRouteRoute,
   } as any)
+const AdminAuthedLibraryRoute = AdminAuthedLibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedMessagesRoute = AdminAuthedMessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -159,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/': typeof AdminAuthedIndexRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin': typeof AdminAuthedIndexRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/_authed/gatherings': typeof AdminAuthedGatheringsRoute
   '/admin/_authed/hijri-adjustment': typeof AdminAuthedHijriAdjustmentRoute
+  '/admin/_authed/library': typeof AdminAuthedLibraryRoute
   '/admin/_authed/messages': typeof AdminAuthedMessagesRoute
   '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/admin/daily-content'
     | '/admin/gatherings'
     | '/admin/hijri-adjustment'
+    | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
     | '/admin/'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/admin/daily-content'
     | '/admin/gatherings'
     | '/admin/hijri-adjustment'
+    | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
     | '/admin'
@@ -273,6 +284,7 @@ export interface FileRouteTypes {
     | '/admin/_authed/daily-content'
     | '/admin/_authed/gatherings'
     | '/admin/_authed/hijri-adjustment'
+    | '/admin/_authed/library'
     | '/admin/_authed/messages'
     | '/admin/_authed/occasions'
     | '/admin/_authed/'
@@ -384,6 +396,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedHijriAdjustmentRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/library': {
+      id: '/admin/_authed/library'
+      path: '/library'
+      fullPath: '/admin/library'
+      preLoaderRoute: typeof AdminAuthedLibraryRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/messages': {
       id: '/admin/_authed/messages'
       path: '/messages'
@@ -468,6 +487,7 @@ interface AdminAuthedRouteRouteChildren {
   AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
   AdminAuthedGatheringsRoute: typeof AdminAuthedGatheringsRoute
   AdminAuthedHijriAdjustmentRoute: typeof AdminAuthedHijriAdjustmentRoute
+  AdminAuthedLibraryRoute: typeof AdminAuthedLibraryRoute
   AdminAuthedMessagesRoute: typeof AdminAuthedMessagesRoute
   AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
@@ -484,6 +504,7 @@ const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
   AdminAuthedGatheringsRoute: AdminAuthedGatheringsRoute,
   AdminAuthedHijriAdjustmentRoute: AdminAuthedHijriAdjustmentRoute,
+  AdminAuthedLibraryRoute: AdminAuthedLibraryRoute,
   AdminAuthedMessagesRoute: AdminAuthedMessagesRoute,
   AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,

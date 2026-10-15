@@ -8,6 +8,7 @@ import { createAnnouncementsRepository } from "@alrisali/db-content/announcement
 import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
 import { createGatheringsRepository } from "@alrisali/db-content/gatherings";
 import { createLessonsRepository } from "@alrisali/db-content/lessons";
+import { createLibraryAssetsRepository } from "@alrisali/db-content/library-assets";
 import { createProgramsRepository } from "@alrisali/db-content/programs";
 import {
   ContentReplicaReadOnlyError,
@@ -24,6 +25,7 @@ import { analyticsEvent } from "@alrisali/db-server/schema/analytics";
 import { pushDevice } from "@alrisali/db-server/schema/announcements";
 import { user as userTable } from "@alrisali/db-server/schema/auth";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
+import { libraryAsset } from "@alrisali/db-server/schema/library-assets";
 import { startSyncServer, temporaryDirectory } from "@alrisali/db-user/testing";
 import type { SyncServer, TemporaryDirectory } from "@alrisali/db-user/testing";
 import {
@@ -37,6 +39,7 @@ import type { OccasionDetails } from "@alrisali/domain/shared";
 import { call, isProcedure } from "@orpc/server";
 import type { AnyProcedure } from "@orpc/server";
 import { eq } from "drizzle-orm";
+import { Hono } from "hono";
 import { Temporal } from "temporal-polyfill";
 import {
   afterAll,
@@ -52,6 +55,7 @@ import { z } from "zod";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
 import { runAnnouncementScheduler } from "@/features/announcements";
+import { servesLibraryFile } from "@/features/library-assets";
 import { createContentDatabase } from "@/shared/lib/content-database";
 import type { ContentDatabase } from "@/shared/lib/content-database";
 import {
@@ -68,6 +72,7 @@ import type {
   PushTransport,
 } from "@/shared/lib/push-transport";
 import type { RecitationSource } from "@/shared/lib/recitation-source";
+import { mountFiles } from "@/shared/lib/uploads";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 import { createContext } from "./context";
@@ -216,6 +221,7 @@ const RAMADAN = {
 /** What a function preparing a procedure's input gets. */
 interface Prepared {
   content: ContentDatabase;
+  db: Database;
 }
 /**
  * An Announcement stored straight in the content database, for procedures
@@ -234,6 +240,39 @@ const storedAnnouncement =
     }
     return { id };
   };
+
+const SOME_UUID = "0b6c3f4e-9d1a-4c8e-8a57-3f2d1e0c9b7a";
+
+/** A Library Asset as an Admin fills it in: a PDF, unpublished. */
+const libraryAssetInput = (overrides: Record<string, unknown> = {}) => ({
+  title: { ar: "مفاتيح الجنان", en: "Mafatih al-Jinan" },
+  author: { ar: "الشيخ عباس القمي", en: "" },
+  description: { ar: "", en: "" },
+  category: "dua",
+  kind: "pdf",
+  fileKey: `library-asset/${SOME_UUID}.pdf`,
+  fileSize: 2048,
+  coverKey: null,
+  order: 0,
+  published: false,
+  ...overrides,
+});
+
+/** A Library Asset stored straight on the server: `{ id }`. */
+const storedLibraryAsset = async ({
+  db,
+}: Prepared): Promise<{ id: string }> => {
+  const asset = libraryAssetInput();
+  await db.insert(libraryAsset).values({
+    id: "stored-asset",
+    titleAr: asset.title.ar,
+    category: asset.category,
+    kind: asset.kind,
+    fileKey: asset.fileKey,
+    fileSize: asset.fileSize,
+  });
+  return { id: "stored-asset" };
+};
 
 /**
  * Who may call each procedure, and a valid input for it (or a function
@@ -341,6 +380,16 @@ const ACCESS: Record<
   "lessons.save": { access: "admin", input: lessonDraft() },
   "lessons.remove": { access: "admin", input: { id: "tawheed" } },
   "lessons.reorder": { access: "admin", input: { ids: ["tawheed"] } },
+  "libraryAssets.list": { access: "admin" },
+  "libraryAssets.save": { access: "admin", input: libraryAssetInput() },
+  "libraryAssets.setPublished": {
+    access: "admin",
+    input: async (prepared: Prepared) => ({
+      ...(await storedLibraryAsset(prepared)),
+      published: true,
+    }),
+  },
+  "libraryAssets.remove": { access: "admin", input: { id: "missing" } },
   "occasions.list": { access: "admin" },
   "occasions.create": { access: "admin", input: occasionDetails() },
   "occasions.update": {
@@ -582,7 +631,7 @@ const callAs = async (
   const given = input ?? ACCESS[path]?.input;
   return call(
     entry[1],
-    typeof given === "function" ? await given({ content }) : given,
+    typeof given === "function" ? await given({ content, db }) : given,
     {
       context,
     }
@@ -1399,6 +1448,224 @@ describe("Gatherings and Speakers", () => {
 
     await expect(repository.gatherings()).resolves.toStrictEqual([]);
     await expect(repository.speakers()).resolves.toStrictEqual([]);
+    await replica.close();
+  });
+});
+
+/** A device's view of the Library Assets it pulled. */
+const pulledLibraryAssets = async (directory: TemporaryDirectory) => {
+  const { replica } = await openDeviceReplica(directory, () => true);
+  await replica.sync();
+  const assets = await createLibraryAssetsRepository(replica.db).list();
+  await replica.close();
+  return assets;
+};
+
+/** Uploads a file as an Admin does: `library-asset` unless told otherwise. */
+const uploadLibraryFile = async (
+  admin: Headers,
+  body: Buffer,
+  contentType: string,
+  purpose = "library-asset"
+): Promise<string> => {
+  const upload = await requestUpload(admin, {
+    purpose,
+    contentType,
+    size: body.length,
+  });
+  await putFile(upload, body);
+  return upload.key;
+};
+
+const PDF = Buffer.from("%PDF-1.4\n%%EOF\n");
+
+const STRUCTURED_TEXT = Buffer.from(
+  JSON.stringify({
+    sections: [{ title: { ar: "دعاء" }, passages: [{ ar: "اللهم" }] }],
+  })
+);
+
+describe("Library Assets", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(async () => {
+    await startLocalCloud();
+    await startBucket();
+  });
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(async () => {
+    await stopBucket();
+    await stopLocalCloud();
+  });
+
+  it("publishes an uploaded PDF with its cover to devices", async () => {
+    const admin = await signInAsAdmin();
+    const fileKey = await uploadLibraryFile(admin, PDF, "application/pdf");
+    const coverKey = await uploadLibraryFile(
+      admin,
+      PNG,
+      "image/png",
+      "library-cover"
+    );
+    const saved = await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({
+        fileKey,
+        fileSize: PDF.length,
+        coverKey,
+        published: true,
+      })
+    );
+
+    const { published: _, ...asset } = saved as { published: boolean };
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([asset]);
+  });
+
+  it("never sends devices an unpublished Library Asset", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput()
+    )) as { id: string };
+
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+    await callAs(admin, "libraryAssets.setPublished", { id, published: true });
+    await expect(pulledLibraryAssets(device)).resolves.toMatchObject([{ id }]);
+    await callAs(admin, "libraryAssets.setPublished", { id, published: false });
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+  });
+
+  it("lists unpublished Library Assets to Admins with previews of their files", async () => {
+    const admin = await signInAsAdmin();
+    const fileKey = await uploadLibraryFile(admin, PDF, "application/pdf");
+    const saved = await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ fileKey, fileSize: PDF.length })
+    );
+
+    const { assets, previews } = (await callAs(
+      admin,
+      "libraryAssets.list"
+    )) as { assets: unknown[]; previews: Record<string, string> };
+
+    expect(assets).toStrictEqual([saved]);
+    await expect(
+      fetch(previews[fileKey] ?? "").then((response) => response.text())
+    ).resolves.toBe(PDF.toString());
+  });
+
+  it("edits a published Library Asset on devices and removes it", async () => {
+    const admin = await signInAsAdmin();
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ published: true })
+    )) as { id: string };
+
+    await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ id, published: true, order: 3 })
+    );
+    await expect(pulledLibraryAssets(device)).resolves.toMatchObject([
+      { id, order: 3 },
+    ]);
+    await callAs(admin, "libraryAssets.remove", { id });
+    await expect(pulledLibraryAssets(device)).resolves.toStrictEqual([]);
+    await expect(callAs(admin, "libraryAssets.list")).resolves.toMatchObject({
+      assets: [],
+    });
+  });
+
+  it("publishes structured text only when its file is in the structured-text format", async () => {
+    const admin = await signInAsAdmin();
+    const good = await uploadLibraryFile(
+      admin,
+      STRUCTURED_TEXT,
+      "application/json"
+    );
+    const bad = await uploadLibraryFile(
+      admin,
+      Buffer.from(JSON.stringify({ chapters: [] })),
+      "application/json"
+    );
+    const text = (fileKey: string) =>
+      libraryAssetInput({
+        kind: "text",
+        fileKey,
+        fileSize: STRUCTURED_TEXT.length,
+      });
+
+    await expect(
+      callAs(admin, "libraryAssets.save", text(good))
+    ).resolves.toMatchObject({ kind: "text", fileKey: good });
+    await expect(
+      callAs(admin, "libraryAssets.save", text(bad))
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(
+        admin,
+        "libraryAssets.save",
+        text(`library-asset/${SOME_UUID}.json`)
+      )
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("refuses a file of another kind than the Library Asset's", async () => {
+    await expect(
+      callAs(
+        await signInAsAdmin(),
+        "libraryAssets.save",
+        libraryAssetInput({ kind: "video" })
+      )
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("answers NOT_FOUND when publishing a Library Asset that is gone", async () => {
+    await expect(
+      callAs(await signInAsAdmin(), "libraryAssets.setPublished", {
+        id: "gone",
+        published: true,
+      })
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+  });
+
+  it("serves a Library Asset's files only while it is published", async () => {
+    const admin = await signInAsAdmin();
+    const fileKey = await uploadLibraryFile(admin, PDF, "application/pdf");
+    const app = new Hono();
+    mountFiles(app, files, { canServe: servesLibraryFile(content) });
+    const { id } = (await callAs(
+      admin,
+      "libraryAssets.save",
+      libraryAssetInput({ fileKey, fileSize: PDF.length })
+    )) as { id: string };
+
+    const unpublished = await app.request(`/files/${fileKey}`);
+    await callAs(admin, "libraryAssets.setPublished", { id, published: true });
+    const published = await app.request(`/files/${fileKey}`);
+
+    expect(unpublished.status).toBe(404);
+    expect(published.status).toBe(302);
+  });
+
+  it("shows devices nothing before their first pull", async () => {
+    const { replica } = await openDeviceReplica(device, () => false);
+
+    await expect(
+      createLibraryAssetsRepository(replica.db).list()
+    ).resolves.toStrictEqual([]);
     await replica.close();
   });
 });

@@ -7,12 +7,20 @@ import { useTranslation } from "react-i18next";
 import { useFavorites } from "../data/favorites";
 import { favoriteEntry } from "../utils/favorite-entry";
 
-/** The Believer's Favorites in the Library, newest first, each opening its item. */
-export const FavoritesCard = () => {
+/**
+ * The Believer's Favorites in the Library, newest first, each opening its
+ * item. Library Assets are listed when the route names them
+ * (`libraryAssetTitle`, undefined for one not on the device).
+ */
+export const FavoritesCard = ({
+  libraryAssetTitle,
+}: {
+  libraryAssetTitle?: (id: string) => string | undefined;
+}) => {
   const { t } = useTranslation("favorites");
   const favorites = useFavorites();
   const entries = (favorites.data ?? []).flatMap((favorite) => {
-    const entry = favoriteEntry(favorite);
+    const entry = favoriteEntry(favorite, libraryAssetTitle);
     return entry ? [{ id: favoriteId(favorite), ...entry }] : [];
   });
 
