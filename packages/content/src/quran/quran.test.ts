@@ -5,6 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
   AYAT,
   getQuranPage,
+  HIZB_QUARTER_COUNT,
+  HIZB_QUARTER_STARTS,
   KFGQPC_NOTICE,
   PAGE_COUNT,
   QURAN_SOURCE,
@@ -161,5 +163,21 @@ describe("Quran dataset integrity", () => {
       "King Fahd Glorious Quran Printing Complex"
     );
     expect(KFGQPC_NOTICE).toContain("ELECTRONIC END-USER LICENSE AGREEMENT");
+  });
+
+  it("starts 240 hizb quarters in order, one at every ۞ and the rest at surah openings", () => {
+    expect(HIZB_QUARTER_STARTS).toHaveLength(HIZB_QUARTER_COUNT);
+    const order = AYAT.map((ayah) => ayah.key);
+    const positions = HIZB_QUARTER_STARTS.map((key) => order.indexOf(key));
+    expect(
+      positions.every((at, index) => at > (positions[index - 1] ?? -1))
+    ).toBeTruthy();
+    const starts = new Set(HIZB_QUARTER_STARTS);
+    const marked = AYAT.filter((ayah) => ayah.text.startsWith("۞"));
+    expect(marked.filter((ayah) => !starts.has(ayah.key))).toStrictEqual([]);
+    const unmarked = AYAT.filter(
+      (ayah) => starts.has(ayah.key) && !ayah.text.startsWith("۞")
+    );
+    expect(unmarked.filter((ayah) => ayah.ayah !== 1)).toStrictEqual([]);
   });
 });

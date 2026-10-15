@@ -1,14 +1,23 @@
 // The bundled KFGQPC Hafs mushaf (ADR-0004): 604 Quran Pages of the Madinah
-// layout, every ayah verbatim, and surah and juz metadata. The font ships as
-// `@alrisali/content/quran/font.ttf`; the notice as `KFGQPC_NOTICE`.
+// layout, every ayah verbatim, and surah, juz and hizb-quarter metadata. The
+// font ships as `@alrisali/content/quran/font.ttf`; the notice as
+// `KFGQPC_NOTICE`.
 import { HAFS } from "./data/hafs";
 import { SURAH_HEADER_PREFIX } from "./dataset";
 
 export const PAGE_COUNT = 604;
 export const SURAH_COUNT = 114;
+/** 60 hizb, each of four quarters (rub' al-hizb); a juz holds two hizb. */
+export const HIZB_QUARTER_COUNT = 240;
 
 /** `surah:ayah`, e.g. `2:255`. */
 export type AyahKey = `${number}:${number}`;
+
+/**
+ * The first ayah of each hizb quarter, in order (Tanzil Quran Metadata,
+ * CC BY 3.0, corrected to KFGQPC's ۞ signs; notices/tanzil.md).
+ */
+export { HIZB_QUARTER_STARTS } from "./data/hizb";
 
 export interface Surah {
   number: number;
