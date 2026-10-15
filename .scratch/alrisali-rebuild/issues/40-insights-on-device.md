@@ -8,5 +8,5 @@
 
 **Status:** ready-for-agent
 
-- [ ] Domain aggregation tests
-- [ ] Works offline and for Guests
+- [x] Domain aggregation tests
+- [x] Works offline and for Guests (repository test on a Guest DB with no sync server; Guest e2e journey `tests/native/insights.e2e.ts` pending simulator verification)

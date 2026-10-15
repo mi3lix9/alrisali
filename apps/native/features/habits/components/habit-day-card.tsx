@@ -1,5 +1,4 @@
-import { habitStreak } from "@alrisali/domain/habits";
-import { isHabitDueOn } from "@alrisali/domain/shared";
+import { habitStreak, isHabitDueOn } from "@alrisali/domain/shared";
 import { Button, Card, Checkbox, Text } from "panelui-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";

@@ -1,7 +1,6 @@
-import { Temporal } from "temporal-polyfill";
+import type { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
-import { habitScheduleSchema, isHabitDueOn } from "../shared";
 import type { HabitSchedule } from "../shared";
 
 /** The default Habits every new Believer starts with, by preset key. */
@@ -77,73 +76,3 @@ export class FutureHabitDateError extends Error {
     this.name = "FutureHabitDateError";
   }
 }
-
-/**
- * Parses a stored schedule (JSON text); null when it is not one this app
- * understands (a newer app may have synced a kind it does not know).
- */
-export const readHabitSchedule = (stored: string): HabitSchedule | null => {
-  try {
-    const parsed = habitScheduleSchema.safeParse(JSON.parse(stored));
-    return parsed.success ? parsed.data : null;
-  } catch {
-    return null;
-  }
-};
-
-/** A Habit's run of completed occurrences. */
-export interface HabitStreak {
-  /**
-   * Consecutive due dates, back from today, that were completed. Today
-   * counts once completed; until then it does not break the streak.
-   */
-  current: number;
-  /** The longest such run up to today. */
-  longest: number;
-}
-
-/**
- * The Habit's streaks, counted in due dates: a date the schedule skips
- * neither adds to nor breaks a streak, and completions on such dates or after
- * today are ignored.
- */
-export const habitStreak = (
-  schedule: HabitSchedule,
-  completedDates: Iterable<Temporal.PlainDate>,
-  today: Temporal.PlainDate
-): HabitStreak => {
-  const completed = new Set<string>();
-  let earliest: Temporal.PlainDate | null = null;
-  for (const date of completedDates) {
-    if (
-      Temporal.PlainDate.compare(date, today) <= 0 &&
-      isHabitDueOn(schedule, date)
-    ) {
-      completed.add(date.toString());
-      if (!earliest || Temporal.PlainDate.compare(date, earliest) < 0) {
-        earliest = date;
-      }
-    }
-  }
-  if (!earliest) {
-    return { current: 0, longest: 0 };
-  }
-
-  let longest = 0;
-  let run = 0;
-  for (
-    let date = earliest;
-    Temporal.PlainDate.compare(date, today) <= 0;
-    date = date.add({ days: 1 })
-  ) {
-    if (isHabitDueOn(schedule, date)) {
-      const done = completed.has(date.toString());
-      // An open today keeps the run from the dates before it.
-      if (done || !date.equals(today)) {
-        run = done ? run + 1 : 0;
-      }
-      longest = Math.max(longest, run);
-    }
-  }
-  return { current: run, longest };
-};

@@ -40,6 +40,7 @@ const RootStack = () => {
           options={{ title: t("account"), presentation: "modal" }}
         />
         <Stack.Screen name="calendar" />
+        <Stack.Screen name="insights" />
         <Stack.Screen name="qibla" />
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />

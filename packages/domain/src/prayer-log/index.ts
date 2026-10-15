@@ -1,7 +1,2 @@
-export {
-  canLogDate,
-  FutureDateError,
-  prayerStreak,
-  setSalahPerformed,
-} from "./prayer-log";
+export { canLogDate, FutureDateError, setSalahPerformed } from "./prayer-log";
 export type { PrayerLog } from "./prayer-log";
