@@ -5,6 +5,8 @@ import {
   BookmarkIcon,
   ChevronLeftIcon,
   EllipsisIcon,
+  ListIcon,
+  SearchIcon,
 } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -20,6 +22,8 @@ interface ReaderTopBarProps {
   surah: number;
   insetTop: number;
   onBack: () => void;
+  onIndex: () => void;
+  onSearch: () => void;
   onSettings: () => void;
   /** Whether the Last-Read Ayah is on the page shown: fills the bookmark. */
   lastReadOnScreen: boolean;
@@ -27,8 +31,8 @@ interface ReaderTopBarProps {
 
 /**
  * The reader's top bar, laid over the page (no layout shift) while the chrome
- * shows: back, the surah with its juz and page, the last-read bookmark and
- * the reader settings.
+ * shows: back, the index, the surah with its juz and page, the last-read
+ * bookmark, search, and the reader settings.
  */
 export const ReaderTopBar = ({
   mode,
@@ -36,6 +40,8 @@ export const ReaderTopBar = ({
   surah,
   insetTop,
   onBack,
+  onIndex,
+  onSearch,
   onSettings,
   lastReadOnScreen,
 }: ReaderTopBarProps) => {
@@ -69,6 +75,14 @@ export const ReaderTopBar = ({
         >
           <ChevronLeftIcon size={22} />
         </Button>
+        <Button
+          variant="ghost"
+          size="icon"
+          accessibilityLabel={t("navigation.index")}
+          onPress={onIndex}
+        >
+          <ListIcon size={22} />
+        </Button>
         <View className="flex-1 items-center">
           <Text weight="semibold" numberOfLines={1}>
             {i18n.language === "ar" ? entry?.nameAr : entry?.nameEn}
@@ -92,6 +106,14 @@ export const ReaderTopBar = ({
               : {})}
           />
         </View>
+        <Button
+          variant="ghost"
+          size="icon"
+          accessibilityLabel={t("navigation.search")}
+          onPress={onSearch}
+        >
+          <SearchIcon size={22} />
+        </Button>
         <Button
           variant="ghost"
           size="icon"

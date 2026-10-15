@@ -24,10 +24,15 @@ const quarterStartIndex = HIZB_QUARTER_STARTS.map(
 const ayatByPage: Ayah[][] = Array.from({ length: PAGE_COUNT }, () => []);
 /** Every ayah of each surah, surah 1 first. */
 const ayatBySurah: Ayah[][] = Array.from({ length: SURAH_COUNT }, () => []);
+/** The first ayah of each juz as KFGQPC divides them, juz 1 first. */
+const juzStarts: Ayah[] = [];
 for (const ayah of AYAT) {
   ayatByPage[ayah.page - 1]?.push(ayah);
   ayatBySurah[ayah.surah - 1]?.push(ayah);
+  juzStarts[ayah.juz - 1] ??= ayah;
 }
+
+export const JUZ_COUNT = 30;
 
 export const isPage = (page: number): boolean =>
   Number.isInteger(page) && page >= 1 && page <= PAGE_COUNT;
@@ -37,6 +42,15 @@ export const isSurah = (surah: number): boolean =>
 
 /** The ayah a key names, or undefined when the Quran has no such ayah. */
 export const findAyah = (key: string): Ayah | undefined => ayahByKey.get(key);
+
+/** The ayah a juz opens with, as KFGQPC divides the juz. */
+export const firstAyahOfJuz = (juz: number): Ayah => {
+  const first = juzStarts[juz - 1];
+  if (!(Number.isInteger(juz) && first)) {
+    throw new RangeError(`No Juz ${juz}; juz run 1–${JUZ_COUNT}`);
+  }
+  return first;
+};
 
 /** The ayat printed on a page, in order. */
 export const ayatOnPage = (page: number): readonly Ayah[] => {
@@ -102,4 +116,20 @@ export const pagePosition = (page: number): PagePosition => {
     hizb: Math.floor(quarterIndex / quartersPerHizb) + 1,
     quarter: quarterIndex % quartersPerHizb,
   };
+};
+
+/** Arabic-Indic digits (٠–٩) as Western ones, as the number pad may type them. */
+export const toWesternDigits = (text: string): string =>
+  text.replaceAll(/[\u0660-\u0669]/gu, (digit) =>
+    String((digit.codePointAt(0) ?? 0x06_60) - 0x06_60)
+  );
+
+/**
+ * The page a typed number names, in Western or Arabic-Indic digits, or null
+ * when it names none.
+ */
+export const parsePage = (text: string): number | null => {
+  const digits = toWesternDigits(text.trim());
+  const page = /^\d+$/u.test(digits) ? Number(digits) : Number.NaN;
+  return isPage(page) ? page : null;
 };
