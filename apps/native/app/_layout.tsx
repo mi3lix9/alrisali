@@ -2,6 +2,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
@@ -45,10 +46,13 @@ const RootStack = () => {
   );
 };
 
+// The Khushu sheet is mounted once, above every tab, because a Salah can be
+// ticked from Home or the Prayer tab.
 const Layout = () => (
   <AppProviders>
     <ReminderScheduler />
     <RootStack />
+    <KhushuSheet />
   </AppProviders>
 );
 
