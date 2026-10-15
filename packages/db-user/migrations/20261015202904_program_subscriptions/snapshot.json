@@ -1,11 +1,15 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "b47b7b43-d1b9-4633-86bc-d86e85b1036e",
-  "prevIds": ["597ef780-5671-4368-ada9-b0d39a2ce3a4"],
+  "id": "d6a05b26-bc36-46bb-81dd-c83559213c56",
+  "prevIds": ["54a7d289-7d0f-4292-9850-9d9240648149"],
   "ddl": [
     {
       "name": "favorites",
+      "entityType": "tables"
+    },
+    {
+      "name": "khushu",
       "entityType": "tables"
     },
     {
@@ -91,6 +95,76 @@
       "name": "favorited_at",
       "entityType": "columns",
       "table": "favorites"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "date",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "salah",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "level",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "distractions",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "custom_distraction",
+      "entityType": "columns",
+      "table": "khushu"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "rated_at",
+      "entityType": "columns",
+      "table": "khushu"
     },
     {
       "type": "text",
@@ -632,6 +706,13 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
+      "name": "khushu_pk",
+      "table": "khushu",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
       "name": "mood_check_ins_pk",
       "table": "mood_check_ins",
       "entityType": "pks"
@@ -719,6 +800,20 @@
       "name": "favorites_favorited_at",
       "entityType": "indexes",
       "table": "favorites"
+    },
+    {
+      "columns": [
+        {
+          "value": "date",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "khushu_date_idx",
+      "entityType": "indexes",
+      "table": "khushu"
     },
     {
       "columns": [

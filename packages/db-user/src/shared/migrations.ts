@@ -88,7 +88,14 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015201658_program_subscriptions",
+    tag: "20261015200852_khushu",
+    statements: [
+      "CREATE TABLE `khushu` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`salah` text NOT NULL,\n\t`level` integer NOT NULL,\n\t`distractions` text NOT NULL,\n\t`custom_distraction` text,\n\t`rated_at` integer NOT NULL\n);",
+      "CREATE INDEX `khushu_date_idx` ON `khushu` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015202904_program_subscriptions",
     statements: [
       "CREATE TABLE `program_subscriptions` (\n\t`id` text PRIMARY KEY,\n\t`program_kind` text NOT NULL,\n\t`paused` integer DEFAULT false NOT NULL,\n\t`subscribed_at` integer NOT NULL\n);",
     ],

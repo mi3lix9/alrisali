@@ -4,7 +4,6 @@ import {
   cancelScheduledNotificationAsync,
   getAllScheduledNotificationsAsync,
   getPermissionsAsync,
-  requestPermissionsAsync,
   scheduleNotificationAsync,
   SchedulableTriggerInputTypes,
   setNotificationChannelAsync,
@@ -63,26 +62,13 @@ const ensureChannels = (): Promise<void> => {
   return channelsReady;
 };
 
-/**
- * Whether notifications may be shown, asking the first time only (when
- * there is something to remind of).
- */
-const mayNotify = async (): Promise<boolean> => {
-  const current = await getPermissionsAsync();
-  if (current.granted) {
-    return true;
-  }
-  if (current.status !== "undetermined" || !current.canAskAgain) {
-    return false;
-  }
-  const asked = await requestPermissionsAsync();
-  return asked.granted;
-};
-
 const applyReminders = async (
   requests: readonly ReminderRequest[]
 ): Promise<void> => {
-  if (requests.length > 0 && !(await mayNotify())) {
+  // Never prompts: onboarding offers notifications, and the Reminders screen
+  // fixes them when they are off.
+  const { granted } = await getPermissionsAsync();
+  if (requests.length > 0 && !granted) {
     return;
   }
   await ensureChannels();

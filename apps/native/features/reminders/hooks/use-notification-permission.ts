@@ -56,6 +56,8 @@ export const useNotificationAccess = () => {
 
   return {
     access,
+    /** Reads the access again (after another feature asked for it). */
+    refresh: refetch,
     allow: async () => {
       await allowNotifications(access?.canAsk ?? false);
       await refetch();
