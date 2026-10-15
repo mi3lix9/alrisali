@@ -40,6 +40,15 @@ export const CONTENT_SOURCES = [
       url: "https://api-docs.quran.foundation/legal/developer-terms/",
     },
   },
+  {
+    id: "adhan-recording",
+    name: "“Adhan wiki.oga” by Jarih, Wikimedia Commons",
+    url: "https://commons.wikimedia.org/wiki/File:Adhan_wiki.oga",
+    licence: {
+      name: "CC BY-SA 3.0 (converted to WAV)",
+      url: "https://creativecommons.org/licenses/by-sa/3.0/",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];

@@ -1,0 +1,91 @@
+import { planReminders } from "@alrisali/domain/reminders";
+import type { ReminderSettings } from "@alrisali/domain/reminders";
+import type {
+  CalculationMethod,
+  Location,
+  MessageStyle,
+} from "@alrisali/domain/shared";
+import { captureException } from "@sentry/react-native";
+import { getCalendars } from "expo-localization";
+import type { TFunction } from "i18next";
+import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { AppState } from "react-native";
+import { Temporal } from "temporal-polyfill";
+
+import { useBelieverSettings } from "@/shared/lib/believer-settings";
+import { launchLanguage } from "@/shared/lib/preferences";
+
+import { useReminderSettings } from "../data/reminder-settings";
+import { toReminderRequest } from "../utils/notification-request";
+import { syncReminders } from "../utils/scheduler";
+
+/**
+ * Plans from now, on the device's current time zone (it changes when the
+ * Believer travels), and brings the scheduled Reminders in line.
+ */
+/** The Believer settings the Reminders depend on. */
+interface PlanningSettings {
+  location: Location | null;
+  calculationMethod: CalculationMethod;
+  imsakMinutes: number;
+  messageStyle: MessageStyle;
+}
+
+const planAndSync = async (
+  believer: PlanningSettings,
+  settings: ReminderSettings,
+  t: TFunction<"reminders">
+): Promise<void> => {
+  const { location, calculationMethod, imsakMinutes, messageStyle } = believer;
+  const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
+  const reminders = planReminders({
+    now: Temporal.Now.zonedDateTimeISO(timeZone),
+    prayerTimes: location
+      ? {
+          coordinates: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+          calculationMethod,
+          imsakMinutes,
+        }
+      : null,
+    settings,
+    messageStyle,
+  });
+  try {
+    await syncReminders(
+      reminders.map((reminder) =>
+        toReminderRequest(reminder, t, launchLanguage)
+      )
+    );
+  } catch (error) {
+    // Tried again on the next foreground or settings change.
+    captureException(error);
+  }
+};
+
+/**
+ * Keeps the rolling window of Reminders scheduled: on launch, whenever the
+ * app returns to the foreground (topping it up and following a new time
+ * zone), and as soon as any setting it depends on changes.
+ */
+export const useReminderScheduler = (): void => {
+  const { t } = useTranslation("reminders");
+  const { data: believer } = useBelieverSettings();
+  const { data: settings } = useReminderSettings();
+
+  useEffect(() => {
+    if (!believer || !settings) {
+      return;
+    }
+    void planAndSync(believer, settings, t);
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") {
+        void planAndSync(believer, settings, t);
+      }
+    });
+    return () => subscription.remove();
+  }, [believer, settings, t]);
+};

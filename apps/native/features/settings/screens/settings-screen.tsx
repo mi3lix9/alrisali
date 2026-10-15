@@ -15,6 +15,8 @@ import { AboutCard } from "../components/about-card";
 import { CalculationMethodCard } from "../components/calculation-method-card";
 import { HijriAdjustmentCard } from "../components/hijri-adjustment-card";
 import { LocationCard } from "../components/location-card";
+import { MessageStyleCard } from "../components/message-style-card";
+import { RemindersCard } from "../components/reminders-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
@@ -85,6 +87,8 @@ export const SettingsScreen = () => {
       <LocationCard />
       <CalculationMethodCard />
       <HijriAdjustmentCard />
+      <RemindersCard />
+      <MessageStyleCard />
       <TextSizeCard />
       <TabsCard />
       <AboutCard />

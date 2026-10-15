@@ -15,6 +15,7 @@ const DEFAULTS = {
   imsakMinutes: 10,
   timeFormat: null,
   hijriAdjustment: 0,
+  messageStyle: "classic",
 };
 
 let directory: TemporaryDirectory;
@@ -62,6 +63,7 @@ describe(createBelieverSettingsRepository, () => {
       imsakMinutes: 15,
       timeFormat: "12h",
       hijriAdjustment: -1,
+      messageStyle: "modern",
     });
 
     await relaunch();
@@ -75,6 +77,7 @@ describe(createBelieverSettingsRepository, () => {
       imsakMinutes: 15,
       timeFormat: "12h",
       hijriAdjustment: -1,
+      messageStyle: "modern",
     });
   });
 
@@ -175,7 +178,7 @@ describe(createBelieverSettingsRepository, () => {
     const settings = createBelieverSettingsRepository(database.db);
     await settings.update({ location: NAJAF, timeFormat: "12h" });
     await database.db.run(
-      sql`UPDATE believer_settings SET calculation_method = 'future-method', time_format = 'swatch', imsak_minutes = 600`
+      sql`UPDATE believer_settings SET calculation_method = 'future-method', time_format = 'swatch', imsak_minutes = 600, message_style = 'shouty'`
     );
 
     await expect(settings.get()).resolves.toStrictEqual({

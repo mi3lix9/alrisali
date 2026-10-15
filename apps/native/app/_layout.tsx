@@ -2,6 +2,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
 
@@ -31,6 +32,7 @@ const RootStack = () => {
 
 const Layout = () => (
   <AppProviders>
+    <ReminderScheduler />
     <RootStack />
   </AppProviders>
 );

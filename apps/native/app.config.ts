@@ -41,6 +41,9 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     },
     predictiveBackGestureEnabled: false,
     package: APP_ID,
+    // Reminders fire at the Prayer Time itself; without it Android may
+    // deliver them minutes late (features/reminders asks for it).
+    permissions: ["android.permission.SCHEDULE_EXACT_ALARM"],
   },
   web: {
     bundler: "metro",
@@ -54,6 +57,18 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     // `I18nManager.forceRTL` would be overwritten by this on every launch.
     ["expo-localization", { supportsRTL: true, forcesRTL: true }],
     "expo-apple-authentication",
+    [
+      "expo-notifications",
+      {
+        // Reminders are local notifications (ADR-0003); these are the tones
+        // and the Adhan voice they can play (features/reminders).
+        sounds: [
+          "./assets/sounds/chime.wav",
+          "./assets/sounds/bell.wav",
+          "./assets/sounds/adhan.wav",
+        ],
+      },
+    ],
     [
       "expo-location",
       {

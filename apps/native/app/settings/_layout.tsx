@@ -12,6 +12,10 @@ const SettingsLayout = () => {
   return (
     <Stack>
       <Stack.Screen name="index" options={{ title: tShell("settings") }} />
+      <Stack.Screen
+        name="reminders"
+        options={{ title: t("reminders.title") }}
+      />
       <Stack.Screen name="sources" options={{ title: t("sources.title") }} />
       <Stack.Screen name="privacy" options={{ title: t("about.privacy") }} />
       <Stack.Screen name="terms" options={{ title: t("about.terms") }} />

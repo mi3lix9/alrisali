@@ -34,4 +34,6 @@ export const believerSettings = sqliteTable("believer_settings", {
     .default(DEFAULT_IMSAK_MINUTES),
   /** "12h" or "24h"; null follows the device's clock setting. */
   timeFormat: text("time_format"),
+  /** "classic" or "modern"; null until chosen, read as Classic. */
+  messageStyle: text("message_style"),
 });

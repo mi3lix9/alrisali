@@ -48,4 +48,11 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `mood_check_ins_checked_in_at_idx` ON `mood_check_ins` (`checked_in_at`);",
     ],
   },
+  {
+    tag: "20261015193930_reminder_settings_and_message_style",
+    statements: [
+      "CREATE TABLE `reminder_settings` (\n\t`id` text PRIMARY KEY,\n\t`salah_rules` text,\n\t`imsak_rule` text,\n\t`quiet_hours_enabled` integer,\n\t`quiet_hours_start` integer,\n\t`quiet_hours_end` integer\n);",
+      "ALTER TABLE `believer_settings` ADD `message_style` text;",
+    ],
+  },
 ];

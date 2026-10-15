@@ -46,6 +46,19 @@ export const en: Catalog<typeof ar> = {
     plus1: "1 day ahead",
     plus2: "2 days ahead",
   },
+  reminders: {
+    title: "Prayer Reminders",
+    description: "A Reminder before each Salah and at Imsak, and quiet hours.",
+    open: "Reminder settings",
+  },
+  messageStyle: {
+    title: "Message Style",
+    description: "The voice the app speaks to you in, in Reminders and beyond.",
+    classic: "Classic",
+    classicHint: "Verses and sayings, with their sources.",
+    modern: "Modern",
+    modernHint: "Gentle, motivating coaching.",
+  },
   textSize: {
     title: "Text size",
     small: "Small",
@@ -79,6 +92,8 @@ export const en: Catalog<typeof ar> = {
         "Arabic texts and English translations of Mafatih al-Jinan, al-Sahifa al-Sajjadiyya and Nahj al-Balagha, from the Thaqalayn library, reformatted for offline reading. Not endorsed by Thaqalayn.",
       "quran-foundation":
         "Recitation audio and the Verse of the Day are streamed from Quran.Foundation. Quran data provided by Quran.Foundation.",
+      "adhan-recording":
+        "The Adhan voice of Prayer Time Reminders: a recording by Jarih from Wikimedia Commons, under CC BY-SA 3.0, converted to WAV.",
       "panel-ui": "The app's interface components.",
       "open-source":
         "Built on Expo, React Native and other open-source libraries, each under its own licence. Al-Risali's own code is MIT-licensed.",
