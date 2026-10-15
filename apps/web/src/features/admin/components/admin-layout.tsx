@@ -37,6 +37,13 @@ export const AdminLayout = ({
             Hijri Adjustment
           </Link>
           <Link
+            to="/admin/analytics"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Usage analytics
+          </Link>
+          <Link
             to="/admin/daily-content"
             className={NAV_LINK}
             activeProps={{ className: ACTIVE_LINK }}

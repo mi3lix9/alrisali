@@ -6,8 +6,8 @@
 
 **Blocked by:** 13 (Admin web foundation and content replica)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Events batched and retried offline
-- [ ] Admin reports computed server-side (server tests)
-- [ ] No third-party analytics
+- [x] Events batched and retried offline
+- [x] Admin reports computed server-side (server tests)
+- [x] No third-party analytics

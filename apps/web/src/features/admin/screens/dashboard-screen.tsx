@@ -10,6 +10,12 @@ const SECTIONS = [
       "Shift every Believer's Hijri Date to match the official moon sighting.",
   },
   {
+    to: "/admin/analytics",
+    title: "Usage analytics",
+    description:
+      "Active users, popular sections, feature usage, retention, Guests, devices and ages.",
+  },
+  {
     to: "/admin/daily-content",
     title: "Daily Content",
     description: "Choose the Supplication Home features on each weekday.",

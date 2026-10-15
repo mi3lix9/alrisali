@@ -18,6 +18,7 @@ import { connectNodeReplica } from "@alrisali/db-content/testing";
 import { createDb } from "@alrisali/db-server";
 import type { Database } from "@alrisali/db-server";
 import { migrateDb } from "@alrisali/db-server/migrate";
+import { analyticsEvent } from "@alrisali/db-server/schema/analytics";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
 import { startSyncServer, temporaryDirectory } from "@alrisali/db-user/testing";
 import type { SyncServer, TemporaryDirectory } from "@alrisali/db-user/testing";
@@ -145,6 +146,35 @@ const CONTACT_MESSAGE = {
   subject: "Prayer Times",
   message: "Fajr shows a minute late in Karbala.",
 };
+
+const INSTALL_ID = "0b6f4f8e-6a43-4c5e-9d5a-3f1e2c7a9b10";
+
+/** A device's batch of usage events: one screen view, one feature use. */
+const analyticsBatch = (installId = INSTALL_ID) => ({
+  installId,
+  device: {
+    platform: "ios",
+    osVersion: "26.1",
+    appVersion: "2.0.0",
+    deviceType: "phone",
+    birthYear: null,
+  },
+  events: [
+    {
+      id: "6f1c2b9e-0d3a-4e8f-a1b2-c3d4e5f60718",
+      type: "screen_view",
+      name: "quran",
+      occurredAt: Date.now(),
+    },
+    {
+      id: "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+      type: "feature_use",
+      name: "prayer-log",
+      occurredAt: Date.now(),
+      data: { salah: "fajr" },
+    },
+  ],
+});
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
  * the router is listed here: adding one without its rule fails the suite.
@@ -156,6 +186,18 @@ const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
   "account.deleteAccount": { access: "believer" },
+  "analytics.track": { access: "anonymous", input: analyticsBatch() },
+  "analytics.summary": { access: "admin" },
+  "analytics.popularSections": { access: "admin", input: { days: 7 } },
+  "analytics.dailyActiveUsers": {
+    access: "admin",
+    input: { days: 7, offset: 0 },
+  },
+  "analytics.featureUsage": { access: "admin", input: { days: 7 } },
+  "analytics.retention": { access: "admin", input: { cohortDays: 30 } },
+  "analytics.guestShare": { access: "admin", input: { days: 30 } },
+  "analytics.devices": { access: "admin", input: { days: 30 } },
+  "analytics.ages": { access: "admin", input: { days: 30 } },
   "contact.send": { access: "anonymous", input: CONTACT_MESSAGE },
   "contact.inbox": { access: "admin", input: {} },
   "contact.counts": { access: "admin" },
@@ -1464,6 +1506,63 @@ describe("account deletion on the local sync server", () => {
 
     await expect(rowCountsOf(userId)).resolves.toStrictEqual(ONE_ROW_EACH);
     await expect(callAs(headers, "account.privateData")).resolves.toBeDefined();
+  });
+});
+
+/** The user id stored with each analytics event, in the order received. */
+const linkedUsers = async () => {
+  const rows = await db.select().from(analyticsEvent);
+  return rows.map(({ userId }) => userId);
+};
+
+describe("usage analytics through the router", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(() => setUp());
+
+  afterAll(stopLocalCloud);
+
+  it("stores a Guest's events without a user id and a Believer's with theirs", async () => {
+    await callAs(new Headers(), "analytics.track", analyticsBatch());
+    const zainab = await signIn("google", idToken(googleBeliever));
+    const zainabId = await userIdOf(zainab);
+    const otherInstall = analyticsBatch("5c1f2e3d-4b5a-4968-8778-695a4b3c2d1e");
+    await callAs(zainab, "analytics.track", {
+      ...otherInstall,
+      events: otherInstall.events.map((event, index) => ({
+        ...event,
+        id: `aaaaaaaa-aaaa-4aaa-8aaa-00000000000${index}`,
+      })),
+    });
+
+    await expect(linkedUsers()).resolves.toStrictEqual([
+      null,
+      null,
+      zainabId,
+      zainabId,
+    ]);
+    await expect(
+      callAs(await signInAsAdmin(), "analytics.guestShare", { days: 1 })
+    ).resolves.toMatchObject({
+      installs: { guest: 1, believer: 1, guestPercentage: 50 },
+    });
+  });
+
+  it("refuses a malformed batch", async () => {
+    await expect(
+      callAs(new Headers(), "analytics.track", {
+        ...analyticsBatch(),
+        installId: "not-a-uuid",
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("keeps a deleted Believer's events, unlinked", async () => {
+    const zainab = await signIn("google", idToken(googleBeliever));
+    await callAs(zainab, "analytics.track", analyticsBatch());
+
+    await callAs(zainab, "account.deleteAccount");
+
+    await expect(linkedUsers()).resolves.toStrictEqual([null, null]);
   });
 });
 

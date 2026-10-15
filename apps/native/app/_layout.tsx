@@ -3,6 +3,7 @@ import "@/global.css";
 import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
+import { UsageAnalytics } from "@/features/analytics";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
@@ -55,6 +56,7 @@ const Layout = () => (
     <HabitReminderPlans>
       {(habits) => <ReminderScheduler habits={habits} />}
     </HabitReminderPlans>
+    <UsageAnalytics />
     <RootStack />
     <KhushuSheet />
   </AppProviders>

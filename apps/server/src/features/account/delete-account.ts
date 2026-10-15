@@ -1,3 +1,7 @@
+import {
+  analyticsEvent,
+  analyticsInstall,
+} from "@alrisali/db-server/schema/analytics";
 import { account, session, user } from "@alrisali/db-server/schema/auth";
 import { believerDatabase } from "@alrisali/db-server/schema/believer-database";
 import { contactMessage } from "@alrisali/db-server/schema/contact";
@@ -24,9 +28,18 @@ export const deleteAccount = authed.account.deleteAccount.handler(
     await userDatabases.destroy(record?.name ?? userDatabaseName(userId));
     // One batch, one transaction: every row goes or none does. The foreign
     // keys cascade from `user` as well; deleting each table explicitly does
-    // not depend on them being enforced.
+    // not depend on them being enforced. Usage analytics keep their counts
+    // but lose the link to the Believer.
     await db.batch([
       db.delete(contactMessage).where(eq(contactMessage.userId, userId)),
+      db
+        .update(analyticsEvent)
+        .set({ userId: null })
+        .where(eq(analyticsEvent.userId, userId)),
+      db
+        .update(analyticsInstall)
+        .set({ userId: null })
+        .where(eq(analyticsInstall.userId, userId)),
       db.delete(believerDatabase).where(eq(believerDatabase.userId, userId)),
       db.delete(session).where(eq(session.userId, userId)),
       db.delete(account).where(eq(account.userId, userId)),
