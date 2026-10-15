@@ -8,6 +8,6 @@
 
 **Status:** ready-for-agent
 
-- [ ] Domain tests: bearing/distance for known cities
-- [ ] Compass uses device heading with permission handling
-- [ ] Facing-Qibla state shown within a tolerance
+- [x] Domain tests: bearing/distance for known cities
+- [x] Compass uses device heading with permission handling (live heading needs a physical device: pending device verification)
+- [x] Facing-Qibla state shown within a tolerance
