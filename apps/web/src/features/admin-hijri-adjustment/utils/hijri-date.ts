@@ -2,23 +2,9 @@ import {
   createHijriCalendar,
   defaultHijriConverter,
 } from "@alrisali/domain/shared";
-import type { HijriMonth } from "@alrisali/domain/shared";
 import { Temporal } from "temporal-polyfill";
 
-const MONTHS = {
-  1: "Muharram",
-  2: "Safar",
-  3: "Rabi al-Awwal",
-  4: "Rabi al-Thani",
-  5: "Jumada al-Ula",
-  6: "Jumada al-Akhirah",
-  7: "Rajab",
-  8: "Shaban",
-  9: "Ramadan",
-  10: "Shawwal",
-  11: "Dhu al-Qadah",
-  12: "Dhu al-Hijjah",
-} as const satisfies Record<HijriMonth, string>;
+import { HIJRI_MONTH_NAMES } from "@/shared/lib/hijri-months";
 
 const converter = defaultHijriConverter();
 
@@ -31,5 +17,5 @@ export const todayInHijri = (adjustment: number): string => {
     adjustment,
     converter,
   }).toHijri(Temporal.Now.plainDateISO());
-  return `${day} ${MONTHS[month]} ${year} AH`;
+  return `${day} ${HIJRI_MONTH_NAMES[month]} ${year} AH`;
 };

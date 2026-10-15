@@ -6,7 +6,7 @@
 
 **Blocked by:** 13 (Admin web foundation and content replica)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Admin CRUD with validation
-- [ ] New Occasion appears on devices after sync
+- [x] Admin CRUD with validation
+- [x] New Occasion appears on devices after sync (router test over the local sync server; on-device rendering pending simulator verification)
