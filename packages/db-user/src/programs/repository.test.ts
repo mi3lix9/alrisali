@@ -5,8 +5,11 @@ import { connectNode, temporaryDirectory } from "../shared/testing";
 import type { TemporaryDirectory } from "../shared/testing";
 import { openUserDatabase } from "../shared/user-database";
 import type { UserDatabase } from "../shared/user-database";
+import { createPersonalProgramsRepository } from "./personal";
 import { createSubscriptionsRepository } from "./repository";
 import { programSubscriptions } from "./schema";
+
+const NOW = new Date(500);
 
 let directory: TemporaryDirectory;
 let database: UserDatabase;
@@ -81,6 +84,11 @@ describe(createSubscriptionsRepository, () => {
     ).rejects.toMatchObject({ reason: "maximum-seasonal" });
 
     await repository.subscribe({ id: "daily-nawafil", kind: "general" });
+    const personal = createPersonalProgramsRepository(database.db);
+    for (const id of ["mine-1", "mine-2", "mine-3", "mine-4"]) {
+      // oxlint-disable-next-line no-await-in-loop -- one at a time, as a Believer would
+      await personal.save({ id, name: id, description: "", acts: [] }, NOW);
+    }
     for (const id of ["mine-1", "mine-2", "mine-3"]) {
       // oxlint-disable-next-line no-await-in-loop -- one at a time, as a Believer would
       await repository.subscribe({ id, kind: "personal" });

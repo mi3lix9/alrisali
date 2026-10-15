@@ -6,7 +6,7 @@
 
 **Blocked by:** 36 (Acts for a date and Act Completion)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Only the creator can subscribe
-- [ ] Personal Programs sync with the Believer database
+- [x] Only the creator can subscribe — `assertCanSubscribe` refuses `not-creator`; the subscriptions repository allows a `personal` Subscription only when this Believer's database holds the Program (domain + db-user tests).
+- [x] Personal Programs sync with the Believer database — `personal_programs` table in the per-user DB; a Program, its Subscription, an edit and a deletion reach a second device (`personal-sync.test.ts`, local sync server).

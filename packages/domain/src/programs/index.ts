@@ -42,7 +42,21 @@ export type {
   SubscribedProgramKind,
   Subscription,
   SubscriptionRefusal,
+  SubscriptionTarget,
 } from "./subscription";
+export {
+  asProgramWithActs,
+  copyAct,
+  editAct,
+  personalProgramNameSchema,
+  personalProgramSchema,
+  writtenAct,
+} from "./personal";
+export type {
+  ActTiming,
+  PersonalProgram,
+  PersonalProgramInput,
+} from "./personal";
 export {
   actsForDate,
   assertCanCompleteAct,

@@ -1,6 +1,6 @@
 import "../i18n";
-import { actsForDate } from "@alrisali/domain/programs";
-import type { Act, DueAct, OfficialProgram } from "@alrisali/domain/programs";
+import { actsForDate, asProgramWithActs } from "@alrisali/domain/programs";
+import type { Act, DueAct, ProgramWithActs } from "@alrisali/domain/programs";
 import { router } from "expo-router";
 import { Button, Card, Checkbox, Spinner, Text } from "panelui-native";
 import { useState } from "react";
@@ -21,8 +21,12 @@ import {
   useSetActCompleted,
 } from "../data/act-completions";
 import { useOfficialPrograms } from "../data/official-programs";
+import { usePersonalPrograms } from "../data/personal-programs";
 import { useSubscriptions } from "../data/subscriptions";
 import { ActSheet } from "./act-sheet";
+
+/** An Official or Personal Program, named in the app language. */
+type DayProgram = ProgramWithActs & { name: string };
 
 const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   weekday: "long",
@@ -38,7 +42,7 @@ const ActRow = ({
   onToggle,
   onOpen,
 }: {
-  due: DueAct<OfficialProgram>;
+  due: DueAct<DayProgram>;
   done: boolean;
   canComplete: boolean;
   onToggle: (completed: boolean) => void;
@@ -54,7 +58,7 @@ const ActRow = ({
           onCheckedChange={onToggle}
           label={act.name[launchLanguage]}
           description={[
-            program.name[launchLanguage],
+            program.name,
             act.detail.type === "regular"
               ? null
               : t(`types.${act.detail.type}`),
@@ -95,23 +99,33 @@ export const ActsDayCard = () => {
   const canComplete = Temporal.PlainDate.compare(date, today) <= 0;
   const hijriDate = calendar.toHijri(date);
 
-  const programs = useOfficialPrograms();
+  const official = useOfficialPrograms();
+  const personal = usePersonalPrograms();
   const subscriptions = useSubscriptions();
   const { data: completions = [] } = useActCompletionsOn(date);
   const { mutate: setCompleted, isError } = useSetActCompleted();
+  const loading =
+    official.isPending || personal.isPending || subscriptions.isPending;
 
   const showDate = (next: Temporal.PlainDate) =>
     setPicked(next.equals(today) ? null : next);
 
+  const programs: DayProgram[] = [
+    ...(official.data ?? []).map((program) => ({
+      ...program,
+      name: program.name[launchLanguage],
+    })),
+    ...(personal.data ?? []).map(asProgramWithActs),
+  ];
   const day = actsForDate({
-    programs: programs.data ?? [],
+    programs,
     subscriptions: subscriptions.data ?? [],
     date,
     hijriDate,
   });
   const isEmpty = day.bySalah.length === 0 && day.general.length === 0;
 
-  const row = (due: DueAct<OfficialProgram>) => (
+  const row = (due: DueAct<DayProgram>) => (
     <ActRow
       key={`${due.program.id}:${due.act.id}`}
       due={due}
@@ -132,7 +146,7 @@ export const ActsDayCard = () => {
     />
   );
 
-  const group = (title: string, acts: DueAct<OfficialProgram>[]) =>
+  const group = (title: string, acts: DueAct<DayProgram>[]) =>
     acts.length === 0 ? null : (
       <View key={title} className="gap-3">
         <Text size="sm" weight="semibold" muted accessibilityRole="header">
@@ -175,8 +189,8 @@ export const ActsDayCard = () => {
             {t("day.next")}
           </Button>
         </View>
-        {programs.isPending || subscriptions.isPending ? <Spinner /> : null}
-        {!programs.isPending && !subscriptions.isPending && isEmpty ? (
+        {loading ? <Spinner /> : null}
+        {!loading && isEmpty ? (
           <View className="items-start gap-3">
             <Text muted>
               {(subscriptions.data ?? []).length === 0

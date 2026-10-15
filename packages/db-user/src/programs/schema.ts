@@ -39,3 +39,19 @@ export const seenPrograms = sqliteTable("seen_programs", {
   id: text("id").primaryKey(),
   seenAt: integer("seen_at", { mode: "timestamp_ms" }).notNull(),
 });
+
+/**
+ * The Programs the Believer built. Only their own database holds them, so
+ * only they can subscribe. The Acts are one JSON array (`Act[]`, read with
+ * `@alrisali/domain/programs`), so a Program edited on two devices merges as
+ * one row: the last push wins whole, never a mix of two Act lists.
+ */
+export const personalPrograms = sqliteTable("personal_programs", {
+  /** A uuid. */
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  acts: text("acts").notNull().default("[]"),
+  createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" }).notNull(),
+});

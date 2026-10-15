@@ -12,7 +12,10 @@ import {
   USER_DATA_QUERY_KEY,
 } from "@/shared/lib/user-database";
 
-const SUBSCRIPTIONS_QUERY_KEY = [...USER_DATA_QUERY_KEY, "subscriptions"];
+export const SUBSCRIPTIONS_QUERY_KEY = [
+  ...USER_DATA_QUERY_KEY,
+  "subscriptions",
+];
 
 const subscriptions = async (): Promise<SubscriptionsRepository> => {
   const { db } = await getUserDatabase();

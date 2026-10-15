@@ -149,4 +149,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `companion_xp_awards` (\n\t`id` text PRIMARY KEY,\n\t`kind` text NOT NULL,\n\t`xp` integer NOT NULL,\n\t`awarded_at` integer NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261015213505_personal_programs",
+    statements: [
+      "CREATE TABLE `personal_programs` (\n\t`id` text PRIMARY KEY,\n\t`name` text NOT NULL,\n\t`description` text DEFAULT '' NOT NULL,\n\t`acts` text DEFAULT '[]' NOT NULL,\n\t`created_at` integer NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+    ],
+  },
 ];
