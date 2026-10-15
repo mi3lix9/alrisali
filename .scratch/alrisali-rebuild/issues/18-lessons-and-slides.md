@@ -6,8 +6,8 @@
 
 **Blocked by:** 16 (Gatherings and Speakers (with uploads))
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Progress uses the real Slide count
-- [ ] Completion recorded at last Slide or Mark complete
-- [ ] Content arrives via the replica
+- [x] Progress uses the real Slide count
+- [x] Completion recorded at last Slide or Mark complete
+- [x] Content arrives via the replica

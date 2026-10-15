@@ -1,5 +1,5 @@
-import { prayerStreak } from "@alrisali/domain/prayer-log";
 import type { PrayerLog } from "@alrisali/domain/prayer-log";
+import { prayerStreak } from "@alrisali/domain/shared";
 import type { Salah } from "@alrisali/domain/shared";
 import { useTranslation } from "react-i18next";
 import { Alert } from "react-native";

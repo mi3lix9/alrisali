@@ -26,6 +26,8 @@ import { Route as AdminAuthedMessagesRouteImport } from './routes/admin/_authed/
 import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
 import { Route as AdminAuthedAnnouncementsIndexRouteImport } from './routes/admin/_authed/announcements/index'
 import { Route as AdminAuthedAnnouncementsIdRouteImport } from './routes/admin/_authed/announcements/$id'
+import { Route as AdminAuthedLessonsIndexRouteImport } from './routes/admin/_authed/lessons/index'
+import { Route as AdminAuthedLessonsIdRouteImport } from './routes/admin/_authed/lessons/$id'
 import { Route as AdminAuthedProgramsIndexRouteImport } from './routes/admin/_authed/programs/index'
 import { Route as AdminAuthedProgramsIdRouteImport } from './routes/admin/_authed/programs/$id'
 
@@ -122,6 +124,16 @@ const AdminAuthedAnnouncementsIdRoute =
     path: '/announcements/$id',
     getParentRoute: () => AdminAuthedRouteRoute,
   } as any)
+const AdminAuthedLessonsIndexRoute = AdminAuthedLessonsIndexRouteImport.update({
+  id: '/lessons/',
+  path: '/lessons/',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
+const AdminAuthedLessonsIdRoute = AdminAuthedLessonsIdRouteImport.update({
+  id: '/lessons/$id',
+  path: '/lessons/$id',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedProgramsIndexRoute =
   AdminAuthedProgramsIndexRouteImport.update({
     id: '/programs/',
@@ -151,8 +163,10 @@ export interface FileRoutesByFullPath {
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
   '/admin/programs/$id': typeof AdminAuthedProgramsIdRoute
   '/admin/announcements/': typeof AdminAuthedAnnouncementsIndexRoute
+  '/admin/lessons/': typeof AdminAuthedLessonsIndexRoute
   '/admin/programs/': typeof AdminAuthedProgramsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -170,8 +184,10 @@ export interface FileRoutesByTo {
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
   '/admin': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
   '/admin/programs/$id': typeof AdminAuthedProgramsIdRoute
   '/admin/announcements': typeof AdminAuthedAnnouncementsIndexRoute
+  '/admin/lessons': typeof AdminAuthedLessonsIndexRoute
   '/admin/programs': typeof AdminAuthedProgramsIndexRoute
 }
 export interface FileRoutesById {
@@ -192,8 +208,10 @@ export interface FileRoutesById {
   '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
   '/admin/_authed/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
+  '/admin/_authed/lessons/$id': typeof AdminAuthedLessonsIdRoute
   '/admin/_authed/programs/$id': typeof AdminAuthedProgramsIdRoute
   '/admin/_authed/announcements/': typeof AdminAuthedAnnouncementsIndexRoute
+  '/admin/_authed/lessons/': typeof AdminAuthedLessonsIndexRoute
   '/admin/_authed/programs/': typeof AdminAuthedProgramsIndexRoute
 }
 export interface FileRouteTypes {
@@ -215,8 +233,10 @@ export interface FileRouteTypes {
     | '/admin/occasions'
     | '/admin/'
     | '/admin/announcements/$id'
+    | '/admin/lessons/$id'
     | '/admin/programs/$id'
     | '/admin/announcements/'
+    | '/admin/lessons/'
     | '/admin/programs/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -234,8 +254,10 @@ export interface FileRouteTypes {
     | '/admin/occasions'
     | '/admin'
     | '/admin/announcements/$id'
+    | '/admin/lessons/$id'
     | '/admin/programs/$id'
     | '/admin/announcements'
+    | '/admin/lessons'
     | '/admin/programs'
   id:
     | '__root__'
@@ -255,8 +277,10 @@ export interface FileRouteTypes {
     | '/admin/_authed/occasions'
     | '/admin/_authed/'
     | '/admin/_authed/announcements/$id'
+    | '/admin/_authed/lessons/$id'
     | '/admin/_authed/programs/$id'
     | '/admin/_authed/announcements/'
+    | '/admin/_authed/lessons/'
     | '/admin/_authed/programs/'
   fileRoutesById: FileRoutesById
 }
@@ -388,6 +412,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedAnnouncementsIdRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/lessons/': {
+      id: '/admin/_authed/lessons/'
+      path: '/lessons'
+      fullPath: '/admin/lessons/'
+      preLoaderRoute: typeof AdminAuthedLessonsIndexRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/lessons/$id': {
+      id: '/admin/_authed/lessons/$id'
+      path: '/lessons/$id'
+      fullPath: '/admin/lessons/$id'
+      preLoaderRoute: typeof AdminAuthedLessonsIdRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/programs/': {
       id: '/admin/_authed/programs/'
       path: '/programs'
@@ -434,8 +472,10 @@ interface AdminAuthedRouteRouteChildren {
   AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
   AdminAuthedAnnouncementsIdRoute: typeof AdminAuthedAnnouncementsIdRoute
+  AdminAuthedLessonsIdRoute: typeof AdminAuthedLessonsIdRoute
   AdminAuthedProgramsIdRoute: typeof AdminAuthedProgramsIdRoute
   AdminAuthedAnnouncementsIndexRoute: typeof AdminAuthedAnnouncementsIndexRoute
+  AdminAuthedLessonsIndexRoute: typeof AdminAuthedLessonsIndexRoute
   AdminAuthedProgramsIndexRoute: typeof AdminAuthedProgramsIndexRoute
 }
 
@@ -448,8 +488,10 @@ const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
   AdminAuthedAnnouncementsIdRoute: AdminAuthedAnnouncementsIdRoute,
+  AdminAuthedLessonsIdRoute: AdminAuthedLessonsIdRoute,
   AdminAuthedProgramsIdRoute: AdminAuthedProgramsIdRoute,
   AdminAuthedAnnouncementsIndexRoute: AdminAuthedAnnouncementsIndexRoute,
+  AdminAuthedLessonsIndexRoute: AdminAuthedLessonsIndexRoute,
   AdminAuthedProgramsIndexRoute: AdminAuthedProgramsIndexRoute,
 }
 

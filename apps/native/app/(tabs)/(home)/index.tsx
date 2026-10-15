@@ -5,6 +5,7 @@ import { Platform } from "react-native";
 import { HijriTodayCard } from "@/features/calendar";
 import { DailyContentCard } from "@/features/daily-content";
 import { UpcomingGatheringsCard } from "@/features/gatherings";
+import { InsightsLinkCard } from "@/features/insights";
 import { PrayerLogQuickTicks } from "@/features/prayer-log";
 import { NextPrayerCard } from "@/features/prayer-times";
 import { ContinueReadingCard, VerseOfTheDayCard } from "@/features/quran";
@@ -41,6 +42,7 @@ const HomeRoute = () => {
         <UpcomingGatheringsCard />
         <ContinueReadingCard />
         <PrayerLogQuickTicks />
+        <InsightsLinkCard />
         <DailyContentCard />
         <VerseOfTheDayCard />
       </Screen>

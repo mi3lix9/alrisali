@@ -59,6 +59,19 @@ export const habitScheduleSchema = z
     return schedule;
   });
 
+/**
+ * Parses a stored schedule (JSON text); null when it is not one this app
+ * understands (a newer app may have synced a kind it does not know).
+ */
+export const readHabitSchedule = (stored: string): HabitSchedule | null => {
+  try {
+    const parsed = habitScheduleSchema.safeParse(JSON.parse(stored));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+};
+
 /** The schedule as JSON-ready data, the inverse of `habitScheduleSchema`. */
 export const serialiseHabitSchedule = (
   schedule: HabitSchedule

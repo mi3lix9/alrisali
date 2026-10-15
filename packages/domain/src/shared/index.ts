@@ -7,9 +7,12 @@ export type { CalculationMethod } from "./calculation-method";
 export {
   habitScheduleSchema,
   isHabitDueOn,
+  readHabitSchedule,
   serialiseHabitSchedule,
 } from "./habit-schedule";
 export type { HabitReminderPlan, HabitSchedule } from "./habit-schedule";
+export { habitStreak, prayerStreak } from "./streaks";
+export type { HabitStreak } from "./streaks";
 export {
   addHijriMonths,
   createHijriCalendar,
@@ -41,6 +44,12 @@ export type {
   Weekday,
 } from "./hijri";
 export { fileKeySchema } from "./files";
+export {
+  localized,
+  localizedTextSchema,
+  optionalLocalizedTextSchema,
+} from "./localized-text";
+export type { LocalizedText } from "./localized-text";
 export { distanceKm, LOCATION_REFRESH_KM, locationSchema } from "./location";
 export type { Location } from "./location";
 export {

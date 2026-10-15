@@ -1,7 +1,8 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
-import { canLogDate, prayerStreak, setSalahPerformed } from "./prayer-log";
+import { prayerStreak } from "../shared";
+import { canLogDate, setSalahPerformed } from "./prayer-log";
 import type { PrayerLog } from "./prayer-log";
 
 const ALL_FIVE = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
