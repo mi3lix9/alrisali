@@ -3,6 +3,8 @@ import type { ConfigContext, ExpoConfig } from "expo/config";
 const IS_PRODUCTION = process.env.APP_VARIANT === "production";
 
 const APP_ID = IS_PRODUCTION ? "com.alrisali.app" : "com.alrisali.app.dev";
+// The Hot Updater channel a build checks; `bun run ota:deploy` targets it.
+const OTA_CHANNEL = IS_PRODUCTION ? "production" : "development";
 const APP_NAME = "الرسالي";
 
 const GOOGLE_CLIENT_ID_SUFFIX = ".apps.googleusercontent.com";
@@ -58,6 +60,7 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
       "@react-native-google-signin/google-signin",
       { iosUrlScheme: googleIosUrlScheme() },
     ],
+    ["@hot-updater/expo", { channel: OTA_CHANNEL }],
     [
       "@sentry/react-native/expo",
       {
@@ -83,6 +86,13 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
+  },
+  extra: {
+    ...config.extra,
+    // Links EAS Build and Submit to the Expo project.
+    ...(process.env.EAS_PROJECT_ID
+      ? { eas: { projectId: process.env.EAS_PROJECT_ID } }
+      : {}),
   },
 });
 

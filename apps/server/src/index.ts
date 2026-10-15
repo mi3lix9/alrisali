@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
+
+import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
 import { createContext } from "./context";
 import { ENV } from "./env.server";
@@ -15,6 +18,10 @@ const app = new Hono();
 
 // oxlint-disable-next-line promise/prefer-await-to-callbacks -- Hono's error hook is callback-based
 app.onError((error, c) => {
+  // Expected refusals, such as the OTA admin routes' 401, keep their status.
+  if (error instanceof HTTPException) {
+    return error.getResponse();
+  }
   reportServerError(error);
   return c.text("Internal Server Error", 500);
 });
@@ -31,6 +38,13 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
+
+// Over-the-air updates (Hot Updater). Required in production by the env
+// schema; off in local development until the HOT_UPDATER_* variables are set.
+const otaConfig = readOtaConfig(ENV);
+if (otaConfig) {
+  mountOta(app, createOtaServer(otaConfig, db), otaConfig.adminToken);
+}
 
 const apiHandler = createApiHandler(appRouter);
 const rpcHandler = createRpcHandler(appRouter);
