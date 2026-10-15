@@ -5,10 +5,13 @@
   "description": "Bundled Quran and book data, with a NOTICE per source.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./quran": "./src/quran/index.ts",
+    "./quran/font.ttf": "./src/quran/data/kfgqpc_hafs_v30.ttf"
   },
   "scripts": {
-    "check-types": "tsc -b"
+    "check-types": "tsc -b",
+    "quran:build": "bun scripts/quran/build.ts"
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",

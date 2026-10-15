@@ -8,5 +8,6 @@ export default defineConfig({
     ...(ultracite.ignorePatterns ?? []),
     ".agents/skills/**",
     ".claude/skills/**",
+    "packages/content/src/*/data/**",
   ],
 });
