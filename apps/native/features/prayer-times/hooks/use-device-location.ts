@@ -1,5 +1,4 @@
 import type { BelieverSettings } from "@alrisali/db-user/shared";
-import { distanceKm, LOCATION_REFRESH_KM } from "@alrisali/domain/shared";
 import type { Location } from "@alrisali/domain/shared";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -15,11 +14,13 @@ import { useEffect, useEffectEvent } from "react";
 import { AppState } from "react-native";
 
 import {
+  readBelieverSettings,
   useBelieverSettings,
   useUpdateBelieverSettings,
 } from "@/shared/lib/believer-settings";
 
-type Coordinates = Pick<Location, "latitude" | "longitude">;
+import { refreshFollowedLocation } from "../utils/refresh-followed-location";
+import type { Coordinates } from "../utils/refresh-followed-location";
 
 const SEARCH_RESULTS = 5;
 
@@ -118,32 +119,8 @@ export const useChooseLocation = () => {
 
 let refreshing = false;
 
-const refreshFollowedLocation = async (
-  settings: BelieverSettings,
-  update: (change: Partial<BelieverSettings>) => Promise<unknown>
-): Promise<void> => {
-  if (!settings.locationFollowsDevice) {
-    return;
-  }
-  // Never prompts: only a Believer's tap asks for access.
-  const { granted } = await getForegroundPermissionsAsync();
-  if (!granted) {
-    return;
-  }
-  const coordinates = await devicePosition();
-  if (
-    settings.location &&
-    distanceKm(settings.location, coordinates) < LOCATION_REFRESH_KM
-  ) {
-    return;
-  }
-  const name = cityOf(await addressOf(coordinates));
-  await update({ location: { ...coordinates, name } });
-};
-
 /** One refresh at a time: Home and the Prayer tab both ask on resume. */
 const refreshOnce = async (
-  settings: BelieverSettings,
   update: (change: Partial<BelieverSettings>) => Promise<unknown>
 ): Promise<void> => {
   if (refreshing) {
@@ -151,7 +128,17 @@ const refreshOnce = async (
   }
   refreshing = true;
   try {
-    await refreshFollowedLocation(settings, update);
+    await refreshFollowedLocation({
+      readSettings: readBelieverSettings,
+      // Never prompts: only a Believer's tap asks for access.
+      permitted: async () => {
+        const { granted } = await getForegroundPermissionsAsync();
+        return granted;
+      },
+      position: devicePosition,
+      nameOf: async (coordinates) => cityOf(await addressOf(coordinates)),
+      update,
+    });
   } catch {
     // A failed fix keeps the saved location; the next resume retries.
   } finally {
@@ -169,9 +156,7 @@ export const useFollowDeviceLocation = (): void => {
   const { mutateAsync: update } = useUpdateBelieverSettings();
   const loaded = settings !== undefined;
   const refresh = useEffectEvent(() => {
-    if (settings) {
-      refreshOnce(settings, update);
-    }
+    refreshOnce(update);
   });
 
   useEffect(() => {
