@@ -6,7 +6,7 @@
 
 **Blocked by:** 11 (Per-user cloud database and Guest→Believer sync)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification; pending env: TURSO_ORG, TURSO_API_TOKEN, TURSO_GROUP
 
 - [x] Cloud database and auth rows removed (server test)
 - [ ] Device returns to first-run state — built (sign-out, DB wipe, every `deviceEntry` SecureStore entry deleted, `reloadAppAsync`); pending simulator verification
