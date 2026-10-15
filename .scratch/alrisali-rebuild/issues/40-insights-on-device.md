@@ -6,7 +6,7 @@
 
 **Blocked by:** 05 (Prayer Log and Prayer Streak), 06 (Khushu rating), 32 (Tasbih al-Zahra and Dhikr Sessions), 34 (Habits), 38 (Mood Check-in and Remedy)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
 - [x] Domain aggregation tests
 - [x] Works offline and for Guests (repository test on a Guest DB with no sync server; Guest e2e journey `tests/native/insights.e2e.ts` pending simulator verification)
