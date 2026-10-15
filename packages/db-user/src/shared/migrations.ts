@@ -55,7 +55,14 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015193658_quran_last_read",
+    tag: "20261015193622_open_tasbih",
+    statements: [
+      "ALTER TABLE `tasbih` ADD `target` integer;",
+      "ALTER TABLE `tasbih` ADD `notes` text;",
+    ],
+  },
+  {
+    tag: "20261015194503_quran_last_read",
     statements: [
       "CREATE TABLE `quran_last_read` (\n\t`id` text PRIMARY KEY,\n\t`ayah` text NOT NULL,\n\t`set_at` text NOT NULL\n);",
     ],

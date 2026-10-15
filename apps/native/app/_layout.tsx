@@ -3,9 +3,12 @@ import { Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 
 import { AppProviders } from "@/shared/lib/app-providers";
+import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
 
 initMonitoring();
+// Runs in the background; failures are reported to Sentry.
+void applyOtaUpdate();
 
 export const unstable_settings = {
   initialRouteName: "(tabs)",

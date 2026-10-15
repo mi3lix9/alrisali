@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "342b6c4f-c34b-4733-bcb0-710dc0d56f3f",
-  "prevIds": ["86c0e4c3-5cdf-4365-9589-d2c0fef11037"],
+  "id": "2d318ab8-5b30-47f1-8d89-98291935d039",
+  "prevIds": ["e72bbcca-0595-439e-817c-1b5d1a022ff8"],
   "ddl": [
     {
       "name": "favorites",
@@ -427,6 +427,26 @@
       "default": "0",
       "generated": null,
       "name": "step",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "target",
+      "entityType": "columns",
+      "table": "tasbih"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "notes",
       "entityType": "columns",
       "table": "tasbih"
     },

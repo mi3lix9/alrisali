@@ -23,4 +23,17 @@ export const en: Catalog<typeof ar> = {
     cancel: "Cancel",
     confirm: "Sign out",
   },
+  deleteAccount: {
+    title: "Delete account",
+    description:
+      "Permanently deletes your account and your cloud database, and returns this device to how it was on first launch.",
+    button: "Delete account",
+    confirmTitle: "Delete your account for good?",
+    confirmMessage:
+      "Everything you recorded is removed from your account and from this device, and can't be recovered. If you sign in again, you start with a new, empty account.",
+    cancel: "Cancel",
+    confirm: "Delete for good",
+    failed:
+      "Couldn't delete your account. Check your connection and try again.",
+  },
 };
