@@ -117,7 +117,15 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015205627_prayer_assistant_recognition_mode",
+    tag: "20261015205608_act_completions",
+    statements: [
+      "CREATE TABLE `act_completions` (\n\t`id` text PRIMARY KEY,\n\t`program_id` text NOT NULL,\n\t`act_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `seen_programs` (\n\t`id` text PRIMARY KEY,\n\t`seen_at` integer NOT NULL\n);",
+      "CREATE INDEX `act_completions_date_idx` ON `act_completions` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015210608_prayer_assistant_recognition_mode",
     statements: [
       "ALTER TABLE `prayer_assistant_settings` ADD `recognition_mode` text;",
     ],

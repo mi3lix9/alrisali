@@ -6,8 +6,8 @@
 
 **Blocked by:** 35 (Official Programs and Subscriptions)
 
-**Status:** ready-for-agent
+**Status:** done — pending simulator verification
 
-- [ ] Domain tests: visibility per frequency and grouping
-- [ ] Act Completion persists and can be undone
-- [ ] Unseen-Program badges
+- [x] Domain tests: visibility per frequency and grouping
+- [x] Act Completion persists and can be undone
+- [x] Unseen-Program badges

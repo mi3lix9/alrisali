@@ -43,3 +43,5 @@ export {
   recognitionModeSchema,
 } from "./settings";
 export type { PrayerAssistantSettings, RecognitionMode } from "./settings";
+export { countTakbirs, createTakbirDetector, TAKBIR_REPEAT_MS } from "./takbir";
+export type { TakbirDetector } from "./takbir";
