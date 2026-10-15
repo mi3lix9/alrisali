@@ -1,0 +1,70 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "08aa5448-6dbf-4cf7-89a9-68a661ec288c",
+  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "ddl": [
+    {
+      "name": "believer_settings",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'jafari'",
+      "generated": null,
+      "name": "calculation_method",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_latitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_longitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_name",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "believer_settings_pk",
+      "table": "believer_settings",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

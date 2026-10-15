@@ -1,0 +1,52 @@
+diff --git a/node_modules/@tursodatabase/sync-react-native/.bun-tag-de26c94b8170492f b/.bun-tag-de26c94b8170492f
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/ios/TursoModule.mm b/ios/TursoModule.mm
+index b8219b890be6cdc1eb5200241ef379f0961f8c84..e4835c500b1e53bd3f9714b79fee2fd50e75ad5d 100644
+--- a/ios/TursoModule.mm
++++ b/ios/TursoModule.mm
+@@ -7,6 +7,12 @@
+ 
+ #import "TursoHostObject.h"
+ 
++// RN 0.88 removed the RCTCxxBridge interface. In bridgeless mode `self.bridge` is an
++// RCTBridgeProxy, which still answers -runtime with the jsi::Runtime pointer.
++@protocol TursoRuntimeProvider <NSObject>
++- (void *)runtime;
++@end
++
+ @implementation Turso
+ 
+ @synthesize bridge = _bridge;
+@@ -45,24 +51,21 @@ RCT_EXPORT_MODULE()
+ }
+ 
+ - (void)setBridge:(RCTBridge *)bridge {
++    // Install happens from the synchronous `install()` method, which runs on the JS thread.
+     _bridge = bridge;
+-
+-    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+-    if (!cxxBridge.runtime) {
+-        return;
+-    }
+-
+-    [self installLibrary];
+ }
+ 
+ - (void)installLibrary {
+-    RCTCxxBridge *cxxBridge = (RCTCxxBridge *)self.bridge;
+-    if (!cxxBridge.runtime) {
++    // RCTBridgeProxy is an NSProxy: -respondsToSelector: is forwarded, so message -runtime directly.
++    id bridge = self.bridge;
++    if (!bridge) {
++        NSLog(@"[Turso] installLibrary: bridge is nil");
+         return;
+     }
+ 
+-    facebook::jsi::Runtime *runtime = (facebook::jsi::Runtime *)cxxBridge.runtime;
++    facebook::jsi::Runtime *runtime = (facebook::jsi::Runtime *)[(id<TursoRuntimeProvider>)bridge runtime];
+     if (!runtime) {
++        NSLog(@"[Turso] installLibrary: runtime is null (bridge class %@)", NSStringFromClass([bridge class]));
+         return;
+     }
+ 

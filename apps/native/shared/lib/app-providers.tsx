@@ -14,6 +14,7 @@ import { LayoutDirection, useCSSVariable, useUniwind } from "uniwind";
 
 import { i18n, launchDirection } from "./i18n";
 import { queryClient } from "./orpc";
+import { useUserDataSync } from "./user-database";
 
 const PANEL_COLORS = [
   "--color-primary",
@@ -55,6 +56,11 @@ const NavigationTheme = ({ children }: { children: ReactNode }) => (
   <ThemeProvider value={useNavigationTheme()}>{children}</ThemeProvider>
 );
 
+const UserDataSync = () => {
+  useUserDataSync();
+  return null;
+};
+
 /**
  * Everything the screens stand on. The direction comes from the launch
  * language, not from the native flag: expo-localization's `forcesRTL` makes
@@ -70,6 +76,7 @@ export const AppProviders = ({ children }: { children: ReactNode }) => (
         <Direction dir={launchDirection} className="flex-1">
           <PanelUIProvider>
             <LocaleDirContext.Provider value={launchDirection}>
+              <UserDataSync />
               <NavigationTheme>{children}</NavigationTheme>
             </LocaleDirContext.Provider>
           </PanelUIProvider>
