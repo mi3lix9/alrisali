@@ -2,8 +2,15 @@ import { once } from "node:events";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 
-import { createAuth } from "@alrisali/auth";
+import { createAuth, grantAdminRole, revokeAdminRole } from "@alrisali/auth";
 import type { Auth } from "@alrisali/auth";
+import {
+  ContentReplicaReadOnlyError,
+  createGlobalSettingsRepository,
+  globalSettings,
+  openContentReplica,
+} from "@alrisali/db-content/shared";
+import { connectNodeReplica } from "@alrisali/db-content/testing";
 import { createDb } from "@alrisali/db-server";
 import type { Database } from "@alrisali/db-server";
 import { migrateDb } from "@alrisali/db-server/migrate";
@@ -23,12 +30,14 @@ import {
 } from "vitest";
 
 import { createLocalSyncHost, createTursoHost } from "@/features/account";
+import { createContentDatabase } from "@/shared/lib/content-database";
+import type { ContentDatabase } from "@/shared/lib/content-database";
 import type { UserDatabaseHost } from "@/shared/lib/user-database-host";
 
 import { createContext } from "./context";
 import { appRouter } from "./router";
 
-type Access = "anonymous" | "believer";
+type Access = "anonymous" | "believer" | "admin";
 
 /**
  * Who may call each procedure, and a valid input for it. Every procedure in
@@ -36,9 +45,12 @@ type Access = "anonymous" | "believer";
  */
 const ACCESS: Record<string, { access: Access; input?: unknown }> = {
   healthCheck: { access: "anonymous" },
+  contentReplica: { access: "anonymous" },
   "account.privateData": { access: "believer" },
   "account.ensureUserDatabase": { access: "believer" },
   "account.userDatabaseToken": { access: "believer" },
+  "hijriAdjustment.get": { access: "admin" },
+  "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
 };
 
 const proceduresOf = (
@@ -80,14 +92,15 @@ const TEST_ENV = {
   APPLE_BUNDLE_IDS: "com.alrisali.app",
 };
 
-const pathsFor = (access: Access): string[] =>
-  PROCEDURES.map(([path]) => path).filter(
-    (path) => ACCESS[path]?.access === access
+const pathsFor = (...access: Access[]): string[] =>
+  PROCEDURES.map(([path]) => path).filter((path) =>
+    access.includes(ACCESS[path]?.access ?? "admin")
   );
 
 let db: Database;
 let auth: Auth;
 let userDatabases: UserDatabaseHost;
+let content: ContentDatabase;
 
 // A local `tursodb --sync-server` stands in for Turso Cloud.
 let syncServer: SyncServer;
@@ -103,6 +116,8 @@ const stopLocalCloud = async () => {
   syncServerDirectory.remove();
 };
 
+let contentDatabases = 0;
+
 const setUp = async (host?: UserDatabaseHost) => {
   db = createDb({ DATABASE_URL: ":memory:", DATABASE_AUTH_TOKEN: "" });
   await migrateDb(db);
@@ -111,6 +126,12 @@ const setUp = async (host?: UserDatabaseHost) => {
       Promise.resolve(token.endsWith(`.${PROVIDER_SIGNATURE}`)),
   });
   userDatabases = host ?? createLocalSyncHost({ baseUrl: syncServer.baseUrl });
+  // A fresh content database per test, so no test sees another's content.
+  contentDatabases += 1;
+  content = createContentDatabase({
+    host: userDatabases,
+    name: `content-${process.pid}-${contentDatabases}`,
+  });
 };
 
 type Provider = "apple" | "google";
@@ -135,13 +156,33 @@ const signIn = async (
   return new Headers({ cookie });
 };
 
-const callAs = async (headers: Headers, path: string) => {
+const callAs = async (headers: Headers, path: string, input?: unknown) => {
   const entry = PROCEDURES.find(([name]) => name === path);
   if (!entry) {
     throw new Error(`No procedure ${path}`);
   }
-  const context = await createContext({ auth, db, userDatabases, headers });
-  return call(entry[1], ACCESS[path]?.input, { context });
+  const context = await createContext({
+    auth,
+    db,
+    userDatabases,
+    content,
+    headers,
+  });
+  return call(entry[1], input ?? ACCESS[path]?.input, { context });
+};
+
+const adminBeliever = {
+  sub: "google-789",
+  email: "fatima@alrisali.org",
+  email_verified: true,
+  name: "Fatima",
+};
+
+/** Signs in with Google and makes that account an Admin. */
+const signInAsAdmin = async (): Promise<Headers> => {
+  const headers = await signIn("google", idToken(adminBeliever));
+  await grantAdminRole(db, adminBeliever.email);
+  return headers;
 };
 
 const googleBeliever = {
@@ -170,7 +211,7 @@ describe("auth guards", () => {
     }
   );
 
-  it.each(pathsFor("believer"))(
+  it.each(pathsFor("believer", "admin"))(
     "%s refuses an anonymous caller",
     async (path) => {
       await expect(callAs(new Headers(), path)).rejects.toMatchObject({
@@ -179,13 +220,37 @@ describe("auth guards", () => {
     }
   );
 
-  it.each(PROCEDURES.map(([path]) => path))(
+  it.each(pathsFor("anonymous", "believer"))(
     "%s answers a Believer signed in with Google",
     async (path) => {
       const headers = await signIn("google", idToken(googleBeliever));
       await expect(callAs(headers, path)).resolves.toBeDefined();
     }
   );
+
+  it.each(pathsFor("admin"))("%s refuses a Believer", async (path) => {
+    const headers = await signIn("google", idToken(googleBeliever));
+    await expect(callAs(headers, path)).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
+  });
+
+  it.each(PROCEDURES.map(([path]) => path))(
+    "%s answers an Admin",
+    async (path) => {
+      const headers = await signInAsAdmin();
+      await expect(callAs(headers, path)).resolves.toBeDefined();
+    }
+  );
+
+  it("refuses a Believer whose Admin role was taken away", async () => {
+    const headers = await signInAsAdmin();
+    await revokeAdminRole(db, adminBeliever.email);
+
+    await expect(callAs(headers, "hijriAdjustment.get")).rejects.toMatchObject({
+      code: "FORBIDDEN",
+    });
+  });
 
   it("knows the Believer behind a Google session", async () => {
     const headers = await signIn("google", idToken(googleBeliever));
@@ -301,6 +366,146 @@ describe("Believer cloud databases on the local sync server", () => {
     expect(zainabToken.expiresAt).toBeLessThanOrEqual(
       Date.now() + 60 * 60 * 1000
     );
+  });
+});
+
+interface ReplicaAccess {
+  url: string;
+  token: string;
+  expiresAt: number;
+}
+
+/**
+ * A device (a Guest's, even) opening its pull-only content replica. It knows
+ * the content database's URL only while `online()` says so.
+ */
+const openDeviceReplica = async (
+  directory: TemporaryDirectory,
+  online: () => boolean
+) => {
+  const access = (await callAs(
+    new Headers(),
+    "contentReplica"
+  )) as ReplicaAccess;
+  const replica = await openContentReplica({
+    path: `${directory.path}/content.db`,
+    remoteUrl: () => (online() ? access.url : null),
+    authToken: () => Promise.resolve(access.token),
+    connect: connectNodeReplica,
+  });
+  return { access, replica };
+};
+
+const setAdjustment = async (admin: Headers, adjustment: number) => {
+  await callAs(admin, "hijriAdjustment.set", { adjustment });
+};
+
+describe("content replica", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("reads the default before a device's first pull, and the Admins' Hijri Adjustment after it", async () => {
+    await setAdjustment(await signInAsAdmin(), -1);
+    let online = false;
+    const { replica } = await openDeviceReplica(device, () => online);
+    const settings = createGlobalSettingsRepository(replica.db);
+
+    await expect(settings.hijriAdjustment()).resolves.toBe(0);
+    online = true;
+    await replica.sync();
+    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await replica.close();
+  });
+
+  it("shows a changed Hijri Adjustment after the device's next sync", async () => {
+    const admin = await signInAsAdmin();
+    await setAdjustment(admin, -1);
+    const { replica } = await openDeviceReplica(device, () => true);
+    const settings = createGlobalSettingsRepository(replica.db);
+    await replica.sync();
+
+    await setAdjustment(admin, 2);
+
+    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await expect(replica.sync()).resolves.toStrictEqual({
+      status: "pulled",
+      pulledChanges: true,
+    });
+    await expect(settings.hijriAdjustment()).resolves.toBe(2);
+    await replica.close();
+  });
+
+  it("keeps the pulled Hijri Adjustment offline", async () => {
+    await setAdjustment(await signInAsAdmin(), 2);
+    const { replica } = await openDeviceReplica(device, () => true);
+    await replica.sync();
+    await replica.close();
+
+    // The next launch has no URL yet: it makes no request and reads the copy.
+    const { replica: offline } = await openDeviceReplica(device, () => false);
+
+    await expect(offline.sync()).resolves.toStrictEqual({ status: "paused" });
+    await expect(
+      createGlobalSettingsRepository(offline.db).hijriAdjustment()
+    ).resolves.toBe(2);
+    await offline.close();
+  });
+
+  it("refuses every write on a device's replica", async () => {
+    const admin = await signInAsAdmin();
+    await setAdjustment(admin, 1);
+    const { replica } = await openDeviceReplica(device, () => true);
+    await replica.sync();
+
+    // Drizzle reports the refusal as the cause of its query error.
+    const refused = { cause: expect.any(ContentReplicaReadOnlyError) };
+    await expect(
+      createGlobalSettingsRepository(replica.db).setHijriAdjustment(-2)
+    ).rejects.toMatchObject(refused);
+    await expect(replica.db.delete(globalSettings)).rejects.toMatchObject(
+      refused
+    );
+    // Pull-only: the replica has nothing that pushes.
+    expect(Object.keys(replica).toSorted()).toStrictEqual([
+      "close",
+      "db",
+      "sync",
+    ]);
+    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual({
+      adjustment: 1,
+    });
+    await expect(
+      createGlobalSettingsRepository(replica.db).hijriAdjustment()
+    ).resolves.toBe(1);
+    await replica.close();
+  });
+
+  it("gives devices a read-only token, which Turso refuses a push with", async () => {
+    const access = (await callAs(
+      new Headers(),
+      "contentReplica"
+    )) as ReplicaAccess;
+
+    expect(claimsOf(access.token)).toMatchObject({ access: "read-only" });
+  });
+
+  it("refuses a Hijri Adjustment beyond two days", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "hijriAdjustment.set", { adjustment: 3 })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 
@@ -426,6 +631,27 @@ describe("Believer cloud databases on Turso Cloud (Platform API)", () => {
       {
         database: hasanDatabase,
         query: "?expiration=60m&authorization=full-access",
+      },
+    ]);
+  });
+
+  it("gives devices one read-only token for the content database, minted once while it lasts", async () => {
+    const guest = await callAs(new Headers(), "contentReplica");
+    const believer = await callAs(
+      await signIn("google", idToken(googleBeliever)),
+      "contentReplica"
+    );
+
+    const [contentName, hostname] = [...platform.databases].at(0) ?? [];
+    expect(guest).toMatchObject({
+      url: `https://${hostname}`,
+      token: `jwt-for-${contentName}`,
+    });
+    expect(believer).toStrictEqual(guest);
+    expect(platform.tokenRequests).toStrictEqual([
+      {
+        database: contentName,
+        query: "?expiration=60m&authorization=read-only",
       },
     ]);
   });

@@ -12,7 +12,8 @@ const base64url = (value: unknown): string =>
 /**
  * Believers' databases on a local `tursodb --sync-server` (development and
  * tests). That server checks no tokens, so the token here is an unsigned
- * JWT naming the one database it is for, standing in for Turso's.
+ * JWT naming the one database and the access it is for, standing in for
+ * Turso's; it enforces neither.
  */
 export const createLocalSyncHost = ({
   baseUrl,
@@ -35,11 +36,11 @@ export const createLocalSyncHost = ({
     }
     return { url };
   },
-  mintToken: (name) => {
+  mintToken: (name, access = "full-access") => {
     const expiresAt = Date.now() + TOKEN_LIFETIME_MS;
     const token = [
       base64url({ alg: "none", typ: "JWT" }),
-      base64url({ db: name, exp: Math.floor(expiresAt / 1000) }),
+      base64url({ db: name, access, exp: Math.floor(expiresAt / 1000) }),
       "",
     ].join(".");
     return Promise.resolve({ token, expiresAt });

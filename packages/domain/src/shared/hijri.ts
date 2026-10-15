@@ -46,12 +46,12 @@ export const hijriDaySchema = z
   .min(1)
   .max(MAX_HIJRI_MONTH_LENGTH);
 
-/** How far the Believer may shift the Hijri Date themselves. */
+/** How far a Hijri Adjustment (the Admins' or the Believer's own) may shift. */
 export const HIJRI_ADJUSTMENT_LIMIT = 2;
 
 export const DEFAULT_HIJRI_ADJUSTMENT = 0;
 
-/** The Believer's own Hijri Adjustment, in whole days. */
+/** A Hijri Adjustment in whole days: the Admins' or the Believer's own. */
 export const hijriAdjustmentSchema = z
   .number()
   .int()

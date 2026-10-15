@@ -1,3 +1,4 @@
+export { AdminGate } from "./components/admin-gate";
 export { AdminLayout } from "./components/admin-layout";
 export { requireSession } from "./data/require-session";
 export { DashboardScreen } from "./screens/dashboard-screen";

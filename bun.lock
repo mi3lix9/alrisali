@@ -26,6 +26,7 @@
       "dependencies": {
         "@alrisali/api": "workspace:*",
         "@alrisali/content": "workspace:*",
+        "@alrisali/db-content": "workspace:*",
         "@alrisali/db-user": "workspace:*",
         "@alrisali/domain": "workspace:*",
         "@alrisali/i18n": "workspace:*",
@@ -95,6 +96,7 @@
       "dependencies": {
         "@alrisali/api": "workspace:*",
         "@alrisali/auth": "workspace:*",
+        "@alrisali/db-content": "workspace:*",
         "@alrisali/db-server": "workspace:*",
         "@orpc/openapi": "catalog:",
         "@orpc/server": "catalog:",
@@ -119,6 +121,8 @@
       "name": "web",
       "dependencies": {
         "@alrisali/api": "workspace:*",
+        "@alrisali/auth": "workspace:*",
+        "@alrisali/domain": "workspace:*",
         "@alrisali/i18n": "workspace:*",
         "@alrisali/ui": "workspace:*",
         "@orpc/client": "catalog:",
@@ -141,6 +145,7 @@
         "react-i18next": "catalog:",
         "sonner": "catalog:",
         "tailwindcss": "catalog:",
+        "temporal-polyfill": "catalog:",
         "varlock": "catalog:",
         "zod": "catalog:",
       },
@@ -162,6 +167,7 @@
     "packages/api": {
       "name": "@alrisali/api",
       "dependencies": {
+        "@alrisali/domain": "workspace:*",
         "@orpc/contract": "catalog:",
         "zod": "catalog:",
       },
@@ -202,11 +208,15 @@
       "name": "@alrisali/db-content",
       "version": "0.0.0",
       "dependencies": {
+        "@alrisali/domain": "workspace:*",
         "drizzle-orm": "catalog:",
         "zod": "catalog:",
       },
       "devDependencies": {
         "@alrisali/config": "workspace:*",
+        "@alrisali/db-user": "workspace:*",
+        "@tursodatabase/sync": "0.8.3",
+        "drizzle-kit": "1.0.0-rc.4",
         "typescript": "^6.0.3",
       },
     },

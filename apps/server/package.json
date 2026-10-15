@@ -9,11 +9,13 @@
     "dev": "bun run --hot src/index.ts",
     "start": "bun run dist/index.mjs",
     "env:generate": "varlock codegen",
-    "auth:generate": "varlock run -- bun x auth@latest generate --config src/services.ts --output ../../packages/db-server/src/schema/auth.ts --yes"
+    "auth:generate": "varlock run -- bun x auth@latest generate --config src/services.ts --output ../../packages/db-server/src/schema/auth.ts --yes",
+    "admin:grant": "varlock run -- bun scripts/grant-admin.ts"
   },
   "dependencies": {
     "@alrisali/api": "workspace:*",
     "@alrisali/auth": "workspace:*",
+    "@alrisali/db-content": "workspace:*",
     "@alrisali/db-server": "workspace:*",
     "@orpc/openapi": "catalog:",
     "@orpc/server": "catalog:",
