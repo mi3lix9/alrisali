@@ -12,7 +12,7 @@ Existing scaffold code moves into the right feature or into shared: auth goes to
 
 **Blocked by:** None (can start immediately). Tickets 01, 03 and 48 are blocked by this one.
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Native, web and server each have `features/` and `shared/{utils,ui,lib}` (server: `shared/{utils,lib}`). Route files only render feature screens.
   - Native `features/account`; web `features/{admin,landing}`; server `features/account`. Empty `shared/utils/` in web and server hold a `.gitkeep`. The demo tab, modal and not-found screens stay as JSX-only routes until ticket 01 replaces them.
