@@ -9,4 +9,13 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `believer_settings` (\n\t`id` text PRIMARY KEY,\n\t`calculation_method` text DEFAULT 'jafari' NOT NULL,\n\t`location_latitude` real,\n\t`location_longitude` real,\n\t`location_name` text\n);",
     ],
   },
+  {
+    tag: "20261015190524_prayer_times_settings",
+    statements: [
+      "CREATE TABLE `prayer_times_settings` (\n\t`id` text PRIMARY KEY,\n\t`hidden_prayer_times` text\n);",
+      "ALTER TABLE `believer_settings` ADD `location_follows_device` integer DEFAULT true NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `imsak_minutes` integer DEFAULT 10 NOT NULL;",
+      "ALTER TABLE `believer_settings` ADD `time_format` text;",
+    ],
+  },
 ];

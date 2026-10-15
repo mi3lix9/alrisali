@@ -1,5 +1,8 @@
-import { DEFAULT_CALCULATION_METHOD } from "@alrisali/domain/shared";
-import { real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  DEFAULT_CALCULATION_METHOD,
+  DEFAULT_IMSAK_MINUTES,
+} from "@alrisali/domain/shared";
+import { integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 // `schema_version` is owned by the migrator (migrate.ts), not drizzle-kit.
 
@@ -15,4 +18,15 @@ export const believerSettings = sqliteTable("believer_settings", {
   locationLatitude: real("location_latitude"),
   locationLongitude: real("location_longitude"),
   locationName: text("location_name"),
+  /** Whether the location follows the device's GPS, or was chosen by hand. */
+  locationFollowsDevice: integer("location_follows_device", {
+    mode: "boolean",
+  })
+    .notNull()
+    .default(true),
+  imsakMinutes: integer("imsak_minutes")
+    .notNull()
+    .default(DEFAULT_IMSAK_MINUTES),
+  /** "12h" or "24h"; null follows the device's clock setting. */
+  timeFormat: text("time_format"),
 });

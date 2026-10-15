@@ -9,6 +9,13 @@ import type { UserDatabase } from "./user-database";
 
 const NAJAF = { latitude: 32.0259, longitude: 44.3462, name: "النجف" };
 
+/** The settings a new Believer starts with, besides method and location. */
+const DEFAULTS = {
+  locationFollowsDevice: true,
+  imsakMinutes: 10,
+  timeFormat: null,
+};
+
 let directory: TemporaryDirectory;
 let database: UserDatabase;
 
@@ -42,20 +49,30 @@ describe(createBelieverSettingsRepository, () => {
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "jafari",
       location: null,
+      ...DEFAULTS,
     });
   });
 
-  it("keeps the Calculation Method and location across a relaunch", async () => {
+  it("keeps every setting across a relaunch", async () => {
     await createBelieverSettingsRepository(database.db).update({
       calculationMethod: "hanafi",
       location: NAJAF,
+      locationFollowsDevice: false,
+      imsakMinutes: 15,
+      timeFormat: "12h",
     });
 
     await relaunch();
 
     await expect(
       createBelieverSettingsRepository(database.db).get()
-    ).resolves.toStrictEqual({ calculationMethod: "hanafi", location: NAJAF });
+    ).resolves.toStrictEqual({
+      calculationMethod: "hanafi",
+      location: NAJAF,
+      locationFollowsDevice: false,
+      imsakMinutes: 15,
+      timeFormat: "12h",
+    });
   });
 
   it("changes one setting without touching the other", async () => {
@@ -66,12 +83,23 @@ describe(createBelieverSettingsRepository, () => {
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "sunni",
       location: NAJAF,
+      ...DEFAULTS,
     });
 
     await settings.update({ location: null });
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "sunni",
       location: null,
+      ...DEFAULTS,
+    });
+
+    await settings.update({ timeFormat: "24h" });
+    await settings.update({ timeFormat: null, imsakMinutes: 0 });
+    await expect(settings.get()).resolves.toStrictEqual({
+      calculationMethod: "sunni",
+      location: null,
+      ...DEFAULTS,
+      imsakMinutes: 0,
     });
   });
 
@@ -80,7 +108,7 @@ describe(createBelieverSettingsRepository, () => {
     const unnamed = { ...NAJAF, name: null };
 
     await expect(settings.update({ location: unnamed })).resolves.toStrictEqual(
-      { calculationMethod: "jafari", location: unnamed }
+      { calculationMethod: "jafari", location: unnamed, ...DEFAULTS }
     );
   });
 
@@ -101,16 +129,32 @@ describe(createBelieverSettingsRepository, () => {
     expect(location).toStrictEqual(NAJAF);
   });
 
-  it("reads a method it does not know (written by a newer app) as the default", async () => {
+  it("rejects Imsak minutes outside 0–60 or fractional", async () => {
     const settings = createBelieverSettingsRepository(database.db);
-    await settings.update({ location: NAJAF });
+
+    await expect(settings.update({ imsakMinutes: -1 })).rejects.toThrow(
+      "imsakMinutes"
+    );
+    await expect(settings.update({ imsakMinutes: 61 })).rejects.toThrow(
+      "imsakMinutes"
+    );
+    await expect(settings.update({ imsakMinutes: 2.5 })).rejects.toThrow(
+      "imsakMinutes"
+    );
+    await expect(settings.get()).resolves.toMatchObject({ imsakMinutes: 10 });
+  });
+
+  it("reads values it does not know (written by a newer app) as the defaults", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ location: NAJAF, timeFormat: "12h" });
     await database.db.run(
-      sql`UPDATE believer_settings SET calculation_method = 'future-method'`
+      sql`UPDATE believer_settings SET calculation_method = 'future-method', time_format = 'swatch', imsak_minutes = 600`
     );
 
     await expect(settings.get()).resolves.toStrictEqual({
       calculationMethod: "jafari",
       location: NAJAF,
+      ...DEFAULTS,
     });
   });
 });

@@ -1,0 +1,131 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "a64ad9a4-df39-41b7-b88a-7fcbdace0b75",
+  "prevIds": ["08aa5448-6dbf-4cf7-89a9-68a661ec288c"],
+  "ddl": [
+    {
+      "name": "prayer_times_settings",
+      "entityType": "tables"
+    },
+    {
+      "name": "believer_settings",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "hidden_prayer_times",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "'jafari'",
+      "generated": null,
+      "name": "calculation_method",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_latitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "real",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_longitude",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "location_name",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "true",
+      "generated": null,
+      "name": "location_follows_device",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "10",
+      "generated": null,
+      "name": "imsak_minutes",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "time_format",
+      "entityType": "columns",
+      "table": "believer_settings"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "prayer_times_settings_pk",
+      "table": "prayer_times_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "believer_settings_pk",
+      "table": "believer_settings",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}
