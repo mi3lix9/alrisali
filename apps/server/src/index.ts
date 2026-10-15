@@ -26,24 +26,27 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
-
-// oRPC interceptors are callback-based by design.
-// oxlint-disable-next-line promise/prefer-await-to-callbacks
-const logErrors = onError((error) => {
-  console.error(error);
-});
-
 export const apiHandler = new OpenAPIHandler(appRouter, {
   plugins: [
     new OpenAPIReferencePlugin({
       schemaConverters: [new ZodToJsonSchemaConverter()],
     }),
   ],
-  interceptors: [logErrors],
+  interceptors: [
+    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
 });
 
 export const rpcHandler = new RPCHandler(appRouter, {
-  interceptors: [logErrors],
+  interceptors: [
+    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
+    onError((error) => {
+      console.error(error);
+    }),
+  ],
 });
 
 app.use("/*", async (c, next) => {
