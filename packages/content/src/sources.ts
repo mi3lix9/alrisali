@@ -51,11 +51,11 @@ export const CONTENT_SOURCES = [
   },
   {
     id: "adhan-recording",
-    name: "“Adhan wiki.oga” by Jarih, Wikimedia Commons",
-    url: "https://commons.wikimedia.org/wiki/File:Adhan_wiki.oga",
+    name: "“AzaanMaahur.ogg” by Saeed Hatamzadeh-Varmazyar, Wikimedia Commons",
+    url: "https://commons.wikimedia.org/wiki/File:AzaanMaahur.ogg",
     licence: {
-      name: "CC BY-SA 3.0 (converted to WAV)",
-      url: "https://creativecommons.org/licenses/by-sa/3.0/",
+      name: "CC BY-SA 4.0 (opening excerpt, converted to WAV)",
+      url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },
 ] as const satisfies readonly ContentSource[];
