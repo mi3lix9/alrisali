@@ -7,6 +7,7 @@ import { contactContract } from "./contact";
 import { dailyContentContract } from "./daily-content";
 import { gatheringsContract } from "./gatherings";
 import { hijriAdjustmentContract } from "./hijri-adjustment";
+import { lessonsContract } from "./lessons";
 import { libraryAssetsContract } from "./library-assets";
 import { occasionsContract } from "./occasions";
 import { programsContract } from "./programs";
@@ -24,6 +25,7 @@ export const contract = {
   dailyContent: dailyContentContract,
   gatherings: gatheringsContract,
   hijriAdjustment: hijriAdjustmentContract,
+  lessons: lessonsContract,
   libraryAssets: libraryAssetsContract,
   occasions: occasionsContract,
   programs: programsContract,

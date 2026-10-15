@@ -1,5 +1,6 @@
 import { BooksCard } from "@/features/books";
 import { FavoritesCard } from "@/features/favorites";
+import { LessonsLinkCard } from "@/features/lessons";
 import {
   LibraryAssetsCard,
   useLibraryAssetTitle,
@@ -15,6 +16,7 @@ const LibraryRoute = () => {
       <QuranLibraryCard />
       <FavoritesCard libraryAssetTitle={libraryAssetTitle} />
       <BooksCard />
+      <LessonsLinkCard />
       <LibraryAssetsCard />
     </Screen>
   );

@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "540cc845-ed1f-4a10-bc1e-749c45dc005d",
-  "prevIds": ["d8b754b6-abf0-46d7-98b0-79d69bc01760"],
+  "id": "feca358c-669b-4474-b8b9-50bf53f52880",
+  "prevIds": ["01f504f3-bba2-466f-a51f-e458e624ea0a"],
   "ddl": [
     {
       "name": "announcement",
@@ -18,6 +18,14 @@
     },
     {
       "name": "speakers",
+      "entityType": "tables"
+    },
+    {
+      "name": "lesson_slides",
+      "entityType": "tables"
+    },
+    {
+      "name": "lessons",
       "entityType": "tables"
     },
     {
@@ -389,6 +397,146 @@
       "name": "photo_key",
       "entityType": "columns",
       "table": "speakers"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "lesson_id",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "position",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "image_key",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "caption_ar",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "caption_en",
+      "entityType": "columns",
+      "table": "lesson_slides"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title_ar",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "title_en",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "description_ar",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "''",
+      "generated": null,
+      "name": "description_en",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "category",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "false",
+      "generated": null,
+      "name": "published",
+      "entityType": "columns",
+      "table": "lessons"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "position",
+      "entityType": "columns",
+      "table": "lessons"
     },
     {
       "type": "text",
@@ -861,6 +1009,20 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
+      "name": "lesson_slides_pk",
+      "table": "lesson_slides",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "lessons_pk",
+      "table": "lessons",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
       "name": "library_assets_pk",
       "table": "library_assets",
       "entityType": "pks"
@@ -920,6 +1082,20 @@
       "name": "gatherings_speaker",
       "entityType": "indexes",
       "table": "gatherings"
+    },
+    {
+      "columns": [
+        {
+          "value": "lesson_id",
+          "isExpression": false
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "origin": "manual",
+      "name": "lesson_slides_lesson_idx",
+      "entityType": "indexes",
+      "table": "lesson_slides"
     },
     {
       "columns": [

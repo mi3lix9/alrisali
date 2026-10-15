@@ -117,7 +117,27 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261015205948_library_asset_positions",
+    tag: "20261015205608_act_completions",
+    statements: [
+      "CREATE TABLE `act_completions` (\n\t`id` text PRIMARY KEY,\n\t`program_id` text NOT NULL,\n\t`act_id` text NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `seen_programs` (\n\t`id` text PRIMARY KEY,\n\t`seen_at` integer NOT NULL\n);",
+      "CREATE INDEX `act_completions_date_idx` ON `act_completions` (`date`);",
+    ],
+  },
+  {
+    tag: "20261015210608_prayer_assistant_recognition_mode",
+    statements: [
+      "ALTER TABLE `prayer_assistant_settings` ADD `recognition_mode` text;",
+    ],
+  },
+  {
+    tag: "20261015211045_lesson_progress",
+    statements: [
+      "CREATE TABLE `lesson_progress` (\n\t`lesson_id` text PRIMARY KEY,\n\t`current_slide` integer NOT NULL,\n\t`furthest_slide` integer NOT NULL,\n\t`completed_at` integer,\n\t`updated_at` integer NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261015211413_library_asset_positions",
     statements: [
       "CREATE TABLE `library_asset_positions` (\n\t`asset_id` text PRIMARY KEY,\n\t`position` real NOT NULL,\n\t`saved_at` text NOT NULL\n);",
     ],

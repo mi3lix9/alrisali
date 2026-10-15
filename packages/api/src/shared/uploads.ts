@@ -37,6 +37,14 @@ export const UPLOAD_RULES = {
     },
     maxBytes: 5 * MEBIBYTE,
   },
+  slide: {
+    contentTypes: {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+    },
+    maxBytes: 10 * MEBIBYTE,
+  },
 } as const satisfies Record<
   string,
   { contentTypes: Record<string, string>; maxBytes: number }
