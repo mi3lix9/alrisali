@@ -11,7 +11,11 @@ import { UpcomingGatheringsCard } from "@/features/gatherings";
 import { InsightsLinkCard } from "@/features/insights";
 import { MoodCheckInCard } from "@/features/mood";
 import { PrayerLogQuickTicks, PrayerStreakTile } from "@/features/prayer-log";
-import { NextPrayerCard, useAfterMaghrib } from "@/features/prayer-times";
+import {
+  NextPrayerCard,
+  useAfterMaghrib,
+  useTonightHijriDate,
+} from "@/features/prayer-times";
 import { QiblaTile } from "@/features/qibla";
 import { ContinueReadingTile, VerseOfTheDayCard } from "@/features/quran";
 import { HomeShortcutsCard } from "@/features/shortcuts";
@@ -31,6 +35,7 @@ const accountIcon =
 const HomeRoute = () => {
   const { t } = useTranslation();
   const afterMaghrib = useAfterMaghrib();
+  const tonight = useTonightHijriDate();
 
   return (
     <>
@@ -53,7 +58,7 @@ const HomeRoute = () => {
       <Screen>
         <NextPrayerCard />
         <WidgetRow>
-          <HijriTodayCard compact />
+          <HijriTodayCard compact tonight={tonight} />
           <PrayerStreakTile />
         </WidgetRow>
         <PrayerLogQuickTicks showStreak={false} />

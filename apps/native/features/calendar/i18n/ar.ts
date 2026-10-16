@@ -5,6 +5,7 @@ export const ar = {
     noOccasions: "لا مناسبة اليوم.",
     openCalendar: "فتح التقويم",
     separator: "، ",
+    eve: "الليلة ليلة {{date}}",
   },
   month: {
     previous: "الشهر السابق",

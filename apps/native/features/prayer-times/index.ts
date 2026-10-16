@@ -4,3 +4,4 @@ export { NextPrayerCard } from "./components/next-prayer-card";
 export { PrayerTimesScreen } from "./screens/prayer-times-screen";
 export { useAfterMaghrib } from "./hooks/use-after-maghrib";
 export { useRememberCity } from "./data/recent-cities";
+export { useTonightHijriDate } from "./hooks/use-tonight-hijri-date";
