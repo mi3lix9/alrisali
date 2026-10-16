@@ -162,3 +162,6 @@ export type {
   ConverterCalendar,
   DateConverter,
 } from "./date-converter";
+export { METHOD_RULES } from "./prayer-times";
+export type { MethodRules, TwilightRule } from "./prayer-times";
+export { locationTimeZone } from "./time-zone";

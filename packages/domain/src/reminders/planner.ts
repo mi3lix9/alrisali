@@ -1,6 +1,6 @@
 import { Temporal } from "temporal-polyfill";
 
-import { calculatePrayerTimes } from "../shared";
+import { calculatePrayerTimes, locationTimeZone } from "../shared";
 import type { MessageStyle, PrayerTimesSettings } from "../shared";
 import { CLASSIC_SAYINGS } from "./sayings";
 import type { ClassicSaying } from "./sayings";
@@ -51,7 +51,7 @@ export type ReminderSource<Message> = (
 export interface PrayerReminderMessage {
   kind: "prayer-time";
   prayerTime: Salah | "imsak";
-  /** The Prayer Time itself, on the device's clock. */
+  /** The Prayer Time itself, on the location's clock. */
   at: Temporal.ZonedDateTime;
   minutesBefore: number;
   style: MessageStyle;
@@ -106,7 +106,14 @@ const prayerReminders = (
   settings: ReminderSettings,
   style: MessageStyle
 ): ReminderCandidate<PrayerReminderMessage>[] => {
-  const timeZone = window.now.timeZoneId;
+  // The place's own clock: its dates name the Reminders and its local times
+  // word them, whatever zone the device is in. One date more than the
+  // window, so a place behind the device still reaches the window's end.
+  const timeZone = locationTimeZone(prayerTimes.coordinates);
+  const today = window.now.withTimeZone(timeZone).toPlainDate();
+  const dates = Array.from({ length: window.dates.length + 1 }, (_, offset) =>
+    today.add({ days: offset })
+  );
   const rules: [Salah | "imsak", ReminderRule][] = [
     ["imsak", settings.imsak],
     ...SALAH.map((salah): [Salah, ReminderRule] => [
@@ -114,7 +121,7 @@ const prayerReminders = (
       settings.salah[salah],
     ]),
   ];
-  return window.dates.flatMap((date) => {
+  return dates.flatMap((date) => {
     const times = calculatePrayerTimes(date, timeZone, prayerTimes);
     return rules.flatMap(([prayerTime, rule]) => {
       const alert = reminderAlert(rule);

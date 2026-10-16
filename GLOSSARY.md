@@ -14,7 +14,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Salah**: One of the five obligatory daily prayers: Fajr, Dhuhr, Asr, Maghrib, Isha. _Avoid_: Prayer (when the five obligatory prayers are meant), namaz
 
-**Prayer Time**: A computed moment in the day for a given place: Imsak, Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight. Only five of them are Salah.
+**Prayer Time**: A computed moment in the day for a given place, on that place's own clock (its time zone, not the device's): Imsak, Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight. Only five of them are Salah.
 
 **Calculation Method**: The set of astronomical and juristic rules that turns a place and date into Prayer Times: Ja'fari (the default), Sunni, Hanafi or Ibadi. _Avoid_: "shia" method
 

@@ -2,20 +2,24 @@
   "name": "@alrisali/content",
   "version": "0.0.0",
   "private": true,
-  "description": "Bundled Quran and book data, with a NOTICE per source.",
+  "description": "Bundled Quran, book and time-zone data, with a NOTICE per source.",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./books": "./src/books/index.ts",
     "./quran": "./src/quran/index.ts",
     "./quran/font.ttf": "./src/quran/data/kfgqpc_hafs_v30.ttf",
-    "./magnetic-model": "./src/magnetic-model/index.ts"
+    "./magnetic-model": "./src/magnetic-model/index.ts",
+    "./time-zones": "./src/time-zones/index.ts"
   },
   "scripts": {
     "check-types": "tsc -b",
     "books:build": "bun scripts/books/build-books.ts",
     "quran:build": "bun scripts/quran/build.ts",
     "quran:build-hizb": "bun scripts/quran/build-hizb.ts"
+  },
+  "dependencies": {
+    "@photostructure/tz-lookup": "^11.7.0"
   },
   "devDependencies": {
     "@alrisali/config": "workspace:*",

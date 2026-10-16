@@ -76,6 +76,15 @@ export const CONTENT_SOURCES = [
       url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
     },
   },
+  {
+    id: "timezone-boundaries",
+    name: "timezone-boundary-builder (Evan Siroky), via @photostructure/tz-lookup",
+    url: "https://github.com/evansiroky/timezone-boundary-builder",
+    licence: {
+      name: "ODbL 1.0, © OpenStreetMap contributors (lookup library: CC0 1.0)",
+      url: "https://opendatacommons.org/licenses/odbl/1-0/",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];
