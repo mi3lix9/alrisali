@@ -11,6 +11,8 @@ import type { SyncServer, TemporaryDirectory } from "../shared/testing";
 import { createFavoritesRepository } from "./repository";
 
 const AYAT_AL_KURSI = { kind: "ayah", key: "2:255" } as const;
+const KUMAYL = { kind: "supplication", key: "mafatih-dua-kumayl" } as const;
+const AL_KAHF = { kind: "surah", key: "18" } as const;
 
 let server: SyncServer;
 let serverDirectory: TemporaryDirectory;
@@ -52,6 +54,35 @@ describe("favourite ayat sync", () => {
       await expect(
         createFavoritesRepository(phone.db).has(AYAT_AL_KURSI)
       ).resolves.toBeFalsy();
+    } finally {
+      await Promise.all([phone.close(), tablet.close()]);
+    }
+  });
+
+  it("brings several Favorites deleted at once to a second device", async () => {
+    const [phone, tablet] = await Promise.all(
+      ["bulk-phone", "bulk-tablet"].map((device) =>
+        openSignedInDevice({ server, directory, cloudName: "bulk", device })
+      )
+    );
+    if (!phone || !tablet) {
+      throw new Error("The devices did not open");
+    }
+    try {
+      const favorites = createFavoritesRepository(phone.db);
+      await favorites.add(AYAT_AL_KURSI);
+      await favorites.add(KUMAYL);
+      await favorites.add(AL_KAHF);
+      await phone.sync();
+      await tablet.sync();
+
+      await createFavoritesRepository(tablet.db).removeMany([
+        AYAT_AL_KURSI,
+        KUMAYL,
+      ]);
+      await tablet.sync();
+      await phone.sync();
+      await expect(favorites.list()).resolves.toMatchObject([AL_KAHF]);
     } finally {
       await Promise.all([phone.close(), tablet.close()]);
     }
