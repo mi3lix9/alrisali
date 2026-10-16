@@ -10,6 +10,7 @@ import {
   KFGQPC_NOTICE,
   PAGE_COUNT,
   QURAN_SOURCE,
+  SURAH_ALIASES,
   SURAHS,
 } from ".";
 import type { QuranLine } from ".";
@@ -179,5 +180,26 @@ describe("Quran dataset integrity", () => {
       (ayah) => starts.has(ayah.key) && !ayah.text.startsWith("۞")
     );
     expect(unmarked.filter((ayah) => ayah.ayah !== 1)).toStrictEqual([]);
+  });
+});
+
+describe("Surah aliases", () => {
+  const entries = Object.entries(SURAH_ALIASES).flatMap(([number, aliases]) =>
+    aliases.map((alias) => ({ number: Number(number), alias }))
+  );
+
+  it("name only real Surahs", () => {
+    expect(entries.length).toBeGreaterThan(0);
+    expect(
+      entries.filter(({ number }) => SURAHS[number - 1] === undefined)
+    ).toStrictEqual([]);
+  });
+
+  it("has no blank, padded or repeated alias", () => {
+    const spellings = entries.map(({ alias }) => alias.toLowerCase());
+    expect(
+      entries.filter(({ alias }) => alias.trim() !== alias || !alias)
+    ).toStrictEqual([]);
+    expect(new Set(spellings).size).toBe(spellings.length);
   });
 });

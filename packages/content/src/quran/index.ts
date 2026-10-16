@@ -19,6 +19,9 @@ export type AyahKey = `${number}:${number}`;
  */
 export { HIZB_QUARTER_STARTS } from "./data/hizb";
 
+/** Other names and spellings of each Surah (in-house), by Surah number. */
+export { SURAH_ALIASES } from "./data/surah-aliases";
+
 export interface Surah {
   number: number;
   nameAr: string;
