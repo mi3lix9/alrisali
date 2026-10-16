@@ -15,7 +15,8 @@ import type { RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { Text, View } from "react-native";
 
-import type { CanvasHandle } from "../hooks/use-capture-share";
+import type { CanvasHandle } from "@/shared/lib/capture-share";
+
 import { SHARE_QURAN_FONT } from "../hooks/use-share-fonts";
 
 /** What the canvas shows, apart from its options. */

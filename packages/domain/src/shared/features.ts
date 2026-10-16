@@ -52,6 +52,14 @@ export const FEATURES = [
   { id: "gatherings", area: "more", shortcut: "hidden" },
   { id: "insights", area: "more", shortcut: "shown" },
   { id: "khatmah", area: "quran", shortcut: "hidden" },
+  { id: "timetable", area: "prayer", shortcut: "hidden" },
+  {
+    id: "imsakiyya",
+    area: "seasonal",
+    shortcut: "shown",
+    // From 20 Sha'ban, so it is there before the first fast, to the last day.
+    window: { start: { month: 8, day: 20 }, end: { month: 9, day: 30 } },
+  },
 ] as const satisfies readonly FeatureEntry[];
 
 export type Feature = (typeof FEATURES)[number];

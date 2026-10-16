@@ -82,12 +82,34 @@ describe(featuresByArea, () => {
     ).toStrictEqual(["quran", "worship", "seasonal"]);
   });
 
-  it("lists every one of the app's features but Home", () => {
+  it("lists every one of the app's features but Home and the seasonal ones out of season", () => {
     expect(
       featuresByArea(FEATURES, SHAWWAL_2).flatMap(({ features }) =>
         ids(features)
       )
-    ).toHaveLength(FEATURES.length - 1);
+    ).toHaveLength(
+      FEATURES.filter((feature) => !("window" in feature)).length - 1
+    );
+  });
+});
+
+const appIds = (today: HijriDate) => ids(visibleFeatures(FEATURES, today));
+
+describe("the Imsakiyya", () => {
+  it("is hidden outside its Hijri window", () => {
+    expect(appIds(SHAWWAL_2)).not.toContain("imsakiyya");
+    expect(appIds({ year: 1448, month: 8, day: 19 })).not.toContain(
+      "imsakiyya"
+    );
+    expect(appIds({ year: 1448, month: 12, day: 10 })).not.toContain(
+      "imsakiyya"
+    );
+  });
+
+  it("shows from 20 Sha'ban to the last day of Ramadan", () => {
+    expect(appIds({ year: 1448, month: 8, day: 20 })).toContain("imsakiyya");
+    expect(appIds(RAMADAN_1)).toContain("imsakiyya");
+    expect(appIds(RAMADAN_30)).toContain("imsakiyya");
   });
 });
 

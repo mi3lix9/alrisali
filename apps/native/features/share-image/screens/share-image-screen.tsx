@@ -29,11 +29,11 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, useWindowDimensions, View } from "react-native";
 
+import { useCaptureShare } from "@/shared/lib/capture-share";
 import { Screen } from "@/shared/ui/screen";
 
 import { contentFits, ShareCanvas } from "../components/share-canvas";
 import type { ShareCanvasContent } from "../components/share-canvas";
-import { useCaptureShare } from "../hooks/use-capture-share";
 import { useShareFonts } from "../hooks/use-share-fonts";
 import { useShareSource } from "../hooks/use-share-source";
 import type { ShareSource } from "../hooks/use-share-source";

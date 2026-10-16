@@ -19,6 +19,8 @@ export const en: Catalog<typeof ar> = {
     gatherings: "Gatherings",
     insights: "Insights",
     khatmah: "Khatmah",
+    timetable: "Monthly timetable",
+    imsakiyya: "Ramadan Imsakiyya",
   },
   featureAreas: {
     quran: "Quran",
