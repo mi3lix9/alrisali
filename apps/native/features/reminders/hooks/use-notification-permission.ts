@@ -15,6 +15,8 @@ export interface NotificationAccess {
   canAsk: boolean;
   /** Android: alarms fire on time (always true elsewhere). */
   exactAlarms: boolean;
+  /** iOS: the app's notifications may play sound (always true elsewhere). */
+  sound: boolean;
 }
 
 const ACCESS_QUERY_KEY = ["reminders", "notification-access"];
@@ -28,6 +30,7 @@ const readAccess = async (): Promise<NotificationAccess> => {
     granted: notifications.granted,
     canAsk: notifications.canAskAgain,
     exactAlarms: exact.granted,
+    sound: notifications.ios?.allowsSound ?? true,
   };
 };
 

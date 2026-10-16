@@ -1,4 +1,15 @@
 export {
+  ALERT_CHECKS,
+  alertChecks,
+  alertProblems,
+  TEST_ALERT_DELAY_SECONDS,
+} from "./alert-health";
+export type {
+  AlertCheck,
+  AlertCheckId,
+  AlertHealthReadings,
+} from "./alert-health";
+export {
   adhanRecordingSchema,
   adhanSoundSchema,
   atTimeSound,

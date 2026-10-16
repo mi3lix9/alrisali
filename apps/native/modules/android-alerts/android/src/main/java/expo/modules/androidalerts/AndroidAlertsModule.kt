@@ -103,6 +103,10 @@ class AndroidAlertsModule : Module() {
     Function("getAutostartInfo") {
       mapOf("manufacturer" to AlertHealth.manufacturer(), "hasScreen" to AlertHealth.hasAutostartScreen())
     }
+    Function("isAutostartConfirmed") { AlertHealth.isAutostartConfirmed(context) }
+    Function("setAutostartConfirmed") { confirmed: Boolean ->
+      AlertHealth.setAutostartConfirmed(context, confirmed)
+    }
     Function("openAutostartSettings") { AlertHealth.openAutostartSettings(context) }
   }
 }

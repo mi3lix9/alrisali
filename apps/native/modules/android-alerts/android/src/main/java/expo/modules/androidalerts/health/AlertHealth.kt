@@ -102,6 +102,17 @@ object AlertHealth {
     open(context, candidates, appDetails(context))
   }
 
+  private fun prefs(context: Context) =
+    context.getSharedPreferences("alert-health", Context.MODE_PRIVATE)
+
+  /** Whether the Believer said they allowed autostart (Android cannot tell). */
+  fun isAutostartConfirmed(context: Context): Boolean =
+    prefs(context).getBoolean("autostartConfirmed", false)
+
+  fun setAutostartConfirmed(context: Context, confirmed: Boolean) {
+    prefs(context).edit().putBoolean("autostartConfirmed", confirmed).apply()
+  }
+
   private fun appDetails(context: Context) =
     Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${context.packageName}"))
 

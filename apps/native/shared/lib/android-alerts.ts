@@ -50,6 +50,9 @@ interface AndroidAlertsModule {
    * autostart screen. Android cannot report if autostart is on.
    */
   getAutostartInfo: () => { manufacturer: string; hasScreen: boolean };
+  /** Whether the Believer confirmed allowing autostart (kept on the device). */
+  isAutostartConfirmed: () => boolean;
+  setAutostartConfirmed: (confirmed: boolean) => void;
   /** Opens the maker's autostart screen, else the app's details. */
   openAutostartSettings: () => void;
 }
