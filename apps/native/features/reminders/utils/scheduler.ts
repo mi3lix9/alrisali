@@ -2,8 +2,10 @@ import { diffSchedule, isStaleAlert } from "@alrisali/domain/reminders";
 import {
   AndroidImportance,
   cancelScheduledNotificationAsync,
+  dismissNotificationAsync,
   getAllScheduledNotificationsAsync,
   getPermissionsAsync,
+  getPresentedNotificationsAsync,
   scheduleNotificationAsync,
   SchedulableTriggerInputTypes,
   setNotificationChannelAsync,
@@ -64,6 +66,22 @@ export const isStaleReminder = (data: ReminderData | null): boolean =>
 
 // A Reminder arriving while the app is open still shows and sounds, unless
 // it arrives over 30 minutes late (the device was off): then it is dropped.
+//
+// Where else a stale alert is stopped, and the platform limit:
+// - Android notifications: expo-notifications drops a past-due date trigger
+//   when it re-arms after a reboot ("will not trigger in the future,
+//   removing", ExpoSchedulingDelegate.kt), so a phone that was off delivers
+//   none late. The adhan service drops alarms past the stale window in
+//   `AdhanScheduler.arm` and `AdhanAlarmReceiver`, on boot, time change and
+//   app update.
+// - Every launch and resume (`syncReminders`) cancels pending past-due
+//   Reminders (they are no longer planned) and dismisses delivered ones that
+//   are over 30 minutes late.
+// - Limit: a local notification the system delivers late while the app is not
+//   running (iOS after a restart; Android if the OS defers an alarm) cannot be
+//   intercepted, as neither platform runs app code for local notifications
+//   (iOS has no service extension for local ones). It shows, and is taken
+//   down the next time the app opens.
 setNotificationHandler({
   handleNotification: (notification) => {
     const show = !isStaleReminder(
@@ -100,6 +118,37 @@ export const ensureChannels = (): Promise<void> => {
   return channelsReady;
 };
 
+/** The ids of delivered Reminders more than 30 minutes past due at `now`. */
+export const staleDeliveredIds = (
+  delivered: readonly { identifier: string; data: unknown }[],
+  now: Temporal.Instant
+): string[] =>
+  delivered.flatMap(({ identifier, data }) => {
+    const reminder = readReminderData(data);
+    return reminder !== null &&
+      reminder.fireAt > 0 &&
+      isStaleAlert(Temporal.Instant.fromEpochMilliseconds(reminder.fireAt), now)
+      ? [identifier]
+      : [];
+  });
+
+/**
+ * Takes down Reminders the system delivered more than 30 minutes late (the
+ * phone was off or asleep), so the Believer is not called to a Salah that
+ * has passed.
+ */
+const dismissStaleDelivered = async (): Promise<void> => {
+  const presented = await getPresentedNotificationsAsync();
+  const stale = staleDeliveredIds(
+    presented.map(({ request }) => ({
+      identifier: request.identifier,
+      data: request.content.data,
+    })),
+    Temporal.Now.instant()
+  );
+  await Promise.all(stale.map((id) => dismissNotificationAsync(id)));
+};
+
 const applyReminders = async (
   allRequests: readonly ReminderRequest[]
 ): Promise<void> => {
@@ -113,10 +162,15 @@ const applyReminders = async (
   // fixes them when they are off.
   const { granted } = await getPermissionsAsync();
   if (allRequests.length > 0 && !granted) {
+    // Without permission nothing may sound: the native adhan alarms armed
+    // earlier (before permission was taken away) are disarmed too, since the
+    // native receiver plays without asking.
+    androidAlerts?.scheduleAdhanAlarms([]);
     return;
   }
   androidAlerts?.scheduleAdhanAlarms(adhanAlarms);
   await ensureChannels();
+  await dismissStaleDelivered();
   const pending = await getAllScheduledNotificationsAsync();
   const scheduled = pending.flatMap(({ identifier, content }) => {
     const data = readReminderData(content.data);
