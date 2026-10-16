@@ -10,7 +10,7 @@ import { ChevronRightIcon } from "panelui-native/icons";
 import { useMemo, useRef } from "react";
 import type { ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, Text as NativeText, ScrollView, View } from "react-native";
 import type {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -206,7 +206,10 @@ export const SurahMode = ({
             onTextLayout={onTextLayout}
           >
             {ayat.map((ayah) => (
-              <Text
+              // A bare React Native Text, so each ayah inherits the surah's
+              // font size and line height (Panel UI Text would reset them to
+              // text-base).
+              <NativeText
                 key={ayah.key}
                 onPress={onTap}
                 onLongPress={() => onLongPressAyah(ayah.key)}
@@ -216,7 +219,7 @@ export const SurahMode = ({
                 }`}
               >
                 {`${ayah.text} `}
-              </Text>
+              </NativeText>
             ))}
           </Text>
         </Direction>
