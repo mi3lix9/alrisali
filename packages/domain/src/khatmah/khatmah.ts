@@ -1,13 +1,14 @@
 import { AYAT } from "@alrisali/content/quran";
-import type { AyahKey } from "@alrisali/content/quran";
 import type { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import type { KhatmahReminderPlan } from "../shared";
 import { applySegments, segmentDueDate, trimPartial } from "./adjustments";
-import type { KhatmahAdjustments } from "./adjustments";
+import type { KhatmahAdjustments, KhatmahSession } from "./adjustments";
 import { AMOUNT_LIMITS, AMOUNT_UNITS, baseRanges } from "./plans";
 import type { SessionInterval } from "./plans";
+
+export type { KhatmahSession } from "./adjustments";
 
 /** An even split runs from this many sessions... */
 export const MIN_EVEN_DAYS = 3;
@@ -72,18 +73,6 @@ export const readKhatmahPlan = (stored: string): KhatmahPlan | null => {
 /** Days between a plan's sessions: 1, 2 or 7. */
 export const planEvery = (plan: KhatmahPlan): SessionInterval =>
   plan.every ?? 1;
-
-/** One scheduled portion of a Khatmah: a run of ayat, first to last. */
-export interface KhatmahSession {
-  /** From 1. */
-  number: number;
-  from: AyahKey;
-  to: AyahKey;
-  /** The Quran Pages the portion touches, its first and last page included. */
-  pages: number;
-  firstPage: number;
-  lastPage: number;
-}
 
 const sessionsCache = new Map<string, readonly KhatmahSession[]>();
 

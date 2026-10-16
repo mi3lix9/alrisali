@@ -3,13 +3,23 @@ import type { AyahKey } from "@alrisali/content/quran";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
-import type { KhatmahSession } from "./khatmah";
-
 /*
  * What rescheduling and "Mark done till…" change about a Khatmah. They are
  * stored beside the plan, as an `adjust` key of the plan's JSON, so they need
  * no table of their own and sync with the Khatmah.
  */
+
+/** One scheduled portion of a Khatmah: a run of ayat, first to last. */
+export interface KhatmahSession {
+  /** From 1. */
+  number: number;
+  from: AyahKey;
+  to: AyahKey;
+  /** The Quran Pages the portion touches, its first and last page included. */
+  pages: number;
+  firstPage: number;
+  lastPage: number;
+}
 
 const POSITIONS = new Map<string, number>(
   AYAT.map((ayah, index) => [ayah.key, index])
