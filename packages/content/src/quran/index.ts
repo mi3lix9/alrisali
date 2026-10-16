@@ -131,3 +131,7 @@ export const getQuranPage = (page: number): QuranPage => {
   const firstAyah = AYAT.find((ayah) => ayah.page === page);
   return { number: page, juz: firstAyah?.juz ?? 1, lines };
 };
+
+/** The sajdah ayat, obligatory (the four 'azaa'im) or recommended. */
+export { SAJDAH } from "./data/sajdah";
+export type { Sajdah, SajdahKind } from "./data/sajdah";

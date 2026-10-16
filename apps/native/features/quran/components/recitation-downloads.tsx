@@ -319,6 +319,7 @@ export const RecitationDownloads = () => {
       <ReciterSheet
         open={choosing}
         reciter=""
+        start="1:1"
         onSelect={(key) => {
           if (findReciter(key)) {
             setAdded((now) => (now.includes(key) ? now : [...now, key]));
