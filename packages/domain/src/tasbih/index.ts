@@ -28,3 +28,15 @@ export type {
   OpenTasbihFeedback,
   OpenTasbihTap,
 } from "./open-tasbih";
+export {
+  DEFAULT_TASBIH_SETTINGS,
+  TASBIH_FEEDBACK_MODES,
+  tasbihFeedback,
+  tasbihFeedbackModeSchema,
+  tasbihSettingsSchema,
+} from "./feedback";
+export type {
+  TasbihFeedbackMode,
+  TasbihFeedbackOutputs,
+  TasbihSettings,
+} from "./feedback";
