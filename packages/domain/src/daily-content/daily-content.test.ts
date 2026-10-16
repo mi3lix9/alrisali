@@ -5,8 +5,10 @@ import { describe, expect, it } from "vitest";
 import {
   dailyContentSchema,
   todaysDailyContent,
+  todaysWorship,
   WEEKDAYS,
   weekdayOf,
+  worshipEntrySchema,
 } from "./daily-content";
 
 const day = (iso: string) => Temporal.PlainDate.from(iso);
@@ -71,5 +73,84 @@ describe("Daily Content", () => {
 
     expect(todaysDailyContent(entries, day("2026-10-15"))).toBeUndefined();
     expect(todaysDailyContent(entries, day("2026-10-16"))).toBeUndefined();
+  });
+});
+
+describe("Today's worship", () => {
+  const entries = [
+    {
+      kind: "ziyarah",
+      day: "thursday",
+      supplicationId: "mafatih-ziyarat-ashura",
+    },
+    {
+      kind: "night-dua",
+      day: "thursday",
+      supplicationId: "mafatih-dua-kumayl",
+    },
+    { kind: "every-day", day: "every", supplicationId: "mafatih-dua-sabah" },
+    { kind: "night-dua", day: "thursday", supplicationId: "gone" },
+  ];
+  const weekdayDuas = [
+    { weekday: "thursday", supplicationId: "sahifa-weekday-thursday" },
+  ];
+  const thursday = day("2026-10-15");
+
+  it("offers the weekday's dua, ziyarah and every-day items before Maghrib", () => {
+    const worship = todaysWorship({
+      weekdayDuas,
+      entries,
+      today: thursday,
+      afterMaghrib: false,
+    });
+    expect(worship.dua?.id).toBe("sahifa-weekday-thursday");
+    expect(worship.ziyarah.map(({ id }) => id)).toStrictEqual([
+      "mafatih-ziyarat-ashura",
+    ]);
+    expect(worship.everyDay.map(({ id }) => id)).toStrictEqual([
+      "mafatih-dua-sabah",
+    ]);
+    expect(worship.tonight).toStrictEqual([]);
+  });
+
+  it("shows Kumayl as tonight's dua after Maghrib on Thursday, dropping unknown ids", () => {
+    const worship = todaysWorship({
+      weekdayDuas,
+      entries,
+      today: thursday,
+      afterMaghrib: true,
+    });
+    expect(worship.tonight.map(({ id }) => id)).toStrictEqual([
+      "mafatih-dua-kumayl",
+    ]);
+  });
+
+  it("offers no night dua on a weekday without one", () => {
+    const worship = todaysWorship({
+      weekdayDuas,
+      entries,
+      today: day("2026-10-16"),
+      afterMaghrib: true,
+    });
+    expect(worship.tonight).toStrictEqual([]);
+    expect(worship.dua).toBeUndefined();
+    expect(worship.everyDay).toHaveLength(1);
+  });
+
+  it("accepts every-day entries only without a weekday", () => {
+    const entry = { kind: "every-day", supplicationId: "sahifa-1" };
+    expect(
+      worshipEntrySchema.safeParse({ ...entry, day: "every" }).success
+    ).toBeTruthy();
+    expect(
+      worshipEntrySchema.safeParse({ ...entry, day: "friday" }).success
+    ).toBeFalsy();
+    expect(
+      worshipEntrySchema.safeParse({
+        kind: "ziyarah",
+        day: "every",
+        supplicationId: "sahifa-1",
+      }).success
+    ).toBeFalsy();
   });
 });

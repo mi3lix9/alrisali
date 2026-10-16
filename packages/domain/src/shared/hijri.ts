@@ -517,3 +517,31 @@ export const forcedHijriDateProblem = ({
     ? "too-far"
     : null;
 };
+
+/**
+ * Whether `now` is at or after Maghrib, the minute the Hijri day of night
+ * content turns. A null Maghrib (never computed) is never reached.
+ */
+export const isAfterMaghrib = (
+  now: Temporal.ZonedDateTime,
+  maghrib: Temporal.ZonedDateTime | null
+): boolean =>
+  maghrib !== null &&
+  Temporal.Instant.compare(now.toInstant(), maghrib.toInstant()) >= 0;
+
+/**
+ * The Hijri Date night content follows: the civil day's, or the next day's
+ * from Maghrib on, because the Hijri day begins at sunset. The date shown
+ * elsewhere stays `calendar.toHijri` of the civil day; only night content
+ * (tonight's Occasion, night a'mal, night duas) reads this.
+ */
+export const nightHijriDate = (
+  now: Temporal.ZonedDateTime,
+  maghrib: Temporal.ZonedDateTime | null,
+  calendar: HijriCalendar
+): HijriDate => {
+  const civil = now.toPlainDate();
+  return calendar.toHijri(
+    isAfterMaghrib(now, maghrib) ? civil.add({ days: 1 }) : civil
+  );
+};
