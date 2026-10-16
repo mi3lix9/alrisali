@@ -30,7 +30,14 @@ describe(playFromAyah, () => {
 
   it("stops at the end Play To chose", () => {
     const state = run(
-      playFromAyah("1:6", "ar.alafasy", { kind: "page" }),
+      playFromAyah(
+        "1:6",
+        "ar.alafasy",
+        { kind: "page" },
+        {
+          askToContinueAtEnd: false,
+        }
+      ),
       { type: "ready" },
       { type: "finished" },
       { type: "ready" },

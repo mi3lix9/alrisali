@@ -72,16 +72,21 @@ export {
 } from "./reciters";
 export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
 export {
+  AYAH_LENGTH_FACTORS,
   isPlayToReachable,
   MAX_PLAYBACK_SPEED,
   MIN_PLAYBACK_SPEED,
   PLAY_TO_KINDS,
+  PLAYBACK_SPEEDS,
   playbackPlan,
   playToEnd,
+  REPEAT_COUNTS,
+  SLEEP_TIMERS,
 } from "./playback-plan";
 export type {
   PauseAfterAyah,
   PlaybackPlan,
+  PlaybackSettings,
   PlayTo,
   RepeatCount,
   SleepTimer,
