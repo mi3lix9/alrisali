@@ -19,7 +19,7 @@ export const BelieverCard = ({ believer }: { believer: Believer }) => {
 
   return (
     <Card>
-      <Card.Content className="flex-row items-center gap-3">
+      <Card.Content className="flex-row items-center gap-3 pt-6">
         <Avatar
           size="lg"
           fallback={displayName.slice(0, 1).toUpperCase()}

@@ -226,7 +226,7 @@ export const SurahMode = ({
         </Direction>
       </Pressable>
       <Card className="mt-8">
-        <Card.Content className="items-center gap-3">
+        <Card.Content className="items-center gap-3 pt-6">
           {next ? (
             <>
               <Text size="sm" muted>

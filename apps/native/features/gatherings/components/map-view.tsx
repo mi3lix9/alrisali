@@ -47,7 +47,7 @@ export const MapView = ({
       />
       {selected ? (
         <Card>
-          <Card.Content>
+          <Card.Content className="pt-6">
             <GatheringList
               gatherings={[selected]}
               speakers={speakers}

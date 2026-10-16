@@ -44,7 +44,7 @@ export const AnnouncementsScreen = () => {
   return (
     <Screen>
       <Card>
-        <Card.Content className="gap-4">
+        <Card.Content className="gap-4 pt-6">
           <Item size="sm">
             <Item.Content>
               <Item.Title>{t("screen.receive")}</Item.Title>
@@ -79,7 +79,7 @@ export const AnnouncementsScreen = () => {
       {inbox.isError ? <Text muted>{t("screen.error")}</Text> : null}
       {inbox.data?.announcements.length ? (
         <Card>
-          <Card.Content>
+          <Card.Content className="pt-6">
             <Item.Group>
               {inbox.data.announcements.map((announcement, index) => (
                 <Fragment key={announcement.id}>

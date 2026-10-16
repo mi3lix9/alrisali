@@ -4,12 +4,13 @@ import {
   SURAH_FONT_SIZE,
 } from "@alrisali/domain/quran";
 import type { QuranReaderSettings } from "@alrisali/domain/quran";
+import { writeDigits } from "@alrisali/domain/shared";
 import { Button, Text, ToggleButton, ToggleButtonGroup } from "panelui-native";
 import { MinusIcon, PlusIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { formatNumber } from "@/shared/lib/numbers";
+import { useDigits } from "@/shared/lib/numbers";
 
 interface ReaderSettingsControlsProps {
   settings: QuranReaderSettings;
@@ -22,6 +23,9 @@ export const ReaderSettingsControls = ({
   onChange,
 }: ReaderSettingsControlsProps) => {
   const { t } = useTranslation("quran");
+  // The size is written in the digits read here, so a change of digits
+  // redraws it (formatNumber reads them outside React).
+  const digits = useDigits();
   const stepFont = (direction: 1 | -1) =>
     onChange({
       surahFontSize: Math.min(
@@ -90,7 +94,7 @@ export const ReaderSettingsControls = ({
             <MinusIcon size={18} />
           </Button>
           <Text className="min-w-8 text-center">
-            {formatNumber(settings.surahFontSize)}
+            {writeDigits(String(settings.surahFontSize), digits)}
           </Text>
           <Button
             variant="outline"

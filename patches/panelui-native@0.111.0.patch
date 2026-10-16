@@ -1,16 +1,20 @@
+diff --git a/node_modules/panelui-native/.bun-tag-c448b08ff4784157 b/.bun-tag-c448b08ff4784157
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/lib/module/components/bottom-sheet/index.js b/lib/module/components/bottom-sheet/index.js
-index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..f2c19e527344c900ce711f9220065e1dba1fe502 100644
+index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..73658b6b296f10c4bab6659ea79d10f289bcebcd 100644
 --- a/lib/module/components/bottom-sheet/index.js
 +++ b/lib/module/components/bottom-sheet/index.js
-@@ -33,6 +33,7 @@ import { impactKnock } from "../../utils/haptics.js";
+@@ -33,6 +33,8 @@ import { impactKnock } from "../../utils/haptics.js";
   * something coming up from the bottom.
   */
  import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
 +import { useLabels } from "../../providers/labels.js";
++import { useKeyboardHeight } from "../../hooks/use-keyboard-avoidance.js";
  const SPRING = {
    duration: 420,
    dampingRatio: 0.9
-@@ -290,6 +291,7 @@ function BottomSheetContent({
+@@ -290,6 +292,7 @@ function BottomSheetContent({
    children,
    ...props
  }) {
@@ -18,7 +22,33 @@ index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..f2c19e527344c900ce711f9220065e1d
    const context = useBottomSheet('BottomSheet.Content');
    const {
      open,
-@@ -695,7 +697,7 @@ function BottomSheetContent({
+@@ -302,6 +305,16 @@ function BottomSheetContent({
+   } = useWindowDimensions();
+   const reducedMotion = useReducedMotion();
+   const insets = useSafeAreaInsets();
++  /*
++   * The keyboard lifts the sheet: the space it sits in ends at the
++   * keyboard's top, and a sheet taller than what is left shrinks (its body
++   * scrolls). The safe-area inset the sheet pads its bottom with is already
++   * under the keyboard, so it is taken off the lift.
++   */
++  const keyboardHeight = useKeyboardHeight();
++  const keyboardStyle = useAnimatedStyle(() => ({
++    paddingBottom: Math.max(Math.abs(keyboardHeight.value) - insets.bottom, 0)
++  }));
+   /*
+    * Starts off screen, and the entrance is this value moving to zero.
+    *
+@@ -688,14 +701,15 @@ function BottomSheetContent({
+   return /*#__PURE__*/_jsx(ModalPortal, {
+     children: /*#__PURE__*/_jsx(BottomSheetContext.Provider, {
+       value: context,
+-      children: /*#__PURE__*/_jsxs(View, {
++      children: /*#__PURE__*/_jsxs(Animated.View, {
+         className: "absolute inset-0 justify-end",
++        style: keyboardStyle,
+         children: [/*#__PURE__*/_jsxs(Animated.View, {
+           style: [StyleSheet.absoluteFill, backdropStyle],
            children: [/*#__PURE__*/_jsx(Scrim, {
              blur: blur
            }), /*#__PURE__*/_jsx(Pressable, {
@@ -27,7 +57,16 @@ index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..f2c19e527344c900ce711f9220065e1d
              className: "flex-1",
              onPress: dismissible ? close : undefined
            })]
-@@ -747,7 +749,7 @@ function BottomSheetContent({
+@@ -735,6 +749,8 @@ function BottomSheetContent({
+               maxHeight: sheetCap
+             } : {
+               height: sizedHeight
++            }, {
++              flexShrink: 1
+             }, props.style],
+             children: /*#__PURE__*/_jsx(SheetSurfaceContext.Provider, {
+               value: surface,
+@@ -747,7 +763,7 @@ function BottomSheetContent({
                    })
                  }) : null, textChildren(children), showClose ? /*#__PURE__*/_jsx(Pressable, {
                    accessibilityRole: "button",
@@ -371,6 +410,19 @@ index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72df
        className: "h-6 w-6 rounded-full",
        onPress: hide,
        children: /*#__PURE__*/_jsx(XIcon, {
+diff --git a/lib/module/hooks/use-keyboard-avoidance.js b/lib/module/hooks/use-keyboard-avoidance.js
+index d9eca943397fd3709e4c598b43221a3bfec3756d..8a1f357f7f6e8adbe0dd3adf38757964bb39cfe4 100644
+--- a/lib/module/hooks/use-keyboard-avoidance.js
++++ b/lib/module/hooks/use-keyboard-avoidance.js
+@@ -89,7 +89,7 @@ function nativeControllerPresent() {
+  * cannot change afterwards.
+  */
+ let keyboardHeightImpl;
+-function useKeyboardHeight() {
++export function useKeyboardHeight() {
+   if (!keyboardHeightImpl) keyboardHeightImpl = resolveKeyboardHeight();
+   return keyboardHeightImpl();
+ }
 diff --git a/lib/module/index.js b/lib/module/index.js
 index 17ee04fb80d88b3566cdd49ced2ab1aae5fbfcdf..6e932959204423ca38b5db15fcf34df7dd117283 100644
 --- a/lib/module/index.js
@@ -487,6 +539,29 @@ index f052a73c11a985bd50dfa8b94a1900c5bb4a9a0a..28d58dafac43c8441c808853fcd8f552
      /** Let the middle field be typed into. When false it is display-only. */
      editable?: boolean;
      disabled?: boolean;
+diff --git a/lib/typescript/src/hooks/use-keyboard-avoidance.d.ts b/lib/typescript/src/hooks/use-keyboard-avoidance.d.ts
+index 437ba47f10f92371ef1b9b0294c7949c09086d63..b0072336ab8e3569c131c3ad92cb615068396f48 100644
+--- a/lib/typescript/src/hooks/use-keyboard-avoidance.d.ts
++++ b/lib/typescript/src/hooks/use-keyboard-avoidance.d.ts
+@@ -1,5 +1,5 @@
+ import { type LayoutChangeEvent, type View, type ViewStyle } from 'react-native';
+-import { useAnimatedStyle, type AnimatedRef } from 'react-native-reanimated';
++import { useAnimatedStyle, type AnimatedRef, type SharedValue } from 'react-native-reanimated';
+ export type KeyboardAvoidanceMode = 'lift' | 'dock';
+ export interface UseKeyboardAvoidanceOptions {
+     /** Set false to leave the element where it is. */
+@@ -36,6 +36,11 @@ export interface UseKeyboardAvoidanceResult {
+     /** Apply to the same element. */
+     animatedStyle: ReturnType<typeof useAnimatedStyle<ViewStyle>>;
+ }
++/**
++ * The keyboard's height on the UI thread, in points. The keyboard
++ * controller reports it negative; take `Math.abs`.
++ */
++export declare function useKeyboardHeight(): SharedValue<number>;
+ /** True when the keyboard controller is driving this, rather than the fallback. */
+ export declare function hasKeyboardController(): boolean;
+ export declare function useKeyboardAvoidance({ enabled, active, mode, offset, bottomInset, }?: UseKeyboardAvoidanceOptions): UseKeyboardAvoidanceResult;
 diff --git a/lib/typescript/src/index.d.ts b/lib/typescript/src/index.d.ts
 index 9f4ebba2a3e33c3529c7ba33db7ef973c530f7eb..b20121f2e113bf49fe8a34c81de2c3fbbc41c7f2 100644
 --- a/lib/typescript/src/index.d.ts
@@ -573,18 +648,19 @@ index 3d94b43d4cc8d1919afd70aced7d5e8de4d429af..50936b7a0675f9775bbe9f653e40f143
  //# sourceMappingURL=panel-ui-provider.d.ts.map
 \ No newline at end of file
 diff --git a/src/components/bottom-sheet/index.tsx b/src/components/bottom-sheet/index.tsx
-index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..0336f6cfb9076136cb722ea398f6f3a682f4800c 100644
+index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..36617444dccc130646ec8628f13b101936825131 100644
 --- a/src/components/bottom-sheet/index.tsx
 +++ b/src/components/bottom-sheet/index.tsx
-@@ -51,6 +51,7 @@ import { Text, textChildren } from '../../primitives/text';
+@@ -51,6 +51,8 @@ import { Text, textChildren } from '../../primitives/text';
  import { useBackHandler } from '../../hooks/use-back-handler';
  import { cn } from '../../utils/cn';
  import { impactKnock } from '../../utils/haptics';
 +import { useLabels } from '../../providers/labels';
++import { useKeyboardHeight } from '../../hooks/use-keyboard-avoidance';
  
  /**
   * One spring for the whole surface, in Apple's two designer parameters rather
-@@ -458,6 +459,7 @@ function BottomSheetContent({
+@@ -458,12 +460,23 @@ function BottomSheetContent({
    children,
    ...props
  }: BottomSheetContentProps) {
@@ -592,7 +668,35 @@ index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..0336f6cfb9076136cb722ea398f6f3a6
    const context = useBottomSheet('BottomSheet.Content');
    const { open, setOpen } = context;
    const nativeSheet = useContext(NativeSheetContext);
-@@ -914,7 +916,7 @@ function BottomSheetContent({
+   const { height: screenHeight, width: screenWidth } = useWindowDimensions();
+   const reducedMotion = useReducedMotion();
+   const insets = useSafeAreaInsets();
++  /*
++   * The keyboard lifts the sheet: the space it sits in ends at the
++   * keyboard's top, and a sheet taller than what is left shrinks (its body
++   * scrolls). The safe-area inset the sheet pads its bottom with is already
++   * under the keyboard, so it is taken off the lift.
++   */
++  const keyboardHeight = useKeyboardHeight();
++  const keyboardStyle = useAnimatedStyle(() => ({
++    paddingBottom: Math.max(Math.abs(keyboardHeight.value) - insets.bottom, 0),
++  }));
+   /*
+    * Starts off screen, and the entrance is this value moving to zero.
+    *
+@@ -903,7 +916,10 @@ function BottomSheetContent({
+       {/* Portal content mounts under PortalHost, outside this provider's
+           subtree — re-provide the context so nested consumers keep working. */}
+       <BottomSheetContext.Provider value={context}>
+-        <View className="absolute inset-0 justify-end">
++        <Animated.View
++          className="absolute inset-0 justify-end"
++          style={keyboardStyle}
++        >
+         {/* Derived from the same value the sheet moves on, so the backdrop
+             cannot disagree with it: dragging the sheet halfway down lightens
+             the screen behind it by half. Left to its own fade the scrim stayed
+@@ -914,7 +930,7 @@ function BottomSheetContent({
                is what closes the sheet, since the scrim takes no touches. */}
            <Scrim blur={blur} />
            <Pressable
@@ -601,7 +705,15 @@ index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..0336f6cfb9076136cb722ea398f6f3a6
              className="flex-1"
              onPress={dismissible ? close : undefined}
            />
-@@ -975,7 +977,7 @@ function BottomSheetContent({
+@@ -949,6 +965,7 @@ function BottomSheetContent({
+               sizedHeight === undefined
+                 ? { maxHeight: sheetCap }
+                 : { height: sizedHeight },
++              { flexShrink: 1 },
+               props.style,
+             ]}
+           >
+@@ -975,7 +992,7 @@ function BottomSheetContent({
                {showClose ? (
                  <Pressable
                    accessibilityRole="button"
@@ -610,6 +722,15 @@ index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..0336f6cfb9076136cb722ea398f6f3a6
                    onPress={close}
                    hitSlop={8}
                    className="absolute end-4 top-3 z-10 h-8 w-8 items-center justify-center rounded-full bg-muted active:opacity-70"
+@@ -990,7 +1007,7 @@ function BottomSheetContent({
+             </SheetSurfaceContext.Provider>
+           </Animated.View>
+         </GestureDetector>
+-        </View>
++        </Animated.View>
+       </BottomSheetContext.Provider>
+     </ModalPortal>
+   );
 diff --git a/src/components/calendar/index.tsx b/src/components/calendar/index.tsx
 index 5251db0cdb13a0ea32a74f4237d92ba7098ac0fd..14ff0b16a24f6305350dd808b7092ef02b39f577 100644
 --- a/src/components/calendar/index.tsx
@@ -977,6 +1098,23 @@ index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68b
          className="h-6 w-6 rounded-full"
          onPress={hide}
        >
+diff --git a/src/hooks/use-keyboard-avoidance.ts b/src/hooks/use-keyboard-avoidance.ts
+index fa011fed038a2140ed4a6da91eec2355bb0fd6fa..ae0ca81b16a59c83bb3001654a6db5af14bce734 100644
+--- a/src/hooks/use-keyboard-avoidance.ts
++++ b/src/hooks/use-keyboard-avoidance.ts
+@@ -148,7 +148,11 @@ function nativeControllerPresent(): boolean {
+  */
+ let keyboardHeightImpl: KeyboardHeightHook | undefined;
+ 
+-function useKeyboardHeight(): SharedValue<number> {
++/**
++ * The keyboard's height on the UI thread, in points. The keyboard
++ * controller reports it negative; take `Math.abs`.
++ */
++export function useKeyboardHeight(): SharedValue<number> {
+   if (!keyboardHeightImpl) keyboardHeightImpl = resolveKeyboardHeight();
+   return keyboardHeightImpl();
+ }
 diff --git a/src/index.ts b/src/index.ts
 index c05902c715ea18e09c6523e28e70157b6e1a16a5..2ceb2988882b0aaadc82b121c841d3001e767b61 100644
 --- a/src/index.ts
