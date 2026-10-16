@@ -131,3 +131,14 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export {
+  canRotateReader,
+  pagesOfSpread,
+  shownPageOfSpread,
+  showsSpread,
+  SPREAD_COUNT,
+  SPREAD_MIN_WIDTH,
+  spreadOfPage,
+  WIDE_SCREEN_SHORT_SIDE,
+} from "./spread";
+export type { ScreenSize } from "./spread";
