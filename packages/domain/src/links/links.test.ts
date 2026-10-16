@@ -7,6 +7,7 @@ import {
   ICON_SHORTCUTS,
   linkFeatureId,
   parseLink,
+  shareableLinkUrl,
   webLinkUrl,
 } from "./links";
 import type { AppLink, LinkTargets } from "./links";
@@ -143,5 +144,25 @@ describe("the link path roots", () => {
     for (const path of parsed) {
       expect(parse(`https://alrisali.app/${path}`)).not.toBeNull();
     }
+  });
+});
+
+describe(shareableLinkUrl, () => {
+  it("uses the web domain's universal link when the app has one", () => {
+    expect(
+      shareableLinkUrl({ kind: "ayah", ayah: "2:255" }, "alrisali.app")
+    ).toBe("https://alrisali.app/ayah/2:255");
+    expect(
+      shareableLinkUrl({ kind: "supplication", id: "sahifa-1" }, "alrisali.app")
+    ).toBe("https://alrisali.app/supplication/sahifa-1");
+    expect(
+      shareableLinkUrl({ kind: "khatmah", id: "k1" }, "alrisali.app")
+    ).toBe("https://alrisali.app/khatmah/k1");
+  });
+
+  it("falls back to the app's own scheme without a domain", () => {
+    expect(shareableLinkUrl({ kind: "ayah", ayah: "2:255" })).toBe(
+      "alrisali://ayah/2:255"
+    );
   });
 });

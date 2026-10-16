@@ -5,6 +5,7 @@ import {
   MarkDoneTillRow,
   useKhatmahDecorations,
 } from "@/features/khatmah";
+import { ShareLinkRow } from "@/features/links";
 import { AyahNoteRow, QuranReaderScreen, RibbonRows } from "@/features/quran";
 import { ShareAyahImageRow } from "@/features/share-image";
 
@@ -31,7 +32,15 @@ const QuranRoute = () => {
             <AyahNoteRow ayah={ayah} />
           </>
         ),
-        share: (ayah) => <ShareAyahImageRow ayah={ayah} />,
+        share: (ayah) => (
+          <>
+            <ShareLinkRow
+              testID="ayah-sheet-share-link"
+              link={{ kind: "ayah", ayah }}
+            />
+            <ShareAyahImageRow ayah={ayah} />
+          </>
+        ),
       }}
     />
   );
