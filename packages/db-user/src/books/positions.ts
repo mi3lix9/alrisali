@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq, gt } from "drizzle-orm";
 import { z } from "zod";
 
 import type { UserDb } from "../shared";
@@ -13,6 +13,13 @@ export interface SupplicationPosition {
 export interface SupplicationPositionsRepository {
   /** Where the Believer stopped in the Supplication; null if never saved. */
   position: (supplicationId: string) => Promise<SupplicationPosition | null>;
+  /**
+   * The Supplication the Believer stopped in most recently, past its first
+   * section (so there is something to continue); null if none.
+   */
+  latest: () => Promise<
+    (SupplicationPosition & { supplicationId: string }) | null
+  >;
   /** Saves the section the Believer reached. */
   save: (supplicationId: string, section: number) => Promise<void>;
 }
@@ -34,6 +41,26 @@ export const createSupplicationPositionsRepository = (
       .get();
     return row
       ? { section: row.section, savedAt: new Date(row.savedAt) }
+      : null;
+  },
+  latest: async () => {
+    const row = await db
+      .select({
+        supplicationId: supplicationPositions.supplicationId,
+        section: supplicationPositions.section,
+        savedAt: supplicationPositions.savedAt,
+      })
+      .from(supplicationPositions)
+      .where(gt(supplicationPositions.section, 0))
+      .orderBy(desc(supplicationPositions.savedAt))
+      .limit(1)
+      .get();
+    return row
+      ? {
+          supplicationId: row.supplicationId,
+          section: row.section,
+          savedAt: new Date(row.savedAt),
+        }
       : null;
   },
   save: async (supplicationId, section) => {

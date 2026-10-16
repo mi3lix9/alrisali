@@ -416,6 +416,15 @@ const ACCESS: Record<
   "programs.save": { access: "admin", input: dailyNawafil },
   "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
   "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
+  "dailyContent.worshipList": { access: "admin" },
+  "dailyContent.worshipSet": {
+    access: "admin",
+    input: {
+      kind: "night-dua",
+      day: "thursday",
+      supplicationIds: ["mafatih-dua-kumayl"],
+    },
+  },
 };
 
 const proceduresOf = (
@@ -1080,11 +1089,14 @@ describe("Daily Content", () => {
 
   afterAll(stopLocalCloud);
 
-  it("lists every weekday, empty until Admins choose", async () => {
+  it("lists every weekday with the Sahifa's weekday dua until Admins choose otherwise", async () => {
     const admin = await signInAsAdmin();
 
     await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
-      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+      days: WEEKDAYS.map((weekday) => ({
+        weekday,
+        supplicationId: `sahifa-weekday-${weekday}`,
+      })),
     });
   });
 
@@ -1102,7 +1114,7 @@ describe("Daily Content", () => {
     });
     expect(
       after.days.filter((day) => day.supplicationId !== null)
-    ).toHaveLength(1);
+    ).toHaveLength(WEEKDAYS.length);
   });
 
   it("clears a weekday", async () => {
@@ -1111,8 +1123,11 @@ describe("Daily Content", () => {
 
     await feature(admin, "friday", null);
 
-    await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
-      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+    await expect(callAs(admin, "dailyContent.list")).resolves.toMatchObject({
+      days: expect.arrayContaining([
+        { weekday: "friday", supplicationId: null },
+        { weekday: "thursday", supplicationId: "sahifa-weekday-thursday" },
+      ]),
     });
   });
 
@@ -1164,6 +1179,98 @@ describe("Daily Content", () => {
       ).toBeTruthy();
     }
     await offline.close();
+  });
+});
+
+interface WorshipList {
+  entries: { kind: string; day: string; supplicationId: string }[];
+}
+
+describe("Today's worship mapping", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("starts with Kumayl on Thursday night and Dua al-Sabah every day", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "dailyContent.worshipList")
+    ).resolves.toStrictEqual({
+      entries: [
+        {
+          kind: "night-dua",
+          day: "thursday",
+          supplicationId: "mafatih-dua-kumayl",
+        },
+        {
+          kind: "every-day",
+          day: "every",
+          supplicationId: "mafatih-dua-sabah",
+        },
+      ],
+    });
+  });
+
+  it("replaces what a kind lists on a day, and clears it with an empty list", async () => {
+    const admin = await signInAsAdmin();
+    const set = (supplicationIds: string[]) =>
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationIds,
+      }) as Promise<WorshipList>;
+
+    const two = await set([
+      "mafatih-ziyarat-jamia-kabira",
+      "mafatih-ziyarat-aal-yasin",
+    ]);
+    expect(
+      two.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toHaveLength(2);
+    const one = await set(["mafatih-ziyarat-aal-yasin"]);
+    expect(
+      one.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toStrictEqual([
+      {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationId: "mafatih-ziyarat-aal-yasin",
+      },
+    ]);
+    const none = await set([]);
+    expect(
+      none.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toStrictEqual([]);
+  });
+
+  it("refuses an id no Book holds and a kind on the wrong day", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationIds: ["sahifa-999"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "every-day",
+        day: "friday",
+        supplicationIds: ["sahifa-1"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "night-dua",
+        day: "every",
+        supplicationIds: ["sahifa-1"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 

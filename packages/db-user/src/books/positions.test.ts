@@ -65,4 +65,25 @@ describe(createSupplicationPositionsRepository, () => {
     await expect(positions.save("kumayl", 2.5)).rejects.toThrow(/int/iu);
     await expect(positions.position("kumayl")).resolves.toBeNull();
   });
+
+  it("finds the Supplication stopped in last, ignoring ones left at the first section", async () => {
+    let clock = new Date("2026-10-15T10:00:00Z");
+    const positions = createSupplicationPositionsRepository(
+      database.db,
+      () => clock
+    );
+    await expect(positions.latest()).resolves.toBeNull();
+
+    await positions.save("kumayl", 12);
+    clock = new Date("2026-10-15T11:00:00Z");
+    await positions.save("sabah", 3);
+    clock = new Date("2026-10-15T12:00:00Z");
+    await positions.save("jawshan", 0);
+
+    await expect(positions.latest()).resolves.toStrictEqual({
+      supplicationId: "sabah",
+      section: 3,
+      savedAt: new Date("2026-10-15T11:00:00Z"),
+    });
+  });
 });
