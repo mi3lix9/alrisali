@@ -7,7 +7,7 @@ const QUARTER_KEYS = [null, "quarter", "half", "threeQuarters"] as const;
 /** "¾ الحزب ٥": the hizb, after the share of it read before the page. */
 export const hizbLabel = (
   t: TFunction<"quran">,
-  { hizb, quarter }: PagePosition
+  { hizb, quarter }: Pick<PagePosition, "hizb" | "quarter">
 ): string => {
   const label = t("page.hizb", { hizb });
   const share = QUARTER_KEYS[quarter];

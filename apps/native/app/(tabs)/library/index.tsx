@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 
 import { BooksCard, useSupplicationSearch } from "@/features/books";
-import { FavoritesCard } from "@/features/favorites";
+import { AyahFavoritesList, FavoritesCard } from "@/features/favorites";
 import { LessonsLinkCard } from "@/features/lessons";
 import {
   LibraryAssetsCard,
@@ -36,7 +36,7 @@ const LibraryRoute = () => {
         results={(query) => <LibrarySearchResults query={query} />}
       >
         <ContinueReadingCard />
-        <QuranLibraryCard />
+        <QuranLibraryCard savedFavorites={AyahFavoritesList} />
         <FavoritesCard libraryAssetTitle={libraryAssetTitle} />
         <BooksCard />
         <LessonsLinkCard />

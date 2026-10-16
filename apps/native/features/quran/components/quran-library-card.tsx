@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { PageJumpSheet } from "./page-jump-sheet";
 import { QuranIndexSheet } from "./quran-index-sheet";
 import { QuranSearchSheet } from "./quran-search-sheet";
+import type { SavedFavorites } from "./saved-list";
 
 type LibrarySheet = "index" | "page-jump" | "search";
 
@@ -31,7 +32,12 @@ const openReaderAt = (target: JumpTarget) => {
  * The Quran's entry in the Library: opens Page Mode at page 1, or at a Surah,
  * Juz, page or search result.
  */
-export const QuranLibraryCard = () => {
+export const QuranLibraryCard = ({
+  savedFavorites,
+}: {
+  /** The Favorites the index's Saved tab lists, composed by the route. */
+  savedFavorites?: SavedFavorites;
+}) => {
   const { t } = useTranslation("quran");
   const [sheet, setSheet] = useState<LibrarySheet | null>(null);
   const select = (target: JumpTarget) => {
@@ -80,6 +86,7 @@ export const QuranLibraryCard = () => {
       </Card.Footer>
       <QuranIndexSheet
         open={sheet === "index"}
+        savedFavorites={savedFavorites}
         onSelect={select}
         onPageJump={() => setSheet("page-jump")}
         onClose={close}
