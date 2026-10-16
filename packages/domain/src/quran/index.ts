@@ -50,6 +50,8 @@ export type {
 } from "./reader";
 export { scrubberDomain, scrubberTarget, scrubberValue } from "./scrubber";
 export type { ScrubberDomain } from "./scrubber";
+export { findSurahsByName, parseQuranQuery, QURAN_QUERY_KINDS } from "./query";
+export type { QuranQueryCandidate } from "./query";
 export { searchQuran, searchSurahs } from "./search";
 export type { QuranSearchOptions, QuranSearchResult } from "./search";
 export {

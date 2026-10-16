@@ -1,29 +1,16 @@
 import { AYAT, SURAHS } from "@alrisali/content/quran";
 import type { Surah } from "@alrisali/content/quran";
 
-import { normalizeArabic } from "../shared";
 import { writeDigits } from "../shared/digits";
 import { findAyah } from "./mushaf";
 import type { Ayah } from "./mushaf";
+import { bareQuranText, findSurahsByName } from "./query";
 
 // Search over Surah names and ayah text that does not ask the Believer to type
 // diacritics. Both sides are reduced to bare letters before comparing.
 
-/** Arabic-Indic digits, as the ayah numbers inside the text. */
-const ARABIC_DIGITS = /[\u0660-\u0669]/gu;
 const DAGGER_ALIF = /\u0670/gu;
 const ALIF = /\u0627/gu;
-
-/** Quran text and queries as bare letters, ayah numbers left out. */
-const bareQuranText = (text: string): string =>
-  normalizeArabic(text.replaceAll(ARABIC_DIGITS, ""));
-
-/** Latin as lowercase letters and digits: "Al-Fātiḥah" is "alfatihah". */
-const normalizeLatin = (text: string): string =>
-  text
-    .normalize("NFD")
-    .toLowerCase()
-    .replaceAll(/[^a-z0-9]/gu, "");
 
 interface AyahIndexEntry {
   ayah: Ayah;
@@ -49,12 +36,6 @@ const getAyahIndex = (): AyahIndexEntry[] => {
   return ayahIndex;
 };
 
-const surahIndex = SURAHS.map((surah) => ({
-  surah,
-  arabic: bareQuranText(surah.nameAr),
-  latin: normalizeLatin(surah.nameEn),
-}));
-
 const AYAH_REFERENCE = /^(?<surah>\d+)\s*[:.]\s*(?<ayah>\d+)$/u;
 const SURAH_NUMBER = /^\d+$/u;
 const MIN_AYAH_QUERY = 2;
@@ -79,15 +60,7 @@ const matchingSurahs = (trimmed: string): Surah[] => {
     const surah = SURAHS[Number(trimmed) - 1];
     return surah ? [surah] : [];
   }
-  const arabic = bareQuranText(trimmed);
-  const latin = normalizeLatin(trimmed);
-  return surahIndex
-    .filter(
-      (entry) =>
-        (arabic && entry.arabic.includes(arabic)) ||
-        (latin && entry.latin.includes(latin))
-    )
-    .map((entry) => entry.surah);
+  return findSurahsByName(trimmed);
 };
 
 /**
