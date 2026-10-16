@@ -15,6 +15,8 @@ export const ar = {
     notReached: "لا يحين اليوم",
     notReachedLabel: "{{name}}: لا يحين اليوم في هذا الموقع",
     current: "الوقت الحالي",
+    shareTitle: "مواقيت الصلاة",
+    shareSeparator: " · ",
     allHidden: "كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت.",
   },
   next: {

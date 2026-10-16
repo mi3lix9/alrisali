@@ -11,18 +11,22 @@ import { OptionsCard } from "../components/options-card";
 import { TimetableCard } from "../components/timetable-card";
 import { useFollowDeviceLocation } from "../hooks/use-device-location";
 import { usePrayerTimesView } from "../hooks/use-prayer-times-settings";
+import type { SharedTimes } from "../utils/shared-times";
 
 /**
  * The Prayer tab: today's timetable, its location and its options.
  * `children` (another feature's card, from the route) shows under the
- * timetable; `timetableRowActions` ends each timetable row.
+ * timetable; `timetableRowActions` ends each timetable row and
+ * `timetableShare` shares today's times.
  */
 export const PrayerTimesScreen = ({
   children,
   timetableRowActions,
+  timetableShare,
 }: {
   children?: ReactNode;
   timetableRowActions?: (name: PrayerTimeName) => ReactNode;
+  timetableShare?: (times: SharedTimes) => ReactNode;
 }) => {
   useFollowDeviceLocation();
   const view = usePrayerTimesView();
@@ -43,6 +47,8 @@ export const PrayerTimesScreen = ({
         <TimetableCard
           view={{ ...view, settings }}
           rowActions={timetableRowActions}
+          placeName={believer.location?.name}
+          shareAction={timetableShare}
         />
       ) : null}
       {children}

@@ -19,6 +19,8 @@ export const en: Catalog<typeof ar> = {
     notReached: "Not today",
     notReachedLabel: "{{name}}: not reached today at this location",
     current: "Now",
+    shareTitle: "Prayer times",
+    shareSeparator: " · ",
     allHidden:
       "Every Prayer Time is hidden. Show the ones you want in Prayer Times options.",
   },
