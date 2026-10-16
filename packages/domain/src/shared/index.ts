@@ -143,3 +143,10 @@ export type {
   TasbihLabel,
 } from "./insights-sources";
 export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
+export {
+  adminHijriAdjustmentSchema,
+  DEFAULT_ADMIN_HIJRI_ADJUSTMENT,
+  forcedHijriDateProblem,
+  forcedHijriDateSchema,
+} from "./hijri";
+export type { AdminHijriAdjustment, ForcedHijriDate } from "./hijri";
