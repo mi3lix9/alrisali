@@ -36,6 +36,8 @@ export const believerSettings = sqliteTable("believer_settings", {
   timeFormat: text("time_format"),
   /** "classic" or "modern"; null until chosen, read as Classic. */
   messageStyle: text("message_style"),
+  /** The Custom method's angles, JSON `{fajr, maghrib, isha}`; null until set. */
+  customAngles: text("custom_angles"),
 });
 
 /**

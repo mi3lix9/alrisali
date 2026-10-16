@@ -1,7 +1,8 @@
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
-import type { CalculationMethod } from "./calculation-method";
+import { DEFAULT_CUSTOM_ANGLES } from "./calculation-method";
+import type { CalculationMethod, CustomAngles } from "./calculation-method";
 import { locationTimeZone } from "./time-zone";
 
 /** The Prayer Times of a day, in the order they fall. */
@@ -72,6 +73,8 @@ export interface PrayerTimesSettings {
   coordinates: Coordinates;
   calculationMethod: CalculationMethod;
   imsakMinutes: number;
+  /** The angles of the Custom method; its defaults when left out. */
+  customAngles?: CustomAngles;
 }
 
 /**
@@ -104,6 +107,15 @@ export interface MethodRules {
 /** The sun's upper limb touches the horizon, with refraction. */
 const HORIZON_ANGLE = 0.833;
 
+/** The rules of the Custom method: Maghrib 0° is Sunset. */
+const customRules = ({ fajr, maghrib, isha }: CustomAngles): MethodRules => ({
+  fajrAngle: fajr,
+  isha: { angle: isha },
+  asrShadowFactor: 1,
+  sunsetAngle: maghrib === 0 ? HORIZON_ANGLE : 0,
+  maghrib: maghrib === 0 ? null : { angle: maghrib },
+});
+
 export const METHOD_RULES: Readonly<Record<CalculationMethod, MethodRules>> = {
   jafari: {
     fajrAngle: 18,
@@ -133,7 +145,96 @@ export const METHOD_RULES: Readonly<Record<CalculationMethod, MethodRules>> = {
     sunsetAngle: HORIZON_ANGLE,
     maghrib: null,
   },
+  // The Shia methods below set Sunset at 0° and Maghrib when the sun is
+  // `angle` below the horizon, like Ja'fari; the Sunni ones are Sunset at
+  // 0.833° with Maghrib at Sunset.
+  /** Leva Research Institute, Qom: Fajr 16°, Maghrib 4°, Isha 14°. */
+  leva: {
+    fajrAngle: 16,
+    isha: { angle: 14 },
+    asrShadowFactor: 1,
+    sunsetAngle: 0,
+    maghrib: { angle: 4 },
+  },
+  /** Institute of Geophysics, University of Tehran: 17.7°, 4.5°, 14°. */
+  tehran: {
+    fajrAngle: 17.7,
+    isha: { angle: 14 },
+    asrShadowFactor: 1,
+    sunsetAngle: 0,
+    maghrib: { angle: 4.5 },
+  },
+  /** Ithna-Ashari as other prayer apps give it: 18°, 4°, 14°. */
+  ithnaAshari: {
+    fajrAngle: 18,
+    isha: { angle: 14 },
+    asrShadowFactor: 1,
+    sunsetAngle: 0,
+    maghrib: { angle: 4 },
+  },
+  /** The Al-Hadi calendar of Bahrain: 18°, 4°, Isha 75 minutes after Maghrib. */
+  alHadiBahrain: {
+    fajrAngle: 18,
+    isha: { minutesAfter: 75 },
+    asrShadowFactor: 1,
+    sunsetAngle: 0,
+    maghrib: { angle: 4 },
+  },
+  /** Muslim World League: Fajr 18°, Isha 17°. */
+  mwl: {
+    fajrAngle: 18,
+    isha: { angle: 17 },
+    asrShadowFactor: 1,
+    sunsetAngle: HORIZON_ANGLE,
+    maghrib: null,
+  },
+  /** Islamic Society of North America: 15° and 15°. */
+  isna: {
+    fajrAngle: 15,
+    isha: { angle: 15 },
+    asrShadowFactor: 1,
+    sunsetAngle: HORIZON_ANGLE,
+    maghrib: null,
+  },
+  /** Egyptian General Authority of Survey: 19.5° and 17.5°. */
+  egypt: {
+    fajrAngle: 19.5,
+    isha: { angle: 17.5 },
+    asrShadowFactor: 1,
+    sunsetAngle: HORIZON_ANGLE,
+    maghrib: null,
+  },
+  /** University of Islamic Sciences, Karachi: 18° and 18°. */
+  karachi: {
+    fajrAngle: 18,
+    isha: { angle: 18 },
+    asrShadowFactor: 1,
+    sunsetAngle: HORIZON_ANGLE,
+    maghrib: null,
+  },
+  /** Umm al-Qura University, Makkah: Fajr 18.5°, Isha 90 minutes after Maghrib. */
+  ummAlQura: {
+    fajrAngle: 18.5,
+    isha: { minutesAfter: 90 },
+    asrShadowFactor: 1,
+    sunsetAngle: HORIZON_ANGLE,
+    maghrib: null,
+  },
+  /** The Believer's own angles replace these (see `methodRules`). */
+  custom: customRules(DEFAULT_CUSTOM_ANGLES),
 };
+
+/** The rules a place's Prayer Times follow: the method's, or the Custom angles. */
+export const methodRules = ({
+  calculationMethod,
+  customAngles,
+}: Pick<
+  PrayerTimesSettings,
+  "calculationMethod" | "customAngles"
+>): MethodRules =>
+  calculationMethod === "custom"
+    ? customRules(customAngles ?? DEFAULT_CUSTOM_ANGLES)
+    : METHOD_RULES[calculationMethod];
 
 const DHUHR_AFTER_NOON_MINUTES = 1;
 
@@ -248,7 +349,7 @@ const fajrInstant = (
   settings: PrayerTimesSettings
 ) => {
   const day = solarDay(date, settings.coordinates);
-  const rules = METHOD_RULES[settings.calculationMethod];
+  const rules = methodRules(settings);
   return day.toInstant(
     day.sunAngleTime(rules.fajrAngle, FIRST_GUESS.fajr, true)
   );
@@ -263,7 +364,7 @@ export const calculatePrayerTimes = (
   timeZone: string,
   settings: PrayerTimesSettings
 ): PrayerTimes => {
-  const rules = METHOD_RULES[settings.calculationMethod];
+  const rules = methodRules(settings);
   const day = solarDay(date, settings.coordinates);
 
   const fajr = fajrInstant(date, settings);

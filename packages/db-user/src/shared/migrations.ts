@@ -207,4 +207,8 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `qibla_settings` (\n\t`id` text PRIMARY KEY,\n\t`target` text\n);",
     ],
   },
+  {
+    tag: "20261016132340_custom_angles",
+    statements: ["ALTER TABLE `believer_settings` ADD `custom_angles` text;"],
+  },
 ];

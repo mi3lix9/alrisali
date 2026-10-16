@@ -11,11 +11,11 @@ import { launchLanguage, usePreferences } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
 import { AboutCard } from "../components/about-card";
-import { CalculationMethodCard } from "../components/calculation-method-card";
 import { DigitsCard } from "../components/digits-card";
 import { HijriAdjustmentCard } from "../components/hijri-adjustment-card";
 import { LocationCard } from "../components/location-card";
 import { MessageStyleCard } from "../components/message-style-card";
+import { PrayerSettingsCard } from "../components/prayer-settings-card";
 import { RemindersCard } from "../components/reminders-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
@@ -101,7 +101,7 @@ export const SettingsScreen = ({
         {...(onLocationChosen ? { onLocationChosen } : {})}
         {...(locationExtras ? { extras: locationExtras } : {})}
       />
-      <CalculationMethodCard />
+      <PrayerSettingsCard />
       <HijriAdjustmentCard />
       <RemindersCard />
       <MessageStyleCard />
