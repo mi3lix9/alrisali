@@ -131,3 +131,19 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export {
+  juzScopes,
+  missingAyat,
+  recitationFile,
+  recitationFileKey,
+  scopeAyat,
+  scopeCoverage,
+  scopeJobId,
+  surahScopes,
+  withDownloads,
+} from "./downloads";
+export type {
+  DownloadedRecitations,
+  DownloadScope,
+  ScopeCoverage,
+} from "./downloads";

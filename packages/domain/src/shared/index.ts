@@ -217,3 +217,21 @@ export {
 } from "./calculation-method";
 export type { CustomAngles } from "./calculation-method";
 export { methodRules } from "./prayer-times";
+export {
+  DOWNLOAD_KINDS,
+  downloadBlock,
+  downloadJobReducer,
+  summarizeStorage,
+} from "./downloads";
+export type {
+  Connection,
+  DownloadBlock,
+  DownloadJob,
+  DownloadJobEvent,
+  DownloadJobStatus,
+  DownloadKind,
+  StorageGroup,
+  StorageKind,
+  StorageSummary,
+  StoredFile,
+} from "./downloads";

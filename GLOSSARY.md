@@ -112,6 +112,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
 
+**Recitation Download**: One reciter's audio the Believer chose to keep on the device, by surah, by juz or the whole Quran; it plays offline, is deleted only by the Believer, and is listed on the Storage screen with adhans. Audio merely played is not one: it is streamed and kept in the 7-day cache. _Avoid_: Offline pack, Cached recitation
+
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
 
 **In-text counter**: A tap counter marked on a passage of a bundled Supplication that itself says to repeat a phrase; the count lives only while the text is open and is not a Tasbih or Dhikr Session. _Avoid_: Tasbih (for this), inline tasbih

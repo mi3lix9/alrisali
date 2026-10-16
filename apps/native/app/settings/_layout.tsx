@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import "@/features/announcements";
 import "@/features/settings";
+import "@/features/storage";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
 
 // The Settings modal has its own stack, so Sources & Credits, Privacy,
@@ -11,6 +12,7 @@ const SettingsLayout = () => {
   const { t: tShell } = useTranslation();
   const { t } = useTranslation("settings");
   const { t: tAnnouncements } = useTranslation("announcements");
+  const { t: tStorage } = useTranslation("storage");
 
   return (
     <Stack>
@@ -33,6 +35,7 @@ const SettingsLayout = () => {
         name="prayer"
         options={{ title: t("prayerSettings.title") }}
       />
+      <Stack.Screen name="storage" options={{ title: tStorage("title") }} />
       <Stack.Screen name="sources" options={{ title: t("sources.title") }} />
       <Stack.Screen name="privacy" options={{ title: t("about.privacy") }} />
       <Stack.Screen name="terms" options={{ title: t("about.terms") }} />
