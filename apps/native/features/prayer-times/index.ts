@@ -3,3 +3,4 @@ export { RecentCitiesList } from "./components/recent-cities-list";
 export { NextPrayerCard } from "./components/next-prayer-card";
 export { PrayerTimesScreen } from "./screens/prayer-times-screen";
 export { useRememberCity } from "./data/recent-cities";
+export type { SharedTimes } from "./utils/shared-times";

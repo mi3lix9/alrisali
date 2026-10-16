@@ -17,20 +17,24 @@ import { useFollowDeviceLocation } from "../hooks/use-device-location";
 import { useNow } from "../hooks/use-now";
 import { usePrayerTimesView } from "../hooks/use-prayer-times-settings";
 import { locationToday } from "../utils/day-navigation";
+import type { SharedTimes } from "../utils/shared-times";
 
 const MINUTE_MS = 60_000;
 
 /**
  * The Prayer tab: the timetable of today or any day the Believer moves to, its location and its options.
  * `children` (another feature's card, from the route) shows under the
- * timetable; `timetableRowActions` ends each timetable row.
+ * timetable; `timetableRowActions` ends each timetable row and
+ * `timetableShare` shares today's times.
  */
 export const PrayerTimesScreen = ({
   children,
   timetableRowActions,
+  timetableShare,
 }: {
   children?: ReactNode;
   timetableRowActions?: (name: PrayerTimeName) => ReactNode;
+  timetableShare?: (times: SharedTimes) => ReactNode;
 }) => {
   useFollowDeviceLocation();
   const view = usePrayerTimesView();
@@ -65,6 +69,8 @@ export const PrayerTimesScreen = ({
             view={{ ...view, settings }}
             date={shown ?? today}
             rowActions={timetableRowActions}
+            placeName={believer.location?.name}
+            shareAction={timetableShare}
           />
         </>
       ) : null}

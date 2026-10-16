@@ -2,6 +2,7 @@ import { SupplicationReaderScreen } from "@/features/books";
 import { FavoriteButton } from "@/features/favorites";
 import { ReadTodayButton } from "@/features/reading-completion";
 import { ReciteAlong } from "@/features/recite-along";
+import { ShareSupplicationImageButton } from "@/features/share-image";
 
 const SupplicationRoute = () => (
   <SupplicationReaderScreen
@@ -10,6 +11,7 @@ const SupplicationRoute = () => (
       <>
         <ReadTodayButton supplicationId={id} />
         <FavoriteButton item={{ kind: "supplication", key: id }} />
+        <ShareSupplicationImageButton supplicationId={id} />
       </>
     )}
   />

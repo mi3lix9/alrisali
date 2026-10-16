@@ -12,11 +12,13 @@ import { useTranslation } from "react-i18next";
 import type { Temporal } from "temporal-polyfill";
 
 import { formatGregorianDate } from "@/shared/lib/hijri-calendar";
+import { formatDateTime } from "@/shared/lib/numbers";
 
 import { useNow } from "../hooks/use-now";
 import type { PrayerTimesView } from "../hooks/use-prayer-times-settings";
 import { locationToday } from "../utils/day-navigation";
 import { formatClockTime } from "../utils/format";
+import type { SharedTimes } from "../utils/shared-times";
 
 const MINUTE_MS = 60_000;
 
@@ -29,12 +31,18 @@ export const TimetableCard = ({
   view,
   date,
   rowActions,
+  placeName,
+  shareAction,
 }: {
   view: PrayerTimesView & {
     settings: NonNullable<PrayerTimesView["settings"]>;
   };
   date?: Temporal.PlainDate | undefined;
   rowActions?: ((name: PrayerTimeName) => ReactNode) | undefined;
+  /** Where the times are for, if the location is named. */
+  placeName?: string | null | undefined;
+  /** Another feature's control (from the route) that shares the shown day's times. */
+  shareAction?: ((times: SharedTimes) => ReactNode) | undefined;
 }) => {
   const { t } = useTranslation("prayer-times");
   const now = useNow(MINUTE_MS);
@@ -48,6 +56,35 @@ export const TimetableCard = ({
   const shown = PRAYER_TIMES.filter((name) => !hidden.includes(name));
   const isCurrent = (name: PrayerTimeName) =>
     isToday && current?.name === name && current.at.toPlainDate().equals(day);
+
+  const sharedTimes: SharedTimes | null = shareAction
+    ? {
+        title: t("timetable.shareTitle"),
+        subtitle: [
+          placeName,
+          formatDateTime(day, {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          }),
+        ]
+          .filter(Boolean)
+          .join(t("timetable.shareSeparator")),
+        rows: shown.flatMap((name) => {
+          const time = times[name];
+          return time
+            ? [
+                {
+                  label: t(`names.${name}`),
+                  time: formatClockTime(time, timeFormat),
+                },
+              ]
+            : [];
+        }),
+        footer: null,
+      }
+    : null;
 
   return (
     <Card>
@@ -103,6 +140,9 @@ export const TimetableCard = ({
             })}
           </Item.Group>
         </Card.Content>
+      ) : null}
+      {shareAction && sharedTimes ? (
+        <Card.Footer>{shareAction(sharedTimes)}</Card.Footer>
       ) : null}
     </Card>
   );
