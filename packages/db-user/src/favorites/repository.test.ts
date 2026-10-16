@@ -113,6 +113,29 @@ describe(createFavoritesRepository, () => {
     await expect(favorites.list()).resolves.toStrictEqual([]);
   });
 
+  it("removes several Favorites at once and leaves the others", async () => {
+    const favorites = createFavoritesRepository(database.db, ticking());
+    await favorites.add(KUMAYL);
+    await favorites.add(AL_KAHF);
+    await favorites.add(AYAT_AL_KURSI);
+
+    await favorites.removeMany([KUMAYL, AYAT_AL_KURSI]);
+
+    await expect(favorites.list()).resolves.toStrictEqual([
+      { ...AL_KAHF, favoritedAt: "2026-10-15T12:02:00.000Z" },
+    ]);
+  });
+
+  it("removes nothing when given nothing, or items that are not Favorites", async () => {
+    const favorites = createFavoritesRepository(database.db, ticking());
+    await favorites.add(KUMAYL);
+
+    await favorites.removeMany([]);
+    await favorites.removeMany([AL_KAHF]);
+
+    await expect(favorites.list()).resolves.toMatchObject([KUMAYL]);
+  });
+
   it("skips Favorites of a kind a newer app added", async () => {
     const favorites = createFavoritesRepository(database.db);
     await favorites.add(KUMAYL);
