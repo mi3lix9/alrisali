@@ -1,10 +1,12 @@
+import { KAABA_COORDINATES } from "@alrisali/content/qibla-targets";
+
 import { distanceKm } from "../shared/location";
 import type { Location } from "../shared/location";
 
-type Coordinates = Pick<Location, "latitude" | "longitude">;
+export type Coordinates = Pick<Location, "latitude" | "longitude">;
 
 /** Where the Kaaba stands. */
-export const KAABA: Coordinates = { latitude: 21.4225, longitude: 39.8262 };
+export const KAABA: Coordinates = KAABA_COORDINATES;
 
 /** Within this many degrees either side of the Qibla, the device faces it. */
 export const FACING_QIBLA_DEGREES = 5;
@@ -28,19 +30,29 @@ const normalize = (degrees: number): number =>
   ((degrees % FULL_TURN) + FULL_TURN) % FULL_TURN;
 
 /**
- * The Qibla from a place: the initial great-circle bearing to the Kaaba, in
- * degrees clockwise from true north (0 ≤ bearing < 360).
+ * The initial great-circle bearing from a place to another, in degrees
+ * clockwise from true north (0 ≤ bearing < 360).
  */
-export const qiblaBearing = ({ latitude, longitude }: Coordinates): number => {
+export const bearingTo = (
+  { latitude, longitude }: Coordinates,
+  target: Coordinates
+): number => {
   const from = latitude * RADIANS;
-  const to = KAABA.latitude * RADIANS;
-  const dLongitude = (KAABA.longitude - longitude) * RADIANS;
+  const to = target.latitude * RADIANS;
+  const dLongitude = (target.longitude - longitude) * RADIANS;
   const x = Math.sin(dLongitude) * Math.cos(to);
   const y =
     Math.cos(from) * Math.sin(to) -
     Math.sin(from) * Math.cos(to) * Math.cos(dLongitude);
   return normalize(Math.atan2(x, y) / RADIANS);
 };
+
+/**
+ * The Qibla from a place: the initial great-circle bearing to the Kaaba, in
+ * degrees clockwise from true north (0 ≤ bearing < 360).
+ */
+export const qiblaBearing = (from: Coordinates): number =>
+  bearingTo(from, KAABA);
 
 /** How far the Kaaba is from a place, in kilometres. */
 export const qiblaDistanceKm = (from: Coordinates): number =>
