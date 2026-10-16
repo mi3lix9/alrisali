@@ -171,4 +171,10 @@ export const migrations: readonly Migration[] = [
     tag: "20261016002557_shell_digits",
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
+  {
+    tag: "20261016123449_tasbih_settings",
+    statements: [
+      "CREATE TABLE `tasbih_settings` (\n\t`id` text PRIMARY KEY,\n\t`feedback_mode` text\n);",
+    ],
+  },
 ];

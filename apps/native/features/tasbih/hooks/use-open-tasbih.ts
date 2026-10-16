@@ -11,8 +11,8 @@ import {
   saveOpenTasbihSession,
   useSavedOpenTasbih,
 } from "../data/tasbih";
-import { playHaptic } from "../utils/haptics";
 import { useSavedCounter } from "./use-saved-counter";
+import { useTasbihFeedback } from "./use-tasbih-feedback";
 
 /**
  * What the counter last announced: the target reached, a saved session, or a
@@ -41,8 +41,8 @@ export interface OpenTasbihCounter {
 }
 
 /**
- * An Open Tasbih's counter. A tap counts and plays its haptic at once; the
- * tap that reaches the target plays the success haptic and shows a notice.
+ * An Open Tasbih's counter. A tap counts and plays its feedback at once; the
+ * tap that reaches the target plays the success feedback and shows a notice.
  */
 export const useOpenTasbih = (tasbihId: string): OpenTasbihCounter => {
   const saved = useSavedOpenTasbih(tasbihId);
@@ -61,11 +61,12 @@ export const useOpenTasbih = (tasbihId: string): OpenTasbihCounter => {
   });
   const { current, count, commit } = counter;
   const target = saved.data?.target ?? null;
+  const feedback = useTasbihFeedback();
 
   const tap = useCallback(() => {
     const outcome = tapOpenTasbih({ count: current(), target });
     const reached = outcome.feedback === "target";
-    playHaptic(reached ? "done" : "tap");
+    feedback(reached ? "done" : "tap");
     count(outcome.count);
     // "Target reached" stays while counting on past it; a tap clears the
     // notice about the last save.
@@ -75,7 +76,7 @@ export const useOpenTasbih = (tasbihId: string): OpenTasbihCounter => {
       }
       return shown === "target-reached" ? shown : null;
     });
-  }, [current, count, target]);
+  }, [current, count, target, feedback]);
 
   const saveSession = useCallback(() => {
     const counted = current();
