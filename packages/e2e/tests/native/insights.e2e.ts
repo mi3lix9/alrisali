@@ -18,7 +18,7 @@ test(
 
     await expect(
       screen.getByTestId("insights-prayer-streak")
-    ).toHaveAccessibleName("سلسلة الصلاة: ٠ يوم");
+    ).toHaveAccessibleName("سلسلة الصلاة: لا أيام");
     await expect(screen.getByTestId("insights-khushu")).toHaveAccessibleName(
       "متوسط الخشوع: لا تقييمات بعد"
     );

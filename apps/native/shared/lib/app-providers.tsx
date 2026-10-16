@@ -1,3 +1,4 @@
+import { writeDigits } from "@alrisali/domain/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   DarkTheme,
@@ -7,13 +8,15 @@ import {
 } from "expo-router/react-navigation";
 import type { Theme } from "expo-router/react-navigation";
 import { Direction, PanelUIProvider } from "panelui-native";
+import type { PanelUILabels } from "panelui-native";
 import { useMemo } from "react";
 import type { ReactNode } from "react";
-import { I18nextProvider } from "react-i18next";
+import { I18nextProvider, useTranslation } from "react-i18next";
 import { LayoutDirection, useCSSVariable, useUniwind } from "uniwind";
 
 import { useContentSync } from "./content-database";
 import { i18n, launchDirection } from "./i18n";
+import { useDigits } from "./numbers";
 import { queryClient } from "./orpc";
 import { useUserDataSync } from "./user-database";
 
@@ -57,6 +60,36 @@ const NavigationTheme = ({ children }: { children: ReactNode }) => (
   <ThemeProvider value={useNavigationTheme()}>{children}</ThemeProvider>
 );
 
+/** Panel UI, its controls speaking to VoiceOver in the interface's language. */
+const TranslatedPanelUI = ({ children }: { children: ReactNode }) => {
+  const { t } = useTranslation();
+  // The spoken percent is written in the Believer's digits.
+  const digits = useDigits();
+  const labels = useMemo<PanelUILabels>(
+    () => ({
+      closeSheet: t("controls.closeSheet"),
+      close: t("controls.close"),
+      dismissNotification: t("controls.dismissNotification"),
+      decrease: (label) =>
+        t("controls.decrease", { label: label ?? t("controls.value") }),
+      increase: (label) =>
+        t("controls.increase", { label: label ?? t("controls.value") }),
+      previousMonth: t("controls.previousMonth"),
+      nextMonth: t("controls.nextMonth"),
+      month: t("controls.month"),
+      year: t("controls.year"),
+      hour: t("controls.hour"),
+      minute: t("controls.minute"),
+      amPm: t("controls.amPm"),
+      time: t("controls.time"),
+      percent: (fraction) =>
+        writeDigits(`${Math.round(fraction * 100)}%`, digits),
+    }),
+    [t, digits]
+  );
+  return <PanelUIProvider labels={labels}>{children}</PanelUIProvider>;
+};
+
 const DataSync = () => {
   useUserDataSync();
   useContentSync();
@@ -76,12 +109,12 @@ export const AppProviders = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <LayoutDirection rtl={launchDirection === "rtl"}>
         <Direction dir={launchDirection} className="flex-1">
-          <PanelUIProvider>
+          <TranslatedPanelUI>
             <LocaleDirContext.Provider value={launchDirection}>
               <DataSync />
               <NavigationTheme>{children}</NavigationTheme>
             </LocaleDirContext.Provider>
-          </PanelUIProvider>
+          </TranslatedPanelUI>
         </Direction>
       </LayoutDirection>
     </QueryClientProvider>

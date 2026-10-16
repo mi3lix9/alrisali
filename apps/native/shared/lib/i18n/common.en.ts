@@ -21,6 +21,22 @@ export const en: Catalog<typeof ar> = {
   library: {
     searchPlaceholder: "Search Surahs, supplications and materials",
   },
+  controls: {
+    closeSheet: "Close sheet",
+    close: "Close",
+    dismissNotification: "Dismiss notification",
+    decrease: "Decrease {{label}}",
+    increase: "Increase {{label}}",
+    value: "value",
+    previousMonth: "Previous month",
+    nextMonth: "Next month",
+    month: "Month",
+    year: "Year",
+    hour: "Hour",
+    minute: "Minute",
+    amPm: "AM or PM",
+    time: "Time",
+  },
   notFound: {
     title: "Page not found",
     goHome: "Back to Home",

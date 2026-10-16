@@ -19,7 +19,7 @@ test(
 
     // The Prayer Streak tile heads Home's widget grid, beside today's date.
     const streak = screen.getByTestId("prayer-streak");
-    await expect(streak).toHaveAccessibleName("سلسلة الصلاة: ٠ يوم");
+    await expect(streak).toHaveAccessibleName("سلسلة الصلاة: لا أيام");
 
     // The quick ticks sit below the Next Prayer card and the tiles.
     const fajr = screen.getByTestId("prayer-log-tick-fajr");

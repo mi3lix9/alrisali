@@ -10,7 +10,7 @@ export const ar = {
   overview: {
     title: "هذا الأسبوع",
     prayerStreak: "سلسلة الصلاة",
-    days_zero: "{{count}} يوم",
+    days_zero: "لا أيام",
     days_one: "يوم واحد",
     days_two: "يومان",
     days_few: "{{count}} أيام",
@@ -42,7 +42,7 @@ export const ar = {
   habits: {
     title: "سلاسل العادات",
     empty: "لا عادات بعد.",
-    streak: "الآن {{current}} · الأطول {{longest}}",
+    streak: "الآن {{current}}، الأطول {{longest}}",
     preset: {
       "quran-page": "قراءة صفحة من القرآن",
       "morning-adhkar": "أذكار الصباح",

@@ -8,6 +8,7 @@ import {
   formatDateTime,
   formatNumber,
   localizeDigits,
+  parseNumber,
 } from "./numbers";
 
 // The launch language and the Believer's digits, as preferences.ts would
@@ -85,5 +86,17 @@ describe(formatDateTime, () => {
         timeZone: "UTC",
       })
     ).toBe("October 16, 2026");
+  });
+});
+
+describe(parseNumber, () => {
+  it("reads typed text in either digits", () => {
+    expect(parseNumber("١٠")).toBe(10);
+    expect(parseNumber("10")).toBe(10);
+  });
+
+  it("is NaN for text that is no number", () => {
+    expect(parseNumber("")).toBeNaN();
+    expect(parseNumber("ten")).toBeNaN();
   });
 });

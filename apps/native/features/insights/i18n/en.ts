@@ -17,7 +17,7 @@ export const en: Catalog<typeof ar> = {
   overview: {
     title: "This week",
     prayerStreak: "Prayer Streak",
-    days_zero: "{{count}} days",
+    days_zero: "No days yet",
     days_one: "{{count}} day",
     days_two: "{{count}} days",
     days_few: "{{count}} days",

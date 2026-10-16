@@ -6,6 +6,8 @@ import {
 } from "@alrisali/content/quran";
 import type { Ayah } from "@alrisali/content/quran";
 
+import { readNumber } from "../shared/digits";
+
 // Lookups over the bundled KFGQPC mushaf: which page holds an ayah, which
 // ayat a page holds, and where a page sits in the juz and hizb.
 
@@ -124,18 +126,11 @@ export const pagePosition = (page: number): PagePosition => {
   };
 };
 
-/** Arabic-Indic digits (٠–٩) as Western ones, as the number pad may type them. */
-export const toWesternDigits = (text: string): string =>
-  text.replaceAll(/[\u0660-\u0669]/gu, (digit) =>
-    String((digit.codePointAt(0) ?? 0x06_60) - 0x06_60)
-  );
-
 /**
  * The page a typed number names, in Western or Arabic-Indic digits, or null
  * when it names none.
  */
 export const parsePage = (text: string): number | null => {
-  const digits = toWesternDigits(text.trim());
-  const page = /^\d+$/u.test(digits) ? Number(digits) : Number.NaN;
-  return isPage(page) ? page : null;
+  const page = readNumber(text);
+  return page !== null && isPage(page) ? page : null;
 };
