@@ -2,6 +2,8 @@
 // layout, every ayah verbatim, and surah, juz and hizb-quarter metadata. The
 // font ships as `@alrisali/content/quran/font.ttf`; the notice as
 // `KFGQPC_NOTICE`.
+import { BY_MEANING_STARTS } from "./data/by-meaning";
+import type { ByMeaningDays } from "./data/by-meaning";
 import { HAFS } from "./data/hafs";
 import { REVELATION } from "./data/revelation";
 import { SURAH_HEADER_PREFIX } from "./dataset";
@@ -130,6 +132,33 @@ export const getQuranPage = (page: number): QuranPage => {
   });
   const firstAyah = AYAT.find((ayah) => ayah.page === page);
   return { number: page, juz: firstAyah?.juz ?? 1, lines };
+};
+
+export { BY_MEANING_DAYS, SCHOLAR_REVIEWED } from "./data/by-meaning";
+export type { ByMeaningDays } from "./data/by-meaning";
+
+/** One session of a by-meaning division: its first and last ayah. */
+export interface AyahRange {
+  from: AyahKey;
+  to: AyahKey;
+}
+
+/**
+ * The by-meaning Khatmah division of 7, 29 or 60 sessions: contiguous
+ * ranges that together cover the whole Quran, each ending at a surah's end
+ * or a hizb quarter's end (data/by-meaning.ts).
+ */
+export const byMeaningRanges = (days: ByMeaningDays): readonly AyahRange[] => {
+  const starts = BY_MEANING_STARTS[days];
+  const last = AYAT.at(-1)?.key ?? "114:6";
+  return starts.map((from, index) => {
+    const next = starts[index + 1];
+    const nextIndex = next ? AYAT.findIndex((ayah) => ayah.key === next) : -1;
+    return {
+      from,
+      to: (nextIndex > 0 ? AYAT[nextIndex - 1]?.key : last) ?? last,
+    };
+  });
 };
 
 /** The sajdah ayat, obligatory (the four 'azaa'im) or recommended. */
