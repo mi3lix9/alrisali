@@ -5,10 +5,11 @@ import { Badge, Button, Card, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { useHijriToday } from "@/shared/lib/hijri-today";
+
 import { useOfficialPrograms } from "../data/official-programs";
 import { useSeenProgramIds } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
-import { useHijriToday } from "../hooks/use-hijri-today";
 
 /**
  * The Worship tab's way into Official Programs, with the Subscription count

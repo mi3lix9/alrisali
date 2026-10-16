@@ -1,12 +1,16 @@
 import {
   digitsSchema,
+  FEATURES,
   readHiddenTabs,
+  readShortcutLayout,
   TEXT_SIZES,
   TABS,
   themePreferenceSchema,
 } from "@alrisali/domain/shared";
 import type {
   Digits,
+  FeatureId,
+  ShortcutLayout,
   Tab,
   TextSize,
   ThemePreference,
@@ -29,6 +33,7 @@ export interface ShellPreferences {
   textSize: TextSize | null;
   hiddenTabs: Tab[] | null;
   digits: Digits | null;
+  homeShortcuts: ShortcutLayout<FeatureId> | null;
 }
 
 /** The preferences to change; anything left out keeps its saved value. */
@@ -38,6 +43,7 @@ export interface ShellPreferencesChange {
   textSize?: TextSize;
   hiddenTabs?: readonly Tab[];
   digits?: Digits;
+  homeShortcuts?: ShortcutLayout<FeatureId>;
 }
 
 export interface ShellPreferencesRepository {
@@ -51,6 +57,7 @@ const ROW_ID = "believer";
 
 const languageSchema = z.enum(LANGUAGES);
 const textSizeSchema = z.enum(TEXT_SIZES);
+const featureIdSchema = z.enum(FEATURES.map((feature) => feature.id));
 
 const changeSchema = z.object({
   language: languageSchema.optional(),
@@ -58,6 +65,12 @@ const changeSchema = z.object({
   textSize: textSizeSchema.optional(),
   hiddenTabs: z.array(z.enum(TABS)).optional(),
   digits: digitsSchema.optional(),
+  homeShortcuts: z
+    .object({
+      order: z.array(featureIdSchema),
+      hidden: z.array(featureIdSchema),
+    })
+    .optional(),
 });
 
 type Row = typeof shellPreferences.$inferSelect;
@@ -68,25 +81,29 @@ const known = <T>(schema: z.ZodType<T>, stored: unknown): T | null => {
   return parsed.success ? parsed.data : null;
 };
 
-const readStoredTabs = (stored: string | null | undefined): Tab[] | null => {
+/** A JSON column's value, or null if it holds none (or not JSON). */
+const readJson = (stored: string | null | undefined): unknown => {
   if (stored === null || stored === undefined) {
     return null;
   }
   try {
-    const parsed: unknown = JSON.parse(stored);
-    return Array.isArray(parsed) ? readHiddenTabs(parsed) : null;
+    return JSON.parse(stored);
   } catch {
     return null;
   }
 };
 
-const toPreferences = (row: Row | undefined): ShellPreferences => ({
-  language: known(languageSchema, row?.language),
-  theme: known(themePreferenceSchema, row?.theme),
-  textSize: known(textSizeSchema, row?.textSize),
-  hiddenTabs: readStoredTabs(row?.hiddenTabs),
-  digits: known(digitsSchema, row?.digits),
-});
+const toPreferences = (row: Row | undefined): ShellPreferences => {
+  const hiddenTabs = readJson(row?.hiddenTabs);
+  return {
+    language: known(languageSchema, row?.language),
+    theme: known(themePreferenceSchema, row?.theme),
+    textSize: known(textSizeSchema, row?.textSize),
+    hiddenTabs: Array.isArray(hiddenTabs) ? readHiddenTabs(hiddenTabs) : null,
+    digits: known(digitsSchema, row?.digits),
+    homeShortcuts: readShortcutLayout(FEATURES, readJson(row?.homeShortcuts)),
+  };
+};
 
 export const createShellPreferencesRepository = (
   db: UserDb
@@ -114,6 +131,10 @@ export const createShellPreferencesRepository = (
           ? current.hiddenTabs
           : readHiddenTabs(parsed.hiddenTabs),
       digits: parsed.digits ?? current.digits,
+      homeShortcuts:
+        parsed.homeShortcuts === undefined
+          ? current.homeShortcuts
+          : readShortcutLayout(FEATURES, parsed.homeShortcuts),
     };
     const columns = {
       language: next.language,
@@ -122,6 +143,8 @@ export const createShellPreferencesRepository = (
       hiddenTabs:
         next.hiddenTabs === null ? null : JSON.stringify(next.hiddenTabs),
       digits: next.digits,
+      homeShortcuts:
+        next.homeShortcuts === null ? null : JSON.stringify(next.homeShortcuts),
     };
     await db
       .insert(shellPreferences)

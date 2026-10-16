@@ -4,7 +4,7 @@ import { TabStack } from "@/shared/ui/tab-stack";
 
 const TasbihLayout = () => {
   const { t } = useTranslation();
-  return <TabStack title={t("tabs.tasbih")} />;
+  return <TabStack title={t("features.tasbih")} />;
 };
 
 export default TasbihLayout;

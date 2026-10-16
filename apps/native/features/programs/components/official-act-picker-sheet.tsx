@@ -7,12 +7,12 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { useHijriToday } from "@/shared/lib/hijri-today";
 import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useOfficialPrograms } from "../data/official-programs";
 import { useDescribe } from "../hooks/use-describe";
-import { useHijriToday } from "../hooks/use-hijri-today";
 
 /** The Official Programs available today, each Act with an Add button. */
 const Picker = ({

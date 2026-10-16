@@ -9,6 +9,7 @@ import { PlusIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { useHijriToday } from "@/shared/lib/hijri-today";
 import { Screen } from "@/shared/ui/screen";
 
 import { PersonalProgramCard } from "../components/personal-program-card";
@@ -17,7 +18,6 @@ import { useOfficialPrograms } from "../data/official-programs";
 import { usePersonalPrograms } from "../data/personal-programs";
 import { useSeenProgramIds } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
-import { useHijriToday } from "../hooks/use-hijri-today";
 
 /**
  * Programs: the Believer's subscribed Official ones first (out-of-season

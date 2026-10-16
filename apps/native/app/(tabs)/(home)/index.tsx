@@ -12,6 +12,7 @@ import { PrayerLogQuickTicks, PrayerStreakTile } from "@/features/prayer-log";
 import { NextPrayerCard } from "@/features/prayer-times";
 import { QiblaTile } from "@/features/qibla";
 import { ContinueReadingCard, VerseOfTheDayCard } from "@/features/quran";
+import { HomeShortcutsCard } from "@/features/shortcuts";
 import { Screen } from "@/shared/ui/screen";
 import { WidgetRow } from "@/shared/ui/widget";
 
@@ -56,6 +57,7 @@ const HomeRoute = () => {
         <MoodCheckInCard />
         <DailyContentCard />
         <ContinueReadingCard />
+        <HomeShortcutsCard />
         <VerseOfTheDayCard />
         <CompanionCard />
         <UpcomingGatheringsCard />

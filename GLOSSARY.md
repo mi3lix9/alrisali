@@ -142,6 +142,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Contact Message**: A message a Believer sends to the Al-Risali team.
 
+## App shell
+
+**Feature Registry**: The single list of features that drives the tabs, Home shortcuts, All Tools and seasonal visibility; a seasonal feature appears only within its Hijri window. _Avoid_: Menu, feature list (for a second, hand-written one)
+
 ## Relationships
 
 - A **Prayer Log** belongs to one **Believer** and one date; a **Prayer Streak** is derived from Prayer Logs, never entered.

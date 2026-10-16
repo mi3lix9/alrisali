@@ -177,4 +177,8 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `tasbih_settings` (\n\t`id` text PRIMARY KEY,\n\t`feedback_mode` text\n);",
     ],
   },
+  {
+    tag: "20261016125410_home_shortcuts",
+    statements: ["ALTER TABLE `shell_preferences` ADD `home_shortcuts` text;"],
+  },
 ];

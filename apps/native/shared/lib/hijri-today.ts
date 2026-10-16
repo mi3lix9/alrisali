@@ -1,8 +1,8 @@
 import type { HijriDate } from "@alrisali/domain/shared";
 import { useMemo } from "react";
 
-import { useHijriCalendar } from "@/shared/lib/hijri-calendar";
-import { useToday } from "@/shared/lib/today";
+import { useHijriCalendar } from "./hijri-calendar";
+import { useToday } from "./today";
 
 /**
  * Today's Hijri Date, with the Hijri Adjustments applied; it moves on at

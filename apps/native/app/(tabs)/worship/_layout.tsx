@@ -4,7 +4,7 @@ import { TabStack } from "@/shared/ui/tab-stack";
 
 const WorshipLayout = () => {
   const { t } = useTranslation();
-  return <TabStack title={t("tabs.worship")} />;
+  return <TabStack title={t("features.worship")} />;
 };
 
 export default WorshipLayout;

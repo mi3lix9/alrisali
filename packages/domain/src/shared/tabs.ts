@@ -1,7 +1,17 @@
-/** The app's tabs, in tab-bar order. Home is always shown. */
-export const TABS = ["home", "prayer", "library", "worship", "tasbih"] as const;
+import { FEATURES } from "./features";
+import type { Feature } from "./features";
 
-export type Tab = (typeof TABS)[number];
+type TabFeature = Extract<Feature, { readonly tab: true }>;
+
+export type Tab = TabFeature["id"];
+
+/**
+ * The app's tabs, in tab-bar order: the Feature Registry's tab features.
+ * Home is always shown.
+ */
+export const TABS: readonly Tab[] = FEATURES.flatMap((feature) =>
+  "tab" in feature ? [feature.id] : []
+);
 
 /** The tab that cannot be hidden. */
 export const ALWAYS_SHOWN_TAB = "home" satisfies Tab;

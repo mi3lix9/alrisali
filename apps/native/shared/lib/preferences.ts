@@ -1,7 +1,9 @@
 import { createShellPreferencesRepository } from "@alrisali/db-user/shared";
 import {
   DIGITS,
+  FEATURES,
   readHiddenTabs,
+  readShortcutLayout,
   TEXT_SCALE,
   TEXT_SIZES,
   THEME_PREFERENCES,
@@ -34,6 +36,7 @@ const NOTHING_CACHED: CachedPreferences = {
   textSize: null,
   hiddenTabs: null,
   digits: null,
+  homeShortcuts: null,
 };
 
 const cachedSchema = z
@@ -43,6 +46,7 @@ const cachedSchema = z
     textSize: z.enum(TEXT_SIZES).nullable(),
     hiddenTabs: z.unknown(),
     digits: z.enum(DIGITS).nullable(),
+    homeShortcuts: z.unknown(),
   })
   .partial();
 
@@ -62,6 +66,7 @@ const secureStoreCache: PreferencesCache = {
           ? readHiddenTabs(data.hiddenTabs)
           : null,
         digits: data?.digits ?? null,
+        homeShortcuts: readShortcutLayout(FEATURES, data?.homeShortcuts),
       };
     } catch {
       return NOTHING_CACHED;

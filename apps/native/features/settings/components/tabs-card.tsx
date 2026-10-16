@@ -22,7 +22,7 @@ export const TabsCard = () => {
       <Card.Content>
         <Item.Group>
           {TABS.map((tab, index) => {
-            const label = tShell(`tabs.${tab}`);
+            const label = tShell(`features.${tab}`);
             const alwaysShown = tab === ALWAYS_SHOWN_TAB;
             return (
               <Fragment key={tab}>

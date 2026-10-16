@@ -53,4 +53,9 @@ export const shellPreferences = sqliteTable("shell_preferences", {
   hiddenTabs: text("hidden_tabs"),
   /** "arabic-indic" or "latin": the digits of the Arabic interface. */
   digits: text("digits"),
+  /**
+   * How the Believer arranged the Home shortcuts, a JSON object: the
+   * arranged feature ids in order, and the hidden ones.
+   */
+  homeShortcuts: text("home_shortcuts"),
 });
