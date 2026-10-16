@@ -60,6 +60,21 @@ export {
 } from "./reciters";
 export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
 export {
+  isPlayToReachable,
+  MAX_PLAYBACK_SPEED,
+  MIN_PLAYBACK_SPEED,
+  PLAY_TO_KINDS,
+  playbackPlan,
+  playToEnd,
+} from "./playback-plan";
+export type {
+  PauseAfterAyah,
+  PlaybackPlan,
+  PlayTo,
+  RepeatCount,
+  SleepTimer,
+} from "./playback-plan";
+export {
   createRecitationCache,
   nextAyah,
   previousAyah,
@@ -73,6 +88,7 @@ export type {
   RecitationCache,
   RecitationCacheOptions,
   RecitationCacheStore,
+  PlaybackOrigin,
   RecitationEvent,
   RecitationPlayback,
   RecitedAyah,
