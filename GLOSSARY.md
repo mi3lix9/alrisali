@@ -120,7 +120,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Reminder**: A notification produced from the Believer's own schedule: a Prayer Time or a Habit. _Avoid_: Push
 
-**Announcement**: A notification Admins write once and send to many Believers, now or at a scheduled time. _Avoid_: Notification template, broadcast
+**Announcement**: A notification Admins write once and send to many Believers, now or at a scheduled time. A sent one cannot be deleted, only archived: it leaves every device's inbox and stays on record. _Avoid_: Notification template, broadcast
 
 **Message Style**: The voice the app speaks in: Classic (scriptural sources) or Modern (gentle, motivational coaching). _Avoid_: Notification mode, traditional mode
 

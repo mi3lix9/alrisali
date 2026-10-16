@@ -28,7 +28,10 @@ const receivedAnnouncement = z.object({
  * procedures (`registerDevice`, `inbox`), which Guests call too.
  */
 export const announcementsContract = {
-  list: oc.output(z.object({ announcements: z.array(announcementSchema) })),
+  /** Newest first; archived ones only with `includeArchived`. */
+  list: oc
+    .input(z.object({ includeArchived: z.boolean().optional() }).optional())
+    .output(z.object({ announcements: z.array(announcementSchema) })),
   get: oc.input(byId).output(announcementSchema),
   /** A new draft. */
   create: oc.input(announcementDraftSchema).output(announcementSchema),
@@ -55,6 +58,12 @@ export const announcementsContract = {
   duplicate: oc.input(byId).output(announcementSchema),
   /** Deletes a draft or a scheduled one; a sent one is CONFLICT. */
   remove: oc.input(byId).output(z.object({ removed: z.literal(true) })),
+  /**
+   * Archives a sent one: it leaves every device's inbox and the default
+   * list, and stays on record. Already archived returns it unchanged; a
+   * draft or scheduled one is CONFLICT (remove it instead).
+   */
+  archive: oc.input(byId).output(announcementSchema),
   /**
    * Sends it only to the calling Admin's own devices, whatever its status,
    * and records nothing. `devices` is 0 when no device of theirs is

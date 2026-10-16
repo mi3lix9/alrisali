@@ -59,4 +59,8 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `library_assets_category` ON `library_assets` (`category`);",
     ],
   },
+  {
+    tag: "20261016025717_announcement_archive",
+    statements: ["ALTER TABLE `announcement` ADD `archived_at` integer;"],
+  },
 ];
