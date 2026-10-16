@@ -154,6 +154,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Feature Registry**: The single list of features that drives the tabs, Home shortcuts, All Tools and seasonal visibility; a seasonal feature appears only within its Hijri window. _Avoid_: Menu, feature list (for a second, hand-written one)
 
+**Share Image**: A picture of an ayah, a Supplication excerpt or today's Prayer Times that the Believer composes (square, portrait or story size, on a flat colour, with an optional Bismillah or A'udhu and an attribution they can turn off) and sends through the system share sheet. _Avoid_: Screenshot, card
+
 ## Relationships
 
 - A **Prayer Log** belongs to one **Believer** and one date; a **Prayer Streak** is derived from Prayer Logs, never entered.
