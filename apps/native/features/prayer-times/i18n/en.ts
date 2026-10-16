@@ -59,6 +59,10 @@ export const en: Catalog<typeof ar> = {
     noResults: "No city found with that name.",
     searchFailed: "Search failed. Searching needs an internet connection.",
   },
+  recent: {
+    title: "Recent cities",
+    timeZone: "Time zone: {{timeZone}}",
+  },
   options: {
     title: "Prayer Times options",
     timeFormat: "Time format",

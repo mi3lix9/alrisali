@@ -12,6 +12,7 @@ import {
   useCitySearch,
   useLocateDevice,
 } from "../hooks/use-device-location";
+import { RecentCitiesList } from "./recent-cities-list";
 
 const coordinatesKey = ({ latitude, longitude }: Location) =>
   `${latitude},${longitude}`;
@@ -132,6 +133,7 @@ export const LocationCard = ({
             ))}
           </Item.Group>
         ) : null}
+        <RecentCitiesList />
       </Card.Content>
     </Card>
   );

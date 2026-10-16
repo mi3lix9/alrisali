@@ -1,5 +1,6 @@
 import "../i18n";
 import { THEME_PREFERENCES } from "@alrisali/domain/shared";
+import type { Location } from "@alrisali/domain/shared";
 import { LANGUAGES } from "@alrisali/i18n";
 import { reloadAppAsync } from "expo";
 import { Button, Card, RadioGroup } from "panelui-native";
@@ -20,11 +21,19 @@ import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
 interface SettingsScreenProps {
+  /** Told of each place typed into the Location card, composed by the route. */
+  onLocationChosen?: (location: Location) => void;
+  /** Extra content for the Location card (Recent Cities), composed by the route. */
+  locationExtras?: ReactNode;
   /** Other features' settings cards, composed by the route. */
   featureCards?: ReactNode;
 }
 
-export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
+export const SettingsScreen = ({
+  featureCards,
+  onLocationChosen,
+  locationExtras,
+}: SettingsScreenProps) => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
 
@@ -88,7 +97,10 @@ export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
           </RadioGroup>
         </Card.Content>
       </Card>
-      <LocationCard />
+      <LocationCard
+        {...(onLocationChosen ? { onLocationChosen } : {})}
+        {...(locationExtras ? { extras: locationExtras } : {})}
+      />
       <CalculationMethodCard />
       <HijriAdjustmentCard />
       <RemindersCard />
