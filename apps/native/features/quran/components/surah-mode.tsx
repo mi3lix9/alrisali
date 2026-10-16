@@ -79,7 +79,10 @@ export const SurahMode = ({
   onScrollStart,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
   initialAyah,
   onAyahShown,
@@ -214,8 +217,14 @@ export const SurahMode = ({
                 key={ayah.key}
                 onPress={onTap}
                 onLongPress={() => onLongPressAyah(ayah.key)}
+                onPressIn={() => onPressInAyah(ayah.key)}
+                onPressOut={onPressOut}
                 suppressHighlighting
-                className={`${selectedAyah === ayah.key ? "bg-accent" : ""} ${
+                className={`${
+                  selectedAyah === ayah.key || pressingAyah === ayah.key
+                    ? "bg-accent"
+                    : ""
+                } ${
                   lastReadAyah === ayah.key ? "text-info" : "text-foreground"
                 }`}
               >
