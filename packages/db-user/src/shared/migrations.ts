@@ -246,7 +246,13 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261016143531_prayer_time_rules",
+    tag: "20261016143800_ayah_notes",
+    statements: [
+      "CREATE TABLE `quran_ayah_notes` (\n\t`ayah` text PRIMARY KEY,\n\t`text` text NOT NULL,\n\t`updated_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016144303_prayer_time_rules",
     statements: [
       "ALTER TABLE `believer_settings` ADD `prayer_adjustments` text;",
       "ALTER TABLE `believer_settings` ADD `midnight_definition` text;",

@@ -11,9 +11,9 @@ const numbers = (sort: Parameters<typeof sortSurahs>[0], language = "en") =>
   sortSurahs(sort, language).map((surah) => surah.number);
 
 describe("the Quran index", () => {
-  it("has Surahs, Juz, Quarters and Saved tabs, Saved filtering ribbons and favorites", () => {
+  it("has Surahs, Juz, Quarters and Saved tabs, Saved filtering ribbons, favorites and notes", () => {
     expect(INDEX_TABS).toStrictEqual(["surahs", "juz", "quarters", "saved"]);
-    expect(SAVED_FILTERS).toStrictEqual(["ribbons", "favorites"]);
+    expect(SAVED_FILTERS).toStrictEqual(["ribbons", "favorites", "notes"]);
   });
 
   it("sorts surahs by mushaf number", () => {

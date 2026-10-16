@@ -102,6 +102,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Khatmah Log**: The record that a Khatmah Session was completed on a date; the same session on two devices is one record.
 
+**Khatmah Plan**: How a Khatmah is divided: the suggested 30 days, an even split, by meaning (7, 29 or 60 days along the Quran's own divisions), by amount (a number of ayat, pages, hizb quarters, hizb, juz or surahs a session) or by deadline (a Gregorian or Hijri day the last session falls on). Its sessions are daily, every other day or weekly, and a Believer may join at session N, skipping the earlier ones; each choice shows its amount, minutes a session and finish day before it starts.
+
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
 **Supplication**: A single readable text inside a Book (a dua, ziyarah, munajat or sermon). _Avoid_: Item, section, content
@@ -113,6 +115,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 **Favorite**: A Surah, ayah, Supplication or Library Asset the Believer has saved for quick return. _Avoid_: Bookmark
 
 **Bookmark Ribbon**: One of six coloured, nameable bookmarks, each resting on one ayah; setting a colour on another ayah moves that ribbon there, as in a printed mushaf. A ribboned ayah shows a coloured rosette on the page. _Avoid_: Bookmark (alone), Favorite
+
+**Ayah Note**: The Believer's own written note on one ayah; an ayah has at most one, and editing replaces it. It can insert the ayah's text and reference, is listed under Saved › Notes, and shows a badge on the ayah's rosette. _Avoid_: Annotation, Comment
 
 **Sajdah Ayah**: An ayah at which a prostration is due; the four whose prostration is wajib (32:15, 41:37, 53:62, 96:19) are obligatory, the rest recommended. Its rosette shows a crimson (obligatory) or amber (recommended) marker.
 

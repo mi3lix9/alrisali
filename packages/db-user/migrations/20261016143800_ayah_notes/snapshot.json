@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "979eaa51-5a94-4e3d-b958-bf3f26dd90c2",
+  "id": "32fc3ee2-2b6e-416e-a168-37b0bc45e5bc",
   "prevIds": ["327fd744-06ff-4ad0-aba6-9bc4bfd939d2"],
   "ddl": [
     {
@@ -94,6 +94,10 @@
     },
     {
       "name": "qibla_settings",
+      "entityType": "tables"
+    },
+    {
+      "name": "quran_ayah_notes",
       "entityType": "tables"
     },
     {
@@ -1200,6 +1204,36 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "ayah",
+      "entityType": "columns",
+      "table": "quran_ayah_notes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "text",
+      "entityType": "columns",
+      "table": "quran_ayah_notes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "quran_ayah_notes"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "color",
       "entityType": "columns",
       "table": "quran_bookmark_ribbons"
@@ -1630,36 +1664,6 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "prayer_adjustments",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "midnight_definition",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "high_latitude_rule",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "shell_preferences"
@@ -2013,6 +2017,13 @@
       "nameExplicit": false,
       "name": "qibla_settings_pk",
       "table": "qibla_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["ayah"],
+      "nameExplicit": false,
+      "name": "quran_ayah_notes_pk",
+      "table": "quran_ayah_notes",
       "entityType": "pks"
     },
     {

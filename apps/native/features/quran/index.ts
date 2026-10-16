@@ -1,4 +1,5 @@
 export type { AyahActions, AyahSlot } from "./components/ayah-sheet";
+export { AyahNoteRow } from "./components/ayah-note-row";
 export { RibbonRows } from "./components/ribbon-rows";
 export type { SavedFavorites } from "./components/saved-list";
 export { ContinueReadingCard } from "./components/continue-reading-card";
