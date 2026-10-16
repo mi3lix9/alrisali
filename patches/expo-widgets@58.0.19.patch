@@ -1,0 +1,81 @@
+diff --git a/node_modules/expo-widgets/.bun-tag-3abfbb9186f59358 b/.bun-tag-3abfbb9186f59358
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt b/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt
+index b0b6479c2292763fd18eaee78b5e8d2dc4234493..83d24410750a5ed9771a90409ae39a1f85ace569 100644
+--- a/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt
++++ b/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt
+@@ -5,6 +5,7 @@ import android.content.Intent
+ import android.net.Uri
+ import androidx.glance.action.Action
+ import androidx.glance.appwidget.action.actionSendBroadcast
++import androidx.glance.appwidget.action.actionStartActivity
+ import expo.modules.widgets.notifications.ExpoWidgetsNotificationReceiver
+ 
+ internal const val WIDGET_INTERACTION_ACTION = "expo.modules.widgets.ACTION_WIDGET_INTERACTION"
+@@ -26,7 +27,20 @@ internal data class WidgetInteraction(
+   val target: String
+ )
+ 
++/**
++ * A widget Button whose target is `open:<url>` opens that URL in the app on a tap:
++ * a deep link, started from the tap itself (a broadcast receiver may not start
++ * an activity from the background).
++ */
++internal const val WIDGET_OPEN_TARGET_PREFIX = "open:"
++
+ internal fun WidgetInteraction.toGlanceAction(context: Context): Action {
++  if (source is InteractionSource.Widget && target.startsWith(WIDGET_OPEN_TARGET_PREFIX)) {
++    return actionStartActivity(
++      Intent(Intent.ACTION_VIEW, Uri.parse(target.removePrefix(WIDGET_OPEN_TARGET_PREFIX)))
++        .setPackage(context.packageName)
++    )
++  }
+   val intent = when (source) {
+     is InteractionSource.Widget -> Intent(WIDGET_INTERACTION_ACTION)
+       .setComponent(widgetProviderComponentName(context, source.name))
+diff --git a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt b/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt
+index 07eca412c873c7fc6d77d40e3ec76f6338081b31..82cabeaa5dc7d73ace29c813d3a7e3e64a1c2972 100644
+--- a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt
++++ b/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt
+@@ -14,8 +14,8 @@ import android.os.Bundle
+ import androidx.core.app.NotificationCompat
+ import androidx.core.app.NotificationManagerCompat
+ import expo.modules.widgets.R
+-import io.github.jakex7.peek.notification.PeekNotificationViews
+-import io.github.jakex7.peek.notification.setPeekContent
++import io.github.expo.peek.notification.PeekNotificationViews
++import io.github.expo.peek.notification.setPeekContent
+ 
+ internal object CustomNotificationBuilder {
+   private const val DEFAULT_CHANNEL_ID = "expo_widgets_notifications"
+diff --git a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationRenderer.kt b/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationRenderer.kt
+index 446a39eb7229324bf70af2bea68b6c60576389e2..e90b09a490bb7fc21b3f048bcffcc45fd4adef3b 100644
+--- a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationRenderer.kt
++++ b/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationRenderer.kt
+@@ -8,9 +8,9 @@ import expo.modules.widgets.WidgetsStorage
+ import expo.modules.widgets.evaluateLayout
+ import expo.modules.widgets.getWidgetEnvironment
+ import expo.modules.widgets.toPeekRoot
+-import io.github.jakex7.peek.emittables.peekEmittableNotificationViews
+-import io.github.jakex7.peek.notification.PeekNotificationSizes
+-import io.github.jakex7.peek.notification.PeekNotificationViews
++import io.github.expo.peek.emittables.peekEmittableNotificationViews
++import io.github.expo.peek.notification.PeekNotificationSizes
++import io.github.expo.peek.notification.PeekNotificationViews
+ 
+ internal object CustomNotificationRenderer {
+   suspend fun render(context: Context, state: CustomNotificationState): PeekNotificationViews {
+diff --git a/android/src/main/java/expo/modules/widgets/notifications/CustomNotifications.kt b/android/src/main/java/expo/modules/widgets/notifications/CustomNotifications.kt
+index a7b372e656b9b1369ddbface2efb15127c211d14..dd001ee83af872c53cf74177f27ced2b507f2682 100644
+--- a/android/src/main/java/expo/modules/widgets/notifications/CustomNotifications.kt
++++ b/android/src/main/java/expo/modules/widgets/notifications/CustomNotifications.kt
+@@ -3,7 +3,7 @@ package expo.modules.widgets.notifications
+ import android.annotation.SuppressLint
+ import android.content.Context
+ import androidx.core.app.NotificationManagerCompat
+-import io.github.jakex7.peek.notification.PeekNotificationViews
++import io.github.expo.peek.notification.PeekNotificationViews
+ import kotlinx.coroutines.CancellationException
+ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.coroutineScope

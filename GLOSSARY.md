@@ -220,7 +220,9 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Imsakiyya**: The Ramadan timetable: Imsak, Fajr, Dhuhr and Iftar for each day of Ramadan, with the Laylat al-Qadr nights (the 19th, 21st and 23rd) marked. A seasonal Feature Registry entry, shown from 20 Sha'ban to the last day of Ramadan. _Avoid_: Ramadan calendar
 
-**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Hijri calendar, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+
+**Home-screen Widget**: A widget on the phone's home screen showing the next Salah with a countdown, today's times, the Hijri Date, the Verse of the Day, Keep Reading (the Last-Read Ayah) or Khatmah progress. It draws only what the app wrote for it, one view per moment something changes (every Prayer Time, and midnight); a tap opens the matching screen through a Link. _Avoid_: Snapshot (the widget's data), tile (the in-app Home shortcut)
 
 ## Relationships
 

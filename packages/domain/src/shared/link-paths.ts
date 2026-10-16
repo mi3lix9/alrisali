@@ -9,6 +9,7 @@ export const LINK_PATH_ROOTS = [
   "quran",
   "supplication",
   "khatmah",
+  "calendar",
   "qibla",
   "tasbih",
   "next-salah",

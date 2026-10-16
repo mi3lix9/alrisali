@@ -5,3 +5,4 @@ export { MarkDoneTillRow } from "./components/mark-done-till-row";
 export { useKhatmahDecorations } from "./hooks/use-khatmah-decorations";
 export { KhatmahScreen } from "./screens/khatmah-screen";
 export { NewKhatmahScreen } from "./screens/new-khatmah-screen";
+export { useKhatmahData } from "./data/khatmah";

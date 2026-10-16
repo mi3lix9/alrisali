@@ -14,3 +14,4 @@ export { RecitationDownloads } from "./components/recitation-downloads";
 export { RecitationDuasLink } from "./components/recitation-duas-link";
 export { QuranicDuasScreen } from "./screens/quranic-duas-screen";
 export { RecitationDuasScreen } from "./screens/recitation-duas-screen";
+export { useQuranLastRead } from "./data/last-read";

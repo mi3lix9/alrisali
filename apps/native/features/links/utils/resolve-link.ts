@@ -48,6 +48,7 @@ export const linkPath = (link: AppLink): string | null => {
         ? base
         : `${base}?id=${encodeURIComponent(link.id)}`;
     }
+    case "calendar":
     case "qibla":
     case "tasbih":
     case "next-salah": {

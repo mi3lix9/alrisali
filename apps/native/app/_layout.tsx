@@ -21,6 +21,7 @@ import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
 import { lockPortrait } from "@/shared/lib/orientation";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
+import { Widgets } from "@/src/widgets";
 
 initMonitoring();
 // Runs in the background; failures are reported to Sentry.
@@ -109,6 +110,7 @@ const Layout = () => (
         </QadaReminderPlans>
       )}
     </HabitReminderPlans>
+    <Widgets />
     <UsageAnalytics />
     <CompanionAwards />
     <PushDeviceRegistration />
