@@ -267,4 +267,31 @@ export const ar = {
     pauseShort: "إيقاف مؤقت",
     open: "افتح في المصحف",
   },
+  downloads: {
+    title: "التلاوات المحمّلة",
+    description:
+      "حمّل تلاوة قارئ بالسورة أو الجزء أو المصحف كاملًا لتسمعها دون اتصال.",
+    empty: "لا تلاوات محمّلة.",
+    addReciter: "إضافة قارئ",
+    ayat: "{{downloaded}} من {{total}} آية",
+    scope: {
+      surah: "سورة",
+      juz: "جزء",
+      quran: "المصحف كاملًا",
+    },
+    juz: "الجزء {{juz}}",
+    wholeQuran: "المصحف كاملًا",
+    download: "تحميل {{name}}",
+    pause: "إيقاف تحميل {{name}} مؤقتًا",
+    resume: "متابعة تحميل {{name}}",
+    downloaded: "محمّل",
+    delete: "حذف",
+    progress: "{{done}} من {{total}}",
+    status: {
+      paused: "متوقف مؤقتًا",
+      "waiting-for-wifi": "بانتظار Wi-Fi",
+      offline: "لا يوجد اتصال",
+      failed: "تعذّر التحميل",
+    },
+  },
 };

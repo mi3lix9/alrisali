@@ -80,4 +80,10 @@ export const en: Catalog<typeof ar> = {
       dhuAlHijjah: "Dhu al-Hijjah",
     },
   },
+  fileSize: {
+    bytes: "{{value}} B",
+    kb: "{{value}} KB",
+    mb: "{{value}} MB",
+    gb: "{{value}} GB",
+  },
 };

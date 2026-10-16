@@ -9,6 +9,7 @@ import { RecentCitiesList, useRememberCity } from "@/features/prayer-times";
 import { QuranReaderSettingsCard } from "@/features/quran";
 import { AlertHealthCard } from "@/features/reminders";
 import { SettingsScreen } from "@/features/settings";
+import { StorageCard } from "@/features/storage";
 import { TasbihSettingsCard } from "@/features/tasbih";
 
 const SettingsRoute = () => {
@@ -22,6 +23,7 @@ const SettingsRoute = () => {
         <>
           <AnnouncementsCard />
           <QuranReaderSettingsCard />
+          <StorageCard />
           <BirthYearCard />
           <TasbihSettingsCard />
           <GuestNudge showSignIn />

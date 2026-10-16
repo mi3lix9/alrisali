@@ -158,6 +158,22 @@ export {
 } from "./ayah-notes";
 export type { AyahNote, TextSelection } from "./ayah-notes";
 export {
+  juzScopes,
+  missingAyat,
+  recitationFile,
+  recitationFileKey,
+  scopeAyat,
+  scopeCoverage,
+  scopeJobId,
+  surahScopes,
+  withDownloads,
+} from "./downloads";
+export type {
+  DownloadedRecitations,
+  DownloadScope,
+  ScopeCoverage,
+} from "./downloads";
+export {
   canRotateReader,
   pagesOfSpread,
   shownPageOfSpread,

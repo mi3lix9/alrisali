@@ -274,4 +274,31 @@ export const en: Catalog<typeof ar> = {
     pauseShort: "Pause",
     open: "Open in the mushaf",
   },
+  downloads: {
+    title: "Downloaded recitation",
+    description:
+      "Download a reciter by surah, by juz or the whole Quran to listen offline.",
+    empty: "No recitation downloaded.",
+    addReciter: "Add a reciter",
+    ayat: "{{downloaded}} of {{total}} ayat",
+    scope: {
+      surah: "Surah",
+      juz: "Juz",
+      quran: "Whole Quran",
+    },
+    juz: "Juz {{juz}}",
+    wholeQuran: "The whole Quran",
+    download: "Download {{name}}",
+    pause: "Pause downloading {{name}}",
+    resume: "Resume downloading {{name}}",
+    downloaded: "Downloaded",
+    delete: "Delete",
+    progress: "{{done}} of {{total}}",
+    status: {
+      paused: "Paused",
+      "waiting-for-wifi": "Waiting for Wi-Fi",
+      offline: "No connection",
+      failed: "Download failed",
+    },
+  },
 };

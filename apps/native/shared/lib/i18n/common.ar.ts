@@ -82,4 +82,10 @@ export const ar = {
       dhuAlHijjah: "ذو الحجة",
     },
   },
+  fileSize: {
+    bytes: "{{value}} بايت",
+    kb: "{{value}} ك.ب",
+    mb: "{{value}} م.ب",
+    gb: "{{value}} غ.ب",
+  },
 };

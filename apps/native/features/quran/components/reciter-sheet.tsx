@@ -22,8 +22,8 @@ export const useReciterName = () => {
 interface ReciterSheetProps {
   open: boolean;
   reciter: string;
-  /** The first ayah on the current page; a sample recites from here to the page's end. */
-  start: AyahKey;
+  /** The first ayah on the current page; a sample recites from here to the page's end. Without it, no sample is offered. */
+  start?: AyahKey;
   onSelect: (reciter: string) => void;
   onClose: () => void;
 }
@@ -91,35 +91,37 @@ export const ReciterSheet = ({
                             </Text>
                             {selected ? <CheckIcon size={20} /> : null}
                           </Pressable>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={t(
-                              sampling
-                                ? "recitation.stopSample"
-                                : "recitation.sample",
-                              { reciter: nameOf(reciter) }
-                            )}
-                            hitSlop={8}
-                            onPress={() =>
-                              sendRecitation(
+                          {start ? (
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={t(
                                 sampling
-                                  ? { type: "stop" }
-                                  : {
-                                      type: "play",
-                                      ayah: start,
-                                      reciter: reciter.key,
-                                      to: { kind: "page" },
-                                    }
-                              )
-                            }
-                            className="p-2"
-                          >
-                            {sampling ? (
-                              <PauseIcon size={20} />
-                            ) : (
-                              <PlayIcon size={20} />
-                            )}
-                          </Pressable>
+                                  ? "recitation.stopSample"
+                                  : "recitation.sample",
+                                { reciter: nameOf(reciter) }
+                              )}
+                              hitSlop={8}
+                              onPress={() =>
+                                sendRecitation(
+                                  sampling
+                                    ? { type: "stop" }
+                                    : {
+                                        type: "play",
+                                        ayah: start,
+                                        reciter: reciter.key,
+                                        to: { kind: "page" },
+                                      }
+                                )
+                              }
+                              className="p-2"
+                            >
+                              {sampling ? (
+                                <PauseIcon size={20} />
+                              ) : (
+                                <PlayIcon size={20} />
+                              )}
+                            </Pressable>
+                          ) : null}
                         </View>
                       );
                     })}

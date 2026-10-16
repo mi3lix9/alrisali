@@ -104,7 +104,7 @@ export interface RecitationCache {
   prune: () => Promise<void>;
 }
 
-const cacheKey = ({ reciter, ayah }: RecitedAyah): string => {
+export const cacheKey = ({ reciter, ayah }: RecitedAyah): string => {
   const [surah = "", number = ""] = ayah.split(":");
   return `${reciter}/${surah.padStart(3, "0")}${number.padStart(3, "0")}`;
 };

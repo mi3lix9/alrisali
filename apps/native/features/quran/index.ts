@@ -10,3 +10,4 @@ export { VerseOfTheDayCard } from "./components/verse-of-the-day-card";
 export { QuranReaderScreen } from "./screens/quran-reader-screen";
 export { useSurahSearch } from "./hooks/use-surah-search";
 export type { AyahDecoration, AyahDecorations } from "./utils/decorations";
+export { RecitationDownloads } from "./components/recitation-downloads";
