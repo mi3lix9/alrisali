@@ -60,6 +60,8 @@ const RootStack = () => {
         <Stack.Screen name="qibla" />
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
+        <Stack.Screen name="quranic-duas" />
+        <Stack.Screen name="recitation-duas" />
         <Stack.Screen name="date-converter" />
         <Stack.Screen name="khatmah" />
         <Stack.Screen name="khatmah-new" />

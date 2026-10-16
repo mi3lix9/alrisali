@@ -11,3 +11,6 @@ export { QuranReaderScreen } from "./screens/quran-reader-screen";
 export { useSurahSearch } from "./hooks/use-surah-search";
 export type { AyahDecoration, AyahDecorations } from "./utils/decorations";
 export { RecitationDownloads } from "./components/recitation-downloads";
+export { RecitationDuasLink } from "./components/recitation-duas-link";
+export { QuranicDuasScreen } from "./screens/quranic-duas-screen";
+export { RecitationDuasScreen } from "./screens/recitation-duas-screen";

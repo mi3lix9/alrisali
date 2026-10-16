@@ -184,4 +184,28 @@ export {
   WIDE_SCREEN_SHORT_SIDE,
 } from "./spread";
 export type { ScreenSize } from "./spread";
+export {
+  ayatBetween,
+  duaRange,
+  filterQuranicDuas,
+  playDuaEvent,
+  QURANIC_DUA_SPEAKERS,
+  QURANIC_DUA_SUBJECTS,
+  QURANIC_DUAS,
+  quranicDuaFacets,
+  RECITATION_DUA_MOMENTS,
+  RECITATION_DUAS,
+  startDuaQueue,
+  stepDuaQueue,
+} from "./quranic-duas";
+export type {
+  DuaQueue,
+  DuaQueueStep,
+  DuaRange,
+  QuranicDua,
+  QuranicDuaFilter,
+  QuranicDuaSpeaker,
+  QuranicDuaSubject,
+  RecitationDuaMoment,
+} from "./quranic-duas";
 export { recordSearch, SEARCH_HISTORY_LIMIT } from "./search-history";
