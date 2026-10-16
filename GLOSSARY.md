@@ -154,6 +154,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Feature Registry**: The single list of features that drives the tabs, Home shortcuts, All Tools and seasonal visibility; a seasonal feature appears only within its Hijri window. _Avoid_: Menu, feature list (for a second, hand-written one)
 
+**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+
 ## Relationships
 
 - A **Prayer Log** belongs to one **Believer** and one date; a **Prayer Streak** is derived from Prayer Logs, never entered.

@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$locale}/route'
+import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known/apple-app-site-association'
+import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known/assetlinks[.]json'
 import { Route as AdminAuthedRouteRouteImport } from './routes/admin/_authed/route'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as DebugSentryRouteImport } from './routes/debug.sentry'
@@ -36,6 +38,18 @@ const Char123LocaleChar125RouteRoute =
   Char123LocaleChar125RouteRouteImport.update({
     id: '/{-$locale}',
     path: '/{-$locale}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownAppleAppSiteAssociationRoute =
+  DotwellKnownAppleAppSiteAssociationRouteImport.update({
+    id: '/.well-known/apple-app-site-association',
+    path: '/.well-known/apple-app-site-association',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownAssetlinksDotjsonRoute =
+  DotwellKnownAssetlinksDotjsonRouteImport.update({
+    id: '/.well-known/assetlinks.json',
+    path: '/.well-known/assetlinks.json',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AdminAuthedRouteRoute = AdminAuthedRouteRouteImport.update({
@@ -155,6 +169,8 @@ const AdminAuthedProgramsIdRoute = AdminAuthedProgramsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/admin': typeof AdminAuthedRouteRouteWithChildren
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
@@ -177,6 +193,8 @@ export interface FileRoutesByFullPath {
   '/admin/programs/': typeof AdminAuthedProgramsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
@@ -202,6 +220,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/admin/_authed': typeof AdminAuthedRouteRouteWithChildren
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
@@ -228,6 +248,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/{-$locale}'
     | '/admin'
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
@@ -250,6 +272,8 @@ export interface FileRouteTypes {
     | '/admin/programs/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
@@ -274,6 +298,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/{-$locale}'
     | '/admin/_authed'
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
@@ -299,6 +325,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Char123LocaleChar125RouteRoute: typeof Char123LocaleChar125RouteRouteWithChildren
   AdminAuthedRouteRoute: typeof AdminAuthedRouteRouteWithChildren
+  DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
+  DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   AdminLoginRoute: typeof AdminLoginRoute
   DebugSentryRoute: typeof DebugSentryRoute
 }
@@ -310,6 +338,20 @@ declare module '@tanstack/react-router' {
       path: '/{-$locale}'
       fullPath: '/{-$locale}'
       preLoaderRoute: typeof Char123LocaleChar125RouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/apple-app-site-association': {
+      id: '/.well-known/apple-app-site-association'
+      path: '/.well-known/apple-app-site-association'
+      fullPath: '/.well-known/apple-app-site-association'
+      preLoaderRoute: typeof DotwellKnownAppleAppSiteAssociationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/assetlinks.json': {
+      id: '/.well-known/assetlinks.json'
+      path: '/.well-known/assetlinks.json'
+      fullPath: '/.well-known/assetlinks.json'
+      preLoaderRoute: typeof DotwellKnownAssetlinksDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/_authed': {
@@ -522,6 +564,9 @@ const AdminAuthedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   Char123LocaleChar125RouteRoute: Char123LocaleChar125RouteRouteWithChildren,
   AdminAuthedRouteRoute: AdminAuthedRouteRouteWithChildren,
+  DotwellKnownAppleAppSiteAssociationRoute:
+    DotwellKnownAppleAppSiteAssociationRoute,
+  DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
   AdminLoginRoute: AdminLoginRoute,
   DebugSentryRoute: DebugSentryRoute,
 }
