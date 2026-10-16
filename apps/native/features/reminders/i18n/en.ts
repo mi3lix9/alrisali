@@ -38,6 +38,11 @@ export const en: Catalog<typeof ar> = {
       title: "Khatmah",
       body: "Today's portion: from {{from}} to {{to}}.",
     },
+    occasion: {
+      dayOf: "Today: {{name}}",
+      eveningBefore: "Tomorrow: {{name}}",
+      body: "The night of the Occasion begins at Maghrib.",
+    },
     modern: {
       fajr: "A fresh start is waiting. Begin your morning with Allah.",
       dhuhr: "Take a short pause from your day and reconnect with Allah.",
@@ -109,6 +114,26 @@ export const en: Catalog<typeof ar> = {
     enabled: "Use quiet hours",
     start: "From",
     end: "To",
+  },
+  occasionAlerts: {
+    title: "Occasion alerts",
+    description: "Be alerted to Occasions on the day or on the evening before.",
+    enabled: "Alert me to Occasions",
+    timing: "When",
+    timings: {
+      "day-of": "On the day",
+      "evening-before": "The evening before (after Maghrib)",
+    },
+    eveningHint:
+      "The alert arrives at your chosen time, or at Maghrib if that is later. It needs your location.",
+    time: "Time",
+    types: "Types",
+    typeNames: {
+      celebration: "Celebration",
+      mourning: "Mourning",
+      religious: "Religious day",
+      fasting: "Fast",
+    },
   },
   atTime: {
     off: { title: "Off", description: "Nothing at the Prayer Time" },
