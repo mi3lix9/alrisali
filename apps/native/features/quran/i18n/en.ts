@@ -156,6 +156,11 @@ export const en: Catalog<typeof ar> = {
       "Showing the first {{shown}} of {{total}} ayat; add words to narrow it down.",
     ayahRef: "{{name}} · {{ayah}}",
     returnTo: "Back to page {{page}}",
+    returnHistory: "Earlier positions",
+    returnHistoryEmpty:
+      "Jump somewhere and your earlier positions are kept here.",
+    recentSearches: "Recent searches",
+    clearSearchHistory: "Clear all",
     scrubPage: "Go to page",
     scrubSurah: "Go to Surah",
     scrubPageValue: "Page {{page}} · {{name}}",

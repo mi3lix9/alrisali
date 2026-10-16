@@ -112,6 +112,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Spread**: On a tablet or foldable in landscape, two Quran Pages shown side by side as in an open mushaf, the odd page on the right.
 
+**Return History**: The reader's last ten positions before a jump (scrubber, index, search, page jump), latest first; the return chip goes back to the latest, and its list jumps to any of them. Going back forgets that position and the newer ones. _Avoid_: Back stack, breadcrumbs
+
+**Search History**: The Believer's last ten Quran searches, kept in their own database with clear-all. _Avoid_: Recent queries
+
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue

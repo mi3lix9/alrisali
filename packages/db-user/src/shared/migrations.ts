@@ -239,4 +239,10 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `occasion_alert_settings` (\n\t`id` text PRIMARY KEY,\n\t`enabled` integer,\n\t`timing` text,\n\t`time` integer,\n\t`types` text\n);",
     ],
   },
+  {
+    tag: "20261016142956_quran-search-history",
+    statements: [
+      "CREATE TABLE `quran_search_history` (\n\t`query` text PRIMARY KEY,\n\t`searched_at` text NOT NULL\n);",
+    ],
+  },
 ];

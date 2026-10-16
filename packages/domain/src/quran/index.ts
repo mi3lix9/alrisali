@@ -36,6 +36,7 @@ export {
   quranReaderSettingsSchema,
   READER_MODES,
   readerReducer,
+  RETURN_HISTORY_LIMIT,
   SURAH_FONT_SIZE,
   surahEnd,
 } from "./reader";
@@ -153,3 +154,4 @@ export {
   WIDE_SCREEN_SHORT_SIDE,
 } from "./spread";
 export type { ScreenSize } from "./spread";
+export { recordSearch, SEARCH_HISTORY_LIMIT } from "./search-history";
