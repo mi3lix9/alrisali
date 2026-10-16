@@ -143,3 +143,6 @@ export type {
   TasbihLabel,
 } from "./insights-sources";
 export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
+export { METHOD_RULES } from "./prayer-times";
+export type { MethodRules, TwilightRule } from "./prayer-times";
+export { locationTimeZone } from "./time-zone";

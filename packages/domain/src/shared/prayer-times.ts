@@ -2,6 +2,7 @@ import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import type { CalculationMethod } from "./calculation-method";
+import { locationTimeZone } from "./time-zone";
 
 /** The Prayer Times of a day, in the order they fall. */
 export const PRAYER_TIMES = [
@@ -80,47 +81,57 @@ export interface PrayerTimesSettings {
  */
 export type PrayerTimes = Record<PrayerTimeName, Temporal.ZonedDateTime | null>;
 
-interface MethodRules {
-  fajrAngle: number;
-  ishaAngle: number;
-  asrShadowFactor: number;
+/**
+ * When a twilight Prayer Time falls: when the sun is `angle` degrees below
+ * the horizon, or a fixed `minutesAfter` the Prayer Time before it (Maghrib
+ * after Sunset, Isha after Maghrib).
+ */
+export type TwilightRule =
+  | { readonly angle: number }
+  | { readonly minutesAfter: number };
+
+/** A Calculation Method as data: one record per method, no branches. */
+export interface MethodRules {
+  readonly fajrAngle: number;
+  readonly isha: TwilightRule;
+  readonly asrShadowFactor: number;
   /** Degrees below the horizon at Sunset. */
-  sunsetAngle: number;
-  /** Degrees below the horizon at Maghrib; null when Maghrib is Sunset. */
-  maghribAngle: number | null;
+  readonly sunsetAngle: number;
+  /** Null when Maghrib is Sunset. */
+  readonly maghrib: TwilightRule | null;
 }
 
 /** The sun's upper limb touches the horizon, with refraction. */
 const HORIZON_ANGLE = 0.833;
 
-const METHOD_RULES: Record<CalculationMethod, MethodRules> = {
+export const METHOD_RULES: Readonly<Record<CalculationMethod, MethodRules>> = {
   jafari: {
     fajrAngle: 18,
-    ishaAngle: 17,
+    isha: { angle: 17 },
     asrShadowFactor: 1,
     sunsetAngle: 0,
-    maghribAngle: 4,
+    maghrib: { angle: 4 },
   },
   sunni: {
     fajrAngle: 18,
-    ishaAngle: 17,
+    isha: { angle: 17 },
     asrShadowFactor: 1,
     sunsetAngle: HORIZON_ANGLE,
-    maghribAngle: null,
+    maghrib: null,
   },
   hanafi: {
     fajrAngle: 18,
-    ishaAngle: 17,
+    isha: { angle: 17 },
     asrShadowFactor: 2,
     sunsetAngle: HORIZON_ANGLE,
-    maghribAngle: null,
+    maghrib: null,
   },
   ibadi: {
     fajrAngle: 18,
-    ishaAngle: 18,
+    isha: { angle: 18 },
     asrShadowFactor: 1,
     sunsetAngle: HORIZON_ANGLE,
-    maghribAngle: null,
+    maghrib: null,
   },
 };
 
@@ -243,7 +254,10 @@ const fajrInstant = (
   );
 };
 
-/** The Prayer Times of `date` at the settings' place, in `timeZone` (IANA). */
+/**
+ * The Prayer Times of `date` at the settings' place, in `timeZone` (IANA):
+ * the place's own zone, from `locationTimeZone`, never the device's.
+ */
 export const calculatePrayerTimes = (
   date: Temporal.PlainDate,
   timeZone: string,
@@ -256,14 +270,15 @@ export const calculatePrayerTimes = (
   const sunset = day.toInstant(
     day.sunAngleTime(rules.sunsetAngle, FIRST_GUESS.sunset, false)
   );
-  const maghribAtAngle =
-    rules.maghribAngle === null
-      ? null
-      : day.toInstant(
-          day.sunAngleTime(rules.maghribAngle, FIRST_GUESS.sunset, false)
-        );
+  const after = (
+    rule: TwilightRule,
+    previous: Temporal.Instant | null
+  ): Temporal.Instant | null =>
+    "angle" in rule
+      ? day.toInstant(day.sunAngleTime(rule.angle, FIRST_GUESS.sunset, false))
+      : (previous?.add({ minutes: rule.minutesAfter }) ?? null);
   // At high latitudes the sun may never reach the Maghrib angle.
-  const maghrib = maghribAtAngle ?? sunset;
+  const maghrib = (rules.maghrib && after(rules.maghrib, sunset)) ?? sunset;
   const nextFajr = fajrInstant(date.add({ days: 1 }), settings);
   const midnight =
     sunset && nextFajr
@@ -291,11 +306,7 @@ export const calculatePrayerTimes = (
     ),
     sunset: shown(sunset),
     maghrib: shown(maghrib),
-    isha: shown(
-      day.toInstant(
-        day.sunAngleTime(rules.ishaAngle, FIRST_GUESS.sunset, false)
-      )
-    ),
+    isha: shown(after(rules.isha, maghrib)),
     midnight: shown(midnight),
   };
 };
@@ -306,18 +317,20 @@ export interface PrayerTimeAt {
 }
 
 /**
- * The visible Prayer Times around `now`, from yesterday to tomorrow, in
- * order. Yesterday is included because its Midnight can fall after 00:00.
+ * The visible Prayer Times around `now`, from yesterday to tomorrow at the
+ * settings' place, on its clock, in order. Yesterday is included because its
+ * Midnight can fall after 00:00.
  */
 const visibleAround = (
-  now: Temporal.ZonedDateTime,
+  now: Temporal.Instant,
   settings: PrayerTimesSettings,
   hidden: readonly PrayerTimeName[]
 ): PrayerTimeAt[] => {
-  const today = now.toPlainDate();
+  const timeZone = locationTimeZone(settings.coordinates);
+  const today = now.toZonedDateTimeISO(timeZone).toPlainDate();
   return [today.subtract({ days: 1 }), today, today.add({ days: 1 })]
     .flatMap((date) => {
-      const times = calculatePrayerTimes(date, now.timeZoneId, settings);
+      const times = calculatePrayerTimes(date, timeZone, settings);
       return PRAYER_TIMES.filter((name) => !hidden.includes(name)).flatMap(
         (name) => {
           const at = times[name];
@@ -328,22 +341,25 @@ const visibleAround = (
     .toSorted((a, b) => Temporal.ZonedDateTime.compare(a.at, b.at));
 };
 
-/** The next visible Prayer Time after `now`, in now's time zone. */
+/** The next visible Prayer Time after `now`, on the place's own clock. */
 export const nextPrayerTime = (
-  now: Temporal.ZonedDateTime,
+  now: Temporal.Instant,
   settings: PrayerTimesSettings,
   hidden: readonly PrayerTimeName[]
 ): PrayerTimeAt | null =>
   visibleAround(now, settings, hidden).find(
-    ({ at }) => Temporal.ZonedDateTime.compare(at, now) > 0
+    ({ at }) => Temporal.Instant.compare(at.toInstant(), now) > 0
   ) ?? null;
 
-/** The latest visible Prayer Time that has begun by `now`. */
+/**
+ * The latest visible Prayer Time that has begun by `now`, on the place's own
+ * clock.
+ */
 export const currentPrayerTime = (
-  now: Temporal.ZonedDateTime,
+  now: Temporal.Instant,
   settings: PrayerTimesSettings,
   hidden: readonly PrayerTimeName[]
 ): PrayerTimeAt | null =>
   visibleAround(now, settings, hidden).findLast(
-    ({ at }) => Temporal.ZonedDateTime.compare(at, now) <= 0
+    ({ at }) => Temporal.Instant.compare(at.toInstant(), now) <= 0
   ) ?? null;

@@ -265,14 +265,15 @@ describe(planReminders, () => {
       expect(eveningPlanIn("Europe/London")).toContain("habit:evening");
     });
 
-    it("keeps the place's Prayer Times and names days on the new clock", () => {
+    it("keeps the place's Prayer Times on the place's own clock and dates", () => {
       const reminders = plan({
         now: NOON_IN_NAJAF.withTimeZone("Europe/London"),
         days: 2,
       });
 
-      // Najaf's Maghrib (17:46 there) is 15:46 in London, so it is still
-      // the 15th there; the window now ends at London's midnight.
+      // The device is in London (10:00 there), but Najaf's Reminders keep
+      // Najaf's dates and say Najaf's time (Maghrib at 17:46); the window
+      // ends at London's midnight.
       expect(reminders.map(({ id }) => id)).toStrictEqual([
         "salah:maghrib:2026-10-15",
         "salah:fajr:2026-10-16",
@@ -285,9 +286,26 @@ describe(planReminders, () => {
         "2026-10-16T11:44",
         "2026-10-16T17:39",
       ]);
-      expect(reminders[0]?.message).toMatchObject({
-        at: at("2026-10-15T15:46[Europe/London]"),
+      const first = reminders[0]?.message;
+      expect(
+        first?.kind === "prayer-time" && first.at.toString({ offset: "never" })
+      ).toBe("2026-10-15T17:46:00[Asia/Baghdad]");
+    });
+
+    it("plans a place behind the device's clock up to the window's end", () => {
+      // Midnight in Najaf is 22:00 the day before in London.
+      const reminders = plan({
+        now: at("2026-10-16T00:00[Asia/Baghdad]"),
+        prayerTimes: {
+          ...NAJAF,
+          coordinates: { latitude: 51.5074, longitude: -0.1278 },
+        },
+        days: 1,
       });
+
+      expect(reminders.map(({ id }) => id)).toContain(
+        "salah:maghrib:2026-10-16"
+      );
     });
 
     it("follows daylight saving: the local clock moves, the sun does not", () => {
