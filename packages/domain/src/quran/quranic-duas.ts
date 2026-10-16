@@ -98,16 +98,26 @@ export const quranicDuaFacets = (
   ),
 });
 
-/** The event that recites one dua from its first to its last ayah, then stops. */
+/**
+ * The event that recites one dua from its first to its last ayah, then
+ * stops: the plan must not ask "continue to the next ayat?" at the end, since
+ * the list goes on to the next dua itself.
+ */
 export const playDuaEvent = (
   dua: DuaRange,
   reciter: string
-): Extract<RecitationEvent, { type: "play" }> => ({
-  type: "play",
-  ayah: dua.from,
-  reciter,
-  to: { kind: "ayah", ayah: dua.to },
-});
+): Extract<RecitationEvent, { type: "play" }> => {
+  // `settings` is the memorisation playback's plan settings; it is built
+  // apart from the event so the event type stays the one recitation defines.
+  const event = {
+    type: "play" as const,
+    ayah: dua.from,
+    reciter,
+    to: { kind: "ayah" as const, ayah: dua.to },
+    settings: { askToContinueAtEnd: false },
+  };
+  return event;
+};
 
 /** The duas being played as a list, in order, and which one is reciting. */
 export interface DuaQueue {
