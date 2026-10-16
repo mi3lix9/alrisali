@@ -385,7 +385,10 @@ const ACCESS: Record<
     input: { id: "speaker-1" },
   },
   "hijriAdjustment.get": { access: "admin" },
-  "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
+  "hijriAdjustment.set": {
+    access: "admin",
+    input: { offset: 1, forced: null },
+  },
   "lessons.list": { access: "admin" },
   "lessons.get": { access: "admin", input: { id: "tawheed" } },
   "lessons.save": { access: "admin", input: lessonDraft() },
@@ -874,8 +877,17 @@ const openDeviceReplica = async (
   return { access, replica };
 };
 
-const setAdjustment = async (admin: Headers, adjustment: number) => {
-  await callAs(admin, "hijriAdjustment.set", { adjustment });
+const setAdjustment = async (admin: Headers, offset: number) => {
+  await callAs(admin, "hijriAdjustment.set", { offset, forced: null });
+};
+
+const offsetOnly = (offset: number) => ({ offset, forced: null });
+
+// A moon sighting puts 1 Jumada al-Akhirah 1448 a day after Umm al-Qura.
+const sighting = {
+  date: { year: 1448, month: 6, day: 1 },
+  from: "2026-11-12",
+  until: "2026-12-10",
 };
 
 describe("content replica", () => {
@@ -899,10 +911,14 @@ describe("content replica", () => {
     const { replica } = await openDeviceReplica(device, () => online);
     const settings = createGlobalSettingsRepository(replica.db);
 
-    await expect(settings.hijriAdjustment()).resolves.toBe(0);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(0)
+    );
     online = true;
     await replica.sync();
-    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(-1)
+    );
     await replica.close();
   });
 
@@ -915,12 +931,16 @@ describe("content replica", () => {
 
     await setAdjustment(admin, 2);
 
-    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(-1)
+    );
     await expect(replica.sync()).resolves.toStrictEqual({
       status: "pulled",
       pulledChanges: true,
     });
-    await expect(settings.hijriAdjustment()).resolves.toBe(2);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(2)
+    );
     await replica.close();
   });
 
@@ -936,7 +956,7 @@ describe("content replica", () => {
     await expect(offline.sync()).resolves.toStrictEqual({ status: "paused" });
     await expect(
       createGlobalSettingsRepository(offline.db).hijriAdjustment()
-    ).resolves.toBe(2);
+    ).resolves.toStrictEqual(offsetOnly(2));
     await offline.close();
   });
 
@@ -949,7 +969,9 @@ describe("content replica", () => {
     // Drizzle reports the refusal as the cause of its query error.
     const refused = { cause: expect.any(ContentReplicaReadOnlyError) };
     await expect(
-      createGlobalSettingsRepository(replica.db).setHijriAdjustment(-2)
+      createGlobalSettingsRepository(replica.db).setHijriAdjustment(
+        offsetOnly(-2)
+      )
     ).rejects.toMatchObject(refused);
     await expect(replica.db.delete(globalSettings)).rejects.toMatchObject(
       refused
@@ -960,12 +982,12 @@ describe("content replica", () => {
       "db",
       "sync",
     ]);
-    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual({
-      adjustment: 1,
-    });
+    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual(
+      offsetOnly(1)
+    );
     await expect(
       createGlobalSettingsRepository(replica.db).hijriAdjustment()
-    ).resolves.toBe(1);
+    ).resolves.toStrictEqual(offsetOnly(1));
     await replica.close();
   });
 
@@ -982,8 +1004,61 @@ describe("content replica", () => {
     const admin = await signInAsAdmin();
 
     await expect(
-      callAs(admin, "hijriAdjustment.set", { adjustment: 3 })
+      callAs(admin, "hijriAdjustment.set", { offset: 3, forced: null })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("gives devices the Admins' forced date with its expiry, and clears it", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "hijriAdjustment.set", { offset: 1, forced: sighting });
+    const { replica } = await openDeviceReplica(device, () => true);
+    const settings = createGlobalSettingsRepository(replica.db);
+    await replica.sync();
+
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual({
+      offset: 1,
+      forced: sighting,
+    });
+
+    await setAdjustment(admin, 1);
+    await replica.sync();
+
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(1)
+    );
+    await replica.close();
+  });
+
+  it("refuses a forced date that expires before it starts, lies too far, or names a missing day", async () => {
+    const admin = await signInAsAdmin();
+    const refused = { code: "BAD_REQUEST" };
+
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: { ...sighting, until: "2026-11-11" },
+      })
+    ).rejects.toMatchObject(refused);
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: { ...sighting, from: "2026-11-20", until: "2026-12-18" },
+      })
+    ).rejects.toMatchObject(refused);
+    // Umm al-Qura's Dhu al-Hijjah 1446 has 29 days.
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: {
+          date: { year: 1446, month: 12, day: 30 },
+          from: "2025-06-26",
+          until: "2025-06-26",
+        },
+      })
+    ).rejects.toMatchObject(refused);
+    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual(
+      offsetOnly(0)
+    );
   });
 });
 
