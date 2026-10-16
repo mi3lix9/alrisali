@@ -1,9 +1,5 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
-// A relative path: the config runs before workspace packages resolve, and
-// this file imports nothing.
-import { LINK_PATH_ROOTS } from "../../packages/domain/src/shared/link-paths";
-
 const IS_PRODUCTION = process.env.APP_VARIANT === "production";
 
 const APP_ID = IS_PRODUCTION ? "com.alrisali.app" : "com.alrisali.app.dev";
@@ -34,12 +30,31 @@ const googleMapsAndroid = (): { googleMaps?: { apiKey: string } } => {
 };
 
 /**
+ * The first path segment of every link the app opens on the web domain
+ * (`LINK_PATH_ROOTS` in the domain's shared module, which app.config.test.ts
+ * keeps equal: the config runs before workspace packages resolve, so it
+ * cannot import it).
+ */
+export const LINK_PATH_ROOTS = [
+  "ayah",
+  "quran",
+  "supplication",
+  "khatmah",
+  "qibla",
+  "tasbih",
+  "next-salah",
+  "prayer",
+] as const;
+
+/**
  * Universal links: the web domain the app opens links of (`https://<domain>/ayah/2:255`).
  * Without it the build still succeeds and only `alrisali://` links work. The
  * domain must also serve the association files (`apps/web`, with the Apple
  * Team ID and the Android signing SHA-256).
  */
-const universalLinks = (): {
+export const universalLinks = (
+  domain?: string
+): {
   ios: { associatedDomains?: string[] };
   android: {
     intentFilters?: NonNullable<
@@ -47,7 +62,6 @@ const universalLinks = (): {
     >;
   };
 } => {
-  const domain = process.env.EXPO_PUBLIC_LINK_DOMAIN;
   if (!domain) {
     return { ios: {}, android: {} };
   }
@@ -71,7 +85,7 @@ const universalLinks = (): {
 };
 
 const appConfig = ({ config }: ConfigContext): ExpoConfig => {
-  const links = universalLinks();
+  const links = universalLinks(process.env.EXPO_PUBLIC_LINK_DOMAIN);
   return {
     ...config,
     name: APP_NAME,
