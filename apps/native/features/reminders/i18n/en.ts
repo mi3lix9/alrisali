@@ -34,6 +34,10 @@ export const en: Catalog<typeof ar> = {
       title: "Qada",
       body: "Today's plan: {{n}} Qada Salah.",
     },
+    khatmah: {
+      title: "Khatmah",
+      body: "Today's portion: from {{from}} to {{to}}.",
+    },
     modern: {
       fajr: "A fresh start is waiting. Begin your morning with Allah.",
       dhuhr: "Take a short pause from your day and reconnect with Allah.",

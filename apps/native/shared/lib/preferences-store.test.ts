@@ -203,8 +203,9 @@ describe(createPreferences, () => {
           "calendar",
           "gatherings",
           "insights",
+          "khatmah",
         ],
-        hidden: ["library", "worship", "programs", "gatherings"],
+        hidden: ["library", "worship", "programs", "gatherings", "khatmah"],
       },
     };
     expect(store.getState()).toMatchObject(chosen);

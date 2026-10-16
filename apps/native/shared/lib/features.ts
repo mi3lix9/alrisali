@@ -69,4 +69,5 @@ export const FEATURE_LINKS: FeatureLinks = {
   },
   gatherings: { href: "/gatherings", icon: { sf: "person.3", md: "groups" } },
   insights: { href: "/insights", icon: { sf: "chart.bar", md: "bar_chart" } },
+  khatmah: { href: "/khatmah", icon: { sf: "target", md: "flag" } },
 };

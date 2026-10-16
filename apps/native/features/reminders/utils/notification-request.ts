@@ -1,6 +1,9 @@
+import { SURAHS } from "@alrisali/content/quran";
+import type { AyahKey } from "@alrisali/content/quran";
 import { atTimeSound, classicSayingById } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
+  KhatmahReminderMessage,
   PlannedReminder,
   PrayerReminderMessage,
   QadaReminderMessage,
@@ -160,9 +163,21 @@ const prayerTimeWording = (
   return { title, body };
 };
 
+/** An ayah as a Reminder names it: "Al-Baqarah 141". */
+const ayahLabel = (key: AyahKey, language: Language): string => {
+  const [surah = 0, ayah = 0] = key.split(":").map(Number);
+  const entry = SURAHS[surah - 1];
+  const name = language === "ar" ? entry?.nameAr : entry?.nameEn;
+  return `${name ?? ""} ${formatNumber(ayah)}`;
+};
+
 /** A Reminder's title and body, by what it reminds of. */
 const wording = (
-  message: PrayerReminderMessage | HabitReminderMessage | QadaReminderMessage,
+  message:
+    | PrayerReminderMessage
+    | HabitReminderMessage
+    | QadaReminderMessage
+    | KhatmahReminderMessage,
   t: TFunction<"reminders">,
   language: Language
 ): { title: string; body: string } => {
@@ -181,6 +196,15 @@ const wording = (
         }),
       };
     }
+    case "khatmah": {
+      return {
+        title: t("notification.khatmah.title"),
+        body: t("notification.khatmah.body", {
+          from: ayahLabel(message.from, language),
+          to: ayahLabel(message.to, language),
+        }),
+      };
+    }
     default: {
       return prayerTimeWording(message, t, language);
     }
@@ -190,7 +214,10 @@ const wording = (
 /** The Reminder worded in the launch language and its Message Style. */
 export const toReminderRequest = (
   reminder: PlannedReminder<
-    PrayerReminderMessage | HabitReminderMessage | QadaReminderMessage
+    | PrayerReminderMessage
+    | HabitReminderMessage
+    | QadaReminderMessage
+    | KhatmahReminderMessage
   >,
   t: TFunction<"reminders">,
   language: Language

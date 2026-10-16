@@ -96,6 +96,17 @@ export interface AppEvents {
     date: string;
     loggedAt: number;
   };
+  /**
+   * The Believer completed a Khatmah Session on `date` (ISO `YYYY-MM-DD`),
+   * from the ayah sheet or the Khatmah screen. `khatmahId` + `session` is
+   * stable, so a listener can react once per session.
+   */
+  KhatmahSessionCompleted: {
+    khatmahId: string;
+    session: number;
+    date: string;
+    completedAt: number;
+  };
 }
 
 export const events = createEventBus<AppEvents>();

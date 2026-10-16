@@ -7,6 +7,7 @@ import { UsageAnalytics } from "@/features/analytics";
 import { PushDeviceRegistration } from "@/features/announcements";
 import { CompanionAwards } from "@/features/companion";
 import { HabitReminderPlans } from "@/features/habits";
+import { KhatmahReminderPlans } from "@/features/khatmah";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
 import { CompletedSalahLogger } from "@/features/prayer-log";
@@ -54,6 +55,8 @@ const RootStack = () => {
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
         <Stack.Screen name="date-converter" />
+        <Stack.Screen name="khatmah" />
+        <Stack.Screen name="khatmah-new" />
         <Stack.Screen name="qada" />
         <Stack.Screen name="qada-setup" />
         <Stack.Screen name="debug-sentry" />
@@ -73,7 +76,17 @@ const Layout = () => (
     <HabitReminderPlans>
       {(habits) => (
         <QadaReminderPlans>
-          {(qada) => <ReminderScheduler habits={habits} qada={qada} />}
+          {(qada) => (
+            <KhatmahReminderPlans>
+              {(khatmah) => (
+                <ReminderScheduler
+                  habits={habits}
+                  qada={qada}
+                  khatmah={khatmah}
+                />
+              )}
+            </KhatmahReminderPlans>
+          )}
         </QadaReminderPlans>
       )}
     </HabitReminderPlans>

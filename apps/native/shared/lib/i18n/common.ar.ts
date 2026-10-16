@@ -17,6 +17,7 @@ export const ar = {
     calendar: "التقويم",
     gatherings: "المجالس",
     insights: "إحصاءاتي",
+    khatmah: "الختمة",
   },
   featureAreas: {
     quran: "القرآن",
