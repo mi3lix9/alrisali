@@ -11,8 +11,8 @@ export type AyahDecoration =
   | { kind: "ribbon"; color: RibbonColor }
   /** The Believer wrote an Ayah Note on it. */
   | { kind: "note" }
-  /** A prostration (sajdah) is due at the ayah. */
-  | { kind: "sajdah" }
+  /** A prostration (sajdah) is due at the ayah: wajib or mustahabb. */
+  | { kind: "sajdah"; obligatory: boolean }
   /** The ayah ends today's Khatmah Portion. */
   | { kind: "khatmah-portion" };
 
@@ -28,17 +28,26 @@ export const RIBBON_HEX: Record<RibbonColor, string> = {
   purple: "#7a4fd6",
 };
 
+/** An obligatory sajdah rosette is crimson, a recommended one amber. */
+export const SAJDAH_HEX = { obligatory: "#a61e4d", recommended: "#b45309" };
+
 const DECORATION_HEX = {
   note: "#6b7a90",
-  sajdah: "#b45309",
   "khatmah-portion": "#0f9ba8",
 } as const;
 
 /** The colour a decoration tints the rosette. */
-const tint = (decoration: AyahDecoration): string =>
-  decoration.kind === "ribbon"
-    ? RIBBON_HEX[decoration.color]
-    : DECORATION_HEX[decoration.kind];
+const tint = (decoration: AyahDecoration): string => {
+  if (decoration.kind === "ribbon") {
+    return RIBBON_HEX[decoration.color];
+  }
+  if (decoration.kind === "sajdah") {
+    return decoration.obligatory
+      ? SAJDAH_HEX.obligatory
+      : SAJDAH_HEX.recommended;
+  }
+  return DECORATION_HEX[decoration.kind];
+};
 
 /** Which decoration wins the rosette when an ayah has several. */
 const PRIORITY: readonly AyahDecoration["kind"][] = [
