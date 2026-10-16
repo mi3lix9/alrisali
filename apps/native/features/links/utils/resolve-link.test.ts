@@ -23,12 +23,13 @@ describe(resolveLink, () => {
     ["alrisali://qibla", "/qibla"],
     ["alrisali://tasbih", "/tasbih"],
     ["alrisali://next-salah", "/prayer"],
+    ["alrisali://khatmah", "/khatmah"],
+    ["alrisali://khatmah/abc", "/khatmah?id=abc"],
   ])("opens %s at %s", (url, path) => {
     expect(resolveLink(url, HOSTS, TARGETS)).toBe(path);
   });
 
   it.each([
-    "alrisali://khatmah",
     "alrisali://nothing",
     "alrisali://ayah/999:1",
     "https://other.example/ayah/2:255",

@@ -93,7 +93,7 @@ describe("appLinkUrl and webLinkUrl", () => {
 });
 
 describe(linkFeatureId, () => {
-  it("names a registered feature for every link kind except Khatmah, which has none yet", () => {
+  it("names a registered feature for every link kind", () => {
     const ids = new Set<string>(FEATURES.map((feature) => feature.id));
     const unregistered = [
       { kind: "ayah", ayah: "1:1" },
@@ -104,7 +104,7 @@ describe(linkFeatureId, () => {
       { kind: "tasbih" },
       { kind: "next-salah" },
     ].filter((link) => !ids.has(linkFeatureId(link as AppLink)));
-    expect(unregistered).toStrictEqual([{ kind: "khatmah" }]);
+    expect(unregistered).toStrictEqual([]);
   });
 });
 

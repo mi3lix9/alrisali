@@ -32,7 +32,7 @@ export const LINK_SCHEME = "alrisali";
 
 /**
  * The Feature Registry id each link kind opens. A kind may name a feature the
- * registry does not hold yet (Khatmah); the app then falls back to Home.
+ * registry does not hold; the app then falls back to Home.
  */
 export const linkFeatureId = (link: AppLink): string => {
   switch (link.kind) {

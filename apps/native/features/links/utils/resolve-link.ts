@@ -23,7 +23,7 @@ const featurePath = (id: string): string | null => {
 /**
  * The route a link opens: its feature's route in the Feature Registry, with
  * the link's own target (an ayah, a Supplication) added. Null when the
- * registry has no such feature, e.g. before Khatmahs exist.
+ * registry has no such feature.
  */
 export const linkPath = (link: AppLink): string | null => {
   const base = featurePath(linkFeatureId(link));
