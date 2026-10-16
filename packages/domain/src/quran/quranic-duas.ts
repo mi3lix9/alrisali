@@ -151,20 +151,26 @@ const within = (dua: DuaRange, ayah: AyahKey): boolean => {
 /**
  * What a change in recitation means for the queue. Recitation going quiet
  * from the current dua's last ayah means it was recited: the next dua starts,
- * or the queue ends after the last. Going quiet anywhere else, or reciting
+ * or the queue ends after the last. Stopping, going quiet anywhere else, or reciting
  * something outside the current dua, means the Believer left the list.
  */
 export const stepDuaQueue = (
   queue: DuaQueue | null,
   previous: RecitationPlayback,
-  next: RecitationPlayback
+  next: RecitationPlayback,
+  event: RecitationEvent
 ): DuaQueueStep => {
   const current = queue?.duas[queue.index];
   if (!(queue && current)) {
     return { queue: null, play: null };
   }
   if (next.status === "idle") {
-    const finished = previous.status !== "idle" && previous.ayah === current.to;
+    // A Stop on the last ayah leaves the list; only reciting it to its end,
+    // or skipping past it, goes on to the next dua.
+    const finished =
+      event.type !== "stop" &&
+      previous.status !== "idle" &&
+      previous.ayah === current.to;
     const following = queue.duas[queue.index + 1];
     if (finished && following) {
       return {

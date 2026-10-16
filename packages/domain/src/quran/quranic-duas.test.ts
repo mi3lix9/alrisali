@@ -13,9 +13,11 @@ import {
 } from "./quranic-duas";
 import type { QuranicDua } from "./quranic-duas";
 import { recitationPlayback } from "./recitation";
-import type { RecitationPlayback } from "./recitation";
+import type { RecitationEvent, RecitationPlayback } from "./recitation";
 
 const IDLE: RecitationPlayback = { status: "idle" };
+const FINISHED: RecitationEvent = { type: "finished" };
+const READY: RecitationEvent = { type: "ready" };
 
 const dua = (id: string): QuranicDua => {
   const found = QURANIC_DUAS.find((entry) => entry.id === id);
@@ -89,7 +91,7 @@ describe(stepDuaQueue, () => {
   const queue = startDuaQueue([dua("7:23"), dua("2:127-128"), dua("11:47")]);
 
   it("starts the next dua when the current one's last ayah is recited", () => {
-    const step = stepDuaQueue(queue, playing("7:23", "7:23"), IDLE);
+    const step = stepDuaQueue(queue, playing("7:23", "7:23"), IDLE, FINISHED);
     expect(step.play?.id).toBe("2:127-128");
     expect(step.queue?.index).toBe(1);
   });
@@ -98,7 +100,7 @@ describe(stepDuaQueue, () => {
     let current = queue;
     const order: string[] = [];
     for (const last of ["7:23", "2:128", "11:47"]) {
-      const step = stepDuaQueue(current, playing("7:23", last), IDLE);
+      const step = stepDuaQueue(current, playing("7:23", last), IDLE, FINISHED);
       if (step.play) {
         order.push(step.play.id);
       }
@@ -108,11 +110,27 @@ describe(stepDuaQueue, () => {
     expect(current).toBeNull();
   });
 
+  it("ends the queue when stopped on the last ayah of a dua, not starting the next", () => {
+    const step = stepDuaQueue(queue, playing("7:23", "7:23"), IDLE, {
+      type: "stop",
+    });
+    expect(step).toStrictEqual({ queue: null, play: null });
+  });
+
+  it("goes on to the next dua when the last ayah is skipped past", () => {
+    const step = stepDuaQueue(queue, playing("7:23", "7:23"), IDLE, {
+      type: "skip",
+      direction: "next",
+    });
+    expect(step.play?.id).toBe("2:127-128");
+  });
+
   it("keeps the queue while ayat inside the dua recite", () => {
     const step = stepDuaQueue(
-      stepDuaQueue(queue, playing("7:23", "7:23"), IDLE).queue,
+      stepDuaQueue(queue, playing("7:23", "7:23"), IDLE, FINISHED).queue,
       IDLE,
-      playing("2:127-128", "2:128")
+      playing("2:127-128", "2:128"),
+      READY
     );
     expect(step.queue?.index).toBe(1);
     expect(step.play).toBeNull();
@@ -122,7 +140,8 @@ describe(stepDuaQueue, () => {
     const mid = stepDuaQueue(
       startDuaQueue([dua("2:127-128"), dua("11:47")]),
       playing("2:127-128", "2:127"),
-      IDLE
+      IDLE,
+      FINISHED
     );
     expect(mid).toStrictEqual({ queue: null, play: null });
   });
@@ -133,7 +152,13 @@ describe(stepDuaQueue, () => {
       ayah: "36:1",
       reciter: "r",
     });
-    expect(stepDuaQueue(queue, IDLE, elsewhere)).toStrictEqual({
+    expect(
+      stepDuaQueue(queue, IDLE, elsewhere, {
+        type: "play",
+        ayah: "36:1",
+        reciter: "r",
+      })
+    ).toStrictEqual({
       queue: null,
       play: null,
     });

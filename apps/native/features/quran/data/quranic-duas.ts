@@ -27,12 +27,12 @@ const listen = () => {
     return;
   }
   listening = true;
-  subscribeRecitation((previous, next) => {
+  subscribeRecitation((previous, next, event) => {
     const { queue, reciter } = useQueueStore.getState();
     if (!queue) {
       return;
     }
-    const step = stepDuaQueue(queue, previous, next);
+    const step = stepDuaQueue(queue, previous, next, event);
     useQueueStore.setState({ queue: step.queue });
     if (step.play) {
       sendRecitation(playDuaEvent(step.play, reciter));
