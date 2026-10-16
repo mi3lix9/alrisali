@@ -198,7 +198,10 @@ const SupplicationText = ({
       {...scrollProps}
       viewabilityConfig={VIEWABILITY}
       onViewableItemsChanged={onViewableItemsChanged}
-      onContentSizeChange={continueOnLayout}
+      onContentSizeChange={(width, height) => {
+        scrollProps.onContentSizeChange(width, height);
+        continueOnLayout();
+      }}
       onScrollBeginDrag={() => {
         movedRef.current = true;
       }}
