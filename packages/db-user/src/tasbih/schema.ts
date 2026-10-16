@@ -31,3 +31,13 @@ export const dhikrSessions = sqliteTable(
   },
   (table) => [index("dhikr_sessions_completed_at").on(table.completedAt)]
 );
+
+/**
+ * The Believer's Tasbih choices, one row. Columns are nullable: null reads as
+ * the default, so a new choice needs no backfill.
+ */
+export const tasbihSettings = sqliteTable("tasbih_settings", {
+  id: text("id").primaryKey(),
+  /** sound-and-haptic | haptic | silent. */
+  feedbackMode: text("feedback_mode"),
+});

@@ -28,6 +28,7 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
   - The Adhan voice is a 27-second CC BY-SA 3.0 recording from Wikimedia Commons, credited in Sources & Credits; the chime and bell tones are synthesised for the app.
 - Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams straight to the device from alquran.cloud (Islamic Network), and from EveryAyah.com for reciters alquran.cloud lacks; the reciter list is bundled, no key or server is involved, and played files are cached for at most 7 days (ADR-0004).
 - Books (Mafatih, Sahifa, Nahj): bundled static data with stable Supplication ids. The content database refers to Supplications by those ids. Arabic and English texts are re-sourced from Thaqalayn (CC BY 4.0).
+- Tasbih feedback mode is a Believer setting (`tasbih_settings`, synced): sound and haptic, haptic only (default), or silent, for Tasbih al-Zahra and every Open Tasbih. The tap, step and round sounds are synthesised for the app, preloaded, and mix with other audio.
 
 ## Stack
 

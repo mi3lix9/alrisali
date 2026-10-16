@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "64790652-c658-4e97-9d35-99ea0a09048b",
+  "id": "68e708c8-ca31-4158-85e9-9b898b2fcb0f",
   "prevIds": ["5a86bc5c-9581-4dea-be17-47d5c9804222"],
   "ddl": [
     {
@@ -102,6 +102,10 @@
     },
     {
       "name": "tasbih",
+      "entityType": "tables"
+    },
+    {
+      "name": "tasbih_settings",
       "entityType": "tables"
     },
     {
@@ -1170,16 +1174,6 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "home_shortcuts",
-      "entityType": "columns",
-      "table": "shell_preferences"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "dhikr_sessions"
@@ -1283,6 +1277,26 @@
       "name": "notes",
       "entityType": "columns",
       "table": "tasbih"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "tasbih_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "feedback_mode",
+      "entityType": "columns",
+      "table": "tasbih_settings"
     },
     {
       "columns": ["id"],
@@ -1457,6 +1471,13 @@
       "nameExplicit": false,
       "name": "tasbih_pk",
       "table": "tasbih",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "tasbih_settings_pk",
+      "table": "tasbih_settings",
       "entityType": "pks"
     },
     {
