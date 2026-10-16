@@ -143,3 +143,22 @@ export type {
   TasbihLabel,
 } from "./insights-sources";
 export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
+export {
+  fromShamsi,
+  SHAMSI_MONTHS,
+  shamsiMonthLength,
+  toShamsi,
+} from "./shamsi";
+export type { ShamsiDate } from "./shamsi";
+export {
+  CONVERTER_CALENDARS,
+  CONVERTER_RANGE,
+  convertedCalendars,
+  createDateConverter,
+  swapCalendar,
+} from "./date-converter";
+export type {
+  CalendarDate,
+  ConverterCalendar,
+  DateConverter,
+} from "./date-converter";
