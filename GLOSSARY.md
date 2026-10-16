@@ -182,6 +182,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Share Image**: A picture of an ayah, a Supplication excerpt or today's Prayer Times that the Believer composes (square, portrait or story size, on a flat colour, with an optional Bismillah or A'udhu and an attribution they can turn off) and sends through the system share sheet. _Avoid_: Screenshot, card
 
+**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+
 ## Relationships
 
 - A **Prayer Log** belongs to one **Believer** and one date; a **Prayer Streak** is derived from Prayer Logs, never entered.

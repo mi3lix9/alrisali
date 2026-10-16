@@ -1,6 +1,6 @@
 import "../i18n";
 import { khatmahSessionRows } from "@alrisali/domain/khatmah";
-import { router, Stack } from "expo-router";
+import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Button, Card, Spinner, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
@@ -139,7 +139,8 @@ const ActiveKhatmahView = ({ active }: { active: ActiveKhatmah }) => {
  */
 export const KhatmahScreen = () => {
   const { t } = useTranslation("khatmah");
-  const active = useActiveKhatmah();
+  const { id } = useLocalSearchParams<{ id?: string }>();
+  const active = useActiveKhatmah(id);
 
   let body = (
     <View className="bg-background flex-1 items-center justify-center">

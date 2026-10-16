@@ -200,6 +200,7 @@ export type {
   KhatmahReminderPortion,
 } from "./khatmah-reminder";
 export { isAfterMaghrib, nightHijriDate } from "./hijri";
+export { LINK_PATH_ROOTS } from "./link-paths";
 export {
   manualLocation,
   MAX_RECENT_CITIES,

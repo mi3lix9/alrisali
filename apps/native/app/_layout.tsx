@@ -9,6 +9,7 @@ import { CompanionAwards } from "@/features/companion";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhatmahReminderPlans } from "@/features/khatmah";
 import { KhushuSheet } from "@/features/khushu";
+import { LinkShortcuts } from "@/features/links";
 import { useOnboarded } from "@/features/onboarding";
 import { CompletedSalahLogger } from "@/features/prayer-log";
 import { QadaReminderPlans } from "@/features/qada";
@@ -69,6 +70,9 @@ const RootStack = () => {
   );
 };
 
+// Icon shortcuts and the links that wait for the first run to end.
+const Links = () => <LinkShortcuts onboarded={useOnboarded()} />;
+
 // The Khushu sheet is mounted once, above every tab, because a Salah can be
 // ticked from Home or the Prayer tab, or logged when the Prayer Assistant
 // finishes one (which the Prayer Log hears at the root).
@@ -96,6 +100,7 @@ const Layout = () => (
     <PushDeviceRegistration />
     <CompletedSalahLogger />
     <RootStack />
+    <Links />
     <KhushuSheet />
   </AppProviders>
 );
