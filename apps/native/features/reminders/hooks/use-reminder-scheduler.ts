@@ -2,6 +2,7 @@ import {
   habitReminderSource,
   khatmahReminderSource,
   maghribFrom,
+  nightDuaReminderSource,
   occasionReminderSource,
   planReminders,
   qadaReminderSource,
@@ -9,6 +10,8 @@ import {
 import type {
   HabitReminderMessage,
   KhatmahReminderMessage,
+  NightDuaPlan,
+  NightDuaReminderMessage,
   OccasionAlertSettings,
   OccasionReminderMessage,
   QadaReminderMessage,
@@ -38,12 +41,16 @@ import { events } from "@/shared/lib/events";
 import { useHijriCalendar } from "@/shared/lib/hijri-calendar";
 import { launchLanguage } from "@/shared/lib/preferences";
 
+import { useNightDuaAlerts } from "../data/night-dua-alerts";
 import { useOccasionAlertSettings } from "../data/occasion-alert-settings";
 import { useAlertOccasions } from "../data/occasions";
 import { useReminderSettings } from "../data/reminder-settings";
 import { toReminderRequest } from "../utils/notification-request";
 import { syncReminders } from "../utils/scheduler";
 import { useNotificationAccess } from "./use-notification-permission";
+
+/** Stable while the worship mapping has not loaded. */
+const NO_WORSHIP: NightDuaPlan["worship"] = [];
 
 /** The Believer settings the Reminders depend on. */
 interface PlanningSettings {
@@ -68,7 +75,8 @@ const planAndSync = async (
   t: TFunction<"reminders">,
   hijri: HijriCalendar,
   occasionAlerts: OccasionAlertSettings,
-  occasions: readonly Occasion[]
+  occasions: readonly Occasion[],
+  nightDuas: Pick<NightDuaPlan, "alerts" | "worship">
 ): Promise<void> => {
   const {
     location,
@@ -94,6 +102,7 @@ const planAndSync = async (
     | QadaReminderMessage
     | KhatmahReminderMessage
     | OccasionReminderMessage
+    | NightDuaReminderMessage
   >({
     now: Temporal.Now.zonedDateTimeISO(timeZone),
     prayerTimes,
@@ -108,6 +117,11 @@ const planAndSync = async (
         occasions,
         calendar: hijri,
         maghribOf: maghribFrom(prayerTimes),
+      }),
+      nightDuaReminderSource({
+        ...nightDuas,
+        prayerTimes,
+        hijri,
       }),
     ],
     hijri,
@@ -135,13 +149,15 @@ const planAndSync = async (
 export const useReminderScheduler = (
   habits: readonly HabitReminderPlan[] | undefined,
   qada: QadaReminderPlan | null | undefined,
-  khatmah: KhatmahReminderPlan | null | undefined
+  khatmah: KhatmahReminderPlan | null | undefined,
+  worship: NightDuaPlan["worship"] | undefined
 ): void => {
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
   const { data: occasionAlerts } = useOccasionAlertSettings();
   const occasions = useAlertOccasions();
+  const { data: nightAlerts } = useNightDuaAlerts();
   // Imsak's At-Time Alert follows Ramadan by the Believer's Hijri calendar.
   const hijri = useHijriCalendar();
   const { access, refresh } = useNotificationAccess();
@@ -164,10 +180,14 @@ export const useReminderScheduler = (
       !habits ||
       qada === undefined ||
       khatmah === undefined ||
-      granted === undefined
+      granted === undefined ||
+      nightAlerts === undefined ||
+      // The ziyarah comes from the worship mapping.
+      (nightAlerts.ziyarah && worship === undefined)
     ) {
       return;
     }
+    const nightDuas = { alerts: nightAlerts, worship: worship ?? NO_WORSHIP };
     const sync = () => {
       void planAndSync(
         believer,
@@ -178,7 +198,8 @@ export const useReminderScheduler = (
         t,
         hijri,
         occasionAlerts,
-        occasions
+        occasions,
+        nightDuas
       );
     };
     sync();
@@ -199,5 +220,7 @@ export const useReminderScheduler = (
     hijri,
     occasionAlerts,
     occasions,
+    nightAlerts,
+    worship,
   ]);
 };

@@ -1,4 +1,5 @@
 import "../i18n";
+import type { NightDuaPlan } from "@alrisali/domain/reminders";
 import type {
   HabitReminderPlan,
   KhatmahReminderPlan,
@@ -18,12 +19,15 @@ export const ReminderScheduler = ({
   habits,
   qada,
   khatmah,
+  worship,
 }: {
   habits: readonly HabitReminderPlan[] | undefined;
   qada: QadaReminderPlan | null | undefined;
   khatmah: KhatmahReminderPlan | null | undefined;
+  /** The worship mapping (the ziyarah Reminder); undefined while it loads. */
+  worship: NightDuaPlan["worship"] | undefined;
 }) => {
-  useReminderScheduler(habits, qada, khatmah);
+  useReminderScheduler(habits, qada, khatmah, worship);
   useAdhanOnOpen();
   return null;
 };
