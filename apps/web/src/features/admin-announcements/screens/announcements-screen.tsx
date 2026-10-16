@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { orpc } from "@/shared/lib/orpc";
@@ -12,7 +13,10 @@ const EMPTY_TEXT = { title: "", body: "" };
 
 export const AnnouncementsScreen = () => {
   const navigate = useNavigate();
-  const announcements = useQuery(orpc.announcements.list.queryOptions());
+  const [includeArchived, setIncludeArchived] = useState(false);
+  const announcements = useQuery(
+    orpc.announcements.list.queryOptions({ input: { includeArchived } })
+  );
   const create = useMutation(
     orpc.announcements.create.mutationOptions({
       onSuccess: async ({ id }) => {
@@ -58,6 +62,15 @@ export const AnnouncementsScreen = () => {
           New Announcement
         </Button>
       </div>
+
+      <label className="flex items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={includeArchived}
+          onChange={(event) => setIncludeArchived(event.target.checked)}
+        />
+        Show archived
+      </label>
 
       {announcements.data.announcements.length === 0 ? (
         <p className="text-muted-foreground">No Announcements yet.</p>

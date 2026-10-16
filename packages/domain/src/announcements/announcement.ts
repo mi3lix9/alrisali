@@ -19,7 +19,9 @@ export const audienceSchema = z.enum(AUDIENCES);
 
 /**
  * A draft is being written; a scheduled one goes out at `scheduledAt`; a sent
- * one went out at `sentAt` and can no longer change.
+ * one went out at `sentAt` and can no longer change. A sent one can only be
+ * archived (`archivedAt`): it leaves device inboxes and the Admins' default
+ * list, and stays on record.
  */
 export const ANNOUNCEMENT_STATUSES = ["draft", "scheduled", "sent"] as const;
 
@@ -67,6 +69,8 @@ export const announcementSchema = announcementDraftSchema.extend({
   status: z.enum(ANNOUNCEMENT_STATUSES),
   scheduledAt: z.number().int().nullable(),
   sentAt: z.number().int().nullable(),
+  /** When an Admin archived it; null while it is not archived. */
+  archivedAt: z.number().int().nullable(),
   createdAt: z.number().int(),
   updatedAt: z.number().int(),
 });

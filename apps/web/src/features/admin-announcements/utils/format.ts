@@ -14,7 +14,10 @@ const dateTime = new Intl.DateTimeFormat("en-GB", {
 /** Where an Announcement stands, for the list and the editor. */
 export const describeStatus = (announcement: Announcement): string => {
   if (announcement.status === "sent" && announcement.sentAt !== null) {
-    return `Sent ${dateTime.format(announcement.sentAt)}`;
+    const sent = `Sent ${dateTime.format(announcement.sentAt)}`;
+    return announcement.archivedAt === null
+      ? sent
+      : `${sent} · Archived ${dateTime.format(announcement.archivedAt)}`;
   }
   if (
     announcement.status === "scheduled" &&

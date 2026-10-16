@@ -203,6 +203,16 @@ const Editor = ({ announcement }: { announcement: Announcement }) => {
       onError,
     })
   );
+  const archive = useMutation(
+    orpc.announcements.archive.mutationOptions({
+      onSuccess: async () => {
+        await refresh();
+        await navigate({ to: "/admin/announcements" });
+        toast.success("Archived: it no longer shows in any device's inbox.");
+      },
+      onError,
+    })
+  );
   const busy = [
     saveDraft,
     schedule,
@@ -211,6 +221,7 @@ const Editor = ({ announcement }: { announcement: Announcement }) => {
     sendTest,
     duplicate,
     remove,
+    archive,
   ].some((mutation) => mutation.isPending);
   const publishable = missing.length === 0;
 
@@ -333,6 +344,23 @@ const Editor = ({ announcement }: { announcement: Announcement }) => {
         >
           Duplicate
         </Button>
+        {sent && announcement.archivedAt === null ? (
+          <Button
+            variant="destructive"
+            disabled={busy}
+            onClick={() => {
+              if (
+                confirmed(
+                  "Archive this Announcement? It leaves every device's inbox and the list; it stays on record under Show archived."
+                )
+              ) {
+                archive.mutate(id);
+              }
+            }}
+          >
+            Archive
+          </Button>
+        ) : null}
         {sent ? null : (
           <Button
             variant="destructive"

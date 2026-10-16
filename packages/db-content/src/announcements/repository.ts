@@ -6,7 +6,7 @@ import type {
   Announcement,
   AnnouncementDraft,
 } from "@alrisali/domain/announcements";
-import { and, desc, eq, inArray, lte, ne } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lte, ne } from "drizzle-orm";
 
 import type { ContentDb } from "../shared";
 import { announcement } from "./schema";
@@ -24,6 +24,7 @@ const toAnnouncement = (row: Row): Announcement => ({
     ANNOUNCEMENT_STATUSES.find((status) => status === row.status) ?? "draft",
   scheduledAt: row.scheduledAt,
   sentAt: row.sentAt,
+  archivedAt: row.archivedAt,
   createdAt: row.createdAt,
   updatedAt: row.updatedAt,
 });
@@ -39,8 +40,10 @@ const draftColumns = ({ text, audience }: AnnouncementDraft) => ({
 const notSent = ne(announcement.status, "sent");
 
 export interface AnnouncementsRepository {
-  /** Every Announcement, newest first. */
-  list: () => Promise<Announcement[]>;
+  /** Every Announcement, newest first; archived ones only when asked for. */
+  list: (options?: {
+    includeArchived?: boolean | undefined;
+  }) => Promise<Announcement[]>;
   find: (id: string) => Promise<Announcement | null>;
   /** These Announcements, in no particular order; unknown ids are skipped. */
   findMany: (ids: readonly string[]) => Promise<Announcement[]>;
@@ -63,6 +66,12 @@ export interface AnnouncementsRepository {
   /** Deletes a draft or scheduled one; false when absent or already sent. */
   remove: (id: string) => Promise<boolean>;
   /**
+   * Archives a sent one at `now`: off device inboxes and the default list,
+   * kept on record. One already archived stays as it was. Null when absent
+   * or not sent.
+   */
+  archive: (id: string, now: number) => Promise<Announcement | null>;
+  /**
    * Marks every scheduled Announcement due by `now` as sent and returns them.
    * One statement, so two callers never claim the same Announcement.
    */
@@ -73,10 +82,11 @@ export interface AnnouncementsRepository {
 export const createAnnouncementsRepository = (
   db: ContentDb
 ): AnnouncementsRepository => ({
-  list: async () => {
+  list: async ({ includeArchived = false } = {}) => {
     const rows = await db
       .select()
       .from(announcement)
+      .where(includeArchived ? undefined : isNull(announcement.archivedAt))
       .orderBy(desc(announcement.createdAt));
     return rows.map(toAnnouncement);
   },
@@ -143,6 +153,27 @@ export const createAnnouncementsRepository = (
       .where(and(eq(announcement.id, id), notSent))
       .returning({ id: announcement.id });
     return rows.length > 0;
+  },
+  archive: async (id, now) => {
+    const [row] = await db
+      .update(announcement)
+      .set({ archivedAt: now, updatedAt: now })
+      .where(
+        and(
+          eq(announcement.id, id),
+          eq(announcement.status, "sent"),
+          isNull(announcement.archivedAt)
+        )
+      )
+      .returning();
+    if (row) {
+      return toAnnouncement(row);
+    }
+    const [already] = await db
+      .select()
+      .from(announcement)
+      .where(and(eq(announcement.id, id), eq(announcement.status, "sent")));
+    return already ? toAnnouncement(already) : null;
   },
   claimDue: async (now) => {
     const rows = await db
