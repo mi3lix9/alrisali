@@ -27,6 +27,12 @@ const SECTIONS = [
     description: "Choose the Supplication Home features on each weekday.",
   },
   {
+    to: "/admin/worship",
+    title: "Today's worship",
+    description:
+      "Map each weekday's ziyarah, the night duas and the every-day items to Supplications.",
+  },
+  {
     to: "/admin/occasions",
     title: "Occasions",
     description:

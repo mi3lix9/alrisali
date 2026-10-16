@@ -2,16 +2,22 @@ import { router, Stack } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
+import { ContinueSupplicationTile } from "@/features/books";
 import { HijriTodayCard } from "@/features/calendar";
 import { CompanionCard } from "@/features/companion";
-import { DailyContentCard } from "@/features/daily-content";
+import { ContinueRow } from "@/features/continue";
+import { TodaysWorshipCard } from "@/features/daily-content";
 import { UpcomingGatheringsCard } from "@/features/gatherings";
 import { InsightsLinkCard } from "@/features/insights";
 import { MoodCheckInCard } from "@/features/mood";
 import { PrayerLogQuickTicks, PrayerStreakTile } from "@/features/prayer-log";
-import { NextPrayerCard } from "@/features/prayer-times";
+import {
+  NextPrayerCard,
+  useAfterMaghrib,
+  useTonightHijriDate,
+} from "@/features/prayer-times";
 import { QiblaTile } from "@/features/qibla";
-import { ContinueReadingCard, VerseOfTheDayCard } from "@/features/quran";
+import { ContinueReadingTile, VerseOfTheDayCard } from "@/features/quran";
 import { HomeShortcutsCard } from "@/features/shortcuts";
 import { Screen } from "@/shared/ui/screen";
 import { WidgetRow } from "@/shared/ui/widget";
@@ -28,6 +34,8 @@ const accountIcon =
 // edge and Settings at its trailing edge.
 const HomeRoute = () => {
   const { t } = useTranslation();
+  const afterMaghrib = useAfterMaghrib();
+  const tonight = useTonightHijriDate();
 
   return (
     <>
@@ -50,13 +58,16 @@ const HomeRoute = () => {
       <Screen>
         <NextPrayerCard />
         <WidgetRow>
-          <HijriTodayCard compact />
+          <HijriTodayCard compact tonight={tonight} />
           <PrayerStreakTile />
         </WidgetRow>
         <PrayerLogQuickTicks showStreak={false} />
         <MoodCheckInCard />
-        <DailyContentCard />
-        <ContinueReadingCard />
+        <ContinueRow>
+          <ContinueReadingTile />
+          <ContinueSupplicationTile />
+        </ContinueRow>
+        <TodaysWorshipCard afterMaghrib={afterMaghrib} />
         <HomeShortcutsCard />
         <VerseOfTheDayCard />
         <CompanionCard />

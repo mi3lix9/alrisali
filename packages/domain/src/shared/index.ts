@@ -199,6 +199,7 @@ export type {
   KhatmahReminderPlan,
   KhatmahReminderPortion,
 } from "./khatmah-reminder";
+export { isAfterMaghrib, nightHijriDate } from "./hijri";
 export {
   manualLocation,
   MAX_RECENT_CITIES,

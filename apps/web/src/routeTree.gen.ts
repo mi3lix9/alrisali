@@ -25,6 +25,7 @@ import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_
 import { Route as AdminAuthedLibraryRouteImport } from './routes/admin/_authed/library'
 import { Route as AdminAuthedMessagesRouteImport } from './routes/admin/_authed/messages'
 import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
+import { Route as AdminAuthedWorshipRouteImport } from './routes/admin/_authed/worship'
 import { Route as AdminAuthedAnnouncementsIndexRouteImport } from './routes/admin/_authed/announcements/index'
 import { Route as AdminAuthedAnnouncementsIdRouteImport } from './routes/admin/_authed/announcements/$id'
 import { Route as AdminAuthedLessonsIndexRouteImport } from './routes/admin/_authed/lessons/index'
@@ -118,6 +119,11 @@ const AdminAuthedOccasionsRoute = AdminAuthedOccasionsRouteImport.update({
   path: '/occasions',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
+const AdminAuthedWorshipRoute = AdminAuthedWorshipRouteImport.update({
+  id: '/worship',
+  path: '/worship',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedAnnouncementsIndexRoute =
   AdminAuthedAnnouncementsIndexRouteImport.update({
     id: '/announcements/',
@@ -168,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/worship': typeof AdminAuthedWorshipRoute
   '/admin/': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByTo {
   '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/worship': typeof AdminAuthedWorshipRoute
   '/admin': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/admin/_authed/library': typeof AdminAuthedLibraryRoute
   '/admin/_authed/messages': typeof AdminAuthedMessagesRoute
   '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/_authed/worship': typeof AdminAuthedWorshipRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
   '/admin/_authed/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/_authed/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
+    | '/admin/worship'
     | '/admin/'
     | '/admin/announcements/$id'
     | '/admin/lessons/$id'
@@ -263,6 +273,7 @@ export interface FileRouteTypes {
     | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
+    | '/admin/worship'
     | '/admin'
     | '/admin/announcements/$id'
     | '/admin/lessons/$id'
@@ -287,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/_authed/library'
     | '/admin/_authed/messages'
     | '/admin/_authed/occasions'
+    | '/admin/_authed/worship'
     | '/admin/_authed/'
     | '/admin/_authed/announcements/$id'
     | '/admin/_authed/lessons/$id'
@@ -417,6 +429,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedOccasionsRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/worship': {
+      id: '/admin/_authed/worship'
+      path: '/worship'
+      fullPath: '/admin/worship'
+      preLoaderRoute: typeof AdminAuthedWorshipRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/announcements/': {
       id: '/admin/_authed/announcements/'
       path: '/announcements'
@@ -490,6 +509,7 @@ interface AdminAuthedRouteRouteChildren {
   AdminAuthedLibraryRoute: typeof AdminAuthedLibraryRoute
   AdminAuthedMessagesRoute: typeof AdminAuthedMessagesRoute
   AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
+  AdminAuthedWorshipRoute: typeof AdminAuthedWorshipRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
   AdminAuthedAnnouncementsIdRoute: typeof AdminAuthedAnnouncementsIdRoute
   AdminAuthedLessonsIdRoute: typeof AdminAuthedLessonsIdRoute
@@ -507,6 +527,7 @@ const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedLibraryRoute: AdminAuthedLibraryRoute,
   AdminAuthedMessagesRoute: AdminAuthedMessagesRoute,
   AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
+  AdminAuthedWorshipRoute: AdminAuthedWorshipRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
   AdminAuthedAnnouncementsIdRoute: AdminAuthedAnnouncementsIdRoute,
   AdminAuthedLessonsIdRoute: AdminAuthedLessonsIdRoute,

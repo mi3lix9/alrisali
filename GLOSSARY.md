@@ -120,6 +120,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Daily Content**: The Supplication, ziyarah or prayer Admins feature for each weekday on Home.
 
+**Today's worship**: What Home offers for the day: the weekday's Daily Content dua, the weekday's ziyarah, every-day items and, from Maghrib, tonight's dua (Kumayl on Thursday night). All are Supplication ids Admins map in the content database. _Avoid_: Daily plan
+
+**Night Hijri Date**: The Hijri Date that night content follows: the next day's from Maghrib on. The Hijri Date shown elsewhere stays the civil day's.
+
 **Verse of the Day**: The Quran verse, with recitation, featured on Home for each weekday.
 
 **A'mal**: The acts of a Hijri day or month (duas, ziyarat, prayers, fasts, tasbih), each read from a Supplication; day 0 means every day of the month. _Avoid_: Deeds, acts (unqualified)

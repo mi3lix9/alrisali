@@ -91,12 +91,15 @@ const SupplicationText = ({
   passages,
   savedSection,
   autoScroll,
+  continueAtOpen,
 }: {
   supplicationId: string;
   passages: readonly Passage[];
   savedSection: number | null;
   /** Scrolls the text down by itself while `active`, pausing on touch. */
   autoScroll: { active: boolean; speed: number; onFinish: () => void };
+  /** Opened from a Continue card: go to the saved section without asking. */
+  continueAtOpen: boolean;
 }) => {
   const { language, font, fontSize, spacing, theme } = useReaderPreferences();
   const format = { font, fontSize, spacing, theme };
@@ -116,10 +119,13 @@ const SupplicationText = ({
   const [resume, setResume] = useState<{
     section: number | null;
     status: "offered" | "resumed" | "dismissed";
-  }>(() => ({
-    section: resumeSection(savedSection, passages.length),
-    status: "offered",
-  }));
+  }>(() => {
+    const section = resumeSection(savedSection, passages.length);
+    return {
+      section,
+      status: continueAtOpen && section !== null ? "resumed" : "offered",
+    };
+  });
   const offer = resume.section;
   const resumed = resume.status === "resumed";
 
@@ -145,6 +151,16 @@ const SupplicationText = ({
       listRef.current?.scrollToOffset({ offset: 0, animated: true });
     } else {
       listRef.current?.scrollToIndex({ index, animated: true });
+    }
+  };
+
+  // Opened from a Continue card: scroll to the saved section once the list
+  // has laid out, once.
+  const pendingContinue = useRef(resume.status === "resumed");
+  const continueOnLayout = () => {
+    if (pendingContinue.current && offer !== null) {
+      pendingContinue.current = false;
+      goTo(offer);
     }
   };
 
@@ -182,6 +198,7 @@ const SupplicationText = ({
       {...scrollProps}
       viewabilityConfig={VIEWABILITY}
       onViewableItemsChanged={onViewableItemsChanged}
+      onContentSizeChange={continueOnLayout}
       onScrollBeginDrag={() => {
         movedRef.current = true;
       }}
@@ -260,7 +277,10 @@ export const SupplicationReaderScreen = ({
   toolbarActions?: (supplicationId: string) => ReactNode;
 }) => {
   const { t } = useTranslation("books");
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, resume } = useLocalSearchParams<{
+    id: string;
+    resume?: string;
+  }>();
   const supplication = getSupplication(id);
   const { fontSize } = useReaderPreferences();
   const [reciting, setReciting] = useState(false);
@@ -315,6 +335,7 @@ export const SupplicationReaderScreen = ({
           speed,
           onFinish: stopAutoScroll,
         }}
+        continueAtOpen={resume === "1"}
       />
     );
   }

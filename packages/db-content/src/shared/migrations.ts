@@ -73,4 +73,12 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `global_settings` ADD `forced_hijri_until` text;",
     ],
   },
+  {
+    tag: "20261016132207_worship_mapping",
+    statements: [
+      "CREATE TABLE `worship_mapping` (\n\t`kind` text NOT NULL,\n\t`day` text NOT NULL,\n\t`supplication_id` text NOT NULL,\n\tCONSTRAINT `worship_mapping_pk` PRIMARY KEY(`kind`, `day`, `supplication_id`)\n);",
+      "INSERT OR IGNORE INTO `daily_content` (`weekday`, `supplication_id`) VALUES ('saturday', 'sahifa-weekday-saturday'), ('sunday', 'sahifa-weekday-sunday'), ('monday', 'sahifa-weekday-monday'), ('tuesday', 'sahifa-weekday-tuesday'), ('wednesday', 'sahifa-weekday-wednesday'), ('thursday', 'sahifa-weekday-thursday'), ('friday', 'sahifa-weekday-friday');",
+      "INSERT OR IGNORE INTO `worship_mapping` (`kind`, `day`, `supplication_id`) VALUES ('night-dua', 'thursday', 'mafatih-dua-kumayl'), ('every-day', 'every', 'mafatih-dua-sabah');",
+    ],
+  },
 ];

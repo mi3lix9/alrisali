@@ -114,4 +114,7 @@ export const en: Catalog<typeof ar> = {
     emptyMonth: "No a'mal are listed for this month yet.",
     emptyGeneral: "No general a'mal are listed for this month yet.",
   },
+  continue: {
+    label: "Continue the supplication",
+  },
 };

@@ -9,6 +9,7 @@ export const en: Catalog<typeof ar> = {
     noOccasions: "No Occasion today.",
     openCalendar: "Open the calendar",
     separator: ", ",
+    eve: "Tonight is the eve of {{date}}",
   },
   month: {
     previous: "Previous month",

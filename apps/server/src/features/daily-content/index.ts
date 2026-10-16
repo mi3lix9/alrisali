@@ -1,6 +1,17 @@
-import { createDailyContentRepository } from "@alrisali/db-content/daily-content";
-import type { DailyContentRepository } from "@alrisali/db-content/daily-content";
-import { WEEKDAYS } from "@alrisali/domain/daily-content";
+import {
+  createDailyContentRepository,
+  createWorshipMappingRepository,
+} from "@alrisali/db-content/daily-content";
+import type {
+  DailyContentRepository,
+  WorshipMappingRepository,
+} from "@alrisali/db-content/daily-content";
+import {
+  EVERY_DAY,
+  WEEKDAYS,
+  WORSHIP_KINDS,
+} from "@alrisali/domain/daily-content";
+import type { WorshipEntry } from "@alrisali/domain/daily-content";
 
 import { admin } from "@/shared/lib/orpc";
 
@@ -33,4 +44,40 @@ const set = admin.dailyContent.set.handler(
   }
 );
 
-export const dailyContentRouter = { list, set };
+const DAYS: readonly string[] = [...WEEKDAYS, EVERY_DAY];
+
+/** Orders entries by kind, then day (week order). */
+const rank = (row: { kind: string; day: string }) =>
+  WORSHIP_KINDS.indexOf(row.kind as WorshipEntry["kind"]) * DAYS.length +
+  DAYS.indexOf(row.day);
+
+/** Entries ordered by kind, then day (week order), then id. */
+const worshipOf = async (repository: WorshipMappingRepository) => {
+  const rows = await repository.all();
+  return {
+    entries: rows
+      .toSorted(
+        (a, b) =>
+          rank(a) - rank(b) || a.supplicationId.localeCompare(b.supplicationId)
+      )
+      .map((row) => row as WorshipEntry),
+  };
+};
+
+const worshipList = admin.dailyContent.worshipList.handler(
+  async ({ context }) =>
+    worshipOf(createWorshipMappingRepository(await context.content.db()))
+);
+
+/** Devices show the new mapping after their next pull. */
+const worshipSet = admin.dailyContent.worshipSet.handler(
+  async ({ context, input: { kind, day, supplicationIds } }) => {
+    const repository = createWorshipMappingRepository(
+      await context.content.db()
+    );
+    await repository.replace(kind, day, supplicationIds);
+    return worshipOf(repository);
+  }
+);
+
+export const dailyContentRouter = { list, set, worshipList, worshipSet };

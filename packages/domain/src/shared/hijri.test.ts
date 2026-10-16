@@ -12,6 +12,7 @@ import {
   forcedHijriDateSchema,
   hijriAdjustmentSchema,
   isInHijriWindow,
+  nightHijriDate,
   tabularHijriConverter,
 } from "./hijri";
 import type {
@@ -427,5 +428,48 @@ describe("Hijri window", () => {
         [1447, 6, 1],
       ])
     ).toStrictEqual([false, true, true, true, false, false]);
+  });
+});
+
+describe("Night Hijri Date", () => {
+  const calendar = createHijriCalendar({ converter: tabularHijriConverter });
+  const zone = "Asia/Riyadh";
+  const at = (iso: string) => Temporal.ZonedDateTime.from(`${iso}[${zone}]`);
+  const maghrib = at("2026-10-15T17:32:00+03:00");
+
+  it("is the civil day's Hijri Date before Maghrib", () => {
+    expect(
+      nightHijriDate(at("2026-10-15T17:31:00+03:00"), maghrib, calendar)
+    ).toStrictEqual(calendar.toHijri(day("2026-10-15")));
+  });
+
+  it("turns to the next Hijri day exactly at Maghrib", () => {
+    const next = calendar.toHijri(day("2026-10-16"));
+    expect(nightHijriDate(maghrib, maghrib, calendar)).toStrictEqual(next);
+    expect(
+      nightHijriDate(at("2026-10-15T23:59:00+03:00"), maghrib, calendar)
+    ).toStrictEqual(next);
+  });
+
+  it("stays on the civil day when Maghrib is unknown", () => {
+    expect(
+      nightHijriDate(at("2026-10-15T20:00:00+03:00"), null, calendar)
+    ).toStrictEqual(calendar.toHijri(day("2026-10-15")));
+  });
+
+  it("leaves the displayed Hijri Date on the civil day", () => {
+    const late = at("2026-10-15T20:00:00+03:00");
+    expect(calendar.toHijri(late.toPlainDate())).not.toStrictEqual(
+      nightHijriDate(late, maghrib, calendar)
+    );
+  });
+
+  it("carries over a month end", () => {
+    const monthEnd = calendar.toGregorian({ year: 1448, month: 3, day: 29 });
+    const evening = at(`${monthEnd.toString()}T20:00:00+03:00`);
+    const sunset = at(`${monthEnd.toString()}T17:00:00+03:00`);
+    expect(nightHijriDate(evening, sunset, calendar)).toStrictEqual(
+      calendar.toHijri(monthEnd.add({ days: 1 }))
+    );
   });
 });

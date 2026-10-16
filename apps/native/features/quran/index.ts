@@ -2,6 +2,7 @@ export type { AyahActions, AyahSlot } from "./components/ayah-sheet";
 export { RibbonRows } from "./components/ribbon-rows";
 export type { SavedFavorites } from "./components/saved-list";
 export { ContinueReadingCard } from "./components/continue-reading-card";
+export { ContinueReadingTile } from "./components/continue-reading-tile";
 export { QuranLibraryCard } from "./components/quran-library-card";
 export { QuranReaderSettingsCard } from "./components/reader-settings-card";
 export { VerseOfTheDayCard } from "./components/verse-of-the-day-card";
