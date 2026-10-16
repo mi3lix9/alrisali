@@ -5,8 +5,6 @@ import {
 } from "@alrisali/content/quran";
 import type { ByMeaningDays } from "@alrisali/content/quran";
 
-import type { KhatmahPlan } from "./khatmah";
-
 /** What a by-amount plan counts a session in. */
 export const AMOUNT_UNITS = [
   "ayat",
@@ -148,13 +146,20 @@ const meaningIndexRanges = (days: ByMeaningDays): IndexRange[] =>
     last: ayahIndex(to),
   }));
 
+/** The part of a Khatmah plan that decides its division (see khatmah.ts). */
+export type DivisionPlan =
+  | { kind: "suggested" }
+  | { kind: "even"; days: number }
+  | { kind: "meaning"; days: ByMeaningDays }
+  | { kind: "amount"; unit: AmountUnit; count: number };
+
 const rangesCache = new Map<string, readonly IndexRange[]>();
 
 /**
  * Every session of a plan before any join, as ayat index ranges: contiguous
  * and covering all 6236 ayat exactly once.
  */
-export const baseRanges = (plan: KhatmahPlan): readonly IndexRange[] => {
+export const baseRanges = (plan: DivisionPlan): readonly IndexRange[] => {
   const key =
     plan.kind === "suggested"
       ? "even:30"

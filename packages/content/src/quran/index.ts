@@ -2,6 +2,7 @@
 // layout, every ayah verbatim, and surah, juz and hizb-quarter metadata. The
 // font ships as `@alrisali/content/quran/font.ttf`; the notice as
 // `KFGQPC_NOTICE`.
+import type { AyahKey } from "./ayah-key";
 import { BY_MEANING_STARTS } from "./data/by-meaning";
 import type { ByMeaningDays } from "./data/by-meaning";
 import { HAFS } from "./data/hafs";
@@ -13,8 +14,7 @@ export const SURAH_COUNT = 114;
 /** 60 hizb, each of four quarters (rub' al-hizb); a juz holds two hizb. */
 export const HIZB_QUARTER_COUNT = 240;
 
-/** `surah:ayah`, e.g. `2:255`. */
-export type AyahKey = `${number}:${number}`;
+export type { AyahKey } from "./ayah-key";
 
 /**
  * The first ayah of each hizb quarter, in order (Tanzil Quran Metadata,

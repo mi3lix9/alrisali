@@ -16,7 +16,7 @@
 // SCHOLAR REVIEW PENDING: the 29- and 60-day divisions are a mechanical best
 // fit, not yet reviewed by a scholar for thematic sense. Do not describe them
 // as reviewed until `SCHOLAR_REVIEWED` is set.
-import type { AyahKey } from "../index";
+import type { AyahKey } from "../ayah-key";
 
 /** The by-meaning plan lengths, in days (sessions). */
 export const BY_MEANING_DAYS = [7, 29, 60] as const;
