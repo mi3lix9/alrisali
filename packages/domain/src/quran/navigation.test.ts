@@ -3,11 +3,13 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_QURAN_READER_SETTINGS,
   firstAyahOfJuz,
+  firstAyahOfPage,
   firstPageOfSurah,
   JUZ_COUNT,
   openReader,
   PAGE_COUNT,
   parsePage,
+  RETURN_HISTORY_LIMIT,
   readerReducer,
   scrubberDomain,
   scrubberTarget,
@@ -29,9 +31,18 @@ const run = (state: QuranReaderState, ...actions: ReaderAction[]) => {
   return next;
 };
 
+/** Jumps to each page in turn, starting from page 1. */
+const jumpAround = (pages: number[]) =>
+  run(
+    openReader({ settings: pageMode, page: 1 }),
+    ...pages.map((page): ReaderAction => ({ type: "jump", to: { page } }))
+  );
+
 describe("return position", () => {
   it("opens with nothing to return to", () => {
-    expect(openReader({ settings: pageMode, page: 50 }).returnTo).toBeNull();
+    expect(
+      openReader({ settings: pageMode, page: 50 }).returnHistory
+    ).toStrictEqual([]);
   });
 
   it("remembers the page before a page jump", () => {
@@ -42,7 +53,7 @@ describe("return position", () => {
     expect(state).toMatchObject({
       currentPage: 300,
       lastReadAyah: "18:54",
-      returnTo: "3:1",
+      returnHistory: ["3:1"],
     });
   });
 
@@ -55,7 +66,7 @@ describe("return position", () => {
       currentPage: firstPageOfSurah(18),
       currentSurah: 18,
       lastReadAyah: "18:1",
-      returnTo: "2:255",
+      returnHistory: ["2:255"],
     });
   });
 
@@ -67,7 +78,7 @@ describe("return position", () => {
     expect(state).toMatchObject({
       currentPage: 582,
       lastReadAyah: "78:1",
-      returnTo: "1:1",
+      returnHistory: ["1:1"],
     });
   });
 
@@ -80,7 +91,7 @@ describe("return position", () => {
       currentSurah: 2,
       currentPage: 42,
       lastReadAyah: "2:255",
-      returnTo: "18:10",
+      returnHistory: ["18:10"],
     });
   });
 
@@ -90,7 +101,7 @@ describe("return position", () => {
       type: "jump",
       to: scrubberTarget("surah", 67),
     });
-    expect(state).toMatchObject({ currentSurah: 67, returnTo: "36:1" });
+    expect(state).toMatchObject({ currentSurah: 67, returnHistory: ["36:1"] });
   });
 
   it("remembers the page before a Page Mode scrubber jump", () => {
@@ -98,7 +109,7 @@ describe("return position", () => {
       type: "jump",
       to: scrubberTarget("page", 500),
     });
-    expect(state).toMatchObject({ currentPage: 500, returnTo: "2:62" });
+    expect(state).toMatchObject({ currentPage: 500, returnHistory: ["2:62"] });
   });
 
   it("ignores a jump to where the Believer already is", () => {
@@ -122,10 +133,10 @@ describe("return position", () => {
       { type: "next-page" },
       { type: "switch-mode", mode: "surah" }
     );
-    expect(state.returnTo).toBe("3:1");
+    expect(state.returnHistory).toStrictEqual(["3:1"]);
   });
 
-  it("returns to the remembered position, which can be returned from in turn", () => {
+  it("returns to the remembered position and forgets it", () => {
     const jumped = run(openReader({ settings: pageMode, page: 50 }), {
       type: "jump",
       to: { page: 300 },
@@ -134,12 +145,53 @@ describe("return position", () => {
     expect(back).toMatchObject({
       currentPage: 50,
       lastReadAyah: "3:1",
-      returnTo: "18:54",
+      returnHistory: [],
     });
-    expect(run(back, { type: "return" })).toMatchObject({
-      currentPage: 300,
-      returnTo: "3:1",
+  });
+
+  it("keeps the last ten positions, newest first, and drops the eleventh", () => {
+    const state = jumpAround([2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+    expect(RETURN_HISTORY_LIMIT).toBe(10);
+    expect(state.returnHistory).toHaveLength(RETURN_HISTORY_LIMIT);
+    expect(state.returnHistory[0]).toBe(firstAyahOfPage(11).key);
+    expect(state.returnHistory).not.toContain(firstAyahOfPage(1).key);
+    expect(state.returnHistory.at(-1)).toBe(firstAyahOfPage(2).key);
+  });
+
+  it("steps back one position at a time", () => {
+    const state = run(jumpAround([100, 200, 300]), { type: "return" });
+    expect(state.currentPage).toBe(200);
+    expect(state.returnHistory).toStrictEqual([
+      firstAyahOfPage(100).key,
+      firstAyahOfPage(1).key,
+    ]);
+  });
+
+  it("jumps to a chosen entry and forgets it and the newer ones", () => {
+    const state = run(jumpAround([100, 200, 300]), {
+      type: "return",
+      index: 1,
     });
+    expect(state.currentPage).toBe(100);
+    expect(state.lastReadAyah).toBe(firstAyahOfPage(100).key);
+    expect(state.returnHistory).toStrictEqual([firstAyahOfPage(1).key]);
+  });
+
+  it("ignores a return to an entry that is not in the history", () => {
+    const jumped = jumpAround([100]);
+    expect(run(jumped, { type: "return", index: 5 })).toBe(jumped);
+    expect(run(jumped, { type: "return", index: -1 })).toBe(jumped);
+  });
+
+  it("does not repeat the position at the top of the history", () => {
+    const state = jumpAround([100]);
+    // Back at page 1 by hand, then the same jump again.
+    const again = run(
+      state,
+      { type: "page-shown", page: 1 },
+      { type: "jump", to: { page: 100 } }
+    );
+    expect(again.returnHistory).toStrictEqual([firstAyahOfPage(1).key]);
   });
 
   it("does nothing on return with nowhere to return to", () => {

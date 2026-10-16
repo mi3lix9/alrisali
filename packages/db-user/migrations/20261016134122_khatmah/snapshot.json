@@ -2,7 +2,7 @@
   "version": "7",
   "dialect": "sqlite",
   "id": "8708a023-acd3-405a-b266-5c3a2dea4660",
-  "prevIds": ["41a1d730-ba08-4769-aeb2-576a2019949e"],
+  "prevIds": ["d14b9c61-cc99-4fb5-97a7-323512b8d576"],
   "ddl": [
     {
       "name": "supplication_positions",
