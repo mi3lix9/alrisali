@@ -5,6 +5,10 @@ import "@/features/announcements";
 import "@/features/settings";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
 
+// Opening a sub-route directly (the Prayer screen's warning links to Prayer
+// settings) still has Settings beneath it.
+export const unstable_settings = { initialRouteName: "index" };
+
 // The Settings modal has its own stack, so Sources & Credits, Privacy,
 // Terms and Contact open inside it.
 const SettingsLayout = () => {

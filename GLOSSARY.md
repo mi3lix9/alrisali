@@ -20,6 +20,12 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Custom Angles**: The Believer's own Fajr, Maghrib and Isha angles (degrees below the horizon) that the Custom Calculation Method uses; edited under Advanced in Prayer settings. A Maghrib angle of 0 puts Maghrib at Sunset.
 
+**Prayer Time Adjustment**: A correction of −30 to +30 whole minutes the Believer sets on one Prayer Time. It is added once to the time as calculated, on the instant, so it keeps its sign across a daylight-saving change, and it does not move any other Prayer Time.
+
+**Midnight Definition**: Which night is halved to find Midnight: Sunset to Fajr (the default), Sunset to Sunrise, Maghrib to Fajr or Maghrib to Sunrise.
+
+**High-Latitude Rule**: How Fajr and Isha are found where the sun never reaches their angle or the night is short: angle-based (the default; the angle's share, angle ÷ 60, of the night), one-seventh of the night, or the middle of the night. The share is kept from Sunrise (Fajr) or Sunset (Isha); an Isha set as minutes after Maghrib is not changed.
+
 **Imsak**: The Prayer Time a set number of minutes before Fajr at which the fast begins.
 
 **Hidden Prayer Time**: A Prayer Time the Believer has chosen not to see on their timetable.

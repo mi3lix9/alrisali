@@ -31,6 +31,9 @@ export const usePrayerTimesView = (): PrayerTimesView | undefined => {
     calculationMethod,
     customAngles,
     imsakMinutes,
+    prayerAdjustments,
+    midnightDefinition,
+    highLatitudeRule,
     timeFormat,
   } = believer;
   return {
@@ -43,6 +46,9 @@ export const usePrayerTimesView = (): PrayerTimesView | undefined => {
           calculationMethod,
           imsakMinutes,
           customAngles,
+          adjustments: prayerAdjustments,
+          midnight: midnightDefinition,
+          highLatitudeRule,
         }
       : null,
     hidden,
