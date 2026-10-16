@@ -11,6 +11,7 @@ import { LANGUAGES } from "@alrisali/i18n";
 import type { Language } from "@alrisali/i18n";
 import { captureException } from "@sentry/react-native";
 import * as SecureStore from "expo-secure-store";
+import { Platform, Settings } from "react-native";
 import { Uniwind } from "uniwind";
 import { z } from "zod";
 import { create } from "zustand";
@@ -119,6 +120,22 @@ export const usePreferences = create(
  * new direction.
  */
 export const launchLanguage: Language = usePreferences.getState().language;
+
+// UIKit writes its own strings (the back button's VoiceOver label "Back", the
+// Sign in with Apple button) in the app's iOS language, which is the
+// device's unless the app names one. The Believer's language is named here,
+// and UIKit reads it at the next launch, as the shell's direction is.
+const nameAppleLanguage = (language: Language) => {
+  if (Platform.OS === "ios") {
+    Settings.set({ AppleLanguages: [language] });
+  }
+};
+nameAppleLanguage(launchLanguage);
+usePreferences.subscribe((state, previous) => {
+  if (state.language !== previous.language) {
+    nameAppleLanguage(state.language);
+  }
+});
 
 // Hydrates when the database opens at launch, after every sync, and after
 // sign-in or sign-out swap it.
