@@ -1,3 +1,4 @@
+import { TaqibatButton } from "@/features/books";
 import { KhushuButton } from "@/features/khushu";
 import { PrayerAssistantCard } from "@/features/prayer-assistant";
 import { PrayerLogCard } from "@/features/prayer-log";
@@ -11,7 +12,10 @@ const PrayerRoute = () => (
       <PrayerAssistantCard />
       <PrayerLogCard
         loggedSalahActions={(date, salah) => (
-          <KhushuButton date={date} salah={salah} />
+          <>
+            <KhushuButton date={date} salah={salah} />
+            <TaqibatButton salah={salah} />
+          </>
         )}
       />
     </PrayerTimesScreen>

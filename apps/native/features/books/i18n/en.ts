@@ -29,4 +29,5 @@ export const en: Catalog<typeof ar> = {
     loading: "Opening the text…",
     loadError: "The text could not be opened.",
   },
+  taqibat: "Taqibat",
 };
