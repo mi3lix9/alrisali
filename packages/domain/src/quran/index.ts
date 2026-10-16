@@ -131,3 +131,12 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export {
+  AYAH_NOTE_MAX,
+  cleanNoteText,
+  insertAtCursor,
+  notedAyat,
+  sortNotes,
+  writeNote,
+} from "./ayah-notes";
+export type { AyahNote, TextSelection } from "./ayah-notes";

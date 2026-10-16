@@ -233,4 +233,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);",
     ],
   },
+  {
+    tag: "20261016141440_ayah_notes",
+    statements: [
+      "CREATE TABLE `quran_ayah_notes` (\n\t`ayah` text PRIMARY KEY,\n\t`text` text NOT NULL,\n\t`updated_at` text NOT NULL\n);",
+    ],
+  },
 ];

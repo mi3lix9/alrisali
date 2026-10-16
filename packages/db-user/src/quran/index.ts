@@ -7,3 +7,5 @@ export type {
 } from "./reader-settings";
 export { createQuranRibbonsRepository } from "./ribbons";
 export type { QuranRibbonsRepository } from "./ribbons";
+export { createQuranAyahNotesRepository } from "./ayah-notes";
+export type { QuranAyahNotesRepository } from "./ayah-notes";
