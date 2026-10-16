@@ -66,7 +66,7 @@ export const ReaderTopBar = ({
       entering={FadeIn.duration(150)}
       exiting={FadeOut.duration(150)}
       style={{ paddingTop: insetTop }}
-      className="bg-background/95 border-border absolute inset-x-0 top-0 border-b dark:bg-black/90"
+      className="bg-background/95 border-border absolute inset-x-0 top-0 border-b dark:bg-black"
       accessibilityRole="toolbar"
       accessibilityLabel={t("chrome.label")}
     >

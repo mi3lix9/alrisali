@@ -69,7 +69,7 @@ export const ReaderBottomBar = ({
       entering={FadeIn.duration(150)}
       exiting={FadeOut.duration(150)}
       style={{ paddingBottom: insetBottom }}
-      className="bg-background/95 border-border absolute inset-x-0 bottom-0 border-t dark:bg-black/90"
+      className="bg-background/95 border-border absolute inset-x-0 bottom-0 border-t dark:bg-black"
       accessibilityRole="toolbar"
       accessibilityLabel={t("navigation.bar")}
     >
