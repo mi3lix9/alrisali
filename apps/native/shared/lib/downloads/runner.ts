@@ -1,4 +1,4 @@
-import { downloadJobReducer } from "@alrisali/domain/shared";
+import { createKeyedSerial, downloadJobReducer } from "@alrisali/domain/shared";
 import type {
   DownloadJob,
   DownloadJobEvent,
@@ -18,6 +18,7 @@ import {
   discardPartial,
   partFile,
   prepareGroup,
+  storedUri,
 } from "./store";
 
 // Runs download jobs for every kind: a job is a batch of files for one group
@@ -46,6 +47,8 @@ interface Runtime {
   spec: JobSpec;
   queue: JobFile[];
   tasks: Set<DownloadTask>;
+  /** Names of the files this job has a `.part` file for. */
+  writing: Set<string>;
   /** Transfers waiting to carry on, released when the job runs again. */
   waiting: (() => void)[];
   cancelled: boolean;
@@ -54,6 +57,9 @@ interface Runtime {
 const useJobs = create<{ jobs: Record<string, DownloadJob> }>(() => ({
   jobs: {},
 }));
+
+/** Transfers to one destination run in turn: jobs overlap (a surah, its juz, the Quran). */
+const destinations = createKeyedSerial();
 
 const runtimes = new Map<string, Runtime>();
 
@@ -133,15 +139,11 @@ const engine = {
 
   async transfer(runtime: Runtime, file: JobFile) {
     const { kind, group, id } = runtime.spec;
-    const task = File.createDownloadTask(
-      file.url,
-      partFile(kind, group, file.name)
-    );
-    runtime.tasks.add(task);
     try {
-      await engine.complete(runtime, task, true);
+      await destinations.run(`${kind}/${group}/${file.name}`, () =>
+        engine.download(runtime, file)
+      );
       if (!runtime.cancelled) {
-        await commitDownload(kind, group, file.name);
         engine.dispatch(id, { type: "file-done" });
       }
     } catch {
@@ -152,10 +154,32 @@ const engine = {
         engine.dispatch(id, { type: "failed" });
       }
     } finally {
-      runtime.tasks.delete(task);
       if (!runtime.cancelled) {
         engine.pump(id);
       }
+    }
+  },
+
+  /** Downloads one file unless an overlapping job stored it while this one waited its turn. */
+  async download(runtime: Runtime, file: JobFile) {
+    const { kind, group } = runtime.spec;
+    if (runtime.cancelled || storedUri(kind, group, file.name)) {
+      return;
+    }
+    const task = File.createDownloadTask(
+      file.url,
+      partFile(kind, group, file.name)
+    );
+    runtime.tasks.add(task);
+    runtime.writing.add(file.name);
+    try {
+      await engine.complete(runtime, task, true);
+      if (!runtime.cancelled) {
+        await commitDownload(kind, group, file.name);
+      }
+    } finally {
+      runtime.tasks.delete(task);
+      runtime.writing.delete(file.name);
     }
   },
 
@@ -200,6 +224,7 @@ export const startDownload = (spec: JobSpec): void => {
     spec,
     queue: [...spec.files],
     tasks: new Set(),
+    writing: new Set(),
     waiting: [],
     cancelled: false,
   });
@@ -240,8 +265,9 @@ export const cancelDownload = (id: string): void => {
   }
   releaseWaiting(runtime);
   const { kind, group } = runtime.spec;
-  for (const file of runtime.spec.files) {
-    discardPartial(kind, group, file.name);
+  // Only what this job was writing: a part file another job owns is its own.
+  for (const name of runtime.writing) {
+    discardPartial(kind, group, name);
   }
   engine.finish(id);
 };

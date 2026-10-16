@@ -42,6 +42,8 @@ const changed = ({ now = false } = {}) => {
 export const partFile = (kind: DownloadKind, group: string, name: string) =>
   new File(groupDirectory(kind, group), `${name}.part`);
 
+const BACKUP_SUFFIX = ".old";
+
 const finalFile = (kind: DownloadKind, group: string, name: string) =>
   new File(groupDirectory(kind, group), name);
 
@@ -50,18 +52,38 @@ export const prepareGroup = (kind: DownloadKind, group: string): void => {
   groupDirectory(kind, group).create({ intermediates: true, idempotent: true });
 };
 
-/** Moves a finished download into its place, replacing an older copy. */
+/**
+ * Moves a finished download into its place, replacing an older copy. The
+ * older copy is kept aside until the move succeeds, so a failed replacement
+ * never loses audio the Believer already has.
+ */
 export const commitDownload = async (
   kind: DownloadKind,
   group: string,
   name: string
 ): Promise<void> => {
   const part = partFile(kind, group, name);
-  const file = finalFile(kind, group, name);
-  if (file.exists) {
-    file.delete();
+  const directory = groupDirectory(kind, group);
+  const backup = new File(directory, `${name}${BACKUP_SUFFIX}`);
+  const existing = finalFile(kind, group, name);
+  const hadOlder = existing.exists;
+  if (hadOlder) {
+    if (backup.exists) {
+      backup.delete();
+    }
+    existing.move(backup);
   }
-  await part.move(file);
+  try {
+    await part.move(finalFile(kind, group, name));
+  } catch (error) {
+    if (hadOlder && backup.exists) {
+      backup.move(finalFile(kind, group, name));
+    }
+    throw error;
+  }
+  if (backup.exists) {
+    backup.delete();
+  }
   changed();
 };
 
@@ -100,7 +122,10 @@ export const listStored = (kind?: DownloadKind): StoredFile[] => {
         continue;
       }
       for (const file of group.list()) {
-        if (file instanceof File && !file.name.endsWith(".part")) {
+        if (
+          file instanceof File &&
+          !(file.name.endsWith(".part") || file.name.endsWith(BACKUP_SUFFIX))
+        ) {
           files.push({
             kind: current,
             group: group.name,
