@@ -13,6 +13,8 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { ClearSearchButton } from "@/shared/ui/search-panel";
+
 import { QURAN_FONT } from "../hooks/use-quran-font";
 import { formatNumber, surahName } from "../utils/format";
 
@@ -40,11 +42,13 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
         placeholder={t("navigation.searchPlaceholder")}
         accessibilityLabel={t("navigation.search")}
         startContent={<SearchIcon size={18} />}
+        endContent={
+          <ClearSearchButton query={query} onClear={() => setQuery("")} />
+        }
         autoFocus
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
-        clearButtonMode="while-editing"
       />
       {deferred.trim() === "" ? (
         <Text size="sm" muted>

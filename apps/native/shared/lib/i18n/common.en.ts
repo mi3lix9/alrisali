@@ -15,6 +15,7 @@ export const en: Catalog<typeof ar> = {
   account: "Account",
   search: {
     label: "Search",
+    clear: "Clear search",
     noResults: "No results.",
   },
   library: {
