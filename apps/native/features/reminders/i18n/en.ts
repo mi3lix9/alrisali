@@ -244,12 +244,24 @@ export const en: Catalog<typeof ar> = {
     title: "{{name}} alert",
     atTimeSection: "At the Prayer Time",
     adhanUnavailable:
-      "No licensed adhan recording is in the app yet. The full adhan becomes available once one is added.",
+      "Download an adhan voice in the Sound section below to make the full adhan available offline.",
     adhanOnOpen: "The full adhan plays when you open the notification",
     soundSection: "Sound",
     systemSound: "Your device's notification sound",
     systemSoundHint:
-      "The app has no takbir recordings yet, so your device's notification sound plays.",
+      "No adhan voices are published yet, so your device's notification sound plays.",
+    voiceNotDownloaded: "Download the voice to choose it ({{size}})",
+    voiceDownloaded: "Downloaded · {{size}}",
+    voiceProgress: "{{done}} of {{total}}",
+    voiceDownload: "Download {{name}}",
+    voicePause: "Pause downloading {{name}}",
+    voiceResume: "Resume downloading {{name}}",
+    voiceStatus: {
+      paused: "Paused",
+      "waiting-for-wifi": "Waiting for Wi-Fi",
+      offline: "No connection",
+      failed: "Download failed",
+    },
     takbirFromVoice: "The short takbir is a cut of the chosen voice.",
     optionsSection: "Options",
     before: "Reminder before",
@@ -272,6 +284,12 @@ export const en: Catalog<typeof ar> = {
     permissionTitle: "Notifications are needed",
     permissionReason:
       "Alerts arrive as notifications from your device. Saving or testing an alert asks to allow them.",
+  },
+  storage: {
+    title: "Downloaded adhans",
+    description: "Adhan voices downloaded to this device, to play offline.",
+    empty: "No adhan downloaded. Download a voice from any prayer's alert.",
+    delete: "Delete",
   },
   onboarding: {
     previewLabel: "What an alert looks like",

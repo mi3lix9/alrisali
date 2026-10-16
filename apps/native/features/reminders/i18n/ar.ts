@@ -232,12 +232,23 @@ export const ar = {
     title: "تنبيه {{name}}",
     atTimeSection: "عند دخول الوقت",
     adhanUnavailable:
-      "لا يتوفّر في التطبيق بعدُ تسجيل أذان مرخّص، فيُتاح الأذان الكامل حين يُضاف تسجيل.",
+      "حمّل صوت أذان من قسم الصوت أدناه ليُتاح الأذان الكامل دون اتصال.",
     adhanOnOpen: "يُشغَّل الأذان كاملًا عند فتح الإشعار",
     soundSection: "الصوت",
     systemSound: "صوت الإشعار في الجهاز",
-    systemSoundHint:
-      "لا تسجيلات تكبير في التطبيق بعدُ، فيُسمع صوت الإشعار في جهازك.",
+    systemSoundHint: "لا أصوات أذان منشورة بعدُ، فيُسمع صوت الإشعار في جهازك.",
+    voiceNotDownloaded: "حمّل الصوت لاختياره ({{size}})",
+    voiceDownloaded: "محمّل · {{size}}",
+    voiceProgress: "{{done}} من {{total}}",
+    voiceDownload: "تحميل {{name}}",
+    voicePause: "إيقاف تحميل {{name}} مؤقتًا",
+    voiceResume: "متابعة تحميل {{name}}",
+    voiceStatus: {
+      paused: "متوقف مؤقتًا",
+      "waiting-for-wifi": "بانتظار Wi-Fi",
+      offline: "لا يوجد اتصال",
+      failed: "تعذّر التحميل",
+    },
     takbirFromVoice: "التكبير القصير مقطع من الصوت المختار.",
     optionsSection: "خيارات",
     before: "تذكير قبل الوقت",
@@ -260,6 +271,12 @@ export const ar = {
     permissionTitle: "الإشعارات مطلوبة",
     permissionReason:
       "تصلك التنبيهات كإشعارات من جهازك. عند حفظ تنبيه أو تجربته سيُطلب منك السماح بها.",
+  },
+  storage: {
+    title: "الأذان المحمّل",
+    description: "أصوات الأذان المحمّلة على هذا الجهاز لتُسمع دون اتصال.",
+    empty: "لا أذان محمّل. حمّل صوتًا من تنبيه أي صلاة.",
+    delete: "حذف",
   },
   onboarding: {
     previewLabel: "هكذا يبدو التنبيه",

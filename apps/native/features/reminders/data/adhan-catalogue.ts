@@ -1,36 +1,57 @@
+import { createAdhansRepository } from "@alrisali/db-content/shared";
+import { installedAdhanSounds } from "@alrisali/domain/reminders";
 import type { AdhanSound } from "@alrisali/domain/reminders";
+import { adhanIdOfFile } from "@alrisali/domain/shared";
+import type { AdhanCatalogueEntry } from "@alrisali/domain/shared";
+import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 
-/** A bundled adhan voice: its catalogue entry and each cut's audio asset. */
-interface BundledAdhan {
-  sound: AdhanSound;
-  /** `require("../../../assets/sounds/<full file>")`. */
-  full: number;
-  /** `require("../../../assets/sounds/<takbir file>")`. */
-  takbir: number;
-}
+import {
+  CONTENT_QUERY_KEY,
+  getContentReplica,
+} from "@/shared/lib/content-database";
+import { storedUri, useStoredFiles } from "@/shared/lib/downloads/store";
+
+/** Stable while the catalogue is empty or has not loaded. */
+const NO_VOICES: readonly AdhanCatalogueEntry[] = [];
 
 /**
- * The adhan voices installed with the app. Empty: no licensed adhan or
- * takbir recording exists yet (spec 0002, Further Notes), so the takbir
- * plays the system's notification sound and the full adhan is not offered.
- * To add a voice: put both files in `assets/sounds`, list them in
- * `app.config.ts` (`expo-notifications.sounds`, so notifications can play
- * them by name), credit the source in `CONTENT_SOURCES` and add an entry
- * here. Voices downloaded from the content database come with ticket 31.
+ * The adhan voices the Admins published, in their order, from the content
+ * replica (refreshed by each pull that brings changes). Empty until the first
+ * pull, and while no Admin has published one: no recording is bundled.
+ * `undefined` while the replica is being read.
  */
-const BUNDLED_ADHANS: readonly BundledAdhan[] = [];
+export const useAdhanCatalogue = ():
+  | readonly AdhanCatalogueEntry[]
+  | undefined => {
+  const { data, isError } = useQuery({
+    queryKey: [...CONTENT_QUERY_KEY, "adhans"],
+    queryFn: async () => {
+      const replica = await getContentReplica();
+      return createAdhansRepository(replica.db).list();
+    },
+  });
+  return isError ? NO_VOICES : data;
+};
 
-/** The adhan voices on the device, ready for an At-Time Alert. */
-export const INSTALLED_ADHAN_SOUNDS: readonly AdhanSound[] = BUNDLED_ADHANS.map(
-  ({ sound }) => sound
-);
+/**
+ * The voices on the device: published ones the Believer has downloaded, both
+ * recordings whole. `undefined` until the catalogue is read, so nothing is
+ * planned with the system's sound meanwhile.
+ */
+export const useInstalledAdhanSounds = ():
+  | readonly AdhanSound[]
+  | undefined => {
+  const catalogue = useAdhanCatalogue();
+  const stored = useStoredFiles("adhan");
+  return useMemo(
+    () => (catalogue ? installedAdhanSounds(catalogue, stored) : undefined),
+    [catalogue, stored]
+  );
+};
 
-const ASSETS: Readonly<Record<string, number>> = Object.fromEntries(
-  BUNDLED_ADHANS.flatMap(({ sound, full, takbir }) => [
-    [sound.full.file, full],
-    [sound.takbir.file, takbir],
-  ])
-);
-
-/** The audio asset of an installed recording, to play it in the app. */
-export const adhanAsset = (file: string): number | undefined => ASSETS[file];
+/** Where a downloaded recording is, from the name it is stored under; null when it is not on the device. */
+export const adhanFileUri = (file: string): string | null => {
+  const id = adhanIdOfFile(file);
+  return id === null ? null : storedUri("adhan", id, file);
+};
