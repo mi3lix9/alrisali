@@ -1,9 +1,11 @@
-import "../i18n";
 import { BOOKS } from "@alrisali/content/books";
+
+import "../i18n";
 import { router } from "expo-router";
 import { Card, Item } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 /** The Library's list of Books, each opening its contents. */
@@ -32,9 +34,11 @@ export const BooksCard = () => {
               <Item.Content>
                 <Item.Title>{book.title[launchLanguage]}</Item.Title>
                 <Item.Description>
-                  {book.sections
-                    .map((section) => section.title[launchLanguage])
-                    .join(" · ")}
+                  {joinParts(
+                    book.sections.map(
+                      (section) => section.title[launchLanguage]
+                    )
+                  )}
                 </Item.Description>
               </Item.Content>
             </Item>

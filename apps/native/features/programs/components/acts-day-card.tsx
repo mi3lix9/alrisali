@@ -13,6 +13,7 @@ import {
   useFormatHijriDate,
   useHijriCalendar,
 } from "@/shared/lib/hijri-calendar";
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 import { useToday } from "@/shared/lib/today";
 
@@ -57,14 +58,14 @@ const ActRow = ({
           disabled={!canComplete}
           onCheckedChange={onToggle}
           label={act.name[launchLanguage]}
-          description={[
-            program.name,
-            act.detail.type === "regular"
-              ? null
-              : t(`types.${act.detail.type}`),
-          ]
-            .filter((part) => part !== null)
-            .join(" · ")}
+          description={joinParts(
+            [
+              program.name,
+              act.detail.type === "regular"
+                ? null
+                : t(`types.${act.detail.type}`),
+            ].filter((part): part is string => part !== null)
+          )}
         />
       </View>
       <Button

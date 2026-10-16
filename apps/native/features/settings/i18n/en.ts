@@ -91,7 +91,7 @@ export const en: Catalog<typeof ar> = {
       "Al-Risali is free. We thank those who made these texts and tools available; each keeps its own licence.",
     content: "Content",
     software: "Software",
-    licence: "Licence: {{licence}}",
+    licence: "Licence",
     credits: {
       kfgqpc:
         "The Quran text (Hafs), the mushaf's pages and lines, and the Uthmanic font, from the developer release of the King Fahd Glorious Qur'an Printing Complex.",

@@ -3,6 +3,8 @@ import { Button, Card, Input, Item } from "panelui-native";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { joinParts } from "@/shared/lib/i18n";
+
 import {
   useChooseLocation,
   useCitySearch,
@@ -60,7 +62,7 @@ export const LocationCard = ({
         </Card.Title>
         <Card.Description>
           {location
-            ? `${coordinatesText(location)} · ${description}`
+            ? joinParts([coordinatesText(location), description])
             : description}
         </Card.Description>
       </Card.Header>

@@ -4,6 +4,7 @@ import { Badge, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useDescribe } from "../hooks/use-describe";
@@ -36,7 +37,7 @@ export const ActRow = ({ act, onOpen }: { act: Act; onOpen: () => void }) => {
         )}
       </View>
       <Text muted size="sm">
-        {details.join(" · ")}
+        {joinParts(details)}
       </Text>
     </Pressable>
   );

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Temporal } from "temporal-polyfill";
 
 import { formatGregorianDate } from "@/shared/lib/hijri-calendar";
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { GATHERING_BADGE } from "../utils/gathering-style";
@@ -33,7 +34,13 @@ export const GatheringItem = ({
   const { t } = useTranslation("gatherings");
   const time = formatTimeRange(gathering);
   const when = showDate
-    ? `${formatGregorianDate(Temporal.PlainDate.from(gathering.date), SHORT_DATE)} · ${time}`
+    ? joinParts([
+        formatGregorianDate(
+          Temporal.PlainDate.from(gathering.date),
+          SHORT_DATE
+        ),
+        time,
+      ])
     : time;
 
   return (
@@ -49,7 +56,7 @@ export const GatheringItem = ({
       <Item.Content>
         <Item.Title>{localized(gathering.title, launchLanguage)}</Item.Title>
         <Item.Description>
-          {`${when} · ${localized(gathering.venue.name, launchLanguage)}`}
+          {joinParts([when, localized(gathering.venue.name, launchLanguage)])}
         </Item.Description>
         {speaker ? (
           <Item.Description>

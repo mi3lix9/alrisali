@@ -18,6 +18,7 @@ import {
   useBelieverSettings,
   useUpdateBelieverSettings,
 } from "@/shared/lib/believer-settings";
+import { joinParts } from "@/shared/lib/i18n";
 
 import { refreshFollowedLocation } from "../utils/refresh-followed-location";
 import type { Coordinates } from "../utils/refresh-followed-location";
@@ -100,7 +101,8 @@ export const useCitySearch = () =>
           const country = address?.country;
           return {
             location: { latitude, longitude, name },
-            label: country && country !== name ? `${name} · ${country}` : name,
+            label:
+              country && country !== name ? joinParts([name, country]) : name,
           };
         })
       );

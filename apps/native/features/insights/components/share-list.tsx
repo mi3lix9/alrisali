@@ -1,6 +1,8 @@
 import { Progress, Text } from "panelui-native";
 import { View } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
+
 import { formatNumber, formatPercent } from "../utils/format";
 
 export interface ShareRow {
@@ -19,7 +21,7 @@ export const ShareList = ({ rows }: { rows: readonly ShareRow[] }) => (
         <View className="flex-row justify-between gap-2">
           <Text className="flex-1">{row.label}</Text>
           <Text muted>
-            {formatNumber(row.count)} · {formatPercent(row.share)}
+            {joinParts([formatNumber(row.count), formatPercent(row.share)])}
           </Text>
         </View>
         <Progress

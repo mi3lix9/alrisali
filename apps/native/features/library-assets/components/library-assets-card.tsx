@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { Card, Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useLibraryAssets } from "../data/library-assets";
@@ -57,7 +58,7 @@ export const LibraryAssetsCard = () => {
                       </Item.Title>
                       <Item.Description>
                         {author
-                          ? `${t(`kind.${asset.kind}`)} · ${author}`
+                          ? joinParts([t(`kind.${asset.kind}`), author])
                           : t(`kind.${asset.kind}`)}
                       </Item.Description>
                     </Item.Content>

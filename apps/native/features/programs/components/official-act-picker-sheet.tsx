@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useOfficialPrograms } from "../data/official-programs";
@@ -56,15 +57,15 @@ const Picker = ({
                     <View className="flex-1 gap-1">
                       <Text>{name}</Text>
                       <Text muted size="sm">
-                        {[
-                          act.detail.type === "regular"
-                            ? null
-                            : t(`types.${act.detail.type}`),
-                          describe.timing(act),
-                          describe.schedule(act),
-                        ]
-                          .filter((part) => part !== null)
-                          .join(" · ")}
+                        {joinParts(
+                          [
+                            act.detail.type === "regular"
+                              ? null
+                              : t(`types.${act.detail.type}`),
+                            describe.timing(act),
+                            describe.schedule(act),
+                          ].filter((part): part is string => part !== null)
+                        )}
                       </Text>
                     </View>
                     <Button

@@ -13,6 +13,7 @@ export const en: Catalog<typeof ar> = {
   },
   settings: "Settings",
   account: "Account",
+  separator: " · ",
   search: {
     label: "Search",
     clear: "Clear search",
