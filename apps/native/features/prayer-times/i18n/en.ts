@@ -65,6 +65,19 @@ export const en: Catalog<typeof ar> = {
     title: "Recent cities",
     timeZone: "Time zone: {{timeZone}}",
   },
+  sanity: {
+    title: "Some times need a look",
+    undefined: "Can't be calculated on this day at this location: {{names}}.",
+    outOfOrder: "Out of order: {{names}}.",
+    fix: "Review Prayer settings",
+  },
+  highLatitude: {
+    title: "Your location is at a high latitude",
+    description:
+      "In summer the sun may not reach the Fajr or Isha angle. Review the high-latitude rule in Prayer settings before you need it.",
+    review: "Review settings",
+    dismiss: "Later",
+  },
   options: {
     title: "Prayer Times options",
     timeFormat: "Time format",

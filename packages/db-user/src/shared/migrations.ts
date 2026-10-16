@@ -257,4 +257,12 @@ export const migrations: readonly Migration[] = [
       "CREATE TABLE `night_dua_alerts` (\n\t`id` text PRIMARY KEY,\n\t`kumayl` integer DEFAULT false NOT NULL,\n\t`tawassul` integer DEFAULT false NOT NULL,\n\t`nudba` integer DEFAULT false NOT NULL,\n\t`ziyarah` integer DEFAULT false NOT NULL\n);",
     ],
   },
+  {
+    tag: "20261016150111_prayer_time_rules",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `prayer_adjustments` text;",
+      "ALTER TABLE `believer_settings` ADD `midnight_definition` text;",
+      "ALTER TABLE `believer_settings` ADD `high_latitude_rule` text;",
+    ],
+  },
 ];

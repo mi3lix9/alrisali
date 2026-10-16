@@ -11,6 +11,7 @@ import { Screen } from "@/shared/ui/screen";
 
 import { DistractionsCard, MoodsCard } from "../components/breakdown-cards";
 import { HeatmapCard } from "../components/heatmap-card";
+import { KhatmahCard } from "../components/khatmah-card";
 import { OverviewCard } from "../components/overview-card";
 import { HabitStreaksCard, TasbihTotalsCard } from "../components/totals-cards";
 import { WeekCard } from "../components/week-card";
@@ -51,6 +52,7 @@ export const InsightsScreen = ({
         <HeatmapCard heatmap={found.heatmap} />
         <HabitStreaksCard streaks={found.habitStreaks} />
         <TasbihTotalsCard totals={found.tasbihTotals} />
+        <KhatmahCard khatmah={found.khatmah} />
         <MoodsCard moods={found.moods} />
         <DistractionsCard distractions={found.distractions} />
       </Screen>

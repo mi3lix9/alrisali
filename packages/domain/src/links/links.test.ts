@@ -42,6 +42,7 @@ describe(parseLink, () => {
     ["alrisali://khatmah/abc-123", { kind: "khatmah", id: "abc-123" }],
     ["alrisali://qibla", { kind: "qibla" }],
     ["alrisali://tasbih", { kind: "tasbih" }],
+    ["alrisali://calendar", { kind: "calendar" }],
     ["alrisali://next-salah", { kind: "next-salah" }],
     ["https://alrisali.app/prayer", { kind: "next-salah" }],
   ] as const)("reads %s", (url, link) => {
@@ -81,6 +82,7 @@ describe("appLinkUrl and webLinkUrl", () => {
     { kind: "khatmah", id: "k-1" },
     { kind: "qibla" },
     { kind: "tasbih" },
+    { kind: "calendar" },
     { kind: "next-salah" },
   ];
 
@@ -102,6 +104,7 @@ describe(linkFeatureId, () => {
       { kind: "khatmah" },
       { kind: "qibla" },
       { kind: "tasbih" },
+      { kind: "calendar" },
       { kind: "next-salah" },
     ].filter((link) => !ids.has(linkFeatureId(link as AppLink)));
     expect(unregistered).toStrictEqual([]);
@@ -128,6 +131,7 @@ describe("the link path roots", () => {
       "quran",
       `supplication/${DUA}`,
       "khatmah",
+      "calendar",
       "qibla",
       "tasbih",
       "next-salah",

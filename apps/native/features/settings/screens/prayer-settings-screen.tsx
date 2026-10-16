@@ -7,11 +7,14 @@ import { Screen } from "@/shared/ui/screen";
 
 import { CalculationMethodCard } from "../components/calculation-method-card";
 import { CustomAnglesCard } from "../components/custom-angles-card";
+import { HighLatitudeRuleCard } from "../components/high-latitude-rule-card";
+import { MidnightDefinitionCard } from "../components/midnight-definition-card";
+import { PrayerAdjustmentsCard } from "../components/prayer-adjustments-card";
 
 /**
  * Prayer settings, one sub-route of the Settings modal that every Prayer
- * Times setting lives in: the Calculation Method and its Advanced angles.
- * Later settings (adjustments, Midnight, high latitudes) add cards here.
+ * Times setting lives in: the Calculation Method and its Advanced angles,
+ * minute adjustments, the Midnight definition and the high-latitude rule.
  */
 export const PrayerSettingsScreen = () => {
   const { t } = useTranslation("settings");
@@ -31,6 +34,9 @@ export const PrayerSettingsScreen = () => {
         </Alert>
       ) : null}
       <CustomAnglesCard />
+      <PrayerAdjustmentsCard />
+      <MidnightDefinitionCard />
+      <HighLatitudeRuleCard />
     </Screen>
   );
 };

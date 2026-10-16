@@ -20,6 +20,12 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Custom Angles**: The Believer's own Fajr, Maghrib and Isha angles (degrees below the horizon) that the Custom Calculation Method uses; edited under Advanced in Prayer settings. A Maghrib angle of 0 puts Maghrib at Sunset.
 
+**Prayer Time Adjustment**: A correction of −30 to +30 whole minutes the Believer sets on one Prayer Time. It is added once to the time as calculated, on the instant, so it keeps its sign across a daylight-saving change, and it does not move any other Prayer Time.
+
+**Midnight Definition**: Which night is halved to find Midnight: Sunset to Fajr (the default), Sunset to Sunrise, Maghrib to Fajr or Maghrib to Sunrise.
+
+**High-Latitude Rule**: How Fajr and Isha are found where the sun never reaches their angle or the night is short: angle-based (the default; the angle's share, angle ÷ 60, of the night), one-seventh of the night, or the middle of the night. The share is kept from Sunrise (Fajr) or Sunset (Isha); an Isha set as minutes after Maghrib is not changed.
+
 **Imsak**: The Prayer Time a set number of minutes before Fajr at which the fast begins.
 
 **Hidden Prayer Time**: A Prayer Time the Believer has chosen not to see on their timetable.
@@ -96,6 +102,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Khatmah Log**: The record that a Khatmah Session was completed on a date; the same session on two devices is one record.
 
+**Reschedule**: Changing a Khatmah that is behind, either pushing its end date back (the portions keep their size) or keeping the end date and enlarging the portions still to read. It is stored with the plan, renumbers the sessions from the first one not done; sessions done before it are kept. _Avoid_: Catch-up plan
+
+**Mark done till**: Recording everything up to an ayah (this ayah, the end of its page or of its portion) as read: the Khatmah Sessions that covers are completed and the one it ends inside keeps the part read, so only the rest of it is left. _Avoid_: Bookmark progress
+
 **Khatmah Plan**: How a Khatmah is divided: the suggested 30 days, an even split, by meaning (7, 29 or 60 days along the Quran's own divisions), by amount (a number of ayat, pages, hizb quarters, hizb, juz or surahs a session) or by deadline (a Gregorian or Hijri day the last session falls on). Its sessions are daily, every other day or weekly, and a Believer may join at session N, skipping the earlier ones; each choice shows its amount, minutes a session and finish day before it starts.
 
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
@@ -129,6 +139,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 **Recitation Download**: One reciter's audio the Believer chose to keep on the device, by surah, by juz or the whole Quran; it plays offline, is deleted only by the Believer, and is listed on the Storage screen with adhans. Audio merely played is not one: it is streamed and kept in the 7-day cache. _Avoid_: Offline pack, Cached recitation
 
 **Reciter**: A person whose recitation is bundled, with one identity and both an Arabic and an English name across every style they are recorded in (murattal, mujawwad, muallim). The picker groups reciters by style, then region, and plays a sample on the current page without choosing them. The choice is a synced Believer setting. _Avoid_: Qari (in UI copy), Voice
+
+**Quranic Dua**: A supplication the Quran reports, kept as a reference to its ayat with who made it (its speaker) and what it asks for (its subject); its words are the bundled Quran text, and the list plays the duas one after another. _Avoid_: Dua (alone, which also means a Supplication in a book)
+
+**Recitation Dua**: An ayah or run of ayat to recite before reciting the Quran, after it, or on completing it, reached from the reader and from a finished **Khatmah**. _Avoid_: Khatm dua
 
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
 
@@ -208,7 +222,9 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Imsakiyya**: The Ramadan timetable: Imsak, Fajr, Dhuhr and Iftar for each day of Ramadan, with the Laylat al-Qadr nights (the 19th, 21st and 23rd) marked. A seasonal Feature Registry entry, shown from 20 Sha'ban to the last day of Ramadan. _Avoid_: Ramadan calendar
 
-**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Hijri calendar, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+
+**Home-screen Widget**: A widget on the phone's home screen showing the next Salah with a countdown, today's times, the Hijri Date, the Verse of the Day, Keep Reading (the Last-Read Ayah) or Khatmah progress. It draws only what the app wrote for it, one view per moment something changes (every Prayer Time, and midnight); a tap opens the matching screen through a Link. _Avoid_: Snapshot (the widget's data), tile (the in-app Home shortcut)
 
 ## Relationships
 

@@ -21,6 +21,7 @@ import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
 import { lockPortrait } from "@/shared/lib/orientation";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
+import { Widgets } from "@/src/widgets";
 
 initMonitoring();
 // Runs in the background; failures are reported to Sentry.
@@ -60,6 +61,8 @@ const RootStack = () => {
         <Stack.Screen name="qibla" />
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
+        <Stack.Screen name="quranic-duas" />
+        <Stack.Screen name="recitation-duas" />
         <Stack.Screen name="date-converter" />
         <Stack.Screen name="khatmah" />
         <Stack.Screen name="khatmah-new" />
@@ -107,6 +110,7 @@ const Layout = () => (
         </QadaReminderPlans>
       )}
     </HabitReminderPlans>
+    <Widgets />
     <UsageAnalytics />
     <CompanionAwards />
     <PushDeviceRegistration />

@@ -1,11 +1,14 @@
 import { AYAT } from "@alrisali/content/quran";
-import type { AyahKey } from "@alrisali/content/quran";
 import type { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import type { KhatmahReminderPlan } from "../shared";
+import { applySegments, segmentDueDate, trimPartial } from "./adjustments";
+import type { KhatmahAdjustments, KhatmahSession } from "./adjustments";
 import { AMOUNT_LIMITS, AMOUNT_UNITS, baseRanges } from "./plans";
 import type { SessionInterval } from "./plans";
+
+export type { KhatmahSession } from "./adjustments";
 
 /** An even split runs from this many sessions... */
 export const MIN_EVEN_DAYS = 3;
@@ -71,18 +74,6 @@ export const readKhatmahPlan = (stored: string): KhatmahPlan | null => {
 export const planEvery = (plan: KhatmahPlan): SessionInterval =>
   plan.every ?? 1;
 
-/** One scheduled portion of a Khatmah: a run of ayat, first to last. */
-export interface KhatmahSession {
-  /** From 1. */
-  number: number;
-  from: AyahKey;
-  to: AyahKey;
-  /** The Quran Pages the portion touches, its first and last page included. */
-  pages: number;
-  firstPage: number;
-  lastPage: number;
-}
-
 const sessionsCache = new Map<string, readonly KhatmahSession[]>();
 
 /**
@@ -144,7 +135,53 @@ export interface Khatmah {
   reminderAt: number | null;
   /** When it was started, in epoch milliseconds. */
   createdAt: number;
+  /**
+   * What rescheduling and "Mark done till…" changed, stored with the plan;
+   * absent when nothing has.
+   */
+  adjust?: KhatmahAdjustments;
 }
+
+/** A Khatmah's sessions as scheduled: its plan's, then each reschedule. */
+export const khatmahScheduledSessions = (
+  khatmah: Khatmah
+): readonly KhatmahSession[] =>
+  khatmah.adjust && khatmah.adjust.segments.length > 0
+    ? applySegments(sessionsFor(khatmah.plan), khatmah.adjust.segments)
+    : sessionsFor(khatmah.plan);
+
+/** The session numbers a Khatmah has logs for, valid ones only. */
+export const khatmahDoneSessions = (
+  khatmah: Khatmah,
+  logs: readonly KhatmahLog[]
+): Set<number> => {
+  const total = khatmahScheduledSessions(khatmah).length;
+  return new Set(
+    logs
+      .filter(
+        ({ khatmahId, session }) =>
+          khatmahId === khatmah.id &&
+          Number.isInteger(session) &&
+          session >= 1 &&
+          session <= total
+      )
+      .map(({ session }) => session)
+  );
+};
+
+/**
+ * A Khatmah's sessions in order, as it stands: rescheduled ones as
+ * rescheduled, and a session read part of starting after what was read.
+ */
+export const khatmahSessions = (
+  khatmah: Khatmah,
+  logs: readonly KhatmahLog[]
+): readonly KhatmahSession[] =>
+  trimPartial(
+    khatmahScheduledSessions(khatmah),
+    khatmah.adjust?.partial ?? null,
+    khatmahDoneSessions(khatmah, logs)
+  );
 
 /** A Khatmah Session the Believer completed, on the date they did. */
 export interface KhatmahLog {
@@ -157,11 +194,15 @@ export interface KhatmahLog {
 export const khatmahLogId = (khatmahId: string, session: number): string =>
   `${khatmahId}:${session}`;
 
-/** The date a session is due: the plan's sessions are `every` days apart. */
+/**
+ * The date a session is due: the plan's sessions are `every` days apart, and
+ * a reschedule dates the sessions after it afresh.
+ */
 export const sessionDueDate = (
   khatmah: Khatmah,
   session: number
 ): Temporal.PlainDate =>
+  segmentDueDate(khatmah.adjust?.segments ?? [], session) ??
   khatmah.startDate.add({ days: (session - 1) * planEvery(khatmah.plan) });
 
 /**
@@ -213,35 +254,14 @@ export interface KhatmahStatus {
   estimatedFinish: Temporal.PlainDate | null;
 }
 
-const clamp = (value: number, min: number, max: number): number =>
-  Math.min(Math.max(value, min), max);
-
-/** The session numbers a Khatmah has logs for, valid ones only. */
-const doneSessions = (
-  khatmah: Khatmah,
-  logs: readonly KhatmahLog[]
-): Set<number> => {
-  const total = planDays(khatmah.plan);
-  return new Set(
-    logs
-      .filter(
-        ({ khatmahId, session }) =>
-          khatmahId === khatmah.id &&
-          Number.isInteger(session) &&
-          session >= 1 &&
-          session <= total
-      )
-      .map(({ session }) => session)
-  );
-};
-
 /** Pages whose every ayah lies in a completed session. */
 const pagesWhollyRead = (
   sessions: readonly KhatmahSession[],
-  done: ReadonlySet<number>
+  done: ReadonlySet<number>,
+  alsoRead: readonly number[]
 ): number => {
   const unread = new Set<number>();
-  const touched = new Set<number>();
+  const touched = new Set<number>(alsoRead);
   for (const session of sessions) {
     for (let page = session.firstPage; page <= session.lastPage; page += 1) {
       touched.add(page);
@@ -254,6 +274,25 @@ const pagesWhollyRead = (
   return [...touched].filter((page) => !unread.has(page)).length;
 };
 
+/** The pages ahead of where a partly read session now starts, read in it. */
+const pagesReadBeforePartial = (
+  khatmah: Khatmah,
+  sessions: readonly KhatmahSession[]
+): number[] => {
+  const partial = khatmah.adjust?.partial;
+  const scheduled = khatmahScheduledSessions(khatmah).find(
+    ({ number }) => number === partial?.session
+  );
+  const trimmed = sessions.find(({ number }) => number === partial?.session);
+  if (!(scheduled && trimmed)) {
+    return [];
+  }
+  return Array.from(
+    { length: Math.max(0, trimmed.firstPage - scheduled.firstPage) },
+    (_, offset) => scheduled.firstPage + offset
+  );
+};
+
 /**
  * Where a Khatmah stands on `today`. Behind: sessions due before today are
  * not all done. Ahead: more are done than are due by the end of today.
@@ -263,19 +302,17 @@ export const khatmahStatus = (
   logs: readonly KhatmahLog[],
   today: Temporal.PlainDate
 ): KhatmahStatus => {
-  const sessions = sessionsFor(khatmah.plan);
+  const sessions = khatmahSessions(khatmah, logs);
   const total = sessions.length;
-  const doneSet = doneSessions(khatmah, logs);
+  const doneSet = khatmahDoneSessions(khatmah, logs);
   const done = doneSet.size;
   const every = planEvery(khatmah.plan);
-  const daysIn = khatmah.startDate.until(today, { largestUnit: "days" }).days;
-  // Sessions fall on days 0, every, 2 * every, ... after the start.
-  const dueBeforeToday = clamp(Math.ceil(daysIn / every), 0, total);
-  const dueThroughToday = clamp(
-    daysIn < 0 ? 0 : Math.floor(daysIn / every) + 1,
-    0,
-    total
-  );
+  const dueBeforeToday = sessions.filter(
+    ({ number }) => sessionDueDate(khatmah, number).until(today).sign > 0
+  ).length;
+  const dueThroughToday = sessions.filter(
+    ({ number }) => sessionDueDate(khatmah, number).until(today).sign >= 0
+  ).length;
 
   let state: KhatmahState = "on-track";
   let gap = 0;
@@ -310,7 +347,11 @@ export const khatmahStatus = (
     done,
     current,
     completedToday,
-    pagesRead: pagesWhollyRead(sessions, doneSet),
+    pagesRead: pagesWhollyRead(
+      sessions,
+      doneSet,
+      pagesReadBeforePartial(khatmah, sessions)
+    ),
     plannedFinish: sessionDueDate(khatmah, total),
     estimatedFinish:
       state === "finished"
@@ -342,7 +383,7 @@ export const khatmahSessionRows = (
       doneOn.set(log.session, log.date);
     }
   }
-  return sessionsFor(khatmah.plan).map((session) => {
+  return khatmahSessions(khatmah, logs).map((session) => {
     const dueDate = sessionDueDate(khatmah, session.number);
     const daysFromToday = today.until(dueDate, { largestUnit: "days" }).days;
     const completed = doneOn.get(session.number) ?? null;
@@ -388,7 +429,7 @@ export const khatmahReminderPlan = (
   if (khatmah.reminderAt === null || status.current === null) {
     return null;
   }
-  const doneSet = doneSessions(khatmah, logs);
+  const doneSet = khatmahDoneSessions(khatmah, logs);
   const firstDate = nextReadingDay(
     khatmah,
     status.completedToday,
@@ -399,7 +440,7 @@ export const khatmahReminderPlan = (
     reminderAt: khatmah.reminderAt,
     firstDate,
     everyDays: planEvery(khatmah.plan),
-    portions: sessionsFor(khatmah.plan)
+    portions: khatmahSessions(khatmah, logs)
       .filter(({ number }) => !doneSet.has(number))
       .map(({ from, to }) => ({ from, to })),
   };

@@ -38,6 +38,12 @@ export const believerSettings = sqliteTable("believer_settings", {
   messageStyle: text("message_style"),
   /** The Custom method's angles, JSON `{fajr, maghrib, isha}`; null until set. */
   customAngles: text("custom_angles"),
+  /** Minutes added per Prayer Time, JSON `{fajr: 2, …}`; null until set. */
+  prayerAdjustments: text("prayer_adjustments"),
+  /** How Midnight is defined; null until chosen, read as Sunset to Fajr. */
+  midnightDefinition: text("midnight_definition"),
+  /** The Fajr and Isha high-latitude rule; null until chosen, read as angle-based. */
+  highLatitudeRule: text("high_latitude_rule"),
 });
 
 /**

@@ -26,8 +26,10 @@ import type { Coordinates, PrayerTimes } from "./prayer-times";
 //   Ithna-Ashari 18,4,14 and Al-Hadi Bahrain 18,4,75 min.
 // Aladhan's Sunni "Maghrib" is Sunset at 0.833°; for the Shia methods it is
 // the 4° or 4.5° Maghrib. Where the sun never gets as deep as a method's
-// angle (London in June) aladhan falls back to a night portion; we have no
-// high-latitude rule here (ticket 03), so those times are null.
+// angle (London in June) the references use aladhan's angle-based
+// high-latitude rule (latitudeAdjustmentMethod=3): the angle's share (angle ÷
+// 60) of the night from Sunset to Sunrise, kept from Sunrise (Fajr) or Sunset
+// (Isha), also where the sun's own time would fall further out.
 
 const PLACES = {
   qatif: { latitude: 26.5652, longitude: 50.0124, zone: "Asia/Riyadh" },
@@ -69,7 +71,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:43", maghrib: "17:16", isha: "18:08" },
     "qom 2025-06-21": { fajr: "03:22", maghrib: "19:41", isha: "20:42" },
     "qom 2025-12-21": { fajr: "05:49", maghrib: "17:17", isha: "18:10" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:50", isha: "00:05" },
+    "london 2025-06-21": { fajr: "02:45", maghrib: "21:50", isha: "23:05" },
     "london 2025-12-21": { fajr: "06:13", maghrib: "16:19", isha: "17:31" },
   },
   tehran: {
@@ -79,7 +81,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:35", maghrib: "17:19", isha: "18:08" },
     "qom 2025-06-21": { fajr: "03:10", maghrib: "19:44", isha: "20:42" },
     "qom 2025-12-21": { fajr: "05:41", maghrib: "17:20", isha: "18:10" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:55", isha: "00:05" },
+    "london 2025-06-21": { fajr: "02:33", maghrib: "21:55", isha: "23:05" },
     "london 2025-12-21": { fajr: "06:01", maghrib: "16:23", isha: "17:31" },
   },
   ithnaAshari: {
@@ -89,7 +91,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:33", maghrib: "17:16", isha: "18:08" },
     "qom 2025-06-21": { fajr: "03:08", maghrib: "19:41", isha: "20:42" },
     "qom 2025-12-21": { fajr: "05:39", maghrib: "17:17", isha: "18:10" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:50", isha: "00:05" },
+    "london 2025-06-21": { fajr: "02:31", maghrib: "21:50", isha: "23:05" },
     "london 2025-12-21": { fajr: "05:59", maghrib: "16:19", isha: "17:31" },
   },
   alHadiBahrain: {
@@ -99,7 +101,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:33", maghrib: "17:16", isha: "18:31" },
     "qom 2025-06-21": { fajr: "03:08", maghrib: "19:41", isha: "20:56" },
     "qom 2025-12-21": { fajr: "05:39", maghrib: "17:17", isha: "18:32" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:50", isha: "23:05" },
+    "london 2025-06-21": { fajr: "02:31", maghrib: "21:50", isha: "23:05" },
     "london 2025-12-21": { fajr: "05:59", maghrib: "16:19", isha: "17:34" },
   },
   mwl: {
@@ -109,7 +111,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:33", maghrib: "16:59", isha: "18:23" },
     "qom 2025-06-21": { fajr: "03:08", maghrib: "19:23", isha: "21:02" },
     "qom 2025-12-21": { fajr: "05:39", maghrib: "17:00", isha: "18:25" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:22", isha: null },
+    "london 2025-06-21": { fajr: "02:31", maghrib: "21:22", isha: "23:27" },
     "london 2025-12-21": { fajr: "05:59", maghrib: "15:54", isha: "17:51" },
   },
   isna: {
@@ -119,7 +121,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:48", maghrib: "16:59", isha: "18:13" },
     "qom 2025-06-21": { fajr: "03:28", maghrib: "19:23", isha: "20:48" },
     "qom 2025-12-21": { fajr: "05:55", maghrib: "17:00", isha: "18:15" },
-    "london 2025-06-21": { fajr: "01:16", maghrib: "21:22", isha: "00:49" },
+    "london 2025-06-21": { fajr: "02:53", maghrib: "21:22", isha: "23:12" },
     "london 2025-12-21": { fajr: "06:20", maghrib: "15:54", isha: "17:38" },
   },
   egypt: {
@@ -129,7 +131,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:26", maghrib: "16:59", isha: "18:25" },
     "qom 2025-06-21": { fajr: "02:57", maghrib: "19:23", isha: "21:05" },
     "qom 2025-12-21": { fajr: "05:32", maghrib: "17:00", isha: "18:27" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:22", isha: null },
+    "london 2025-06-21": { fajr: "02:20", maghrib: "21:22", isha: "23:30" },
     "london 2025-12-21": { fajr: "05:50", maghrib: "15:54", isha: "17:55" },
   },
   karachi: {
@@ -139,7 +141,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:33", maghrib: "16:59", isha: "18:28" },
     "qom 2025-06-21": { fajr: "03:08", maghrib: "19:23", isha: "21:09" },
     "qom 2025-12-21": { fajr: "05:39", maghrib: "17:00", isha: "18:30" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:22", isha: null },
+    "london 2025-06-21": { fajr: "02:31", maghrib: "21:22", isha: "23:34" },
     "london 2025-12-21": { fajr: "05:59", maghrib: "15:54", isha: "17:58" },
   },
   ummAlQura: {
@@ -149,7 +151,7 @@ const REFERENCE: Record<
     "baghdad 2025-12-21": { fajr: "05:31", maghrib: "16:59", isha: "18:29" },
     "qom 2025-06-21": { fajr: "03:04", maghrib: "19:23", isha: "20:53" },
     "qom 2025-12-21": { fajr: "05:37", maghrib: "17:00", isha: "18:30" },
-    "london 2025-06-21": { fajr: null, maghrib: "21:22", isha: "22:52" },
+    "london 2025-06-21": { fajr: "02:27", maghrib: "21:22", isha: "22:52" },
     "london 2025-12-21": { fajr: "05:56", maghrib: "15:54", isha: "17:24" },
   },
 };

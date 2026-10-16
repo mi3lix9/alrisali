@@ -10,8 +10,10 @@ import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { Screen } from "@/shared/ui/screen";
 
 import { DayNavigationCard } from "../components/day-navigation-card";
+import { HighLatitudePrompt } from "../components/high-latitude-prompt";
 import { LocationCard } from "../components/location-card";
 import { OptionsCard } from "../components/options-card";
+import { PrayerTimesWarning } from "../components/prayer-times-warning";
 import { TimetableCard } from "../components/timetable-card";
 import { useFollowDeviceLocation } from "../hooks/use-device-location";
 import { useNow } from "../hooks/use-now";
@@ -65,6 +67,11 @@ export const PrayerTimesScreen = ({
             shown={shown}
             onShow={setShown}
           />
+          <PrayerTimesWarning
+            view={{ ...view, settings }}
+            date={shown ?? today}
+          />
+          <HighLatitudePrompt coordinates={settings.coordinates} />
           <TimetableCard
             view={{ ...view, settings }}
             date={shown ?? today}

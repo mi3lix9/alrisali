@@ -90,6 +90,39 @@ export const ar = {
     invalid: "أدخل زوايا ضمن النطاقات المعروضة.",
     save: "حفظ الزوايا",
   },
+  prayerAdjustments: {
+    title: "تعديل الأوقات بالدقائق",
+    description:
+      "أضف أو اطرح حتى ٣٠ دقيقة من أي وقت. يُطبَّق التعديل مرة واحدة على الوقت كما يظهر، ولا يتغيّر مع تغيير الساعة الصيفية.",
+    label: "{{name}}، بالدقائق",
+    names: {
+      imsak: "الإمساك",
+      fajr: "الفجر",
+      sunrise: "الشروق",
+      dhuhr: "الظهر",
+      asr: "العصر",
+      sunset: "الغروب",
+      maghrib: "المغرب",
+      isha: "العشاء",
+      midnight: "منتصف الليل",
+    },
+  },
+  midnightDefinition: {
+    title: "تعريف منتصف الليل",
+    description: "الليل الذي يُنصَّف لحساب منتصف الليل.",
+    sunsetToFajr: "من الغروب إلى الفجر",
+    sunsetToSunrise: "من الغروب إلى الشروق",
+    maghribToFajr: "من المغرب إلى الفجر",
+    maghribToSunrise: "من المغرب إلى الشروق",
+  },
+  highLatitudeRule: {
+    title: "قاعدة العروض العليا",
+    description:
+      "تحدّد الفجر والعشاء حيث لا تبلغ الشمس زاويتهما أو يقصر الليل، كصيف المدن الشمالية.",
+    angleBased: "حسب الزاوية (الافتراضي)",
+    oneSeventh: "سُبع الليل",
+    middleOfNight: "منتصف الليل",
+  },
   hijriAdjustment: {
     title: "تعديل التاريخ الهجري",
     description:

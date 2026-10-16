@@ -13,6 +13,8 @@ import type {
   LoggedDay,
   TasbihLabel,
 } from "../shared";
+import { khatmahInsights } from "./khatmah";
+import type { KhatmahInsights } from "./khatmah";
 
 /*
  * Insights are pure aggregations over what the Believer recorded on this
@@ -255,6 +257,7 @@ export interface Insights {
   tasbihTotals: TasbihTotal[];
   moods: MoodDistribution;
   distractions: DistractionBreakdown;
+  khatmah: KhatmahInsights;
 }
 
 const toInsightsDay = (
@@ -430,5 +433,6 @@ export const insights = (
     tasbihTotals: tasbihTotals(sources),
     moods: moodDistribution(sources, today),
     distractions: distractionBreakdown(sources, today),
+    khatmah: khatmahInsights(sources),
   };
 };

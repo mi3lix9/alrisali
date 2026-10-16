@@ -2,6 +2,7 @@ import {
   readHabitCompletionsInsightsSource,
   readHabitsInsightsSource,
 } from "@alrisali/db-user/habits";
+import { readKhatmahInsightsSource } from "@alrisali/db-user/khatmah";
 import { readKhushuInsightsSource } from "@alrisali/db-user/khushu";
 import { readMoodCheckInsInsightsSource } from "@alrisali/db-user/mood";
 import { readPrayerLogInsightsSource } from "@alrisali/db-user/prayer-log";
@@ -18,6 +19,7 @@ const INSIGHTS_SOURCE_READERS: InsightsSourceReaders = {
   habitCompletions: readHabitCompletionsInsightsSource,
   dhikrSessions: readDhikrSessionsInsightsSource,
   moodCheckIns: readMoodCheckInsInsightsSource,
+  khatmahs: readKhatmahInsightsSource,
 };
 
 const InsightsRoute = () => (

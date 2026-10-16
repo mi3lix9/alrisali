@@ -177,6 +177,14 @@ const follow = (
   }
 };
 
+type RecitationListener = (
+  previous: RecitationPlayback,
+  next: RecitationPlayback,
+  event: RecitationEvent
+) => void;
+
+const listeners = new Set<RecitationListener>();
+
 /** Tells recitation what the Believer (or the audio) did. */
 export const sendRecitation = (event: RecitationEvent) => {
   const previous = usePlaybackStore.getState().playback;
@@ -188,4 +196,17 @@ export const sendRecitation = (event: RecitationEvent) => {
   timers ??= createRecitationTimers(sendRecitation);
   timers.follow(next);
   follow(previous, next, event, sendRecitation);
+  // After the device follows, so a listener that starts more recitation is not
+  // undone by the audio still following the change that prompted it.
+  for (const listener of listeners) {
+    listener(previous, next, event);
+  }
+};
+
+/** Calls `listener` with recitation before and after each change, and the event that caused it; returns how to stop listening. */
+export const subscribeRecitation = (
+  listener: RecitationListener
+): (() => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 };

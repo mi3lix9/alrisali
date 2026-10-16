@@ -23,6 +23,7 @@ const NOTHING: InsightsSources = {
   habitCompletions: [],
   dhikrSessions: [],
   moodCheckIns: [],
+  khatmahs: [],
 };
 
 const habit = (

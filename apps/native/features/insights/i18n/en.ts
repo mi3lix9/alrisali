@@ -57,6 +57,14 @@ export const en: Catalog<typeof ar> = {
       "drink-water": "Drink water",
     },
   },
+  khatmah: {
+    title: "Khatmah",
+    completed: "Completed Khatmahs: {{n}}",
+    empty: "No completed Khatmah yet.",
+    entry: "{{date}} · {{days}} days",
+    chart: "Pages in each session of your latest Khatmah",
+    bar: "Session {{session}}: {{pages}} pages",
+  },
   tasbih: {
     title: "Tasbih totals",
     empty: "No Dhikr Sessions yet.",
