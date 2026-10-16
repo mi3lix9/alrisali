@@ -2,7 +2,20 @@ export const ar = {
   title: "القبلة",
   bearing: "{{degrees}}° {{direction}}",
   bearingLabel: "اتجاه القبلة {{degrees}} درجة {{direction}} من الشمال",
-  distance: "{{distance}} كم إلى الكعبة",
+  bearingTargetLabel:
+    "اتجاه {{target}} {{degrees}} درجة {{direction}} من الشمال",
+  distance: "{{distance}} كم إلى {{target}}",
+  targets: {
+    label: "الوجهة",
+    kaaba: "الكعبة",
+    najaf: "النجف",
+    karbala: "كربلاء",
+    mashhad: "مشهد",
+    madina: "المدينة",
+    kadhimiya: "الكاظمية",
+    samarra: "سامراء",
+  },
+  notQibla: "هذا اتجاه {{target}} وليس القبلة. اختر الكعبة لترجع إلى القبلة.",
   directions: {
     n: "شمال",
     ne: "شمال شرق",
@@ -15,6 +28,7 @@ export const ar = {
   },
   north: "ش",
   facing: "أنت متّجه نحو القبلة",
+  facingTarget: "أنت متّجه نحو {{target}}",
   turnRight: "استدر يمينًا {{degrees}}°",
   turnLeft: "استدر يسارًا {{degrees}}°",
   nearRight: "قريب · قليلًا يمينًا",
@@ -24,6 +38,12 @@ export const ar = {
     "صُحِّحت البوصلة إلى الشمال الحقيقي بانحراف مغناطيسي {{degrees}} درجة {{direction}}",
   declinationEast: "شرقًا",
   declinationWest: "غربًا",
+  level: {
+    label: "ميزان الاستواء",
+    level: "الهاتف مستوٍ",
+    tilted: "أمسك الهاتف أفقيًا لقراءة أدق",
+    tilt: "الميل {{degrees}}°",
+  },
   noLocation: {
     title: "حدّد موقعك",
     description: "يُحسب اتجاه القبلة من موقعك. حدّده في تبويب الصلاة.",
