@@ -124,6 +124,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Message Style**: The voice the app speaks in: Classic (scriptural sources) or Modern (gentle, motivational coaching). _Avoid_: Notification mode, traditional mode
 
+**At-Time Alert**: What plays when a Prayer Time arrives (off, a silent notification, the short takbir or the full adhan), chosen per Salah and for Imsak, separately from the Reminder before it. Quiet hours never hold it back. _Avoid_: Adhan notification, prayer alarm
+
 ## Learning & support
 
 **Lesson**: An Admin-published teaching made of ordered Slides on aqeedah, fiqh, akhlaq or history. _Avoid_: Learning module, module

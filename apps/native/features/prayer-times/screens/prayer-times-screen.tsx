@@ -1,4 +1,5 @@
 import "../i18n";
+import type { PrayerTimeName } from "@alrisali/domain/shared";
 import { Spinner } from "panelui-native";
 import type { ReactNode } from "react";
 
@@ -14,9 +15,15 @@ import { usePrayerTimesView } from "../hooks/use-prayer-times-settings";
 /**
  * The Prayer tab: today's timetable, its location and its options.
  * `children` (another feature's card, from the route) shows under the
- * timetable.
+ * timetable; `timetableRowActions` ends each timetable row.
  */
-export const PrayerTimesScreen = ({ children }: { children?: ReactNode }) => {
+export const PrayerTimesScreen = ({
+  children,
+  timetableRowActions,
+}: {
+  children?: ReactNode;
+  timetableRowActions?: (name: PrayerTimeName) => ReactNode;
+}) => {
   useFollowDeviceLocation();
   const view = usePrayerTimesView();
   const { data: believer } = useBelieverSettings();
@@ -32,7 +39,12 @@ export const PrayerTimesScreen = ({ children }: { children?: ReactNode }) => {
   const { settings } = view;
   return (
     <Screen>
-      {settings ? <TimetableCard view={{ ...view, settings }} /> : null}
+      {settings ? (
+        <TimetableCard
+          view={{ ...view, settings }}
+          rowActions={timetableRowActions}
+        />
+      ) : null}
       {children}
       <LocationCard
         location={believer.location}

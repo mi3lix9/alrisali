@@ -1,4 +1,4 @@
-import { classicSayingById } from "@alrisali/domain/reminders";
+import { atTimeSound, classicSayingById } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
   PlannedReminder,
@@ -7,8 +7,11 @@ import type {
 } from "@alrisali/domain/reminders";
 import type { Language } from "@alrisali/i18n";
 import type { TFunction } from "i18next";
+import { Platform } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
+
+import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
 
 /** Where each alert's sound comes from; the files are in assets/sounds. */
 const SOUND_FILES = {
@@ -17,36 +20,81 @@ const SOUND_FILES = {
   voice: "adhan.wav",
 } as const;
 
+/** The channel of an At-Time Alert that plays the system's sound. */
+export const AT_TIME_SYSTEM_CHANNEL = "at-time-default";
+
+const atTimeChannel = (file: string) => `at-time-${file}`;
+
 /**
  * One Android channel per alert: Android fixes a channel's sound when the
- * channel is created, so each sound gets its own.
+ * channel is created, so each sound gets its own. At-Time Alerts have their
+ * own channels, so the Believer can tune them apart from the Reminders.
  */
-export const REMINDER_CHANNELS = [
+export const REMINDER_CHANNELS: readonly {
+  id: string;
+  sound: string | null;
+}[] = [
   { id: "reminder-default", sound: "default" },
   { id: "reminder-chime", sound: SOUND_FILES.chime },
   { id: "reminder-bell", sound: SOUND_FILES.bell },
   { id: "reminder-voice", sound: SOUND_FILES.voice },
   { id: "reminder-silent", sound: null },
-] as const;
+  { id: AT_TIME_SYSTEM_CHANNEL, sound: "default" },
+  ...INSTALLED_ADHAN_SOUNDS.flatMap(({ full, takbir }) =>
+    [full.file, takbir.file].map((file) => ({
+      id: atTimeChannel(file),
+      sound: file,
+    }))
+  ),
+];
 
-type ChannelId = (typeof REMINDER_CHANNELS)[number]["id"];
+interface AlertSound {
+  channelId: string;
+  sound: string | null;
+  /** The full adhan to play in the app when the notification is opened. */
+  adhanOnOpen: string | null;
+}
 
-const alertSound = (
-  alert: ReminderAlert
-): { channelId: ChannelId; sound: string | null } => {
+/**
+ * The takbir and the full adhan from the installed voice, else the system
+ * sound. iOS plays at most 30 seconds of a notification sound: it sounds the
+ * takbir and plays the full adhan when opened. Android sounds the full adhan
+ * itself, until its adhan service (ticket 30).
+ */
+const atTimeAlertSound = (alert: ReminderAlert): AlertSound => {
+  const { notification, full } = atTimeSound(alert, INSTALLED_ADHAN_SOUNDS);
+  const played =
+    Platform.OS === "android" ? (full ?? notification) : notification;
+  return {
+    channelId: played ? atTimeChannel(played.file) : AT_TIME_SYSTEM_CHANNEL,
+    sound: played?.file ?? "default",
+    adhanOnOpen: Platform.OS === "ios" ? (full?.file ?? null) : null,
+  };
+};
+
+const alertSound = (alert: ReminderAlert): AlertSound => {
   switch (alert.kind) {
     case "silent": {
-      return { channelId: "reminder-silent", sound: null };
+      return { channelId: "reminder-silent", sound: null, adhanOnOpen: null };
     }
     case "voice": {
-      return { channelId: "reminder-voice", sound: SOUND_FILES.voice };
+      return {
+        channelId: "reminder-voice",
+        sound: SOUND_FILES.voice,
+        adhanOnOpen: null,
+      };
+    }
+    case "takbir":
+    case "adhan": {
+      return atTimeAlertSound(alert);
     }
     default: {
       return alert.sound === "default"
-        ? { channelId: "reminder-default", sound: "default" }
+        ? { channelId: "reminder-default", sound: "default", adhanOnOpen: null }
         : {
             channelId: `reminder-${alert.sound}`,
             sound: SOUND_FILES[alert.sound],
+            adhanOnOpen: null,
           };
     }
   }
@@ -60,8 +108,10 @@ export interface ReminderRequest {
   fireAt: number;
   title: string;
   body: string;
-  channelId: ChannelId;
+  channelId: string;
   sound: string | null;
+  /** The full adhan to play when the notification is opened (iOS). */
+  adhanOnOpen: string | null;
 }
 
 const minutesPhrase = (
@@ -124,14 +174,22 @@ export const toReminderRequest = (
         }
       : prayerTimeWording(message, t, language);
   const fireAt = reminder.fireAt.epochMilliseconds;
-  const { channelId, sound } = alertSound(reminder.alert);
+  const { channelId, sound, adhanOnOpen } = alertSound(reminder.alert);
   return {
     id: reminder.id,
-    fingerprint: JSON.stringify([fireAt, title, body, channelId, sound]),
+    fingerprint: JSON.stringify([
+      fireAt,
+      title,
+      body,
+      channelId,
+      sound,
+      adhanOnOpen,
+    ]),
     fireAt,
     title,
     body,
     channelId,
     sound,
+    adhanOnOpen,
   };
 };

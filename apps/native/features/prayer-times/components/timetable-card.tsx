@@ -6,6 +6,7 @@ import {
 import type { PrayerTimeName } from "@alrisali/domain/shared";
 import { Badge, Card, Item } from "panelui-native";
 import { Fragment } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useNow } from "../hooks/use-now";
@@ -14,13 +15,18 @@ import { formatClockTime } from "../utils/format";
 
 const MINUTE_MS = 60_000;
 
-/** Today's visible Prayer Times, with the one in progress marked. */
+/**
+ * Today's visible Prayer Times, with the one in progress marked.
+ * `rowActions` (another feature's control, from the route) ends each row.
+ */
 export const TimetableCard = ({
   view,
+  rowActions,
 }: {
   view: PrayerTimesView & {
     settings: NonNullable<PrayerTimesView["settings"]>;
   };
+  rowActions?: ((name: PrayerTimeName) => ReactNode) | undefined;
 }) => {
   const { t } = useTranslation("prayer-times");
   const now = useNow(MINUTE_MS);
@@ -78,6 +84,7 @@ export const TimetableCard = ({
                           ? formatClockTime(time, timeFormat)
                           : t("timetable.notReached")}
                       </Item.Title>
+                      {rowActions?.(name)}
                     </Item.Actions>
                   </Item>
                 </Fragment>
