@@ -36,16 +36,22 @@ export const createWorshipMappingRepository = (
     }
   },
   replace: async (kind, day, supplicationIds) => {
-    await db
+    // One transaction: a failed insert never leaves the day empty.
+    const unique = [...new Set(supplicationIds)];
+    const remove = db
       .delete(worshipMapping)
       .where(and(eq(worshipMapping.kind, kind), eq(worshipMapping.day, day)));
-    const unique = [...new Set(supplicationIds)];
-    if (unique.length > 0) {
-      await db
+    if (unique.length === 0) {
+      await db.batch([remove]);
+      return;
+    }
+    await db.batch([
+      remove,
+      db
         .insert(worshipMapping)
         .values(
           unique.map((supplicationId) => ({ kind, day, supplicationId }))
-        );
-    }
+        ),
+    ]);
   },
 });
