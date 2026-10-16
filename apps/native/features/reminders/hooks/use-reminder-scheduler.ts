@@ -3,6 +3,7 @@ import type { ReminderSettings } from "@alrisali/domain/reminders";
 import type {
   CalculationMethod,
   HabitReminderPlan,
+  HijriCalendar,
   Location,
   MessageStyle,
 } from "@alrisali/domain/shared";
@@ -16,6 +17,7 @@ import { Temporal } from "temporal-polyfill";
 
 import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { events } from "@/shared/lib/events";
+import { useHijriCalendar } from "@/shared/lib/hijri-calendar";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useReminderSettings } from "../data/reminder-settings";
@@ -40,7 +42,8 @@ const planAndSync = async (
   believer: PlanningSettings,
   settings: ReminderSettings,
   habits: readonly HabitReminderPlan[],
-  t: TFunction<"reminders">
+  t: TFunction<"reminders">,
+  hijri: HijriCalendar
 ): Promise<void> => {
   const { location, calculationMethod, imsakMinutes, messageStyle } = believer;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
@@ -59,6 +62,7 @@ const planAndSync = async (
     settings,
     messageStyle,
     sources: [habitReminderSource(habits, messageStyle)],
+    hijri,
   });
   try {
     await syncReminders(
@@ -86,6 +90,8 @@ export const useReminderScheduler = (
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
+  // Imsak's At-Time Alert follows Ramadan by the Believer's Hijri calendar.
+  const hijri = useHijriCalendar();
   const { access, refresh } = useNotificationAccess();
   const granted = access?.granted;
 
@@ -102,12 +108,12 @@ export const useReminderScheduler = (
     if (!believer || !settings || !habits || granted === undefined) {
       return;
     }
-    void planAndSync(believer, settings, habits, t);
+    void planAndSync(believer, settings, habits, t, hijri);
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void planAndSync(believer, settings, habits, t);
+        void planAndSync(believer, settings, habits, t, hijri);
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, habits, t, granted]);
+  }, [believer, settings, habits, t, granted, hijri]);
 };

@@ -74,9 +74,57 @@ export const en: Catalog<typeof ar> = {
   quietHours: {
     title: "Quiet hours",
     description:
-      "Non-essential Reminders are held back. Salah and Imsak Reminders always arrive.",
+      "Reminders before a Salah and other non-essential alerts are held back. At-Time Alerts and Imsak always arrive.",
     enabled: "Use quiet hours",
     start: "From",
     end: "To",
+  },
+  atTime: {
+    off: { title: "Off", description: "Nothing at the Prayer Time" },
+    silent: {
+      title: "Silent notification",
+      description: "A notification without sound",
+    },
+    takbir: {
+      title: "Short takbir",
+      description: "A short “Allahu akbar” with the notification",
+    },
+    adhan: {
+      title: "Full adhan",
+      description: "The whole adhan at the Prayer Time",
+    },
+  },
+  editor: {
+    title: "{{name}} alert",
+    atTimeSection: "At the Prayer Time",
+    adhanUnavailable:
+      "No licensed adhan recording is in the app yet. The full adhan becomes available once one is added.",
+    adhanOnOpen: "The full adhan plays when you open the notification",
+    soundSection: "Sound",
+    systemSound: "Your device's notification sound",
+    systemSoundHint:
+      "The app has no takbir recordings yet, so your device's notification sound plays.",
+    takbirFromVoice: "The short takbir is a cut of the chosen voice.",
+    optionsSection: "Options",
+    before: "Reminder before",
+    beforeHint: "Separate from the At-Time Alert.",
+    minutesBefore: "Minutes before",
+    ramadanOnly: "Only in Ramadan",
+    ramadanOnlyHint: "The Imsak alert comes on the days of Ramadan alone.",
+    iosLimit:
+      "iOS plays at most {{seconds}} seconds of a notification sound: you hear the short takbir with the notification, and the full adhan plays when you open it.",
+    testTitle: "Test your choice",
+    testHint: "Tests the current choice, even before saving.",
+    testNoSound: "This choice makes no sound.",
+    testNotification: "Test: {{name}} alert",
+    testDenied: "Allow notifications to hear the notification sound.",
+    test: "Test",
+    stop: "Stop",
+    save: "Save",
+    cancel: "Cancel",
+    saved: "{{name}} alert saved: {{alert}}",
+  },
+  button: {
+    label: "{{name}} At-Time Alert: {{alert}}",
   },
 };

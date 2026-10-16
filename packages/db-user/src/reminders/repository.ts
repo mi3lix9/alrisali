@@ -1,8 +1,7 @@
 import {
   applyReminderSettingsChange,
-  DEFAULT_REMINDER_SETTINGS,
+  readImsakRule,
   readQuietHours,
-  readReminderRule,
   readSalahRules,
 } from "@alrisali/domain/reminders";
 import type {
@@ -45,10 +44,7 @@ export const createReminderSettingsRepository = (
       .get();
     return {
       salah: readSalahRules(parseJson(row?.salahRules)),
-      imsak: readReminderRule(
-        parseJson(row?.imsakRule),
-        DEFAULT_REMINDER_SETTINGS.imsak
-      ),
+      imsak: readImsakRule(parseJson(row?.imsakRule)),
       quietHours: readQuietHours({
         enabled: row?.quietHoursEnabled,
         start: row?.quietHoursStart,
