@@ -229,6 +229,14 @@ export const en: Catalog<typeof ar> = {
       mujawwad: "Mujawwad",
       muallim: "Muallim",
     },
+    region: {
+      "saudi-arabia": "Saudi Arabia",
+      egypt: "Egypt",
+      kuwait: "Kuwait",
+      iran: "Iran",
+    },
+    sample: "Hear a sample of {{reciter}} on this page",
+    stopSample: "Stop the sample of {{reciter}}",
   },
   verseOfTheDay: {
     title: "Verse of the Day",

@@ -1,3 +1,4 @@
+import { SAJDAH } from "@alrisali/content/quran";
 import { notedAyat, ribbonColorsByAyah } from "@alrisali/domain/quran";
 import type { AyahKey } from "@alrisali/domain/quran";
 import { useMemo } from "react";
@@ -7,9 +8,17 @@ import { useRibbons } from "../data/ribbons";
 import { mergeDecorations } from "../utils/decorations";
 import type { AyahDecoration, AyahDecorations } from "../utils/decorations";
 
+/** The sajdah ayat, each with its obligatory or recommended marker. */
+const SAJDAH_DECORATIONS: AyahDecorations = new Map(
+  SAJDAH.map(({ ayah, kind }) => [
+    ayah,
+    [{ kind: "sajdah", obligatory: kind === "obligatory" }] as const,
+  ])
+);
+
 /**
  * Every decoration the reader draws on its rosettes: this feature's own
- * (Bookmark Ribbons, Ayah Notes) merged with those the route hands in from other
+ * (Bookmark Ribbons, Ayah Notes, sajdah) merged with those the route hands in from other
  * features (e.g. a Khatmah Portion's end).
  */
 export const useAyahDecorations = (
@@ -29,6 +38,6 @@ export const useAyahDecorations = (
     for (const ayah of notedAyat(notes ?? [])) {
       noted.set(ayah, [{ kind: "note" }]);
     }
-    return mergeDecorations(own, noted, fromRoute);
+    return mergeDecorations(SAJDAH_DECORATIONS, own, noted, fromRoute);
   }, [ribbons, notes, fromRoute]);
 };

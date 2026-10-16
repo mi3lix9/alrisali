@@ -67,10 +67,21 @@ export type { QuranSearchOptions, QuranSearchResult } from "./search";
 export {
   DEFAULT_RECITER,
   findReciter,
+  groupReciters,
+  RECITATION_STYLES,
+  RECITER_REGIONS,
   RECITERS,
   recitationUrl,
 } from "./reciters";
-export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
+export type {
+  RecitationStyle,
+  Reciter,
+  ReciterPerson,
+  ReciterRegion,
+  ReciterRegionGroup,
+  ReciterSource,
+  ReciterStyleGroup,
+} from "./reciters";
 export {
   isPlayToReachable,
   MAX_PLAYBACK_SPEED,
@@ -140,3 +151,14 @@ export {
   writeNote,
 } from "./ayah-notes";
 export type { AyahNote, TextSelection } from "./ayah-notes";
+export {
+  canRotateReader,
+  pagesOfSpread,
+  shownPageOfSpread,
+  showsSpread,
+  SPREAD_COUNT,
+  SPREAD_MIN_WIDTH,
+  spreadOfPage,
+  WIDE_SCREEN_SHORT_SIDE,
+} from "./spread";
+export type { ScreenSize } from "./spread";
