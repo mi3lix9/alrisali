@@ -22,6 +22,9 @@
       /* Unticked checkboxes and radios are outlined in this colour. Panel
          UI's 8% white vanished on a dark card. */
       --color-input: rgba(255, 255, 255, 0.24);
+      /* Secondary text and unselected toggle labels. Panel UI's #878787 read
+         at about 3.8:1 on the secondary fill; this is about 5.3:1. */
+      --color-muted-foreground: #a1a1a1;
     }
   }
 }

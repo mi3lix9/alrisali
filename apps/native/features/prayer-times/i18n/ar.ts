@@ -29,6 +29,7 @@ export const ar = {
   location: {
     title: "الموقع",
     unnamed: "موقع بلا اسم",
+    coordinates: "{{latitude}}، {{longitude}}",
     notSet: "لم تحدّد موقعك بعد.",
     following: "يتحدّث تلقائيًا عند السفر.",
     chosen: "اخترته بنفسك، فلا يتغيّر عند السفر.",

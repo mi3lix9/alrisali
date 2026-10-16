@@ -1,3 +1,9 @@
+diff --git a/node_modules/panelui-native/.bun-tag-6d0a1e846a1ae269 b/.bun-tag-6d0a1e846a1ae269
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/panelui-native/.bun-tag-70f5ffb48e371d1 b/.bun-tag-70f5ffb48e371d1
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/panelui-native/.bun-tag-c448b08ff4784157 b/.bun-tag-c448b08ff4784157
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
@@ -132,6 +138,38 @@ index fc3297892b2cbf255a3599165f7e0c9f019e3a92..f2cfca66d11bad3a40ddd2eea97e9075
        options: years.map(String),
        active: years.indexOf(current.year),
        width: YEAR_LIST_WIDTH,
+diff --git a/lib/module/components/chip/index.js b/lib/module/components/chip/index.js
+index aecf2d3998c24fcdc236bc5f2b13b881747c553d..9476c57fd823182a53d53a0c93d8520d7991a834 100644
+--- a/lib/module/components/chip/index.js
++++ b/lib/module/components/chip/index.js
+@@ -97,13 +97,14 @@ const chipVariants = tv({
+       }
+     },
+     /**
+-     * The filter "on" state — a loud accent surface that wins over the resting
+-     * variant, so any chip can be a filter without picking a second colour.
++     * The filter "on" state — the primary fill, which wins over the resting
++     * variant. The accent surface it used is the resting chip's own fill in
++     * both themes, so "on" showed only as a faint outline.
+      */
+     selected: {
+       true: {
+-        root: 'border-primary/24 bg-accent',
+-        label: 'text-accent-foreground'
++        root: 'border-primary bg-primary',
++        label: 'text-primary-foreground'
+       }
+     },
+     /** Trims the trailing padding so the close target hugs the right edge. */
+@@ -230,7 +231,7 @@ const ChipRoot = /*#__PURE__*/forwardRef(({
+ 
+   // Icons and the ✕ inherit this, so they track the surface they sit on
+   // instead of every caller hardcoding a hex that is wrong in one theme.
+-  const tint = useCSSVariable(isSelected ? '--color-accent-foreground' : TINT_VAR[variant]);
++  const tint = useCSSVariable(isSelected ? '--color-primary-foreground' : TINT_VAR[variant]);
+   const handlePress = useCallback(event => {
+     if (haptics) selectionTick();
+     onPress?.(event);
 diff --git a/lib/module/components/input/index.js b/lib/module/components/input/index.js
 index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f1596e8ad 100644
 --- a/lib/module/components/input/index.js
@@ -272,6 +310,47 @@ index 5f6eddac5da1844b7cfbef256e6c957e13b0eef3..c4d2f18a88db5b2feb2cb199cecb3748
    const track = /*#__PURE__*/_jsx(View, {
      ref: ref,
      accessibilityRole: "progressbar",
+diff --git a/lib/module/components/switch/index.js b/lib/module/components/switch/index.js
+index 4f2f85c9a6ca93d9b71ca4f68bb2cf928c4d2e8e..43ca1a3fd88f0b06d7c4eebe96113fdd7b9944a0 100644
+--- a/lib/module/components/switch/index.js
++++ b/lib/module/components/switch/index.js
+@@ -18,7 +18,7 @@ const switchVariants = tv({
+   slots: {
+     track: 'justify-center rounded-full border border-transparent bg-input p-[3px]',
+     activeTrack: 'absolute inset-0 rounded-full bg-primary',
+-    thumb: 'rounded-full bg-white shadow-sm'
++    thumb: 'rounded-full shadow-sm'
+   },
+   variants: {
+     // Each track is its thumb plus the 3pt of padding and 1pt of border on
+@@ -50,6 +50,17 @@ const switchVariants = tv({
+       true: {
+         track: 'opacity-50'
+       }
++    },
++    // On, the thumb sits on `bg-primary`, which is near-white in dark mode, so
++    // it takes the primary's foreground there. Off, it stays white on the
++    // input-coloured track.
++    checked: {
++      true: {
++        thumb: 'bg-primary-foreground'
++      },
++      false: {
++        thumb: 'bg-white'
++      }
+     }
+   },
+   defaultVariants: {
+@@ -140,7 +151,8 @@ export const Switch = /*#__PURE__*/forwardRef(({
+   const nativeUI = native ? getNativeUI() : null;
+   const slots = switchVariants({
+     size,
+-    disabled: !!disabled
++    disabled: !!disabled,
++    checked: value
+   });
+   // React Native's labelled-by relationship is Android-only. `label` or an
+   // explicit accessibilityLabel remains the portable name on iOS.
 diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
 index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
 --- a/lib/module/components/textarea/index.js
@@ -840,6 +919,38 @@ index 5251db0cdb13a0ea32a74f4237d92ba7098ac0fd..14ff0b16a24f6305350dd808b7092ef0
          options={years.map(String)}
          active={years.indexOf(current.year)}
          width={YEAR_LIST_WIDTH}
+diff --git a/src/components/chip/index.tsx b/src/components/chip/index.tsx
+index c5738c42484c3a474818963fd7ec1b2cceaee76f..781cf89189e700e205dff4b795870b0612944031 100644
+--- a/src/components/chip/index.tsx
++++ b/src/components/chip/index.tsx
+@@ -79,13 +79,14 @@ const chipVariants = tv({
+       xl: { root: 'h-11 gap-2 px-4', label: 'text-base' },
+     },
+     /**
+-     * The filter "on" state — a loud accent surface that wins over the resting
+-     * variant, so any chip can be a filter without picking a second colour.
++     * The filter "on" state — the primary fill, which wins over the resting
++     * variant. The accent surface it used is the resting chip's own fill in
++     * both themes, so "on" showed only as a faint outline.
+      */
+     selected: {
+       true: {
+-        root: 'border-primary/24 bg-accent',
+-        label: 'text-accent-foreground',
++        root: 'border-primary bg-primary',
++        label: 'text-primary-foreground',
+       },
+     },
+     /** Trims the trailing padding so the close target hugs the right edge. */
+@@ -225,7 +226,7 @@ const ChipRoot = forwardRef<View, ChipProps>(
+     // Icons and the ✕ inherit this, so they track the surface they sit on
+     // instead of every caller hardcoding a hex that is wrong in one theme.
+     const tint = useCSSVariable(
+-      isSelected ? '--color-accent-foreground' : TINT_VAR[variant]
++      isSelected ? '--color-primary-foreground' : TINT_VAR[variant]
+     );
+ 
+     const handlePress = useCallback<NonNullable<AnimatedPressableProps['onPress']>>(
 diff --git a/src/components/input/index.tsx b/src/components/input/index.tsx
 index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc5f144f30 100644
 --- a/src/components/input/index.tsx
@@ -1006,6 +1117,42 @@ index a1dd8839c938134fc29b524e606f7c25e67e1766..e7b6608b400ecb9fa30ab9a19a9c484e
      );
  
      const track = (
+diff --git a/src/components/switch/index.tsx b/src/components/switch/index.tsx
+index f745b1e2b189c57e585e251d586920a3717009be..6226e2b48ffde95c79ba49f06036f61b72904745 100644
+--- a/src/components/switch/index.tsx
++++ b/src/components/switch/index.tsx
+@@ -18,7 +18,7 @@ const switchVariants = tv({
+   slots: {
+     track: 'justify-center rounded-full border border-transparent bg-input p-[3px]',
+     activeTrack: 'absolute inset-0 rounded-full bg-primary',
+-    thumb: 'rounded-full bg-white shadow-sm',
++    thumb: 'rounded-full shadow-sm',
+   },
+   variants: {
+     // Each track is its thumb plus the 3pt of padding and 1pt of border on
+@@ -34,6 +34,13 @@ const switchVariants = tv({
+     disabled: {
+       true: { track: 'opacity-50' },
+     },
++    // On, the thumb sits on `bg-primary`, which is near-white in dark mode, so
++    // it takes the primary's foreground there. Off, it stays white on the
++    // input-coloured track.
++    checked: {
++      true: { thumb: 'bg-primary-foreground' },
++      false: { thumb: 'bg-white' },
++    },
+   },
+   defaultVariants: {
+     size: 'md',
+@@ -123,7 +130,7 @@ export const Switch = forwardRef<View, SwitchProps>(
+     // as the toggle running backwards.
+     const sign = useDirectionSign();
+     const nativeUI = native ? getNativeUI() : null;
+-    const slots = switchVariants({ size, disabled: !!disabled });
++    const slots = switchVariants({ size, disabled: !!disabled, checked: value });
+     // React Native's labelled-by relationship is Android-only. `label` or an
+     // explicit accessibilityLabel remains the portable name on iOS.
+     const fieldLabelledBy = useFieldLabelledBy();
 diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
 index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
 --- a/src/components/textarea/index.tsx

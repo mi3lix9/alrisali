@@ -34,6 +34,7 @@ export const en: Catalog<typeof ar> = {
   location: {
     title: "Location",
     unnamed: "Unnamed place",
+    coordinates: "{{latitude}}, {{longitude}}",
     notSet: "You haven't set your location yet.",
     following: "Updates on its own when you travel.",
     chosen: "Chosen by you, so it stays put when you travel.",
