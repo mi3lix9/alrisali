@@ -2,6 +2,7 @@ import type { Passage } from "@alrisali/content/books";
 import { readerLineHeight } from "@alrisali/domain/books";
 import type { ReaderFormat } from "@alrisali/domain/books";
 import { Direction, Text } from "panelui-native";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
@@ -25,6 +26,8 @@ export interface PassageViewProps {
   number?: number;
   /** Marks the section the reader continued at. */
   highlighted?: boolean;
+  /** A tap counter for a phrase the passage asks to repeat, shown under it. */
+  counter?: ReactNode;
 }
 
 /** One section of a Supplication, set in the Believer's reading format. */
@@ -36,6 +39,7 @@ export const PassageView = ({
   colors,
   number,
   highlighted = false,
+  counter,
 }: PassageViewProps) => {
   const { t } = useTranslation("books");
   const { fontSize, spacing } = format;
@@ -93,6 +97,7 @@ export const PassageView = ({
           </Text>
         </Direction>
       ) : null}
+      {counter}
     </View>
   );
 };
