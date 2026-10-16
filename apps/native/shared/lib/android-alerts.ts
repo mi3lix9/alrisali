@@ -39,6 +39,22 @@ interface AndroidAlertsModule {
   /** Whether the full-screen adhan may open over the lock screen. */
   canUseFullScreenIntent: () => boolean;
   openFullScreenIntentSettings: () => void;
+  /** Alert Health: exact alarms (always true before Android 12). */
+  canScheduleExactAlarms: () => boolean;
+  openExactAlarmSettings: () => void;
+  /** Alert Health: whether battery optimisation is off for the app (good). */
+  isIgnoringBatteryOptimizations: () => boolean;
+  openBatteryOptimizationSettings: () => void;
+  /**
+   * Alert Health: the phone maker (lower case) and whether we know its
+   * autostart screen. Android cannot report if autostart is on.
+   */
+  getAutostartInfo: () => { manufacturer: string; hasScreen: boolean };
+  /** Whether the Believer confirmed allowing autostart (kept on the device). */
+  isAutostartConfirmed: () => boolean;
+  setAutostartConfirmed: (confirmed: boolean) => void;
+  /** Opens the maker's autostart screen, else the app's details. */
+  openAutostartSettings: () => void;
 }
 
 /**

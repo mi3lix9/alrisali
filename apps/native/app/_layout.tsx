@@ -1,11 +1,13 @@
 import "@/shared/lib/polyfills";
 import "@/global.css";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { UsageAnalytics } from "@/features/analytics";
 import { PushDeviceRegistration } from "@/features/announcements";
 import { CompanionAwards } from "@/features/companion";
+import { WorshipMappingPlans } from "@/features/daily-content";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhatmahReminderPlans } from "@/features/khatmah";
 import { KhushuSheet } from "@/features/khushu";
@@ -17,6 +19,7 @@ import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
+import { lockPortrait } from "@/shared/lib/orientation";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
 import { Widgets } from "@/src/widgets";
 
@@ -30,6 +33,8 @@ export const unstable_settings = {
 
 const RootStack = () => {
   const { t } = useTranslation();
+  // The manifest allows landscape; only the reader takes it up, on wide screens.
+  useEffect(lockPortrait, []);
   const onboarded = useOnboarded();
 
   // Until the first run is over, onboarding is the only screen. A screen
@@ -62,6 +67,8 @@ const RootStack = () => {
         <Stack.Screen name="qada" />
         <Stack.Screen name="qada-setup" />
         <Stack.Screen name="share-image" />
+        <Stack.Screen name="timetable" />
+        <Stack.Screen name="imsakiyya" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
@@ -85,11 +92,16 @@ const Layout = () => (
           {(qada) => (
             <KhatmahReminderPlans>
               {(khatmah) => (
-                <ReminderScheduler
-                  habits={habits}
-                  qada={qada}
-                  khatmah={khatmah}
-                />
+                <WorshipMappingPlans>
+                  {(worship) => (
+                    <ReminderScheduler
+                      habits={habits}
+                      qada={qada}
+                      khatmah={khatmah}
+                      worship={worship}
+                    />
+                  )}
+                </WorshipMappingPlans>
               )}
             </KhatmahReminderPlans>
           )}

@@ -1,15 +1,12 @@
 import { SURAHS } from "@alrisali/content/quran";
 import type { AyahKey } from "@alrisali/domain/quran";
 import { findAyah, findReciter } from "@alrisali/domain/quran";
-import { Button, Spinner, Text } from "panelui-native";
+import { Button, Text } from "panelui-native";
 import {
   ChevronDownIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   EllipsisIcon,
-  PauseIcon,
-  PlayIcon,
-  RotateCwIcon,
   XIcon,
 } from "panelui-native/icons";
 import { useState } from "react";
@@ -24,6 +21,8 @@ import {
   sendRecitation,
   useRecitationPlayback,
 } from "../data/recitation-player";
+import { mainControl } from "./recitation-main-control";
+import { RecitationNotice } from "./recitation-notice";
 import { ReciterSheet, useReciterName } from "./reciter-sheet";
 
 interface RecitationPillProps {
@@ -89,46 +88,7 @@ export const RecitationPill = ({
     label = nameOf(chosen);
   }
 
-  const main = (() => {
-    if (!active) {
-      return {
-        label: t("recitation.play"),
-        icon: <PlayIcon size={20} />,
-        handlePress: () =>
-          sendRecitation({ type: "play", ayah: start, reciter }),
-      };
-    }
-    switch (playback.status) {
-      case "loading": {
-        return {
-          label: t("recitation.pause"),
-          icon: <Spinner size="sm" />,
-          handlePress: () => sendRecitation({ type: "pause" }),
-        };
-      }
-      case "playing": {
-        return {
-          label: t("recitation.pause"),
-          icon: <PauseIcon size={20} />,
-          handlePress: () => sendRecitation({ type: "pause" }),
-        };
-      }
-      case "paused": {
-        return {
-          label: t("recitation.resume"),
-          icon: <PlayIcon size={20} />,
-          handlePress: () => sendRecitation({ type: "resume" }),
-        };
-      }
-      default: {
-        return {
-          label: t("recitation.retry"),
-          icon: <RotateCwIcon size={20} />,
-          handlePress: () => sendRecitation({ type: "resume" }),
-        };
-      }
-    }
-  })();
+  const main = mainControl({ playback, active, start, reciter, t });
 
   const selectReciter = (key: string) => {
     setChoosing(false);
@@ -224,15 +184,12 @@ export const RecitationPill = ({
             </Button>
           ) : null}
         </View>
-        {playback.status === "error" && active ? (
-          <Text size="xs" className="text-destructive mt-1">
-            {t("recitation.failed")}
-          </Text>
-        ) : null}
+        {active ? <RecitationNotice playback={playback} /> : null}
       </Animated.View>
       <ReciterSheet
         open={choosing}
         reciter={reciter}
+        start={start}
         onSelect={selectReciter}
         onClose={() => setChoosing(false)}
       />

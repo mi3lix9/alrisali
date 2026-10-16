@@ -233,4 +233,28 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);",
     ],
   },
+  {
+    tag: "20261016141454_occasion-alerts",
+    statements: [
+      "CREATE TABLE `occasion_alert_settings` (\n\t`id` text PRIMARY KEY,\n\t`enabled` integer,\n\t`timing` text,\n\t`time` integer,\n\t`types` text\n);",
+    ],
+  },
+  {
+    tag: "20261016142956_quran-search-history",
+    statements: [
+      "CREATE TABLE `quran_search_history` (\n\t`query` text PRIMARY KEY,\n\t`searched_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016143800_ayah_notes",
+    statements: [
+      "CREATE TABLE `quran_ayah_notes` (\n\t`ayah` text PRIMARY KEY,\n\t`text` text NOT NULL,\n\t`updated_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016144713_night_dua_alerts",
+    statements: [
+      "CREATE TABLE `night_dua_alerts` (\n\t`id` text PRIMARY KEY,\n\t`kumayl` integer DEFAULT false NOT NULL,\n\t`tawassul` integer DEFAULT false NOT NULL,\n\t`nudba` integer DEFAULT false NOT NULL,\n\t`ziyarah` integer DEFAULT false NOT NULL\n);",
+    ],
+  },
 ];

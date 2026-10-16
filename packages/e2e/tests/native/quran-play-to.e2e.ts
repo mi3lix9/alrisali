@@ -36,7 +36,12 @@ test(
     await expect(stop).toBeVisible();
     await expect(screen.getByTestId("recitation-next")).toBeVisible();
 
-    // … and goes after the last ayah of the page.
-    await expect(stop).toBeHidden({ timeout: RECITATION_TIMEOUT });
+    // … the range ends with "continue to the next ayat?" (ticket 20) …
+    const decline = screen.getByTestId("recitation-continue-no");
+    await expect(decline).toBeVisible({ timeout: RECITATION_TIMEOUT });
+
+    // … and declining ends recitation, so the bar goes.
+    await decline.tap();
+    await expect(stop).toBeHidden();
   }
 );

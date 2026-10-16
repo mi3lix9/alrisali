@@ -9,6 +9,7 @@ import {
   temporaryDirectory,
 } from "../shared/testing";
 import type { SyncServer, TemporaryDirectory } from "../shared/testing";
+import { createQuranAyahNotesRepository } from "./ayah-notes";
 import { createQuranLastReadRepository } from "./last-read";
 import { createQuranRibbonsRepository } from "./ribbons";
 
@@ -101,5 +102,24 @@ describe("Last-Read Ayah sync", () => {
       name: "Hifz",
     });
     expect(ribbons).toHaveLength(6);
+  });
+
+  it("brings an Ayah Note, and its deletion, to a second device", async () => {
+    const { phone, tablet } = await openPhoneAndTablet();
+    const onPhone = createQuranAyahNotesRepository(phone.db);
+    await onPhone.write("2:255", "Ayat al-Kursi");
+    await phone.sync();
+    await tablet.sync();
+
+    const onTablet = createQuranAyahNotesRepository(tablet.db);
+    await expect(onTablet.list()).resolves.toMatchObject([
+      { ayah: "2:255", text: "Ayat al-Kursi" },
+    ]);
+
+    await onPhone.remove("2:255");
+    await phone.sync();
+    await tablet.sync();
+
+    await expect(onTablet.list()).resolves.toStrictEqual([]);
   });
 });

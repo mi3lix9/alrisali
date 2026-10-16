@@ -8,12 +8,13 @@ import type { JumpTarget, QuranQueryCandidate } from "@alrisali/domain/quran";
 import {
   Badge,
   BottomSheet,
+  Button,
   Direction,
   Input,
   Item,
   Text,
 } from "panelui-native";
-import { SearchIcon } from "panelui-native/icons";
+import { ClockIcon, SearchIcon } from "panelui-native/icons";
 import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -21,6 +22,10 @@ import { View } from "react-native";
 import { formatNumber } from "@/shared/lib/numbers";
 import { ClearSearchButton } from "@/shared/ui/search-panel";
 
+import {
+  useChangeQuranSearchHistory,
+  useQuranSearchHistory,
+} from "../data/search-history";
 import { QURAN_FONT } from "../hooks/use-quran-font";
 import { surahName } from "../utils/format";
 
@@ -40,6 +45,13 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
   const { t, i18n } = useTranslation("quran");
 
   const [query, setQuery] = useState("");
+  const { data: history = [] } = useQuranSearchHistory();
+  const changeHistory = useChangeQuranSearchHistory();
+  /** Opens a result, keeping what was typed as a recent search. */
+  const choose = (target: JumpTarget) => {
+    changeHistory.mutate(query);
+    onSelect(target);
+  };
   // Typing stays responsive while the 6236 ayat are scanned.
   const deferred = useDeferredValue(query);
   const result = useMemo(() => searchQuran(deferred), [deferred]);
@@ -102,9 +114,43 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
         returnKeyType="search"
       />
       {deferred.trim() === "" ? (
-        <Text size="sm" muted>
-          {t("navigation.searchHint", { surah: 2, ayah: 255 })}
-        </Text>
+        <View className="gap-1">
+          {history.length > 0 ? (
+            <View>
+              <View className="flex-row items-center justify-between">
+                <Text weight="semibold" accessibilityRole="header">
+                  {t("navigation.recentSearches")}
+                </Text>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  testID="quran-search-clear-history"
+                  onPress={() => changeHistory.mutate(null)}
+                >
+                  {t("navigation.clearSearchHistory")}
+                </Button>
+              </View>
+              {history.map((entry) => (
+                <Item
+                  key={entry}
+                  size="sm"
+                  accessibilityRole="button"
+                  onPress={() => setQuery(entry)}
+                >
+                  <Item.Media>
+                    <ClockIcon size={16} />
+                  </Item.Media>
+                  <Item.Content>
+                    <Item.Title>{entry}</Item.Title>
+                  </Item.Content>
+                </Item>
+              ))}
+            </View>
+          ) : null}
+          <Text size="sm" muted>
+            {t("navigation.searchHint", { surah: 2, ayah: 255 })}
+          </Text>
+        </View>
       ) : null}
       {empty ? (
         <Text size="sm" muted accessibilityLiveRegion="polite">
@@ -124,7 +170,7 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
                 size="sm"
                 accessibilityRole="button"
                 testID={`quran-search-${kind}-${candidate.kind === "ayah" ? candidate.key : candidate.value}`}
-                onPress={() => onSelect(candidate.target)}
+                onPress={() => choose(candidate.target)}
               >
                 <Item.Media>
                   <Badge size="sm" variant="outline">
@@ -158,7 +204,7 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
               key={ayah.key}
               size="sm"
               accessibilityRole="button"
-              onPress={() => onSelect({ ayah: ayah.key })}
+              onPress={() => choose({ ayah: ayah.key })}
             >
               <Item.Content>
                 <Direction dir="rtl">

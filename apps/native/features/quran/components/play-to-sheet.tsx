@@ -24,6 +24,12 @@ import { formatNumber } from "@/shared/lib/numbers";
 import { sendRecitation } from "../data/recitation-player";
 import { playFromAyah } from "../utils/ayah-actions";
 import { surahName } from "../utils/format";
+import {
+  DEFAULT_MEMORISATION_FORM,
+  memorisationSettings,
+} from "../utils/memorisation-form";
+import type { MemorisationForm } from "../utils/memorisation-form";
+import { MemorisationControls } from "./memorisation-controls";
 
 type PlayToKind = (typeof PLAY_TO_KINDS)[number];
 
@@ -88,6 +94,9 @@ const PlayToForm = ({ from, reciter, onStart }: PlayToFormProps) => {
   const { t, i18n } = useTranslation("quran");
   const start = findAyah(from);
   const [kind, setKind] = useState<PlayToKind>("page");
+  const [memorisation, setMemorisation] = useState<MemorisationForm>(
+    DEFAULT_MEMORISATION_FORM
+  );
   const [chosen, setChosen] = useState({
     surah: start?.surah ?? 1,
     ayah: start?.ayah ?? 1,
@@ -184,11 +193,14 @@ const PlayToForm = ({ from, reciter, onStart }: PlayToFormProps) => {
           )}
         </View>
       ) : null}
+      <MemorisationControls form={memorisation} onChange={setMemorisation} />
       <Button
         testID="play-to-start"
         disabled={!reachable || endAyah === undefined}
         onPress={() => {
-          sendRecitation(playFromAyah(from, reciter, to));
+          sendRecitation(
+            playFromAyah(from, reciter, to, memorisationSettings(memorisation))
+          );
           onStart();
         }}
       >

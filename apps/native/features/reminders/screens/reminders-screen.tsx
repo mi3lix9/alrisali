@@ -7,8 +7,14 @@ import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { Screen } from "@/shared/ui/screen";
 
 import { AdhanServiceCard } from "../components/adhan-service-card";
+import { NightDuaCard } from "../components/night-dua-card";
+import { OccasionAlertsCard } from "../components/occasion-alerts-card";
 import { QuietHoursCard } from "../components/quiet-hours-card";
 import { RuleCard } from "../components/rule-card";
+import {
+  useNightDuaAlerts,
+  useUpdateNightDuaAlerts,
+} from "../data/night-dua-alerts";
 import {
   useReminderSettings,
   useUpdateReminderSettings,
@@ -21,6 +27,8 @@ export const RemindersScreen = () => {
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
   const { mutate: update } = useUpdateReminderSettings();
+  const { data: nightDuas } = useNightDuaAlerts();
+  const { mutate: updateNightDuas } = useUpdateNightDuaAlerts();
   const { access, allow, allowExactAlarms } = useNotificationAccess();
 
   return (
@@ -73,6 +81,10 @@ export const RemindersScreen = () => {
             onChange={(quietHours) => update({ quietHours })}
           />
         </>
+      ) : null}
+      <OccasionAlertsCard />
+      {nightDuas ? (
+        <NightDuaCard alerts={nightDuas} onChange={updateNightDuas} />
       ) : null}
       <AdhanServiceCard />
     </Screen>

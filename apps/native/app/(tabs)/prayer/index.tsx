@@ -7,6 +7,7 @@ import { QadaCard, QadaSalahToggle } from "@/features/qada";
 import { QiblaToolbarButton } from "@/features/qibla";
 import { AtTimeAlertButton } from "@/features/reminders";
 import { ShareTimesImageButton } from "@/features/share-image";
+import { MonthlyTimetableLink } from "@/features/timetable";
 
 const PrayerRoute = () => (
   <>
@@ -15,6 +16,7 @@ const PrayerRoute = () => (
       timetableRowActions={(name) => <AtTimeAlertButton prayerTime={name} />}
       timetableShare={(times) => <ShareTimesImageButton times={times} />}
     >
+      <MonthlyTimetableLink />
       <PrayerAssistantCard />
       <PrayerLogCard
         loggedSalahActions={(date, salah) => (

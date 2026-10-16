@@ -7,6 +7,7 @@ import { BirthYearCard } from "@/features/analytics";
 import { AnnouncementsCard } from "@/features/announcements";
 import { RecentCitiesList, useRememberCity } from "@/features/prayer-times";
 import { QuranReaderSettingsCard } from "@/features/quran";
+import { AlertHealthCard } from "@/features/reminders";
 import { SettingsScreen } from "@/features/settings";
 import { TasbihSettingsCard } from "@/features/tasbih";
 
@@ -16,6 +17,7 @@ const SettingsRoute = () => {
     <SettingsScreen
       onLocationChosen={remember}
       locationExtras={<RecentCitiesList />}
+      reminderExtras={<AlertHealthCard />}
       featureCards={
         <>
           <AnnouncementsCard />

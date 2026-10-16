@@ -36,6 +36,7 @@ export {
   quranReaderSettingsSchema,
   READER_MODES,
   readerReducer,
+  RETURN_HISTORY_LIMIT,
   SURAH_FONT_SIZE,
   surahEnd,
 } from "./reader";
@@ -67,21 +68,37 @@ export type { QuranSearchOptions, QuranSearchResult } from "./search";
 export {
   DEFAULT_RECITER,
   findReciter,
+  groupReciters,
+  RECITATION_STYLES,
+  RECITER_REGIONS,
   RECITERS,
   recitationUrl,
 } from "./reciters";
-export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
+export type {
+  RecitationStyle,
+  Reciter,
+  ReciterPerson,
+  ReciterRegion,
+  ReciterRegionGroup,
+  ReciterSource,
+  ReciterStyleGroup,
+} from "./reciters";
 export {
+  AYAH_LENGTH_FACTORS,
   isPlayToReachable,
   MAX_PLAYBACK_SPEED,
   MIN_PLAYBACK_SPEED,
   PLAY_TO_KINDS,
+  PLAYBACK_SPEEDS,
   playbackPlan,
   playToEnd,
+  REPEAT_COUNTS,
+  SLEEP_TIMERS,
 } from "./playback-plan";
 export type {
   PauseAfterAyah,
   PlaybackPlan,
+  PlaybackSettings,
   PlayTo,
   RepeatCount,
   SleepTimer,
@@ -131,3 +148,24 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export {
+  AYAH_NOTE_MAX,
+  cleanNoteText,
+  insertAtCursor,
+  notedAyat,
+  sortNotes,
+  writeNote,
+} from "./ayah-notes";
+export type { AyahNote, TextSelection } from "./ayah-notes";
+export {
+  canRotateReader,
+  pagesOfSpread,
+  shownPageOfSpread,
+  showsSpread,
+  SPREAD_COUNT,
+  SPREAD_MIN_WIDTH,
+  spreadOfPage,
+  WIDE_SCREEN_SHORT_SIDE,
+} from "./spread";
+export type { ScreenSize } from "./spread";
+export { recordSearch, SEARCH_HISTORY_LIMIT } from "./search-history";
