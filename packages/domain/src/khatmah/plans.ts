@@ -5,8 +5,6 @@ import {
 } from "@alrisali/content/quran";
 import type { ByMeaningDays } from "@alrisali/content/quran";
 
-import type { KhatmahPlan } from "./khatmah";
-
 /** What a by-amount plan counts a session in. */
 export const AMOUNT_UNITS = [
   "ayat",
@@ -40,6 +38,18 @@ export type SessionInterval = (typeof SESSION_INTERVALS)[number];
  * estimate for "minutes per session", not a measurement of the reader.
  */
 export const READING_MINUTES_PER_PAGE = 2;
+
+/** The parts of a Khatmah Plan that decide its sessions' ayat ranges. */
+export type PlanShape =
+  | { kind: "suggested"; from?: number | undefined }
+  | { kind: "even"; days: number; from?: number | undefined }
+  | { kind: "meaning"; days: ByMeaningDays; from?: number | undefined }
+  | {
+      kind: "amount";
+      unit: AmountUnit;
+      count: number;
+      from?: number | undefined;
+    };
 
 /** An inclusive run of indexes into `AYAT`. */
 export interface IndexRange {
@@ -154,7 +164,7 @@ const rangesCache = new Map<string, readonly IndexRange[]>();
  * Every session of a plan before any join, as ayat index ranges: contiguous
  * and covering all 6236 ayat exactly once.
  */
-export const baseRanges = (plan: KhatmahPlan): readonly IndexRange[] => {
+export const baseRanges = (plan: PlanShape): readonly IndexRange[] => {
   const key =
     plan.kind === "suggested"
       ? "even:30"
