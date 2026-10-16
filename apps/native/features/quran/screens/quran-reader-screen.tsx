@@ -43,6 +43,7 @@ import {
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
 import { RecitationPill } from "../components/recitation-pill";
+import { ReturnHistorySheet } from "../components/return-history-sheet";
 import type { SavedFavorites } from "../components/saved-list";
 import { SurahMode } from "../components/surah-mode";
 import { useQuranLastRead, useSetQuranLastRead } from "../data/last-read";
@@ -192,7 +193,7 @@ const Reader = ({
     }
   };
   const jumpTo = (to: JumpTarget) => move({ type: "jump", to });
-  const openSheet = (kind: "index" | "page-jump" | "search") =>
+  const openSheet = (kind: "index" | "page-jump" | "search" | "returns") =>
     send({ type: "open-sheet", sheet: { kind } });
   const closeSheet = () => send({ type: "close-sheet" });
   /** Brings the page or surah behind to an ayah when it is off screen. */
@@ -328,9 +329,10 @@ const Reader = ({
           <ReaderBottomBar
             mode={state.mode}
             value={scrubberValue(state)}
-            returnTo={state.returnTo}
+            returnHistory={state.returnHistory}
             insetBottom={insets.bottom}
             onReturn={() => move({ type: "return" })}
+            onReturnHistory={() => openSheet("returns")}
             onScrubberHold={() => send({ type: "scrubber-hold" })}
             onScrubberRelease={() => send({ type: "scrubber-release" })}
             onJump={jumpTo}
@@ -388,6 +390,12 @@ const Reader = ({
         <QuranSearchSheet
           open={chrome.sheet?.kind === "search"}
           onSelect={jumpTo}
+          onClose={closeSheet}
+        />
+        <ReturnHistorySheet
+          open={chrome.sheet?.kind === "returns"}
+          history={state.returnHistory}
+          onSelect={(index) => move({ type: "return", index })}
           onClose={closeSheet}
         />
       </View>

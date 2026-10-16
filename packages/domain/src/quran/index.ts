@@ -36,6 +36,7 @@ export {
   quranReaderSettingsSchema,
   READER_MODES,
   readerReducer,
+  RETURN_HISTORY_LIMIT,
   SURAH_FONT_SIZE,
   surahEnd,
 } from "./reader";
@@ -131,3 +132,4 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export { recordSearch, SEARCH_HISTORY_LIMIT } from "./search-history";

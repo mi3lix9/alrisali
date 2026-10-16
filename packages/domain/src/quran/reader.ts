@@ -57,6 +57,9 @@ export const DEFAULT_QURAN_READER_SETTINGS: QuranReaderSettings = {
   keepAwake: true,
 };
 
+/** How many jumps the return chip remembers. */
+export const RETURN_HISTORY_LIMIT = 10;
+
 export interface QuranReaderState {
   mode: ReaderMode;
   pageNav: PageNav;
@@ -66,10 +69,10 @@ export interface QuranReaderState {
   currentSurah: number;
   lastReadAyah: AyahKey | null;
   /**
-   * Where the Believer was before their last jump (scrubber, index, search,
-   * page jump); the return button takes them back there.
+   * Where the Believer was before each of their last ten jumps (scrubber,
+   * index, search, page jump), latest first; the return chip takes them back.
    */
-  returnTo: AyahKey | null;
+  returnHistory: AyahKey[];
 }
 
 /** Where a jump goes: a page's first ayah, a surah's first ayah, or an ayah. */
@@ -93,8 +96,11 @@ export type ReaderAction =
   | { type: "set-last-read"; ayah: AyahKey }
   /** A jump from the scrubber, the index, search or page jump. */
   | { type: "jump"; to: JumpTarget }
-  /** Back to `returnTo`; where the Believer was becomes `returnTo`. */
-  | { type: "return" };
+  /**
+   * Back to a position in `returnHistory` (the latest unless `index` says
+   * otherwise); that position and the newer ones are forgotten.
+   */
+  | { type: "return"; index?: number };
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -173,6 +179,12 @@ const isHere = (
     : target.key === anchor?.key;
 };
 
+/** Puts a position first in the history, keeping the last ten. */
+const remember = (history: AyahKey[], key: AyahKey): AyahKey[] =>
+  history[0] === key
+    ? history
+    : [key, ...history].slice(0, RETURN_HISTORY_LIMIT);
+
 const jump = (state: QuranReaderState, to: JumpTarget): QuranReaderState => {
   const target = jumpAyah(to);
   if (!target) {
@@ -190,7 +202,27 @@ const jump = (state: QuranReaderState, to: JumpTarget): QuranReaderState => {
     currentPage: target.page,
     currentSurah: target.surah,
     lastReadAyah: target.key,
-    returnTo: anchor?.key ?? state.returnTo,
+    returnHistory: anchor
+      ? remember(state.returnHistory, anchor.key)
+      : state.returnHistory,
+  };
+};
+
+/**
+ * Jumps back to the history's entry at `index` (0 is the latest) and forgets
+ * it and every newer one, so the next return steps back further.
+ */
+const goBack = (state: QuranReaderState, index: number): QuranReaderState => {
+  const target = findAyah(state.returnHistory[index] ?? "");
+  if (!target) {
+    return state;
+  }
+  return {
+    ...state,
+    currentPage: target.page,
+    currentSurah: target.surah,
+    lastReadAyah: target.key,
+    returnHistory: state.returnHistory.slice(index + 1),
   };
 };
 
@@ -251,7 +283,7 @@ export const readerReducer = (
       return jump(state, action.to);
     }
     case "return": {
-      return state.returnTo ? jump(state, { ayah: state.returnTo }) : state;
+      return goBack(state, action.index ?? 0);
     }
     default: {
       return state;
@@ -302,7 +334,7 @@ export const openReader = ({
     currentPage: target?.page ?? 1,
     currentSurah: target?.surah ?? 1,
     lastReadAyah: known?.key ?? lastReadAyah,
-    returnTo: null,
+    returnHistory: [],
   };
 };
 
