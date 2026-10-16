@@ -355,6 +355,7 @@
     },
   },
   "patchedDependencies": {
+    "panelui-native@0.111.0": "patches/panelui-native@0.111.0.patch",
     "@tursodatabase/sync-react-native@0.8.3": "patches/@tursodatabase%2Fsync-react-native@0.8.3.patch",
   },
   "catalog": {
