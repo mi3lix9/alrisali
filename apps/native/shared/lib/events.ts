@@ -107,6 +107,12 @@ export interface AppEvents {
     date: string;
     completedAt: number;
   };
+  /**
+   * The Believer finished a Khatmah: its last Khatmah Session was completed
+   * on `date` (ISO `YYYY-MM-DD`). `khatmahId` is stable, so a listener can
+   * react once per Khatmah.
+   */
+  KhatmahCompleted: { khatmahId: string; date: string; completedAt: number };
 }
 
 export const events = createEventBus<AppEvents>();

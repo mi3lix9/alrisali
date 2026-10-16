@@ -9,6 +9,7 @@ import { ContinueRow } from "@/features/continue";
 import { TodaysWorshipCard } from "@/features/daily-content";
 import { UpcomingGatheringsCard } from "@/features/gatherings";
 import { InsightsLinkCard } from "@/features/insights";
+import { ContinueKhatmahTile } from "@/features/khatmah";
 import { MoodCheckInCard } from "@/features/mood";
 import { PrayerLogQuickTicks, PrayerStreakTile } from "@/features/prayer-log";
 import {
@@ -68,6 +69,7 @@ const HomeRoute = () => {
         <ContinueRow>
           <ContinueReadingTile />
           <ContinueSupplicationTile />
+          <ContinueKhatmahTile />
         </ContinueRow>
         <TodaysWorshipCard afterMaghrib={afterMaghrib} />
         <HomeShortcutsCard />

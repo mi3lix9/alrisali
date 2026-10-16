@@ -2,6 +2,7 @@ import "../i18n";
 import { khatmahSessionRows } from "@alrisali/domain/khatmah";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Button, Card, Spinner, Text } from "panelui-native";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
@@ -10,7 +11,10 @@ import { formatNumber } from "@/shared/lib/numbers";
 import { useToday } from "@/shared/lib/today";
 import { Screen } from "@/shared/ui/screen";
 
+import { CelebrationCard } from "../components/celebration-card";
+import { CompletedHistory } from "../components/completed-history";
 import { ReminderField } from "../components/reminder-field";
+import { RescheduleSheet } from "../components/reschedule-sheet";
 import { SessionList } from "../components/session-list";
 import { useRemoveKhatmah, useSetKhatmahReminder } from "../data/khatmah";
 import { useActiveKhatmah } from "../hooks/use-active-khatmah";
@@ -26,6 +30,8 @@ const StatusCard = ({
   completionActions?: ReactNode;
 }) => {
   const { t } = useTranslation("khatmah");
+  const { t: tProgress } = useTranslation("khatmahProgress");
+  const [rescheduling, setRescheduling] = useState(false);
   const ayahLabel = useAyahLabel();
   const dayLabels = useDayLabels();
   const { status } = active;
@@ -82,7 +88,7 @@ const StatusCard = ({
         <Card.Footer>{completionActions}</Card.Footer>
       ) : null}
       {current ? (
-        <Card.Footer>
+        <Card.Footer className="flex-col gap-2">
           <Button
             testID="khatmah-open-portion"
             variant="secondary"
@@ -95,8 +101,22 @@ const StatusCard = ({
           >
             {t("status.open")}
           </Button>
+          {status.state === "behind" ? (
+            <Button
+              testID="khatmah-reschedule"
+              variant="outline"
+              onPress={() => setRescheduling(true)}
+            >
+              {tProgress("reschedule.action")}
+            </Button>
+          ) : null}
         </Card.Footer>
       ) : null}
+      <RescheduleSheet
+        active={active}
+        open={rescheduling}
+        onClose={() => setRescheduling(false)}
+      />
     </Card>
   );
 };
@@ -128,6 +148,23 @@ const ActiveKhatmahView = ({
       ]
     );
 
+  if (active.status.state === "finished") {
+    return (
+      <Screen>
+        <CelebrationCard active={active} />
+        {completionActions}
+        <CompletedHistory />
+        <Button
+          testID="khatmah-remove"
+          variant="outline"
+          onPress={confirmRemove}
+        >
+          {t("manage.remove")}
+        </Button>
+      </Screen>
+    );
+  }
+
   return (
     <Screen>
       <StatusCard active={active} completionActions={completionActions} />
@@ -140,6 +177,7 @@ const ActiveKhatmahView = ({
         rows={khatmahSessionRows(khatmah, logs, today)}
         today={today}
       />
+      <CompletedHistory />
       <Button testID="khatmah-remove" variant="outline" onPress={confirmRemove}>
         {t("manage.remove")}
       </Button>
@@ -192,6 +230,7 @@ export const KhatmahScreen = ({
             </Button>
           </Card.Footer>
         </Card>
+        <CompletedHistory />
       </Screen>
     );
   }

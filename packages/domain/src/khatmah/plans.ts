@@ -39,6 +39,18 @@ export type SessionInterval = (typeof SESSION_INTERVALS)[number];
  */
 export const READING_MINUTES_PER_PAGE = 2;
 
+/** The parts of a Khatmah Plan that decide its sessions' ayat ranges. */
+export type PlanShape =
+  | { kind: "suggested"; from?: number | undefined }
+  | { kind: "even"; days: number; from?: number | undefined }
+  | { kind: "meaning"; days: ByMeaningDays; from?: number | undefined }
+  | {
+      kind: "amount";
+      unit: AmountUnit;
+      count: number;
+      from?: number | undefined;
+    };
+
 /** An inclusive run of indexes into `AYAT`. */
 export interface IndexRange {
   first: number;
@@ -146,20 +158,13 @@ const meaningIndexRanges = (days: ByMeaningDays): IndexRange[] =>
     last: ayahIndex(to),
   }));
 
-/** The part of a Khatmah plan that decides its division (see khatmah.ts). */
-export type DivisionPlan =
-  | { kind: "suggested" }
-  | { kind: "even"; days: number }
-  | { kind: "meaning"; days: ByMeaningDays }
-  | { kind: "amount"; unit: AmountUnit; count: number };
-
 const rangesCache = new Map<string, readonly IndexRange[]>();
 
 /**
  * Every session of a plan before any join, as ayat index ranges: contiguous
  * and covering all 6236 ayat exactly once.
  */
-export const baseRanges = (plan: DivisionPlan): readonly IndexRange[] => {
+export const baseRanges = (plan: PlanShape): readonly IndexRange[] => {
   const key =
     plan.kind === "suggested"
       ? "even:30"

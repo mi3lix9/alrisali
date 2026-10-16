@@ -107,6 +107,55 @@ describe(createKhatmahRepository, () => {
     await expect(repository.logs()).resolves.toStrictEqual([]);
   });
 
+  it("keeps what rescheduling and Mark done till changed with the plan", async () => {
+    const repository = createKhatmahRepository(database.db);
+    await repository.create(
+      ID,
+      { plan: { kind: "suggested" }, startDate: START, reminderAt: null },
+      AT
+    );
+    const adjust = {
+      segments: [
+        {
+          from: 3,
+          start: START.add({ days: 4 }),
+          every: 1 as const,
+          portions: [{ from: "1:1" as const, to: "114:6" as const }],
+        },
+      ],
+      partial: { session: 3, till: "2:5" as const },
+    };
+
+    await repository.setAdjustments(ID, adjust);
+
+    const [saved] = await repository.list();
+    expect(saved?.adjust).toStrictEqual(adjust);
+    expect(saved?.plan).toStrictEqual({ kind: "suggested" });
+
+    await repository.setAdjustments(ID, { segments: [], partial: null });
+    const [cleared] = await repository.list();
+    expect(cleared?.adjust).toBeUndefined();
+  });
+
+  it("deletes the logs from a session on", async () => {
+    const repository = createKhatmahRepository(database.db);
+    await repository.create(
+      ID,
+      { plan: { kind: "suggested" }, startDate: START, reminderAt: null },
+      AT
+    );
+    await Promise.all(
+      [1, 2, 3].map((session) =>
+        repository.log({ khatmahId: ID, session, date: START }, AT)
+      )
+    );
+
+    await repository.unlogFrom(ID, 2);
+
+    const logs = await repository.logs();
+    expect(logs.map(({ session }) => session)).toStrictEqual([1]);
+  });
+
   it("deletes a Khatmah with its logs and leaves the others", async () => {
     const repository = createKhatmahRepository(database.db);
     await Promise.all(

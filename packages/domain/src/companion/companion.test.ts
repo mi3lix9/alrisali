@@ -18,6 +18,7 @@ const EVENTS: XpEvent[] = [
   { kind: "reading", supplicationId: "sahifa-1", date: "2026-10-16" },
   { kind: "lesson", lessonId: "aqeedah-1" },
   { kind: "khatmah-session", khatmahId: "khatmah-1", session: 3 },
+  { kind: "khatmah", khatmahId: "khatmah-1" },
 ];
 
 describe("Companion XP awards", () => {
@@ -36,6 +37,7 @@ describe("Companion XP awards", () => {
       "reading:sahifa-1:2026-10-16",
       "lesson:aqeedah-1",
       "khatmah-session:khatmah-1:3",
+      "khatmah:khatmah-1",
     ]);
   });
 

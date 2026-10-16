@@ -33,6 +33,9 @@ export const listenForXp = (
     bus.on("KhatmahSessionCompleted", ({ khatmahId, session }) =>
       onXpEvent({ kind: "khatmah-session", khatmahId, session })
     ),
+    bus.on("KhatmahCompleted", ({ khatmahId }) =>
+      onXpEvent({ kind: "khatmah", khatmahId })
+    ),
   ];
   return () => {
     for (const unsubscribe of unsubscribes) {

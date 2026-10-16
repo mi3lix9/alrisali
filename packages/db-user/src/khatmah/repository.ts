@@ -1,14 +1,17 @@
 import {
   khatmahLogId,
+  readKhatmahAdjustments,
   readKhatmahPlan,
   serialiseKhatmahPlan,
+  withKhatmahAdjustments,
 } from "@alrisali/domain/khatmah";
 import type {
   Khatmah,
+  KhatmahAdjustments,
   KhatmahLog,
   KhatmahPlan,
 } from "@alrisali/domain/khatmah";
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte } from "drizzle-orm";
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
@@ -29,6 +32,13 @@ export interface KhatmahRepository {
   create: (id: string, draft: KhatmahDraft, at: Date) => Promise<Khatmah>;
   /** Sets or clears (null) the Khatmah's daily reminder time. */
   setReminder: (id: string, reminderAt: number | null) => Promise<void>;
+  /**
+   * Saves what rescheduling or "Mark done till…" changed about the Khatmah,
+   * with the plan; none clears it.
+   */
+  setAdjustments: (id: string, adjust: KhatmahAdjustments) => Promise<void>;
+  /** Deletes the logs of this session and every later one. */
+  unlogFrom: (khatmahId: string, session: number) => Promise<void>;
   /** Deletes the Khatmah and its logs. */
   remove: (id: string) => Promise<void>;
   /** Every Khatmah Log, oldest date first. */
@@ -57,12 +67,14 @@ const toKhatmah = (row: KhatmahRow): Khatmah | null => {
   }
   const startDate = Temporal.PlainDate.from(row.startDate);
   const reminderAt = reminderAtSchema.safeParse(row.reminderAt);
+  const adjust = readKhatmahAdjustments(row.plan);
   return {
     id: row.id,
     plan,
     startDate,
     reminderAt: reminderAt.success ? reminderAt.data : null,
     createdAt: row.createdAt.getTime(),
+    ...(adjust.segments.length > 0 || adjust.partial ? { adjust } : {}),
   };
 };
 
@@ -102,6 +114,30 @@ export const createKhatmahRepository = (db: UserDb): KhatmahRepository => ({
       .update(khatmahs)
       .set({ reminderAt: reminderAtSchema.parse(reminderAt) })
       .where(eq(khatmahs.id, id));
+  },
+  setAdjustments: async (id, adjust) => {
+    const row = await db
+      .select({ plan: khatmahs.plan })
+      .from(khatmahs)
+      .where(eq(khatmahs.id, id))
+      .get();
+    if (!row) {
+      return;
+    }
+    await db
+      .update(khatmahs)
+      .set({ plan: withKhatmahAdjustments(row.plan, adjust) })
+      .where(eq(khatmahs.id, id));
+  },
+  unlogFrom: async (khatmahId, session) => {
+    await db
+      .delete(khatmahLogs)
+      .where(
+        and(
+          eq(khatmahLogs.khatmahId, khatmahId),
+          gte(khatmahLogs.session, session)
+        )
+      );
   },
   remove: async (id) => {
     await db.delete(khatmahLogs).where(eq(khatmahLogs.khatmahId, id));
