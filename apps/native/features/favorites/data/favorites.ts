@@ -50,3 +50,15 @@ export const useSetFavorite = () =>
       await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
     },
   });
+
+/** Removes several Favorites at once; the deletion syncs like any other. */
+export const useRemoveFavorites = () =>
+  useMutation({
+    mutationFn: async (items: readonly FavoriteItem[]) => {
+      const { db } = await getUserDatabase();
+      await createFavoritesRepository(db).removeMany(items);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: FAVORITES_QUERY_KEY });
+    },
+  });
