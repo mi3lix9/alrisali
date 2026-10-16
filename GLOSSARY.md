@@ -92,6 +92,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Favorite**: A Surah, ayah, Supplication or Library Asset the Believer has saved for quick return. _Avoid_: Bookmark
 
+**Bookmark Ribbon**: One of six coloured, nameable bookmarks, each resting on one ayah; setting a colour on another ayah moves that ribbon there, as in a printed mushaf. A ribboned ayah shows a coloured rosette on the page. _Avoid_: Bookmark (alone), Favorite
+
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
@@ -162,6 +164,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 - A **Believer** holds at most five active **Subscriptions**, of which at most one General and one Seasonal **Official Program**.
 - **Tasbih al-Zahra** exists exactly once per Believer and cannot be removed or renamed.
 - A **Book** contains many **Supplications**; **Daily Content** points at a Supplication.
+- A **Believer** has exactly six **Bookmark Ribbons**, each on at most one ayah; unlike **Favorites**, they never accumulate.
 - An **Occasion** recurs every Hijri year; a **Gathering** happens once on a Gregorian date.
 
 ## Flagged ambiguities
