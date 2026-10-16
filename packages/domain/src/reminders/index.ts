@@ -67,3 +67,8 @@ export type {
   ReminderSound,
   Salah,
 } from "./settings";
+export {
+  allSalahAtTime,
+  atTimeForAllSalah,
+  sendsNotifications,
+} from "./alerts-overview";

@@ -196,3 +196,11 @@ export {
 export type { ArrangedShortcut, ShortcutLayout } from "./home-shortcuts";
 export type { QadaReminderPlan } from "./qada-reminder";
 export { isAfterMaghrib, nightHijriDate } from "./hijri";
+export {
+  manualLocation,
+  MAX_RECENT_CITIES,
+  readRecentCities,
+  recentCitySchema,
+  rememberCity,
+} from "./recent-cities";
+export type { RecentCity } from "./recent-cities";

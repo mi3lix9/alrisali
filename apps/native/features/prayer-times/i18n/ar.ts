@@ -53,6 +53,10 @@ export const ar = {
     noResults: "لم نجد مدينة بهذا الاسم.",
     searchFailed: "تعذّر البحث. يحتاج البحث إلى اتصال بالإنترنت.",
   },
+  recent: {
+    title: "المدن الأخيرة",
+    timeZone: "المنطقة الزمنية: {{timeZone}}",
+  },
   options: {
     title: "خيارات المواقيت",
     timeFormat: "صيغة الوقت",
