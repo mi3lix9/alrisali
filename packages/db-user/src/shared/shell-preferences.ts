@@ -1,10 +1,16 @@
 import {
+  digitsSchema,
   readHiddenTabs,
   TEXT_SIZES,
   TABS,
   themePreferenceSchema,
 } from "@alrisali/domain/shared";
-import type { Tab, TextSize, ThemePreference } from "@alrisali/domain/shared";
+import type {
+  Digits,
+  Tab,
+  TextSize,
+  ThemePreference,
+} from "@alrisali/domain/shared";
 import { LANGUAGES } from "@alrisali/i18n";
 import type { Language } from "@alrisali/i18n";
 import { eq } from "drizzle-orm";
@@ -22,6 +28,7 @@ export interface ShellPreferences {
   theme: ThemePreference | null;
   textSize: TextSize | null;
   hiddenTabs: Tab[] | null;
+  digits: Digits | null;
 }
 
 /** The preferences to change; anything left out keeps its saved value. */
@@ -30,6 +37,7 @@ export interface ShellPreferencesChange {
   theme?: ThemePreference;
   textSize?: TextSize;
   hiddenTabs?: readonly Tab[];
+  digits?: Digits;
 }
 
 export interface ShellPreferencesRepository {
@@ -49,6 +57,7 @@ const changeSchema = z.object({
   theme: themePreferenceSchema.optional(),
   textSize: textSizeSchema.optional(),
   hiddenTabs: z.array(z.enum(TABS)).optional(),
+  digits: digitsSchema.optional(),
 });
 
 type Row = typeof shellPreferences.$inferSelect;
@@ -76,6 +85,7 @@ const toPreferences = (row: Row | undefined): ShellPreferences => ({
   theme: known(themePreferenceSchema, row?.theme),
   textSize: known(textSizeSchema, row?.textSize),
   hiddenTabs: readStoredTabs(row?.hiddenTabs),
+  digits: known(digitsSchema, row?.digits),
 });
 
 export const createShellPreferencesRepository = (
@@ -103,6 +113,7 @@ export const createShellPreferencesRepository = (
         parsed.hiddenTabs === undefined
           ? current.hiddenTabs
           : readHiddenTabs(parsed.hiddenTabs),
+      digits: parsed.digits ?? current.digits,
     };
     const columns = {
       language: next.language,
@@ -110,6 +121,7 @@ export const createShellPreferencesRepository = (
       textSize: next.textSize,
       hiddenTabs:
         next.hiddenTabs === null ? null : JSON.stringify(next.hiddenTabs),
+      digits: next.digits,
     };
     await db
       .insert(shellPreferences)

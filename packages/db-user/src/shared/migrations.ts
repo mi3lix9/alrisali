@@ -167,4 +167,8 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `quran_reader_settings` ADD `reciter` text DEFAULT 'ar.alafasy' NOT NULL;",
     ],
   },
+  {
+    tag: "20261016002557_shell_digits",
+    statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
+  },
 ];
