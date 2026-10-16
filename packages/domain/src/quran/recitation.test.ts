@@ -6,6 +6,7 @@ import {
   DEFAULT_QURAN_READER_SETTINGS,
   nextAyah,
   openReader,
+  previousAyah,
   readerReducer,
   recitationPlayback,
   recitationStart,
@@ -69,6 +70,21 @@ describe(nextAyah, () => {
 
   it("ends after the last ayah of the Quran", () => {
     expect(nextAyah("114:6")).toBeNull();
+  });
+});
+
+describe(previousAyah, () => {
+  it("moves to the previous ayah within a surah", () => {
+    expect(previousAyah("1:7")).toBe("1:6");
+  });
+
+  it("moves back to the previous surah's last ayah from a surah's first", () => {
+    expect(previousAyah("2:1")).toBe("1:7");
+    expect(previousAyah("3:1")).toBe("2:286");
+  });
+
+  it("ends before the first ayah of the Quran", () => {
+    expect(previousAyah("1:1")).toBeNull();
   });
 });
 

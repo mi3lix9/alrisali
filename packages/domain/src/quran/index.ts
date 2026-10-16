@@ -62,6 +62,7 @@ export type { RecitationStyle, Reciter, ReciterSource } from "./reciters";
 export {
   createRecitationCache,
   nextAyah,
+  previousAyah,
   RECITATION_CACHE_MAX_AGE_MS,
   recitationPlayback,
   recitationStart,
