@@ -67,3 +67,11 @@ export type {
   ReminderSound,
   Salah,
 } from "./settings";
+export {
+  ADHAN_STREAMS,
+  adhanPlayback,
+  adhanServiceSettingsSchema,
+  adhanStreamSchema,
+  DEFAULT_ADHAN_SERVICE_SETTINGS,
+} from "./adhan-service";
+export type { AdhanServiceSettings, AdhanStream } from "./adhan-service";

@@ -54,13 +54,16 @@ interface AlertSound {
   sound: string | null;
   /** The full adhan to play in the app when the notification is opened. */
   adhanOnOpen: string | null;
+  /** The installed full adhan the Android service plays, if any. */
+  serviceFile: string | null;
 }
 
 /**
  * The takbir and the full adhan from the installed voice, else the system
  * sound. iOS plays at most 30 seconds of a notification sound: it sounds the
- * takbir and plays the full adhan when opened. Android sounds the full adhan
- * itself, until its adhan service (ticket 30).
+ * takbir and plays the full adhan when opened. On Android the adhan service
+ * plays the full adhan (`serviceFile`); where it is unavailable (a build made
+ * without the module) the notification sounds the full adhan itself.
  */
 const atTimeAlertSound = (alert: ReminderAlert): AlertSound => {
   const { notification, full } = atTimeSound(alert, INSTALLED_ADHAN_SOUNDS);
@@ -70,19 +73,26 @@ const atTimeAlertSound = (alert: ReminderAlert): AlertSound => {
     channelId: played ? atTimeChannel(played.file) : AT_TIME_SYSTEM_CHANNEL,
     sound: played?.file ?? "default",
     adhanOnOpen: Platform.OS === "ios" ? (full?.file ?? null) : null,
+    serviceFile: Platform.OS === "android" ? (full?.file ?? null) : null,
   };
 };
 
 const alertSound = (alert: ReminderAlert): AlertSound => {
   switch (alert.kind) {
     case "silent": {
-      return { channelId: "reminder-silent", sound: null, adhanOnOpen: null };
+      return {
+        channelId: "reminder-silent",
+        sound: null,
+        adhanOnOpen: null,
+        serviceFile: null,
+      };
     }
     case "voice": {
       return {
         channelId: "reminder-voice",
         sound: SOUND_FILES.voice,
         adhanOnOpen: null,
+        serviceFile: null,
       };
     }
     case "takbir":
@@ -91,11 +101,17 @@ const alertSound = (alert: ReminderAlert): AlertSound => {
     }
     default: {
       return alert.sound === "default"
-        ? { channelId: "reminder-default", sound: "default", adhanOnOpen: null }
+        ? {
+            channelId: "reminder-default",
+            sound: "default",
+            adhanOnOpen: null,
+            serviceFile: null,
+          }
         : {
             channelId: `reminder-${alert.sound}`,
             sound: SOUND_FILES[alert.sound],
             adhanOnOpen: null,
+            serviceFile: null,
           };
     }
   }
@@ -113,6 +129,15 @@ export interface ReminderRequest {
   sound: string | null;
   /** The full adhan to play when the notification is opened (iOS). */
   adhanOnOpen: string | null;
+  /**
+   * Android: the full adhan the adhan service plays as an alarm instead of
+   * the notification playing it; null for every other alert.
+   */
+  adhanService: {
+    file: string;
+    stopLabel: string;
+    channelName: string;
+  } | null;
 }
 
 const minutesPhrase = (
@@ -197,7 +222,16 @@ export const toReminderRequest = (
 ): ReminderRequest => {
   const { title, body } = wording(reminder.message, t, language);
   const fireAt = reminder.fireAt.epochMilliseconds;
-  const { channelId, sound, adhanOnOpen } = alertSound(reminder.alert);
+  const { channelId, sound, adhanOnOpen, serviceFile } = alertSound(
+    reminder.alert
+  );
+  const adhanService = serviceFile
+    ? {
+        file: serviceFile,
+        stopLabel: t("adhanService.stop"),
+        channelName: t("adhanService.channel"),
+      }
+    : null;
   return {
     id: reminder.id,
     fingerprint: JSON.stringify([
@@ -207,6 +241,7 @@ export const toReminderRequest = (
       channelId,
       sound,
       adhanOnOpen,
+      adhanService,
     ]),
     fireAt,
     title,
@@ -214,5 +249,6 @@ export const toReminderRequest = (
     channelId,
     sound,
     adhanOnOpen,
+    adhanService,
   };
 };
