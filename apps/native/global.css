@@ -3,3 +3,22 @@
 @import "panelui-native/theme.css";
 
 @source "./node_modules/panelui-native/src";
+
+/*
+ * Destructive fills (Sign out, Delete account) carry white text on a deeper
+ * red, as iOS does. Panel UI's near-black label on its bright red read as
+ * dark-on-red. Both reds still read as error text on the background.
+ */
+@layer theme {
+  :root {
+    @variant light {
+      --color-destructive: #dc2626;
+      --color-destructive-solid-foreground: #ffffff;
+    }
+
+    @variant dark {
+      --color-destructive: #e5484d;
+      --color-destructive-solid-foreground: #ffffff;
+    }
+  }
+}
