@@ -2,7 +2,7 @@ import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import { SALAH, salahSchema } from "../shared";
-import type { Salah } from "../shared";
+import type { QadaReminderPlan, Salah, Weekday } from "../shared";
 
 /**
  * What the Believer has to make up: missed Salah, counted per Salah, and
@@ -370,3 +370,87 @@ export const qadaCalendar = (
     })
   );
 };
+
+/** When the Qada Reminder fires. */
+export interface QadaReminder {
+  enabled: boolean;
+  /** Minutes after local midnight. */
+  at: number;
+  /** The weekdays it fires on (ISO, 1 is Monday); all seven is every day. */
+  weekdays: readonly Weekday[];
+}
+
+/** What the Believer set up: the backlog they entered, the pace, the Reminder. */
+export interface QadaPlan {
+  backlog: QadaBacklog;
+  pace: QadaPace;
+  reminder: QadaReminder;
+}
+
+const ALL_WEEKDAYS: readonly Weekday[] = [1, 2, 3, 4, 5, 6, 7];
+
+/** Off, at 21:00 every day: the Reminder before the Believer sets one. */
+export const DEFAULT_QADA_REMINDER: QadaReminder = {
+  enabled: false,
+  at: 21 * 60,
+  weekdays: ALL_WEEKDAYS,
+};
+
+/**
+ * The Qada Reminder the Reminders schedule; null while it is off, has no
+ * weekday, or nothing is left to make up.
+ */
+export const qadaReminderPlan = (
+  plan: QadaPlan,
+  logs: readonly QadaLog[]
+): QadaReminderPlan | null => {
+  const { reminder, pace } = plan;
+  const remaining = remainingBacklog(plan.backlog, logs);
+  if (
+    !reminder.enabled ||
+    reminder.weekdays.length === 0 ||
+    (totalSalah(remaining) === 0 && remaining.fasts === 0)
+  ) {
+    return null;
+  }
+  const weekdays = [...new Set(reminder.weekdays)].toSorted((a, b) => a - b);
+  return {
+    schedule:
+      weekdays.length === ALL_WEEKDAYS.length
+        ? { kind: "daily" }
+        : { kind: "weekdays", weekdays },
+    reminderAt: reminder.at,
+    salahPerDay: pace.salahPerDay,
+  };
+};
+
+export const qadaReminderSchema = z.object({
+  enabled: z.boolean(),
+  at: z
+    .number()
+    .int()
+    .min(0)
+    .max(24 * 60 - 1),
+  weekdays: z.array(
+    z
+      .number()
+      .int()
+      .min(1)
+      .max(7)
+      .transform((day) => day as Weekday)
+  ),
+});
+
+export const qadaPlanSchema = z.object({
+  backlog: qadaBacklogSchema,
+  pace: qadaPaceSchema,
+  reminder: qadaReminderSchema,
+});
+
+/** A Qada item can be logged for today or a past date, never a future one. */
+export class FutureQadaDateError extends Error {
+  constructor(date: Temporal.PlainDate) {
+    super(`Qada cannot be logged for a future date (${date.toString()})`);
+    this.name = "FutureQadaDateError";
+  }
+}

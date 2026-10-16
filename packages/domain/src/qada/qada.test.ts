@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   applyQadaLog,
+  DEFAULT_QADA_REMINDER,
   lastQadaSalahLog,
   matchingPreset,
   nextQadaSalahLog,
@@ -12,11 +13,18 @@ import {
   qadaDaysLeft,
   qadaFastLog,
   qadaItemLog,
+  qadaReminderPlan,
   qadaToday,
   readQadaLog,
   remainingBacklog,
 } from "./qada";
-import type { QadaBacklog, QadaItem, QadaLog, QadaPace } from "./qada";
+import type {
+  QadaBacklog,
+  QadaItem,
+  QadaLog,
+  QadaPace,
+  QadaPlan,
+} from "./qada";
 
 // 2026-10-15 is a Thursday; its week began on Saturday 2026-10-10.
 const TODAY = Temporal.PlainDate.from("2026-10-15");
@@ -293,6 +301,48 @@ describe(readQadaLog, () => {
     ).toBeNull();
     expect(
       readQadaLog({ id: "x", date: "2026-10-15", kind: "salah", salah: "duha" })
+    ).toBeNull();
+  });
+});
+
+describe(qadaReminderPlan, () => {
+  const plan: QadaPlan = {
+    backlog: MONTH,
+    pace: pace(5, 2),
+    reminder: { ...DEFAULT_QADA_REMINDER, enabled: true },
+  };
+
+  it("reminds every day at its time with the day's pace", () => {
+    expect(qadaReminderPlan(plan, [])).toStrictEqual({
+      schedule: { kind: "daily" },
+      reminderAt: 21 * 60,
+      salahPerDay: 5,
+    });
+  });
+
+  it("reminds on the chosen weekdays only", () => {
+    expect(
+      qadaReminderPlan(
+        { ...plan, reminder: { ...plan.reminder, weekdays: [6, 1, 6] } },
+        []
+      )?.schedule
+    ).toStrictEqual({ kind: "weekdays", weekdays: [1, 6] });
+  });
+
+  it("is off when disabled, with no weekday, or once all is made up", () => {
+    expect(
+      qadaReminderPlan({ ...plan, reminder: DEFAULT_QADA_REMINDER }, [])
+    ).toBeNull();
+    expect(
+      qadaReminderPlan(
+        { ...plan, reminder: { ...plan.reminder, weekdays: [] } },
+        []
+      )
+    ).toBeNull();
+    const oneFajr = { ...plan, backlog: backlog({ fajr: 1 }) };
+    expect(qadaReminderPlan(oneFajr, [])).not.toBeNull();
+    expect(
+      qadaReminderPlan(oneFajr, [nextQadaSalahLog([], TODAY, "fajr")])
     ).toBeNull();
   });
 });

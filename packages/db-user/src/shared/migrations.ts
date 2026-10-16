@@ -171,4 +171,12 @@ export const migrations: readonly Migration[] = [
     tag: "20261016002557_shell_digits",
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
+  {
+    tag: "20261016124135_qada",
+    statements: [
+      "CREATE TABLE `qada_logs` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`kind` text NOT NULL,\n\t`salah` text,\n\t`logged_at` integer NOT NULL\n);",
+      "CREATE TABLE `qada_plan` (\n\t`id` text PRIMARY KEY,\n\t`fajr` integer DEFAULT 0 NOT NULL,\n\t`dhuhr` integer DEFAULT 0 NOT NULL,\n\t`asr` integer DEFAULT 0 NOT NULL,\n\t`maghrib` integer DEFAULT 0 NOT NULL,\n\t`isha` integer DEFAULT 0 NOT NULL,\n\t`fasts` integer DEFAULT 0 NOT NULL,\n\t`salah_per_day` integer DEFAULT 5 NOT NULL,\n\t`fasts_per_week` integer DEFAULT 2 NOT NULL,\n\t`reminder_enabled` integer DEFAULT false NOT NULL,\n\t`reminder_at` integer DEFAULT 1260 NOT NULL,\n\t`reminder_weekdays` text DEFAULT '[1,2,3,4,5,6,7]' NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE INDEX `qada_logs_date_idx` ON `qada_logs` (`date`);",
+    ],
+  },
 ];

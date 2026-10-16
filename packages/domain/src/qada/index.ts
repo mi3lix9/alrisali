@@ -1,7 +1,9 @@
 export {
   applyQadaLog,
   DEFAULT_QADA_PACE,
+  DEFAULT_QADA_REMINDER,
   EMPTY_QADA_BACKLOG,
+  FutureQadaDateError,
   lastQadaSalahLog,
   matchingPreset,
   MAX_FASTS_PER_WEEK,
@@ -17,6 +19,9 @@ export {
   qadaFastLog,
   qadaItemLog,
   qadaPaceSchema,
+  qadaPlanSchema,
+  qadaReminderPlan,
+  qadaReminderSchema,
   qadaSalahCount,
   qadaToday,
   readQadaLog,
@@ -29,5 +34,7 @@ export type {
   QadaItem,
   QadaLog,
   QadaPace,
+  QadaPlan,
+  QadaReminder,
   QadaPreset,
 } from "./qada";
