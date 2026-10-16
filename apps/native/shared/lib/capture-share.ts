@@ -1,4 +1,6 @@
 import { captureException } from "@sentry/react-native";
+import { File, Paths } from "expo-file-system";
+import { printToFileAsync } from "expo-print";
 import { isAvailableAsync, shareAsync } from "expo-sharing";
 import { useCallback, useRef, useState } from "react";
 import type { ComponentRef, RefObject } from "react";
@@ -67,4 +69,32 @@ export const useCaptureShare = (): {
   }, []);
 
   return { canvasRef, share, sharing };
+};
+
+/**
+ * Prints `html` to a PDF page of `width` by `height` points, named
+ * `<fileName>.pdf`, and opens the system share sheet on it.
+ */
+export const sharePdf = async (
+  html: string,
+  { width, height, fileName }: CaptureTarget
+): Promise<CaptureShareResult> => {
+  try {
+    if (!(await isAvailableAsync())) {
+      return "failed";
+    }
+    const printed = await printToFileAsync({ html, width, height });
+    // The printer names its file at random; the share sheet shows this name.
+    const file = new File(Paths.cache, `${fileName}.pdf`);
+    await new File(printed.uri).move(file, { overwrite: true });
+    await shareAsync(file.uri, {
+      mimeType: "application/pdf",
+      UTI: "com.adobe.pdf",
+      dialogTitle: fileName,
+    });
+    return "shared";
+  } catch (error) {
+    captureException(error);
+    return "failed";
+  }
 };
