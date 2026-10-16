@@ -27,10 +27,13 @@ interface SettingsScreenProps {
   locationExtras?: ReactNode;
   /** Other features' settings cards, composed by the route. */
   featureCards?: ReactNode;
+  /** Shown right after the Reminders card (Alert Health), composed by the route. */
+  reminderExtras?: ReactNode;
 }
 
 export const SettingsScreen = ({
   featureCards,
+  reminderExtras,
   onLocationChosen,
   locationExtras,
 }: SettingsScreenProps) => {
@@ -104,6 +107,7 @@ export const SettingsScreen = ({
       <PrayerSettingsCard />
       <HijriAdjustmentCard />
       <RemindersCard />
+      {reminderExtras}
       <MessageStyleCard />
       <TextSizeCard />
       <DigitsCard />

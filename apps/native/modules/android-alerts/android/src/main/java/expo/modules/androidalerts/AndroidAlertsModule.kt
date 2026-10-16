@@ -10,6 +10,7 @@ import expo.modules.androidalerts.adhan.AdhanScheduler
 import expo.modules.androidalerts.adhan.AdhanService
 import expo.modules.androidalerts.adhan.AdhanSettings
 import expo.modules.androidalerts.adhan.AdhanStore
+import expo.modules.androidalerts.health.AlertHealth
 import expo.modules.kotlin.exception.Exceptions
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
@@ -34,8 +35,7 @@ class AdhanSettingsRecord : Record {
 
 /**
  * Android-only alert plumbing the JS notification layer cannot do. Today the
- * adhan service (`adhan/`); the Alert Health checks join it as their own
- * functions here.
+ * adhan service (`adhan/`) and the Alert Health checks (`health/`).
  */
 class AndroidAlertsModule : Module() {
   private val context
@@ -93,5 +93,20 @@ class AndroidAlertsModule : Module() {
       }
       context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
+
+    // Alert Health: each check reads the real state, each fix opens the system screen.
+    Function("canScheduleExactAlarms") { AlertHealth.canScheduleExactAlarms(context) }
+    Function("openExactAlarmSettings") { AlertHealth.openExactAlarmSettings(context) }
+    Function("isIgnoringBatteryOptimizations") { AlertHealth.isIgnoringBatteryOptimizations(context) }
+    Function("openBatteryOptimizationSettings") { AlertHealth.openBatteryOptimizationSettings(context) }
+    // Android cannot say whether autostart is on, so this only names the maker.
+    Function("getAutostartInfo") {
+      mapOf("manufacturer" to AlertHealth.manufacturer(), "hasScreen" to AlertHealth.hasAutostartScreen())
+    }
+    Function("isAutostartConfirmed") { AlertHealth.isAutostartConfirmed(context) }
+    Function("setAutostartConfirmed") { confirmed: Boolean ->
+      AlertHealth.setAutostartConfirmed(context, confirmed)
+    }
+    Function("openAutostartSettings") { AlertHealth.openAutostartSettings(context) }
   }
 }

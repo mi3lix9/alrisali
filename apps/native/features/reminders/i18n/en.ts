@@ -111,6 +111,63 @@ export const en: Catalog<typeof ar> = {
     imsakDescription:
       "Arrives at Imsak, so you don't miss the start of the fast.",
   },
+  health: {
+    title: "Alert Health",
+    description: "Check what could stop alerts arriving on time, and fix it.",
+    open: "Check alerts",
+    allGood: "Everything is ready",
+    needsAttention: "Some checks need your attention",
+    banner: {
+      title: "Your alerts may not arrive on time",
+      fix: "Fix now",
+    },
+    status: { ok: "Ready", failing: "Needs a fix" },
+    checks: {
+      notifications: {
+        title: "Notification permission",
+        ok: "Allowed",
+        failing: "Notifications are not allowed, so alerts won't arrive.",
+        fix: "Allow",
+      },
+      sound: {
+        title: "Sounds",
+        ok: "On for the app's notifications",
+        failing:
+          "Notification sound is off for this app, so the adhan won't be heard.",
+        fix: "Open settings",
+      },
+      exactAlarms: {
+        title: "Exact alarms",
+        ok: "Alerts arrive in the same minute",
+        failing: "Android may delay alerts by minutes.",
+        fix: "Allow",
+      },
+      batteryOptimisation: {
+        title: "Battery optimisation",
+        ok: "The app is exempt",
+        failing:
+          "Battery optimisation is on for this app and may delay the Fajr adhan.",
+        fix: "Open settings",
+      },
+      autostart: {
+        title: "Autostart",
+        ok: "You allowed it",
+        failing:
+          "Your phone ({{maker}}) needs autostart allowed so alerts are scheduled again after a restart. The app can't read it, so confirm once you've allowed it.",
+        fix: "Open settings",
+        confirm: "I allowed it",
+        undo: "Undo",
+      },
+    },
+    test: {
+      button: "Send a test alert",
+      hint: "A notification arrives in a few seconds, to confirm the fix worked.",
+      sent: "The notification is on its way.",
+      denied: "Notifications are not allowed. Allow them first.",
+      title: "Test alert",
+      body: "Your alerts are arriving.",
+    },
+  },
   rule: {
     enabled: "Remind me",
     minutesBefore: "Minutes before",

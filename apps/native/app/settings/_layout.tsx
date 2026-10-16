@@ -10,6 +10,7 @@ import { ModalCloseButton } from "@/shared/ui/modal-close-button";
 const SettingsLayout = () => {
   const { t: tShell } = useTranslation();
   const { t } = useTranslation("settings");
+  const { t: tReminders } = useTranslation("reminders");
   const { t: tAnnouncements } = useTranslation("announcements");
 
   return (
@@ -24,6 +25,10 @@ const SettingsLayout = () => {
       <Stack.Screen
         name="reminders"
         options={{ title: t("reminders.title") }}
+      />
+      <Stack.Screen
+        name="alert-health"
+        options={{ title: tReminders("health.title") }}
       />
       <Stack.Screen
         name="announcements"

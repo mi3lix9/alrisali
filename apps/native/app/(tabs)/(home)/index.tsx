@@ -18,6 +18,7 @@ import {
 } from "@/features/prayer-times";
 import { QiblaTile } from "@/features/qibla";
 import { ContinueReadingTile, VerseOfTheDayCard } from "@/features/quran";
+import { AlertHealthBanner } from "@/features/reminders";
 import { HomeShortcutsCard } from "@/features/shortcuts";
 import { Screen } from "@/shared/ui/screen";
 import { WidgetRow } from "@/shared/ui/widget";
@@ -56,6 +57,7 @@ const HomeRoute = () => {
         </Stack.Toolbar.Button>
       </Stack.Toolbar>
       <Screen>
+        <AlertHealthBanner />
         <NextPrayerCard />
         <WidgetRow>
           <HijriTodayCard compact tonight={tonight} />
