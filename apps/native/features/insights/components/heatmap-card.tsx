@@ -1,4 +1,8 @@
-import { MAX_HEATMAP_LEVEL } from "@alrisali/domain/insights";
+import {
+  HEATMAP_DAYS,
+  INSIGHTS_WEEK_DAYS,
+  MAX_HEATMAP_LEVEL,
+} from "@alrisali/domain/insights";
 import type { HeatmapDay } from "@alrisali/domain/insights";
 import { Card, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
@@ -36,7 +40,9 @@ export const HeatmapCard = ({
   return (
     <Card>
       <Card.Header>
-        <Card.Title>{t("heatmap.title")}</Card.Title>
+        <Card.Title>
+          {t("heatmap.title", { weeks: HEATMAP_DAYS / INSIGHTS_WEEK_DAYS })}
+        </Card.Title>
         <Card.Description>{t("heatmap.description")}</Card.Description>
       </Card.Header>
       <Card.Content className="gap-3">

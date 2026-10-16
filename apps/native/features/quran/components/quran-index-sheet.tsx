@@ -19,7 +19,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { formatNumber, surahName } from "../utils/format";
+import { formatNumber } from "@/shared/lib/numbers";
+
+import { surahName } from "../utils/format";
 
 const TABS = ["surahs", "juz"] as const;
 type IndexTab = (typeof TABS)[number];
@@ -45,7 +47,7 @@ export const QuranIndexSheet = ({
 }: QuranIndexSheetProps) => {
   const { t, i18n } = useTranslation("quran");
   const [tab, setTab] = useState<IndexTab>("surahs");
-  const format = (value: number) => formatNumber(i18n.language, value);
+
   const currentBadge = (
     <Badge size="sm" variant="secondary">
       {t("navigation.current")}
@@ -105,7 +107,7 @@ export const QuranIndexSheet = ({
                 >
                   <Item.Media>
                     <Badge size="sm" variant="outline">
-                      {format(surah.number)}
+                      {formatNumber(surah.number)}
                     </Badge>
                   </Item.Media>
                   <Item.Content>
@@ -114,8 +116,9 @@ export const QuranIndexSheet = ({
                     </Item.Title>
                     <Item.Description>
                       {t("navigation.surahMeta", {
-                        ayat: format(ayatOfSurah(surah.number).length),
-                        page: format(firstPageOfSurah(surah.number)),
+                        count: ayatOfSurah(surah.number).length,
+                        ayat: formatNumber(ayatOfSurah(surah.number).length),
+                        page: formatNumber(firstPageOfSurah(surah.number)),
                       })}
                     </Item.Description>
                   </Item.Content>
@@ -135,17 +138,17 @@ export const QuranIndexSheet = ({
                   >
                     <Item.Media>
                       <Badge size="sm" variant="outline">
-                        {format(juz)}
+                        {formatNumber(juz)}
                       </Badge>
                     </Item.Media>
                     <Item.Content>
                       <Item.Title>
-                        {t("navigation.juzTitle", { juz: format(juz) })}
+                        {t("navigation.juzTitle", { juz: formatNumber(juz) })}
                       </Item.Title>
                       <Item.Description>
                         {t("navigation.juzMeta", {
                           name: surahName(i18n.language, first.surah),
-                          page: format(first.page),
+                          page: formatNumber(first.page),
                         })}
                       </Item.Description>
                     </Item.Content>

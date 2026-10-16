@@ -19,6 +19,7 @@ describe(parseBirthYear, () => {
   it("reads a four-digit year up to the current one", () => {
     expect(parseBirthYear(" 1990 ", 2026)).toBe(1990);
     expect(parseBirthYear("2026", 2026)).toBe(2026);
+    expect(parseBirthYear("١٩٩٠", 2026)).toBe(1990);
   });
 
   it.each(["", "abc", "90", "2027", "1899", "1990.5"])(

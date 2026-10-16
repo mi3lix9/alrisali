@@ -13,6 +13,7 @@ export const ar = {
   account: "الحساب",
   search: {
     label: "بحث",
+    clear: "مسح البحث",
     noResults: "لا توجد نتائج.",
   },
   library: {

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { WidgetTile } from "@/shared/ui/widget";
 
-import { bearingSector, wholeNumber } from "../utils/format";
+import { bearingSector, formatWholeNumber } from "../utils/format";
 
 const openQibla = () => router.push("/qibla");
 
@@ -31,10 +31,10 @@ export const QiblaTile = () => {
   }
 
   const bearing = qiblaBearing(location);
-  const degrees = wholeNumber.format(Math.round(bearing));
+  const degrees = formatWholeNumber(Math.round(bearing));
   const direction = t(`directions.${bearingSector(bearing)}`);
   const distance = t("distance", {
-    distance: wholeNumber.format(qiblaDistanceKm(location)),
+    distance: formatWholeNumber(qiblaDistanceKm(location)),
   });
 
   return (

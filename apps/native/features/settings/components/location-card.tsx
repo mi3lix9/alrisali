@@ -1,4 +1,8 @@
-import { locationSchema } from "@alrisali/domain/shared";
+import {
+  locationSchema,
+  MAX_LATITUDE,
+  MAX_LONGITUDE,
+} from "@alrisali/domain/shared";
 import type { Location } from "@alrisali/domain/shared";
 import { Button, Card, Input } from "panelui-native";
 import { useState } from "react";
@@ -8,6 +12,7 @@ import {
   useBelieverSettings,
   useUpdateBelieverSettings,
 } from "@/shared/lib/believer-settings";
+import { localizeDigits } from "@/shared/lib/numbers";
 
 import { parseCoordinate } from "../utils/parse-coordinate";
 
@@ -15,9 +20,12 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
   const { t } = useTranslation("settings");
   const { mutate: update, isPending } = useUpdateBelieverSettings();
   const [name, setName] = useState(saved?.name ?? "");
-  const [latitude, setLatitude] = useState(saved ? String(saved.latitude) : "");
+  // Shown in the interface's digits; parseCoordinate reads either.
+  const [latitude, setLatitude] = useState(
+    saved ? localizeDigits(String(saved.latitude)) : ""
+  );
   const [longitude, setLongitude] = useState(
-    saved ? String(saved.longitude) : ""
+    saved ? localizeDigits(String(saved.longitude)) : ""
   );
   const [invalid, setInvalid] = useState(false);
 
@@ -48,7 +56,14 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
           value={latitude}
           onChangeText={setLatitude}
           keyboardType="numbers-and-punctuation"
-          {...(invalid ? { errorMessage: t("location.invalid") } : {})}
+          {...(invalid
+            ? {
+                errorMessage: t("location.invalid", {
+                  latitude: MAX_LATITUDE,
+                  longitude: MAX_LONGITUDE,
+                }),
+              }
+            : {})}
         />
         <Input
           label={t("location.longitude")}

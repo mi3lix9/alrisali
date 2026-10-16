@@ -1,6 +1,7 @@
 import "../i18n";
 import {
   editAct,
+  NAME_MAX_LENGTH,
   personalProgramNameSchema,
   SALAH_TIMINGS,
   writtenAct,
@@ -135,7 +136,11 @@ const ActForm = ({
             autoComplete="off"
             isRequired
             {...(problem === "name"
-              ? { errorMessage: t("actForm.invalidName") }
+              ? {
+                  errorMessage: t("actForm.invalidName", {
+                    max: NAME_MAX_LENGTH,
+                  }),
+                }
               : {})}
           />
           <View className="gap-2">

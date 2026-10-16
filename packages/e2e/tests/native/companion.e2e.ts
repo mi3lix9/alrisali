@@ -14,7 +14,7 @@ test(
 
     const xp = screen.getByTestId("companion-xp");
     await screen.scrollUntilVisible(xp, { direction: "down" });
-    await expect(xp).toHaveText("0 نقطة");
+    await expect(xp).toHaveText("٠ نقطة");
 
     const fajr = screen.getByTestId("prayer-log-tick-fajr");
     await screen.scrollUntilVisible(fajr, { direction: "up" });
@@ -22,6 +22,6 @@ test(
     await expect(fajr).toBeSelected();
 
     await screen.scrollUntilVisible(xp, { direction: "down" });
-    await expect(xp).toHaveText("10 نقطة");
+    await expect(xp).toHaveText("١٠ نقاط");
   }
 );

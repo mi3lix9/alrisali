@@ -30,7 +30,7 @@ export const en: Catalog<typeof ar> = {
   save: "Save",
   remove: "Remove",
   rate: "Rate Khushu",
-  rated: "Khushu {{level}}/10",
+  rated: "Khushu {{level}}/{{max}}",
   confirmRemove: {
     title: "Remove Khushu for {{salah}}?",
     message: "This Salah's Khushu rating and Distractions will be removed.",

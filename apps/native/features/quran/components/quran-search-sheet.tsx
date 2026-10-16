@@ -13,8 +13,11 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
+import { ClearSearchButton } from "@/shared/ui/search-panel";
+
 import { QURAN_FONT } from "../hooks/use-quran-font";
-import { formatNumber, surahName } from "../utils/format";
+import { surahName } from "../utils/format";
 
 interface SearchFormProps {
   onSelect: (target: JumpTarget) => void;
@@ -22,7 +25,7 @@ interface SearchFormProps {
 
 const SearchForm = ({ onSelect }: SearchFormProps) => {
   const { t, i18n } = useTranslation("quran");
-  const format = (value: number) => formatNumber(i18n.language, value);
+
   const [query, setQuery] = useState("");
   // Typing stays responsive while the 6236 ayat are scanned.
   const deferred = useDeferredValue(query);
@@ -40,15 +43,17 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
         placeholder={t("navigation.searchPlaceholder")}
         accessibilityLabel={t("navigation.search")}
         startContent={<SearchIcon size={18} />}
+        endContent={
+          <ClearSearchButton query={query} onClear={() => setQuery("")} />
+        }
         autoFocus
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
-        clearButtonMode="while-editing"
       />
       {deferred.trim() === "" ? (
         <Text size="sm" muted>
-          {t("navigation.searchHint")}
+          {t("navigation.searchHint", { surah: 2, ayah: 255 })}
         </Text>
       ) : null}
       {empty ? (
@@ -70,7 +75,7 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
             >
               <Item.Media>
                 <Badge size="sm" variant="outline">
-                  {format(surah.number)}
+                  {formatNumber(surah.number)}
                 </Badge>
               </Item.Media>
               <Item.Content>
@@ -111,7 +116,7 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
                 <Item.Description>
                   {t("navigation.ayahRef", {
                     name: surahName(i18n.language, ayah.surah),
-                    ayah: format(ayah.ayah),
+                    ayah: formatNumber(ayah.ayah),
                   })}
                 </Item.Description>
               </Item.Content>
@@ -120,8 +125,8 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
           {result.ayatTotal > result.ayat.length ? (
             <Text size="xs" muted className="pt-2">
               {t("navigation.moreAyat", {
-                shown: format(result.ayat.length),
-                total: format(result.ayatTotal),
+                shown: formatNumber(result.ayat.length),
+                total: formatNumber(result.ayatTotal),
               })}
             </Text>
           ) : null}

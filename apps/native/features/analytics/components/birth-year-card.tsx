@@ -1,8 +1,10 @@
 import "../i18n";
-import { parseBirthYear } from "@alrisali/domain/analytics";
+import { BIRTH_YEAR_MIN, parseBirthYear } from "@alrisali/domain/analytics";
 import { Button, Card, Input } from "panelui-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+
+import { localizeDigits } from "@/shared/lib/numbers";
 
 import { useBirthYear } from "../data/birth-year";
 
@@ -10,7 +12,10 @@ import { useBirthYear } from "../data/birth-year";
 export const BirthYearCard = () => {
   const { t } = useTranslation("analytics");
   const { birthYear, setBirthYear } = useBirthYear();
-  const [text, setText] = useState(birthYear === null ? "" : String(birthYear));
+  // Shown in the interface's digits; parseBirthYear reads either.
+  const [text, setText] = useState(
+    birthYear === null ? "" : localizeDigits(String(birthYear))
+  );
   const [invalid, setInvalid] = useState(false);
 
   const save = () => {
@@ -35,12 +40,14 @@ export const BirthYearCard = () => {
       </Card.Header>
       <Card.Content>
         <Input
-          label={t("birthYear.label")}
+          label={t("birthYear.label", { example: 1990 })}
           value={text}
           onChangeText={setText}
           keyboardType="number-pad"
           maxLength={4}
-          {...(invalid ? { errorMessage: t("birthYear.invalid") } : {})}
+          {...(invalid
+            ? { errorMessage: t("birthYear.invalid", { min: BIRTH_YEAR_MIN }) }
+            : {})}
         />
       </Card.Content>
       <Card.Footer className="flex-row gap-2">

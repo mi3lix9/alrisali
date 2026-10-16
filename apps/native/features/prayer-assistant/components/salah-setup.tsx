@@ -13,6 +13,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 const HOLD_STEP_MS = 100;
 const MS_PER_SECOND = 1000;
 
@@ -155,6 +157,7 @@ export const SalahSetup = ({
           <Slider
             label={t("setup.bowSensitivity")}
             showValue
+            formatValue={(value) => formatNumber(value)}
             min={BOW_SENSITIVITY_LIMITS.min}
             max={BOW_SENSITIVITY_LIMITS.max}
             step={1}

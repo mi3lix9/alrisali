@@ -3,19 +3,25 @@ import type {
   ShellPreferencesRepository,
 } from "@alrisali/db-user/shared";
 import {
+  DEFAULT_DIGITS,
   DEFAULT_HIDDEN_TABS,
   DEFAULT_TEXT_SIZE,
   DEFAULT_THEME_PREFERENCE,
   setTabVisible,
 } from "@alrisali/domain/shared";
-import type { Tab, TextSize, ThemePreference } from "@alrisali/domain/shared";
+import type {
+  Digits,
+  Tab,
+  TextSize,
+  ThemePreference,
+} from "@alrisali/domain/shared";
 import { DEFAULT_LANGUAGE } from "@alrisali/i18n";
 import type { Language } from "@alrisali/i18n";
 import type { StateCreator } from "zustand";
 
-// The shell preferences (language, theme, text size, hidden tabs) belong to
-// the Believer's database, so they follow the Believer to a new phone. The
-// shell needs them before its first frame, and the database opens
+// The shell preferences (language, theme, text size, hidden tabs, digits)
+// belong to the Believer's database, so they follow the Believer to a new
+// phone. The shell needs them before its first frame, and the database opens
 // asynchronously, so the device keeps a startup cache: the store starts from
 // it, then hydrates from the database (the database wins) and writes every
 // change through to both.
@@ -25,6 +31,7 @@ export interface Preferences {
   theme: ThemePreference;
   textSize: TextSize;
   hiddenTabs: readonly Tab[];
+  digits: Digits;
 }
 
 /** What the startup cache holds; null where nothing was chosen. */
@@ -53,6 +60,7 @@ export interface PreferencesState extends Preferences {
   setTheme: (theme: ThemePreference) => void;
   setTextSize: (textSize: TextSize) => void;
   setTabVisible: (tab: Tab, visible: boolean) => void;
+  setDigits: (digits: Digits) => void;
   /**
    * Reads the Believer's database over the cached preferences, and saves into
    * it what only the cache knows (preferences chosen before this table
@@ -67,6 +75,7 @@ const withDefaults = (chosen: CachedPreferences): Preferences => ({
   theme: chosen.theme ?? DEFAULT_THEME_PREFERENCE,
   textSize: chosen.textSize ?? DEFAULT_TEXT_SIZE,
   hiddenTabs: chosen.hiddenTabs ?? DEFAULT_HIDDEN_TABS,
+  digits: chosen.digits ?? DEFAULT_DIGITS,
 });
 
 export const createPreferences =
@@ -120,6 +129,7 @@ export const createPreferences =
           theme: saved.theme ?? cached.theme,
           textSize: saved.textSize ?? cached.textSize,
           hiddenTabs: saved.hiddenTabs ?? cached.hiddenTabs,
+          digits: saved.digits ?? cached.digits,
         };
         // What only the cache knows goes into the database.
         const unsaved: ShellPreferencesChange = {
@@ -134,6 +144,9 @@ export const createPreferences =
             : {}),
           ...(saved.hiddenTabs === null && cached.hiddenTabs !== null
             ? { hiddenTabs: cached.hiddenTabs }
+            : {}),
+          ...(saved.digits === null && cached.digits !== null
+            ? { digits: cached.digits }
             : {}),
         };
         if (Object.keys(unsaved).length > 0) {
@@ -172,6 +185,7 @@ export const createPreferences =
       },
       setTabVisible: (tab, visible) =>
         change({ hiddenTabs: setTabVisible(get().hiddenTabs, tab, visible) }),
+      setDigits: (digits) => change({ digits }),
       hydrate,
     };
   };

@@ -46,8 +46,7 @@ export const ar = {
   options: {
     title: "خيارات المواقيت",
     timeFormat: "صيغة الوقت",
-    hours12: "١٢ ساعة",
-    hours24: "٢٤ ساعة",
+    hours: "{{hours}} ساعة",
     imsakMinutes: "الإمساك قبل الفجر بـ (دقائق)",
     shown: "المواقيت الظاهرة",
     shownDescription: "تُخفى المواقيت المطفأة من الجدول والعدّ التنازلي.",

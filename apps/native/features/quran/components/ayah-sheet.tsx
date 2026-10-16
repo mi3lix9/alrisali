@@ -7,10 +7,12 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Share, View } from "react-native";
 
+import { formatNumber, useDigits } from "@/shared/lib/numbers";
+
 import { sendRecitation } from "../data/recitation-player";
 import { QURAN_FONT } from "../hooks/use-quran-font";
 import { ayahCopyText, playFromAyah } from "../utils/ayah-actions";
-import { formatNumber, surahName } from "../utils/format";
+import { surahName } from "../utils/format";
 
 /** Extra actions another feature adds to the sheet, composed by the route. */
 export type AyahActions = (ayah: AyahKey) => ReactNode;
@@ -34,19 +36,18 @@ export const AyahSheet = ({
   actions,
 }: AyahSheetProps) => {
   const { t, i18n } = useTranslation("quran");
+  const digits = useDigits();
   const found = ayah ? findAyah(ayah) : undefined;
   const name = found ? surahName(i18n.language, found.surah) : "";
   const title = found
     ? t("sheet.title", {
         surah: name,
-        ayah: formatNumber(i18n.language, found.ayah),
+        ayah: formatNumber(found.ayah),
       })
     : "";
 
   const copy = async (key: AyahKey, text: string) => {
-    await setStringAsync(
-      ayahCopyText({ text, key, surahName: name, language: i18n.language })
-    );
+    await setStringAsync(ayahCopyText({ text, key, surahName: name, digits }));
     toast.show({ variant: "success", label: t("sheet.copied") });
   };
 

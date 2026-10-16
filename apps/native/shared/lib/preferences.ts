@@ -1,5 +1,6 @@
 import { createShellPreferencesRepository } from "@alrisali/db-user/shared";
 import {
+  DIGITS,
   readHiddenTabs,
   TEXT_SCALE,
   TEXT_SIZES,
@@ -31,6 +32,7 @@ const NOTHING_CACHED: CachedPreferences = {
   theme: null,
   textSize: null,
   hiddenTabs: null,
+  digits: null,
 };
 
 const cachedSchema = z
@@ -39,6 +41,7 @@ const cachedSchema = z
     theme: z.enum(THEME_PREFERENCES).nullable(),
     textSize: z.enum(TEXT_SIZES).nullable(),
     hiddenTabs: z.unknown(),
+    digits: z.enum(DIGITS).nullable(),
   })
   .partial();
 
@@ -57,6 +60,7 @@ const secureStoreCache: PreferencesCache = {
         hiddenTabs: Array.isArray(data?.hiddenTabs)
           ? readHiddenTabs(data.hiddenTabs)
           : null,
+        digits: data?.digits ?? null,
       };
     } catch {
       return NOTHING_CACHED;

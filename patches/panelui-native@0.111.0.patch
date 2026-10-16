@@ -1,0 +1,129 @@
+diff --git a/lib/module/components/input/index.js b/lib/module/components/input/index.js
+index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f1596e8ad 100644
+--- a/lib/module/components/input/index.js
++++ b/lib/module/components/input/index.js
+@@ -47,6 +47,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTimin
+ import { tv } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
+ import { IconColorProvider } from "../../icons/index.js";
++import { useDirection } from "../../hooks/use-direction.js";
+ import { KeyboardAvoider } from "../../primitives/keyboard-avoider.js";
+ import { Text, textChildren } from "../../primitives/text.js";
+ import { Label } from "../label/index.js";
+@@ -185,6 +186,7 @@ export const Input = /*#__PURE__*/forwardRef(({
+   // turns out to be — an icon, a unit, a two-word label.
+   const [startWidth, setStartWidth] = useState(0);
+   const [endWidth, setEndWidth] = useState(0);
++  const direction = useDirection();
+   const placeholderColor = useCSSVariable('--color-muted-foreground');
+   const restColor = useCSSVariable('--color-input');
+   const focusColor = useCSSVariable('--color-ring');
+@@ -260,7 +262,9 @@ export const Input = /*#__PURE__*/forwardRef(({
+       paddingStart: startPadding
+     } : null, endPadding ? {
+       paddingEnd: endPadding
+-    } : null,
++    } : null, {
++      textAlign: direction === 'rtl' ? 'right' : 'left'
++    },
+     // Caller styles come last so InputGroup can pad the field around its
+     // decorators, but never last enough to drop the animated border.
+     style],
+diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
+index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
+--- a/lib/module/components/textarea/index.js
++++ b/lib/module/components/textarea/index.js
+@@ -26,6 +26,7 @@ import { TextInput, View } from 'react-native';
+ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+ import { tv } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
++import { useDirection } from "../../hooks/use-direction.js";
+ import { KeyboardAvoider } from "../../primitives/keyboard-avoider.js";
+ import { Text } from "../../primitives/text.js";
+ import { Label } from "../label/index.js";
+@@ -179,6 +180,7 @@ export const Textarea = /*#__PURE__*/forwardRef(({
+   const grownHeight = autoGrow ? Math.min(Math.max(minHeight, contentHeight + metrics.padding * 2), maxHeight ?? Number.POSITIVE_INFINITY) : minHeight;
+   const length = props.value?.length ?? props.defaultValue?.length ?? 0;
+   const over = !!props.maxLength && length >= props.maxLength;
++  const direction = useDirection();
+   const placeholderColor = useCSSVariable('--color-muted-foreground');
+   const restColor = useCSSVariable('--color-input');
+   const focusColor = useCSSVariable('--color-ring');
+@@ -279,7 +281,9 @@ export const Textarea = /*#__PURE__*/forwardRef(({
+       // Caller styles come last, but never last enough to drop the
+       // animated border or the height the row count asked for.
+       ,
+-      style: [boxStyle, borderStyle, style],
++      style: [boxStyle, borderStyle, {
++        textAlign: direction === 'rtl' ? 'right' : 'left'
++      }, style],
+       placeholderTextColor: typeof placeholderColor === 'string' ? placeholderColor : undefined,
+       ...props
+     }), footer]
+diff --git a/src/components/input/index.tsx b/src/components/input/index.tsx
+index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc5f144f30 100644
+--- a/src/components/input/index.tsx
++++ b/src/components/input/index.tsx
+@@ -55,6 +55,7 @@ import Animated, {
+ import { tv, type VariantProps } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
+ import type { KeyboardAvoidanceMode } from '../../hooks/use-keyboard-avoidance';
++import { useDirection } from '../../hooks/use-direction';
+ import { IconColorProvider } from '../../icons';
+ import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
+ import { Text, textChildren } from '../../primitives/text';
+@@ -246,6 +247,10 @@ export const Input = forwardRef<TextInput, InputProps>(
+     // turns out to be — an icon, a unit, a two-word label.
+     const [startWidth, setStartWidth] = useState(0);
+     const [endWidth, setEndWidth] = useState(0);
++    // UITextField aligns "natural" text by the app's native direction, not by
++    // Yoga's, so an RTL screen in an LTR process would type and show its
++    // placeholder against the wrong edge.
++    const direction = useDirection();
+ 
+     const placeholderColor = useCSSVariable('--color-muted-foreground');
+     const restColor = useCSSVariable('--color-input');
+@@ -337,6 +342,7 @@ export const Input = forwardRef<TextInput, InputProps>(
+           // measured — a 0 here would wipe out the field's own padding.
+           startPadding ? { paddingStart: startPadding } : null,
+           endPadding ? { paddingEnd: endPadding } : null,
++          { textAlign: direction === 'rtl' ? 'right' : 'left' },
+           // Caller styles come last so InputGroup can pad the field around its
+           // decorators, but never last enough to drop the animated border.
+           style,
+diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
+index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
+--- a/src/components/textarea/index.tsx
++++ b/src/components/textarea/index.tsx
+@@ -36,6 +36,7 @@ import Animated, {
+ import { tv, type VariantProps } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
+ import type { KeyboardAvoidanceMode } from '../../hooks/use-keyboard-avoidance';
++import { useDirection } from '../../hooks/use-direction';
+ import { KeyboardAvoider } from '../../primitives/keyboard-avoider';
+ import { Text } from '../../primitives/text';
+ import { Label } from '../label';
+@@ -227,6 +228,9 @@ export const Textarea = forwardRef<TextInput, TextareaProps>(
+     const length = props.value?.length ?? props.defaultValue?.length ?? 0;
+     const over = !!props.maxLength && length >= props.maxLength;
+ 
++    // UITextView aligns "natural" text by the app's native direction, not by
++    // Yoga's; follow the direction in force instead.
++    const direction = useDirection();
+     const placeholderColor = useCSSVariable('--color-muted-foreground');
+     const restColor = useCSSVariable('--color-input');
+     const focusColor = useCSSVariable('--color-ring');
+@@ -348,7 +352,12 @@ export const Textarea = forwardRef<TextInput, TextareaProps>(
+           className={slots.field({ className })}
+           // Caller styles come last, but never last enough to drop the
+           // animated border or the height the row count asked for.
+-          style={[boxStyle, borderStyle, style]}
++          style={[
++            boxStyle,
++            borderStyle,
++            { textAlign: direction === 'rtl' ? 'right' : 'left' },
++            style,
++          ]}
+           placeholderTextColor={
+             typeof placeholderColor === 'string' ? placeholderColor : undefined
+           }

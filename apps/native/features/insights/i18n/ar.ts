@@ -20,7 +20,7 @@ export const ar = {
     salah: "الصلوات المسجّلة",
     salahValue: "{{logged}} من {{possible}}",
     khushu: "متوسط الخشوع",
-    khushuValue: "{{value}} من ١٠",
+    khushuValue: "{{value}} من {{max}}",
     khushuUp: "أعلى بـ {{value}} من الأسبوع الماضي",
     khushuDown: "أقل بـ {{value}} من الأسبوع الماضي",
     khushuSame: "مثل الأسبوع الماضي",
@@ -29,12 +29,12 @@ export const ar = {
     noHabits: "لا عادات مستحقة",
   },
   week: {
-    title: "آخر ٧ أيام",
+    title: "آخر {{days}} أيام",
     description: "الصلوات المسجّلة كل يوم.",
-    day: "{{day}}: {{salah}} من ٥ صلوات",
+    day: "{{day}}: {{salah}} من {{possible}} صلوات",
   },
   heatmap: {
-    title: "آخر ١٢ أسبوعًا",
+    title: "آخر {{weeks}} أسبوعًا",
     description: "كل مربّع يوم: الصلوات أولًا، ثم العادات والأذكار.",
     less: "أقل",
     more: "أكثر",
@@ -59,8 +59,8 @@ export const ar = {
   },
   moods: {
     title: "مشاعري",
-    description: "آخر ٣٠ يومًا.",
-    empty: "لم تسجّل شعورك في آخر ٣٠ يومًا.",
+    description: "آخر {{days}} يومًا.",
+    empty: "لم تسجّل شعورك في آخر {{days}} يومًا.",
     mood: {
       happy: "سعيد",
       calm: "هادئ",
@@ -72,7 +72,7 @@ export const ar = {
   },
   distractions: {
     title: "المشتتات",
-    description: "في الصلوات التي قيّمتها، آخر ٣٠ يومًا.",
+    description: "في الصلوات التي قيّمتها، آخر {{days}} يومًا.",
     empty: "لا مشتتات في الصلوات التي قيّمتها.",
     distraction: {
       mindWandering: "شرود الذهن",

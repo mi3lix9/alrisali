@@ -1,5 +1,8 @@
 import "../i18n";
-import { personalProgramNameSchema } from "@alrisali/domain/programs";
+import {
+  NAME_MAX_LENGTH,
+  personalProgramNameSchema,
+} from "@alrisali/domain/programs";
 import type { Act, PersonalProgram } from "@alrisali/domain/programs";
 import { captureException } from "@sentry/react-native";
 import { randomUUID } from "expo-crypto";
@@ -109,7 +112,9 @@ const Builder = ({ program }: { program: PersonalProgram | null }) => {
         autoComplete="off"
         isRequired
         {...(problem === "name"
-          ? { errorMessage: t("builder.invalidName") }
+          ? {
+              errorMessage: t("builder.invalidName", { max: NAME_MAX_LENGTH }),
+            }
           : {})}
       />
       <Input

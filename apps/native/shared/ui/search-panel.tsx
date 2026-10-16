@@ -1,9 +1,37 @@
 import { Input, Item, Text } from "panelui-native";
-import { SearchIcon } from "panelui-native/icons";
+import { SearchIcon, XIcon } from "panelui-native/icons";
 import { useDeferredValue, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
+
+/**
+ * A search field's clear button, for its `endContent`. UIKit's own
+ * (`clearButtonMode`) sits on the native trailing edge, which is the start of
+ * an Arabic field, on top of its search icon.
+ */
+export const ClearSearchButton = ({
+  query,
+  onClear,
+}: {
+  query: string;
+  onClear: () => void;
+}) => {
+  const { t } = useTranslation();
+  if (query === "") {
+    return null;
+  }
+  return (
+    <Pressable
+      onPress={onClear}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={t("search.clear")}
+    >
+      <XIcon size={16} />
+    </Pressable>
+  );
+};
 
 /** One thing a search found, opening it when pressed. */
 export interface SearchResult {
@@ -103,10 +131,12 @@ export const SearchPanel = ({
         placeholder={placeholder}
         accessibilityLabel={t("search.label")}
         startContent={<SearchIcon size={18} />}
+        endContent={
+          <ClearSearchButton query={query} onClear={() => setQuery("")} />
+        }
         autoCorrect={false}
         autoCapitalize="none"
         returnKeyType="search"
-        clearButtonMode="while-editing"
         testID="search-input"
       />
       {deferred === "" ? children : results(deferred)}

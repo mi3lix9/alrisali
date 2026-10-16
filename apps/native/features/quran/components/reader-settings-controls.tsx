@@ -9,7 +9,7 @@ import { MinusIcon, PlusIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { formatNumber } from "../utils/format";
+import { formatNumber } from "@/shared/lib/numbers";
 
 interface ReaderSettingsControlsProps {
   settings: QuranReaderSettings;
@@ -21,7 +21,7 @@ export const ReaderSettingsControls = ({
   settings,
   onChange,
 }: ReaderSettingsControlsProps) => {
-  const { t, i18n } = useTranslation("quran");
+  const { t } = useTranslation("quran");
   const stepFont = (direction: 1 | -1) =>
     onChange({
       surahFontSize: Math.min(
@@ -90,7 +90,7 @@ export const ReaderSettingsControls = ({
             <MinusIcon size={18} />
           </Button>
           <Text className="min-w-8 text-center">
-            {formatNumber(i18n.language, settings.surahFontSize)}
+            {formatNumber(settings.surahFontSize)}
           </Text>
           <Button
             variant="outline"

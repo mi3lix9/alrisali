@@ -1,4 +1,5 @@
 import type { InsightsOverview } from "@alrisali/domain/insights";
+import { MAX_KHUSHU_LEVEL } from "@alrisali/domain/shared";
 import { Card, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -80,6 +81,7 @@ export const OverviewCard = ({ overview }: { overview: InsightsOverview }) => {
               ? t("overview.noKhushu")
               : t("overview.khushuValue", {
                   value: formatNumber(overview.averageKhushu),
+                  max: MAX_KHUSHU_LEVEL,
                 })
           }
           note={khushuNote}

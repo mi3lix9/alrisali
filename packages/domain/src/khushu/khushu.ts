@@ -1,7 +1,10 @@
 import { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
+import { MAX_KHUSHU_LEVEL } from "../shared";
 import type { Salah } from "../shared";
+
+export { MAX_KHUSHU_LEVEL } from "../shared";
 
 /**
  * The Distractions a Believer can pick, in the order they are listed. Carried
@@ -22,7 +25,6 @@ export type Distraction = (typeof DISTRACTIONS)[number];
 export const distractionSchema = z.enum(DISTRACTIONS);
 
 export const MIN_KHUSHU_LEVEL = 0;
-export const MAX_KHUSHU_LEVEL = 10;
 /** Where the slider starts for a Salah not rated yet. */
 export const DEFAULT_KHUSHU_LEVEL = 7;
 export const MAX_CUSTOM_DISTRACTION_LENGTH = 100;

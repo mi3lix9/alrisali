@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-const MAX_LATITUDE = 90;
-const MAX_LONGITUDE = 180;
+export const MAX_LATITUDE = 90;
+export const MAX_LONGITUDE = 180;
 
 /** Where the Believer is: coordinates, plus a place name when one is known. */
 export const locationSchema = z.object({

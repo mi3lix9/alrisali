@@ -140,7 +140,7 @@ export const ar = {
     editTitle: "تعديل البرنامج",
     name: "اسم البرنامج",
     namePlaceholder: "ليالي الجمعة",
-    invalidName: "اكتب اسمًا للبرنامج (حتى 120 حرفًا).",
+    invalidName: "اكتب اسمًا للبرنامج (حتى {{max}} حرفًا).",
     description: "الوصف",
     descriptionPlaceholder: "وصف اختياري",
     acts: "الأعمال",
@@ -160,7 +160,7 @@ export const ar = {
     editTitle: "تعديل العمل",
     name: "اسم العمل",
     namePlaceholder: "قراءة سورة الواقعة",
-    invalidName: "اكتب اسمًا للعمل (حتى 120 حرفًا).",
+    invalidName: "اكتب اسمًا للعمل (حتى {{max}} حرفًا).",
     repeat: "التكرار",
     kinds: {
       daily: "يوميًا",

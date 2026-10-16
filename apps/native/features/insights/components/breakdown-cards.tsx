@@ -1,3 +1,4 @@
+import { RECENT_DAYS } from "@alrisali/domain/insights";
 import type {
   DistractionBreakdown,
   MoodDistribution,
@@ -44,10 +45,10 @@ export const MoodsCard = ({ moods }: { moods: MoodDistribution }) => {
   return (
     <BreakdownCard
       title={t("moods.title")}
-      description={t("moods.description")}
+      description={t("moods.description", { days: RECENT_DAYS })}
     >
       {rows.length === 0 ? (
-        <Text muted>{t("moods.empty")}</Text>
+        <Text muted>{t("moods.empty", { days: RECENT_DAYS })}</Text>
       ) : (
         <ShareList rows={rows} />
       )}
@@ -77,7 +78,7 @@ export const DistractionsCard = ({
   return (
     <BreakdownCard
       title={t("distractions.title")}
-      description={t("distractions.description")}
+      description={t("distractions.description", { days: RECENT_DAYS })}
     >
       {rows.length === 0 ? (
         <Text muted>{t("distractions.empty")}</Text>

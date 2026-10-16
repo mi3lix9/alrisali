@@ -15,11 +15,14 @@ export interface LoggedDay {
   performed: readonly Salah[];
 }
 
+/** The highest Khushu level a Salah can be rated. */
+export const MAX_KHUSHU_LEVEL = 10;
+
 /** One Salah's Khushu. Distractions are the stored keys, unchecked. */
 export interface KhushuRating {
   date: Temporal.PlainDate;
   salah: Salah;
-  /** 0 (distracted) to 10 (full Khushu). */
+  /** 0 (distracted) to MAX_KHUSHU_LEVEL (full Khushu). */
   level: number;
   distractions: readonly string[];
   /** The Distraction the Believer typed, if any. */

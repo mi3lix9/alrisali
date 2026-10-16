@@ -12,6 +12,7 @@ const NONE_CHOSEN = {
   theme: null,
   textSize: null,
   hiddenTabs: null,
+  digits: null,
 };
 
 let directory: TemporaryDirectory;
@@ -53,6 +54,7 @@ describe(createShellPreferencesRepository, () => {
       theme: "dark",
       textSize: "larger",
       hiddenTabs: ["library", "tasbih"],
+      digits: "latin",
     });
 
     await relaunch();
@@ -64,6 +66,7 @@ describe(createShellPreferencesRepository, () => {
       theme: "dark",
       textSize: "larger",
       hiddenTabs: ["library", "tasbih"],
+      digits: "latin",
     });
   });
 
@@ -71,6 +74,7 @@ describe(createShellPreferencesRepository, () => {
     const preferences = createShellPreferencesRepository(database.db);
     await preferences.update({ theme: "light" });
     await preferences.update({ hiddenTabs: [] });
+    await preferences.update({ digits: "arabic-indic" });
 
     await expect(
       preferences.update({ textSize: "small" })
@@ -79,12 +83,14 @@ describe(createShellPreferencesRepository, () => {
       theme: "light",
       textSize: "small",
       hiddenTabs: [],
+      digits: "arabic-indic",
     });
     await expect(preferences.get()).resolves.toStrictEqual({
       language: null,
       theme: "light",
       textSize: "small",
       hiddenTabs: [],
+      digits: "arabic-indic",
     });
   });
 
@@ -100,9 +106,13 @@ describe(createShellPreferencesRepository, () => {
 
   it("reads values it does not know (written by a newer app) as not chosen", async () => {
     const preferences = createShellPreferencesRepository(database.db);
-    await preferences.update({ language: "ar", hiddenTabs: ["prayer"] });
+    await preferences.update({
+      language: "ar",
+      hiddenTabs: ["prayer"],
+      digits: "latin",
+    });
     await database.db.run(
-      sql`UPDATE shell_preferences SET language = 'fr', theme = 'sepia', text_size = 'huge', hidden_tabs = 'not json'`
+      sql`UPDATE shell_preferences SET language = 'fr', theme = 'sepia', text_size = 'huge', hidden_tabs = 'not json', digits = 'roman'`
     );
 
     await expect(preferences.get()).resolves.toStrictEqual(NONE_CHOSEN);

@@ -8,6 +8,7 @@ export {
   EMPTY_BILINGUAL_TEXT,
   hijriWindowSchema,
   isProgramAvailable,
+  NAME_MAX_LENGTH,
   officialProgramSchema,
   PROGRAM_CATEGORIES,
   SALAH_TIMINGS,

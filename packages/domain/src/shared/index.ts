@@ -4,6 +4,8 @@ export {
   DEFAULT_CALCULATION_METHOD,
 } from "./calculation-method";
 export type { CalculationMethod } from "./calculation-method";
+export { DEFAULT_DIGITS, DIGITS, digitsSchema, writeDigits } from "./digits";
+export type { Digits } from "./digits";
 export {
   habitScheduleSchema,
   isHabitDueOn,
@@ -50,7 +52,13 @@ export {
   optionalLocalizedTextSchema,
 } from "./localized-text";
 export type { LocalizedText } from "./localized-text";
-export { distanceKm, LOCATION_REFRESH_KM, locationSchema } from "./location";
+export {
+  distanceKm,
+  LOCATION_REFRESH_KM,
+  locationSchema,
+  MAX_LATITUDE,
+  MAX_LONGITUDE,
+} from "./location";
 export type { Location } from "./location";
 export {
   allOccasions,
@@ -117,6 +125,7 @@ export type {
   PrayerTimesSettings,
   TimeFormat,
 } from "./prayer-times";
+export { MAX_KHUSHU_LEVEL } from "./insights-sources";
 export type {
   DhikrSessionSource,
   HabitCompletionSource,

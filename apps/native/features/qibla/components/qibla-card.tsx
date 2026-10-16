@@ -11,7 +11,7 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCompass } from "../hooks/use-compass";
-import { bearingSector, wholeNumber } from "../utils/format";
+import { bearingSector, formatWholeNumber } from "../utils/format";
 import { CompassStatus } from "./compass-status";
 import { QiblaDial } from "./qibla-dial";
 
@@ -40,16 +40,16 @@ export const QiblaCard = ({ location }: { location: Location }) => {
     }
   }, [facing]);
 
-  const degrees = wholeNumber.format(Math.round(bearing));
+  const degrees = formatWholeNumber(Math.round(bearing));
   const direction = t(`directions.${bearingSector(bearing)}`);
   const distance = t("distance", {
-    distance: wholeNumber.format(qiblaDistanceKm(location)),
+    distance: formatWholeNumber(qiblaDistanceKm(location)),
   });
 
   let guidance = t("facing");
   if (heading !== null && !facing) {
     const offset = qiblaOffset(heading, bearing);
-    const turn = { degrees: wholeNumber.format(Math.abs(offset)) };
+    const turn = { degrees: formatWholeNumber(Math.abs(offset)) };
     guidance = offset > 0 ? t("turnRight", turn) : t("turnLeft", turn);
   }
 
@@ -88,7 +88,7 @@ export const QiblaCard = ({ location }: { location: Location }) => {
           <Alert.Content>
             <Alert.Title>{t("compass.calibrateTitle")}</Alert.Title>
             <Alert.Description>
-              {t("compass.calibrateDescription")}
+              {t("compass.calibrateDescription", { figure: 8 })}
             </Alert.Description>
           </Alert.Content>
         </Alert>

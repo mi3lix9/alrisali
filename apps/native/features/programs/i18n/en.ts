@@ -152,7 +152,7 @@ export const en: Catalog<typeof ar> = {
     editTitle: "Edit Program",
     name: "Program name",
     namePlaceholder: "Friday nights",
-    invalidName: "Give the Program a name (up to 120 characters).",
+    invalidName: "Give the Program a name (up to {{max}} characters).",
     description: "Description",
     descriptionPlaceholder: "Optional description",
     acts: "Acts",
@@ -173,7 +173,7 @@ export const en: Catalog<typeof ar> = {
     editTitle: "Edit Act",
     name: "Act name",
     namePlaceholder: "Read Surah al-Waqi'ah",
-    invalidName: "Give the Act a name (up to 120 characters).",
+    invalidName: "Give the Act a name (up to {{max}} characters).",
     repeat: "Repeat",
     kinds: {
       daily: "Daily",

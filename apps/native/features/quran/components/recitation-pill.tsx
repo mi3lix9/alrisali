@@ -14,12 +14,13 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import {
   sendRecitation,
   stopReaderRecitation,
   useRecitationPlayback,
 } from "../data/recitation-player";
-import { formatNumber } from "../utils/format";
 import { ReciterSheet, useReciterName } from "./reciter-sheet";
 
 interface RecitationPillProps {
@@ -71,7 +72,7 @@ export const RecitationPill = ({
   if (playing && surah) {
     label = t("recitation.position", {
       surah: i18n.language === "ar" ? surah.nameAr : surah.nameEn,
-      ayah: formatNumber(i18n.language, playing.ayah),
+      ayah: formatNumber(playing.ayah),
     });
   } else if (chosen) {
     label = nameOf(chosen);

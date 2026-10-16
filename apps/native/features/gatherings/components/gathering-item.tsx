@@ -31,7 +31,7 @@ export const GatheringItem = ({
   showDate?: boolean;
 }) => {
   const { t } = useTranslation("gatherings");
-  const time = formatTimeRange(gathering, launchLanguage);
+  const time = formatTimeRange(gathering);
   const when = showDate
     ? `${formatGregorianDate(Temporal.PlainDate.from(gathering.date), SHORT_DATE)} · ${time}`
     : time;

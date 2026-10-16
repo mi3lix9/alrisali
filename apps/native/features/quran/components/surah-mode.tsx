@@ -10,7 +10,7 @@ import { ChevronRightIcon } from "panelui-native/icons";
 import { useMemo, useRef } from "react";
 import type { ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, Text as NativeText, ScrollView, View } from "react-native";
 import type {
   LayoutChangeEvent,
   NativeScrollEvent,
@@ -18,8 +18,9 @@ import type {
   TextLayoutEvent,
 } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import { QURAN_FONT } from "../hooks/use-quran-font";
-import { formatNumber } from "../utils/format";
 import type { AyahGestures } from "./quran-page-view";
 
 const LINE_HEIGHT = 2;
@@ -206,7 +207,10 @@ export const SurahMode = ({
             onTextLayout={onTextLayout}
           >
             {ayat.map((ayah) => (
-              <Text
+              // A bare React Native Text, so each ayah inherits the surah's
+              // font size and line height (Panel UI Text would reset them to
+              // text-base).
+              <NativeText
                 key={ayah.key}
                 onPress={onTap}
                 onLongPress={() => onLongPressAyah(ayah.key)}
@@ -216,7 +220,7 @@ export const SurahMode = ({
                 }`}
               >
                 {`${ayah.text} `}
-              </Text>
+              </NativeText>
             ))}
           </Text>
         </Direction>
@@ -234,7 +238,7 @@ export const SurahMode = ({
                 endContent={<ChevronRightIcon size={18} />}
               >
                 {t("surah.next", {
-                  number: formatNumber(i18n.language, next.number),
+                  number: formatNumber(next.number),
                   name: name(next.number),
                 })}
               </Button>

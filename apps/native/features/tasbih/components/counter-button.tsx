@@ -2,10 +2,7 @@ import { Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
-import { launchLanguage } from "@/shared/lib/preferences";
-
-export const formatCount = (value: number): string =>
-  value.toLocaleString(launchLanguage);
+import { formatNumber } from "@/shared/lib/numbers";
 
 /**
  * The large circle the Believer taps to count. It counts on press-in, so a
@@ -23,10 +20,10 @@ export const CounterButton = ({
   const { t } = useTranslation("tasbih");
   const counted =
     target === null
-      ? formatCount(count)
+      ? formatNumber(count)
       : t("counter.progress", {
-          count: formatCount(count),
-          target: formatCount(target),
+          count: formatNumber(count),
+          target: formatNumber(target),
         });
 
   return (
@@ -40,9 +37,9 @@ export const CounterButton = ({
       className="bg-card border-border size-64 items-center justify-center rounded-full border-4 active:opacity-80"
     >
       <Text className="text-7xl font-bold tabular-nums">
-        {formatCount(count)}
+        {formatNumber(count)}
       </Text>
-      {target === null ? null : <Text muted>/ {formatCount(target)}</Text>}
+      {target === null ? null : <Text muted>/ {formatNumber(target)}</Text>}
     </Pressable>
   );
 };

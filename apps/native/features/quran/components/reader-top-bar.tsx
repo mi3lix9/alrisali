@@ -14,7 +14,7 @@ import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useCSSVariable } from "uniwind";
 
-import { formatNumber } from "../utils/format";
+import { formatNumber } from "@/shared/lib/numbers";
 
 interface ReaderTopBarProps {
   mode: ReaderMode;
@@ -52,14 +52,14 @@ export const ReaderTopBar = ({
   const { t, i18n } = useTranslation("quran");
   const accent = useCSSVariable("--color-info");
   const entry = SURAHS[surah - 1];
-  const format = (value: number) => formatNumber(i18n.language, value);
+
   const subtitle =
     mode === "page"
       ? t("chrome.position", {
-          juz: format(position.juz),
-          page: format(position.page),
+          juz: formatNumber(position.juz),
+          page: formatNumber(position.page),
         })
-      : t("chrome.surahNumber", { number: format(surah) });
+      : t("chrome.surahNumber", { number: formatNumber(surah) });
 
   return (
     <Animated.View
@@ -93,7 +93,13 @@ export const ReaderTopBar = ({
           <Text weight="semibold" numberOfLines={1}>
             {i18n.language === "ar" ? entry?.nameAr : entry?.nameEn}
           </Text>
-          <Text size="xs" muted numberOfLines={1}>
+          <Text
+            size="xs"
+            muted
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
             {subtitle}
           </Text>
         </View>

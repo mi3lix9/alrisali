@@ -16,13 +16,11 @@ import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateBelieverSettings } from "@/shared/lib/believer-settings";
+import { formatNumber } from "@/shared/lib/numbers";
 
 import { useSetPrayerTimeVisible } from "../data/hidden-prayer-times";
 
-const FORMAT_LABEL = {
-  "12h": "options.hours12",
-  "24h": "options.hours24",
-} as const;
+const FORMAT_HOURS = { "12h": 12, "24h": 24 } as const;
 
 /** Time format, Imsak minutes and which Prayer Times are shown. */
 export const OptionsCard = ({
@@ -59,13 +57,16 @@ export const OptionsCard = ({
             <RadioGroup.Item
               key={format}
               value={format}
-              label={t(FORMAT_LABEL[format])}
+              label={t("options.hours", { hours: FORMAT_HOURS[format] })}
             />
           ))}
         </RadioGroup>
         <NumberInput
           label={t("options.imsakMinutes")}
           value={imsakMinutes}
+          // A new function each render, so a change of digits re-renders
+          // the field (this card re-renders through useTranslation).
+          formatValue={(minutes) => formatNumber(minutes)}
           min={0}
           max={MAX_IMSAK_MINUTES}
           step={1}

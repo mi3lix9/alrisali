@@ -1,9 +1,8 @@
 import { z } from "zod";
 
-import { actSchema, EMPTY_BILINGUAL_TEXT } from "./program";
+import { actSchema, EMPTY_BILINGUAL_TEXT, NAME_MAX_LENGTH } from "./program";
 import type { Act, ActInput, ActSalah } from "./program";
 
-const NAME_MAX_LENGTH = 120;
 const DESCRIPTION_MAX_LENGTH = 4000;
 
 export const personalProgramNameSchema = z
