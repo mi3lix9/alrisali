@@ -274,3 +274,4 @@ export {
   prayerTimesSanity,
 } from "./prayer-times-sanity";
 export type { PrayerTimesProblem } from "./prayer-times-sanity";
+export { createKeyedSerial } from "./destination-lock";

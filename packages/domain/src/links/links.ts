@@ -263,6 +263,14 @@ export const webLinkUrl = (link: AppLink, origin: string): string =>
   `${origin.replace(/\/+$/u, "")}/${pathOf(link)}`;
 
 /**
+ * The link to send a friend: on the app's web domain when it has one (a
+ * universal link, which also opens in a browser for someone without the app),
+ * else the app's own `alrisali://` link.
+ */
+export const shareableLinkUrl = (link: AppLink, domain?: string): string =>
+  domain ? webLinkUrl(link, `https://${domain}`) : appLinkUrl(link);
+
+/**
  * The long-press shortcuts on the app icon, in the order the system shows
  * them. The app supplies each one's title.
  */

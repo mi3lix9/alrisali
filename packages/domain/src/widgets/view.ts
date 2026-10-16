@@ -26,8 +26,20 @@ export type WidgetBlock =
       type: "countdown";
       /** Epoch milliseconds the countdown ends. */
       to: number;
-      /** Shown where the layout cannot tick (Android): the clock time. */
+      /**
+       * Shown where the layout cannot tick (Android) until the last
+       * `window` milliseconds: the clock time.
+       */
       text: string;
+      /**
+       * Android: within this many milliseconds of `to`, the layout shows the
+       * minutes left, which the app's per-minute refresh alarms keep right.
+       */
+      window: number;
+      /** The ten digits in the Believer's numerals, for the minutes left. */
+      digits: readonly string[];
+      /** The minutes left in words, with `{time}` where they go: "in {time}". */
+      remaining: string;
       min: WidgetSize;
     }
   | {
@@ -70,6 +82,10 @@ export interface WidgetText {
   prayerName: (name: PrayerTimeName) => string;
   /** A clock time in the Believer's format, in `timeZone`. */
   clock: (at: number, timeZone: string) => string;
+  /** The ten digits, 0 to 9, in the Believer's numerals. */
+  digits: readonly string[];
+  /** "in 0:45": the time left (hours:minutes), in words. */
+  remaining: (time: string) => string;
   noLocation: string;
   /** "Then Sunrise 06:30". */
   following: (prayer: string, time: string) => string;
@@ -102,6 +118,38 @@ export interface WidgetLinks {
   /** The Khatmah screen, or one Khatmah by id. */
   khatmah: (id?: string) => string;
 }
+
+/**
+ * Android widgets cannot tick: in the last hour before a Prayer Time they
+ * show the minutes left, drawn again every minute by an alarm; earlier, the
+ * Prayer Time's clock time (a minute-by-minute refresh all day would cost
+ * the battery more than a glance at a distant time is worth).
+ */
+export const COUNTDOWN_WINDOW_MS = 60 * 60_000;
+
+/**
+ * The minutes at which Android redraws the widgets to keep the countdown
+ * right: each minute of the countdown window before every Prayer Time the
+ * entries name, after `after` (epoch milliseconds).
+ */
+export const countdownTicks = (
+  entries: readonly WidgetEntry[],
+  after: number
+): number[] => {
+  const arrivals = new Set(
+    entries.flatMap(({ next }) => (next ? [next.at] : []))
+  );
+  const ticks = new Set<number>();
+  for (const at of arrivals) {
+    for (let left = 1; left <= COUNTDOWN_WINDOW_MS / 60_000; left += 1) {
+      const tick = at - left * 60_000;
+      if (tick > after) {
+        ticks.add(tick);
+      }
+    }
+  }
+  return [...ticks].toSorted((a, b) => a - b);
+};
 
 const text = (
   value: string,
@@ -141,7 +189,15 @@ const nextSalah = (
     blocks: [
       text(words.titles["next-salah"], "caption", 1, "muted"),
       text(words.prayerName(next.name), "title", 1, "accent"),
-      { type: "countdown", to: next.at, text: clock, min: 1 },
+      {
+        type: "countdown",
+        to: next.at,
+        text: clock,
+        window: COUNTDOWN_WINDOW_MS,
+        digits: words.digits,
+        remaining: words.remaining("{time}"),
+        min: 1,
+      },
       text(clock, "body", 2, "muted"),
       ...(after
         ? [

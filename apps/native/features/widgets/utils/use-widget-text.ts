@@ -53,6 +53,8 @@ export const useWidgetText = (timeFormat: TimeFormat): WidgetText => {
           hour12: timeFormat === "12h",
           timeZone,
         }),
+      digits: Array.from({ length: 10 }, (_, digit) => formatNumber(digit)),
+      remaining: (time) => t("remaining", { time }),
       noLocation: t("noLocation"),
       following: (prayer, time) => t("following", { prayer, time }),
       hijriDay: ({ day }) => formatNumber(day),

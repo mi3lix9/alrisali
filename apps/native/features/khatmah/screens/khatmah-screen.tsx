@@ -124,9 +124,11 @@ const StatusCard = ({
 const ActiveKhatmahView = ({
   active,
   completionActions,
+  shareAction,
 }: {
   active: ActiveKhatmah;
   completionActions?: ReactNode;
+  shareAction?: ((khatmahId: string) => ReactNode) | undefined;
 }) => {
   const { t } = useTranslation("khatmah");
   const today = useToday();
@@ -153,6 +155,7 @@ const ActiveKhatmahView = ({
       <Screen>
         <CelebrationCard active={active} />
         {completionActions}
+        {shareAction?.(khatmah.id)}
         <CompletedHistory />
         <Button
           testID="khatmah-remove"
@@ -168,6 +171,7 @@ const ActiveKhatmahView = ({
   return (
     <Screen>
       <StatusCard active={active} completionActions={completionActions} />
+      {shareAction?.(khatmah.id)}
       <ReminderField
         value={khatmah.reminderAt}
         onChange={(reminderAt) => setReminder({ id: khatmah.id, reminderAt })}
@@ -193,9 +197,12 @@ const ActiveKhatmahView = ({
  */
 export const KhatmahScreen = ({
   completionActions,
+  shareAction,
 }: {
   /** Shown on the status card once every session is done, composed by the route. */
   completionActions?: ReactNode;
+  /** Shares a link to this Khatmah (composed by the route). */
+  shareAction?: ((khatmahId: string) => ReactNode) | undefined;
 }) => {
   const { t } = useTranslation("khatmah");
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -211,6 +218,7 @@ export const KhatmahScreen = ({
       <ActiveKhatmahView
         active={active}
         completionActions={completionActions}
+        shareAction={shareAction}
       />
     );
   } else if (active === null) {

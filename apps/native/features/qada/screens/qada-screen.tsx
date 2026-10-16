@@ -1,8 +1,6 @@
 import "../i18n";
 import {
-  lastQadaSalahLog,
   qadaDaysLeft,
-  qadaFastLog,
   qadaItemLog,
   qadaToday,
   remainingBacklog,
@@ -95,15 +93,8 @@ const Dashboard = ({ data, plan }: { data: QadaData; plan: QadaPlan }) => {
       change({ log: qadaItemLog(item, today), logged: true });
       return;
     }
-    // The day's ticks are the first of each Salah, so un-ticking gives back
-    // the last one.
-    const last =
-      item.kind === "fast"
-        ? qadaFastLog(today)
-        : lastQadaSalahLog(logs, today, item.salah);
-    if (last) {
-      change({ log: last, logged: false });
-    }
+    // An item's Qada Log carries its id, so un-ticking gives back that one.
+    change({ log: qadaItemLog(item, today), logged: false });
   };
 
   return (

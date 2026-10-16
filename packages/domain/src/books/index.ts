@@ -6,8 +6,14 @@ export type {
   SupplicationSearchResult,
 } from "./search";
 export { taqibatFor } from "./taqibat";
-export { amalOfMonth } from "./amal";
-export type { AmalDay, MonthAmal } from "./amal";
+export {
+  AMAL_KIND_NAMES,
+  AMAL_LAST_DAY,
+  amalActSchema,
+  amalDaySchema,
+  amalOfMonth,
+} from "./amal";
+export type { AmalDay, AmalDayInput, MonthAmal } from "./amal";
 export {
   DEFAULT_READER_FORMAT,
   READER_FONT_SIZE,

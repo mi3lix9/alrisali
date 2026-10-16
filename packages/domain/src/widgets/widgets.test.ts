@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { createHijriCalendar, DEFAULT_IMSAK_MINUTES } from "../shared";
 import type { PrayerTimeName } from "../shared";
-import { widgetProps } from "./view";
+import { COUNTDOWN_WINDOW_MS, countdownTicks, widgetProps } from "./view";
 import type { WidgetBlock, WidgetLinks, WidgetText } from "./view";
 import { WIDGET_HORIZON_HOURS, WIDGET_KINDS, widgetEntries } from "./widgets";
 import type { WidgetInput, WidgetKhatmah } from "./widgets";
@@ -164,6 +164,8 @@ describe(widgetEntries, () => {
 });
 
 const WORDS: WidgetText = {
+  digits: ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+  remaining: (time) => `in ${time}`,
   titles: {
     "next-salah": "Next prayer",
     "today-times": "Today",
@@ -254,7 +256,23 @@ describe(widgetProps, () => {
     ).toMatchObject({
       to: first?.next?.at,
       text: expect.stringMatching(/^\d\d:\d\d$/u),
+      window: COUNTDOWN_WINDOW_MS,
+      remaining: "in {time}",
     });
+  });
+
+  it("redraws the Android countdown each minute of the hour before a Prayer Time", () => {
+    const entries = widgetEntries(input(), NOW);
+    const [first] = entries;
+    const at = first?.next?.at ?? 0;
+    const ticks = countdownTicks(entries, NOW.epochMilliseconds);
+    const before = ticks.filter((tick) => tick < at && tick >= at - 3_600_000);
+
+    expect(before.length).toBeLessThanOrEqual(60);
+    expect(before.at(-1)).toBe(at - 60_000);
+    expect(ticks.every((tick) => tick > NOW.epochMilliseconds)).toBeTruthy();
+    expect(ticks).toStrictEqual(ticks.toSorted((a, b) => a - b));
+    expect(new Set(ticks).size).toBe(ticks.length);
   });
 
   it("shows the following Prayer Time on larger sizes only", () => {

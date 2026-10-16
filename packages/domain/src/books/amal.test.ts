@@ -1,6 +1,7 @@
+import { AMAL_KINDS } from "@alrisali/content/books";
 import { describe, expect, it } from "vitest";
 
-import { amalOfMonth } from "./amal";
+import { AMAL_KIND_NAMES, amalDaySchema, amalOfMonth } from "./amal";
 
 describe(amalOfMonth, () => {
   it("lists the acts of every day of the month apart from those of a specific day", () => {
@@ -55,5 +56,43 @@ describe(amalOfMonth, () => {
         },
       ],
     });
+  });
+});
+
+describe("A'mal day input", () => {
+  it("accepts a day's acts that name bundled Supplications", () => {
+    expect(
+      amalDaySchema.safeParse({
+        month: 9,
+        day: 0,
+        acts: [
+          { kind: "dua", time: "night", supplicationId: "mafatih-dua-iftitah" },
+        ],
+      }).success
+    ).toBeTruthy();
+  });
+
+  it("refuses an unknown Supplication, a day out of range and a repeated act", () => {
+    const act = { kind: "dua", supplicationId: "mafatih-dua-iftitah" };
+    expect(
+      amalDaySchema.safeParse({
+        month: 9,
+        day: 1,
+        acts: [{ kind: "dua", supplicationId: "sahifa-999" }],
+      }).success
+    ).toBeFalsy();
+    expect(
+      amalDaySchema.safeParse({ month: 13, day: 1, acts: [] }).success
+    ).toBeFalsy();
+    expect(
+      amalDaySchema.safeParse({ month: 1, day: 31, acts: [] }).success
+    ).toBeFalsy();
+    expect(
+      amalDaySchema.safeParse({ month: 1, day: 1, acts: [act, act] }).success
+    ).toBeFalsy();
+  });
+
+  it("knows the same kinds as the bundled index", () => {
+    expect([...AMAL_KIND_NAMES]).toStrictEqual([...AMAL_KINDS]);
   });
 });

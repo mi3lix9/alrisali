@@ -33,6 +33,12 @@ const SECTIONS = [
       "Map each weekday's ziyarah, the night duas and the every-day items to Supplications.",
   },
   {
+    to: "/admin/amal",
+    title: "A'mal",
+    description:
+      "Choose the duas, ziyarat, prayers and fasts each Hijri day or month lists in the Books tab.",
+  },
+  {
     to: "/admin/occasions",
     title: "Occasions",
     description:

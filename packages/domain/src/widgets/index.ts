@@ -1,4 +1,4 @@
-export { widgetProps } from "./view";
+export { COUNTDOWN_WINDOW_MS, countdownTicks, widgetProps } from "./view";
 export type {
   WidgetBlock,
   WidgetLinks,

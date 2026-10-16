@@ -4,6 +4,7 @@ export {
   LINK_SCHEME,
   linkFeatureId,
   parseLink,
+  shareableLinkUrl,
   webLinkUrl,
 } from "./links";
 export type {

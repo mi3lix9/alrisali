@@ -445,6 +445,11 @@ const ACCESS: Record<
   "programs.save": { access: "admin", input: dailyNawafil },
   "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
   "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
+  "books.amalList": { access: "admin" },
+  "books.amalSet": {
+    access: "admin",
+    input: { month: 9, day: 0, acts: [] },
+  },
   "dailyContent.worshipList": { access: "admin" },
   "dailyContent.worshipSet": {
     access: "admin",
@@ -1299,6 +1304,70 @@ describe("Today's worship mapping", () => {
         day: "every",
         supplicationIds: ["sahifa-1"],
       })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
+
+interface AmalList {
+  entries: { month: number; day: number; supplicationId: string }[];
+}
+
+const ofDay27 = (list: AmalList) =>
+  list.entries.filter((entry) => entry.month === 9 && entry.day === 27);
+
+describe("The A'mal index managed by Admins", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("starts with the index the app bundles", async () => {
+    const admin = await signInAsAdmin();
+    const { entries } = (await callAs(admin, "books.amalList")) as AmalList;
+
+    expect(entries).toContainEqual({
+      month: 9,
+      day: 0,
+      kind: "dua",
+      time: "night",
+      supplicationId: "mafatih-dua-iftitah",
+    });
+    expect(entries.length).toBeGreaterThan(12);
+  });
+
+  it("replaces what a day lists and clears it with an empty list", async () => {
+    const admin = await signInAsAdmin();
+    const set = (acts: unknown[]) =>
+      callAs(admin, "books.amalSet", {
+        month: 9,
+        day: 27,
+        acts,
+      }) as Promise<AmalList>;
+
+    const two = await set([
+      { kind: "dua", time: "night", supplicationId: "mafatih-dua-kumayl" },
+      { kind: "dua", supplicationId: "sahifa-44" },
+    ]);
+    expect(ofDay27(two)).toHaveLength(2);
+    const none = await set([]);
+    expect(ofDay27(none)).toStrictEqual([]);
+    expect(none.entries.some((entry) => entry.day === 0)).toBeTruthy();
+  });
+
+  it("refuses an id no Book holds and a day out of range", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "books.amalSet", {
+        month: 9,
+        day: 1,
+        acts: [{ kind: "dua", supplicationId: "sahifa-999" }],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "books.amalSet", { month: 9, day: 31, acts: [] })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });

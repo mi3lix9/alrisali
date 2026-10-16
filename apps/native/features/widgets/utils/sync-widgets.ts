@@ -3,7 +3,11 @@ import type {
   WidgetLinks,
   WidgetText,
 } from "@alrisali/domain/widgets";
-import { WIDGET_KINDS, widgetProps } from "@alrisali/domain/widgets";
+import {
+  countdownTicks,
+  WIDGET_KINDS,
+  widgetProps,
+} from "@alrisali/domain/widgets";
 import { Platform } from "react-native";
 
 import { ANDROID_SIZES } from "../data/android-sizes";
@@ -35,5 +39,12 @@ export const syncWidgets = (
       widget.updateSnapshot(props);
     }
   }
-  widgetRefresh?.scheduleRefreshes(entries.slice(1).map(({ from }) => from));
+  // Android redraws at every change, and each minute of the last hour before
+  // a Prayer Time so its countdown stays right.
+  widgetRefresh?.scheduleRefreshes(
+    [
+      ...entries.slice(1).map(({ from }) => from),
+      ...countdownTicks(entries, Date.now()),
+    ].toSorted((a, b) => a - b)
+  );
 };

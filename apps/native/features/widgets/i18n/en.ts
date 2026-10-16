@@ -22,6 +22,7 @@ export const en: Catalog<typeof ar> = {
     isha: "Isha",
     midnight: "Midnight",
   },
+  remaining: "in {{time}}",
   noLocation: "Choose your location to see prayer times",
   following: "Then {{prayer}} {{time}}",
   reference: "{{surah}} {{ayah}}",

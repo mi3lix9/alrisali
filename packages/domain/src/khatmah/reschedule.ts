@@ -6,6 +6,7 @@ import { ayahPosition, NO_ADJUSTMENTS } from "./adjustments";
 import type { KhatmahAdjustments } from "./adjustments";
 import {
   khatmahDoneSessions,
+  khatmahScheduledSessions,
   khatmahSessions,
   planEvery,
   sessionDueDate,
@@ -93,6 +94,21 @@ export const reschedule = (
     );
   }
 
+  // The read part of the session in progress stays credited: its new portion
+  // still starts where the session did, and `partial` cuts off what was read,
+  // so the pages read still count and only the rest is left to read.
+  const partial = khatmah.adjust?.partial ?? null;
+  const kept = partial?.session === first.number ? partial : null;
+  const scheduled = kept
+    ? khatmahScheduledSessions(khatmah).find(
+        ({ number }) => number === first.number
+      )
+    : undefined;
+  const [head] = portions;
+  if (scheduled && head) {
+    portions = [{ from: scheduled.from, to: head.to }, ...portions.slice(1)];
+  }
+
   return {
     fromSession: first.number,
     adjust: {
@@ -102,7 +118,7 @@ export const reschedule = (
         ),
         { from: first.number, start, every, portions },
       ],
-      partial: null,
+      partial: scheduled ? kept : null,
     },
   };
 };

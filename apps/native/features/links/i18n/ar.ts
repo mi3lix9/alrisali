@@ -3,4 +3,7 @@ export const ar = {
     continueReading: "تابع القراءة",
     nextSalah: "الصلاة القادمة",
   },
+  share: {
+    link: "مشاركة الرابط",
+  },
 };

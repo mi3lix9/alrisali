@@ -18,6 +18,7 @@ export const ar = {
     isha: "العشاء",
     midnight: "منتصف الليل",
   },
+  remaining: "بعد {{time}}",
   noLocation: "حدّد موقعك لتظهر المواقيت",
   following: "ثم {{prayer}} {{time}}",
   reference: "{{surah}} {{ayah}}",

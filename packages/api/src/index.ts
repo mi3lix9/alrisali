@@ -4,6 +4,7 @@ import { accountContract } from "./account";
 import { adhansContract } from "./adhans";
 import { analyticsContract } from "./analytics";
 import { announcementsContract } from "./announcements";
+import { booksContract } from "./books";
 import { contactContract } from "./contact";
 import { dailyContentContract } from "./daily-content";
 import { gatheringsContract } from "./gatherings";
@@ -23,6 +24,7 @@ export const contract = {
   adhans: adhansContract,
   analytics: analyticsContract,
   announcements: announcementsContract,
+  books: booksContract,
   dailyContent: dailyContentContract,
   gatherings: gatheringsContract,
   hijriAdjustment: hijriAdjustmentContract,

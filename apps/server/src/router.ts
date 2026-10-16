@@ -2,6 +2,7 @@ import { accountRouter } from "@/features/account";
 import { adhansRouter } from "@/features/adhans";
 import { analyticsRouter } from "@/features/analytics";
 import { announcementsRouter } from "@/features/announcements";
+import { booksRouter } from "@/features/books";
 import { contactRouter } from "@/features/contact";
 import { dailyContentRouter } from "@/features/daily-content";
 import { gatheringsRouter } from "@/features/gatherings";
@@ -24,6 +25,7 @@ export const appRouter = os.router({
   adhans: adhansRouter,
   analytics: analyticsRouter,
   announcements: announcementsRouter,
+  books: booksRouter,
   dailyContent: dailyContentRouter,
   gatherings: gatheringsRouter,
   hijriAdjustment: hijriAdjustmentRouter,

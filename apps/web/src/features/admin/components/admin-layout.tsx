@@ -65,6 +65,13 @@ export const AdminLayout = ({
             Today&apos;s worship
           </Link>
           <Link
+            to="/admin/amal"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            A&apos;mal
+          </Link>
+          <Link
             to="/admin/occasions"
             className={NAV_LINK}
             activeProps={{ className: ACTIVE_LINK }}

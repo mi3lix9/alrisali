@@ -21,6 +21,7 @@ import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
 import { Route as AdminAuthedAdhansRouteImport } from './routes/admin/_authed/adhans'
+import { Route as AdminAuthedAmalRouteImport } from './routes/admin/_authed/amal'
 import { Route as AdminAuthedAnalyticsRouteImport } from './routes/admin/_authed/analytics'
 import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
 import { Route as AdminAuthedGatheringsRouteImport } from './routes/admin/_authed/gatherings'
@@ -101,6 +102,11 @@ const AdminAuthedIndexRoute = AdminAuthedIndexRouteImport.update({
 const AdminAuthedAdhansRoute = AdminAuthedAdhansRouteImport.update({
   id: '/adhans',
   path: '/adhans',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
+const AdminAuthedAmalRoute = AdminAuthedAmalRouteImport.update({
+  id: '/amal',
+  path: '/amal',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
 const AdminAuthedAnalyticsRoute = AdminAuthedAnalyticsRouteImport.update({
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/amal': typeof AdminAuthedAmalRoute
   '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/admin/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/amal': typeof AdminAuthedAmalRoute
   '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/admin/_authed/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/_authed/amal': typeof AdminAuthedAmalRoute
   '/admin/_authed/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/_authed/gatherings': typeof AdminAuthedGatheringsRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}/'
     | '/admin/adhans'
+    | '/admin/amal'
     | '/admin/analytics'
     | '/admin/daily-content'
     | '/admin/gatherings'
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}'
     | '/admin/adhans'
+    | '/admin/amal'
     | '/admin/analytics'
     | '/admin/daily-content'
     | '/admin/gatherings'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/{-$locale}/terms'
     | '/{-$locale}/'
     | '/admin/_authed/adhans'
+    | '/admin/_authed/amal'
     | '/admin/_authed/analytics'
     | '/admin/_authed/daily-content'
     | '/admin/_authed/gatherings'
@@ -439,6 +451,13 @@ declare module '@tanstack/react-router' {
       path: '/adhans'
       fullPath: '/admin/adhans'
       preLoaderRoute: typeof AdminAuthedAdhansRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/amal': {
+      id: '/admin/_authed/amal'
+      path: '/amal'
+      fullPath: '/admin/amal'
+      preLoaderRoute: typeof AdminAuthedAmalRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
     '/admin/_authed/analytics': {
@@ -564,6 +583,7 @@ const Char123LocaleChar125RouteRouteWithChildren =
 
 interface AdminAuthedRouteRouteChildren {
   AdminAuthedAdhansRoute: typeof AdminAuthedAdhansRoute
+  AdminAuthedAmalRoute: typeof AdminAuthedAmalRoute
   AdminAuthedAnalyticsRoute: typeof AdminAuthedAnalyticsRoute
   AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
   AdminAuthedGatheringsRoute: typeof AdminAuthedGatheringsRoute
@@ -583,6 +603,7 @@ interface AdminAuthedRouteRouteChildren {
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedAdhansRoute: AdminAuthedAdhansRoute,
+  AdminAuthedAmalRoute: AdminAuthedAmalRoute,
   AdminAuthedAnalyticsRoute: AdminAuthedAnalyticsRoute,
   AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
   AdminAuthedGatheringsRoute: AdminAuthedGatheringsRoute,

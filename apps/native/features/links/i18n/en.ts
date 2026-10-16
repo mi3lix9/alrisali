@@ -7,4 +7,7 @@ export const en: Catalog<typeof ar> = {
     continueReading: "Continue reading",
     nextSalah: "Next Salah",
   },
+  share: {
+    link: "Share link",
+  },
 };
