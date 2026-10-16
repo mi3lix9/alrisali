@@ -241,6 +241,10 @@ describe(recitationPlayback, () => {
       reciter: "ar.alafasy",
       origin: "reader",
       plan: playbackPlan("1:1"),
+      ayahPass: 1,
+      rangePass: 1,
+      pauseSeconds: null,
+      sleepAt: null,
     });
     expect(play(loading, { type: "ready" })).toMatchObject({
       status: "playing",
@@ -266,6 +270,7 @@ describe(recitationPlayback, () => {
         ayah: "2:255",
         reciter: "ar.alafasy",
         to: { kind: "ayah", ayah: "2:255" },
+        settings: { askToContinueAtEnd: false },
       },
       { type: "ready" },
       { type: "finished" }
@@ -339,6 +344,7 @@ describe(recitationPlayback, () => {
       ayah: "1:5",
       reciter: "ar.alafasy",
       to: { kind: "page" },
+      settings: { askToContinueAtEnd: false },
     });
     for (const ayah of ["1:6", "1:7"]) {
       state = play(state, { type: "ready" }, { type: "finished" });
@@ -384,7 +390,13 @@ describe(recitationPlayback, () => {
       ayah: "2:255",
       reciter: "everyayah.minshawy-murattal",
       origin: "verse-of-the-day",
-      plan: playbackPlan("2:255", { kind: "surah" }),
+      plan: playbackPlan(
+        "2:255",
+        { kind: "surah" },
+        {
+          askToContinueAtEnd: false,
+        }
+      ),
     });
   });
 

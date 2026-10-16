@@ -1,4 +1,9 @@
-import type { AyahKey, PlayTo, RecitationEvent } from "@alrisali/domain/quran";
+import type {
+  AyahKey,
+  PlaybackSettings,
+  PlayTo,
+  RecitationEvent,
+} from "@alrisali/domain/quran";
 import { writeDigits } from "@alrisali/domain/shared";
 import type { Digits } from "@alrisali/domain/shared";
 
@@ -10,8 +15,15 @@ import type { Digits } from "@alrisali/domain/shared";
 export const playFromAyah = (
   ayah: AyahKey,
   reciter: string,
-  to?: PlayTo
-): RecitationEvent => ({ type: "play", ayah, reciter, ...(to ? { to } : {}) });
+  to?: PlayTo,
+  settings?: PlaybackSettings
+): RecitationEvent => ({
+  type: "play",
+  ayah,
+  reciter,
+  ...(to ? { to } : {}),
+  ...(settings ? { settings } : {}),
+});
 
 interface AyahCopy {
   text: string;

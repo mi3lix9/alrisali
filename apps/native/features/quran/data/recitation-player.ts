@@ -14,6 +14,8 @@ import type { AudioPlayer } from "expo-audio";
 import { create } from "zustand";
 
 import { recitationCache } from "./recitation-cache";
+import { createRecitationTimers } from "./recitation-timers";
+import type { RecitationTimers } from "./recitation-timers";
 
 // One recitation plays at a time, in the reader or on Home. The domain's
 // `recitationPlayback` decides what plays; this module makes the device's
@@ -43,6 +45,9 @@ let loadId = 0;
 
 type Send = (event: RecitationEvent) => void;
 
+/** The silence after an ayah and the sleep timer, made with the first state. */
+let timers: RecitationTimers | null = null;
+
 const devicePlayer = (send: Send): AudioPlayer => {
   if (player) {
     return player;
@@ -59,7 +64,8 @@ const devicePlayer = (send: Send): AudioPlayer => {
   player.addListener("playbackStatusUpdate", (status) => {
     const { playback } = usePlaybackStore.getState();
     if (status.didJustFinish) {
-      send({ type: "finished" });
+      // The ayah's length sets a pause measured in ayah lengths.
+      send({ type: "finished", durationSeconds: status.duration });
     } else if (status.error) {
       send({ type: "failed" });
     } else if (status.playing && playback.status === "loading") {
@@ -103,7 +109,12 @@ const showOnLockScreen = (
   );
 };
 
-const load = async (reciter: string, ayah: AyahKey, send: Send) => {
+const load = async (
+  reciter: string,
+  ayah: AyahKey,
+  speed: number,
+  send: Send
+) => {
   loadId += 1;
   const id = loadId;
   const recited = { reciter, ayah };
@@ -115,6 +126,8 @@ const load = async (reciter: string, ayah: AyahKey, send: Send) => {
     const audio = devicePlayer(send);
     audio.replace({ uri });
     showOnLockScreen(audio, reciter, ayah);
+    audio.shouldCorrectPitch = true;
+    audio.setPlaybackRate(speed);
     if (usePlaybackStore.getState().playback.status !== "paused") {
       audio.play();
     }
@@ -151,9 +164,10 @@ const follow = (
     (event.type === "play" ||
       event.type === "reciter" ||
       moved ||
-      previous.status === "error")
+      previous.status !== "loading")
   ) {
-    void load(next.reciter, next.ayah, send);
+    // Also an ayah repeated, or the silence after one over: same ayah, loaded again.
+    void load(next.reciter, next.ayah, next.plan.speed, send);
   } else if (next.status === "paused") {
     commandedAt = Date.now();
     player?.pause();
@@ -171,5 +185,7 @@ export const sendRecitation = (event: RecitationEvent) => {
     return;
   }
   usePlaybackStore.setState({ playback: next });
+  timers ??= createRecitationTimers(sendRecitation);
+  timers.follow(next);
   follow(previous, next, event, sendRecitation);
 };

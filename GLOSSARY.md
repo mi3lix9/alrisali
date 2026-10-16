@@ -124,6 +124,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
 
+**Continue Prompt**: The question "continue to the next ayat?" a Playback Plan asks when its range, after every repeat, ends; yes plays the same kind of range from the next ayah, no ends recitation. It is skipped at the end of the Quran and when the Believer turns it off. _Avoid_: Auto-continue
+
 **Reciter**: A person whose recitation is bundled, with one identity and both an Arabic and an English name across every style they are recorded in (murattal, mujawwad, muallim). The picker groups reciters by style, then region, and plays a sample on the current page without choosing them. The choice is a synced Believer setting. _Avoid_: Qari (in UI copy), Voice
 
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode

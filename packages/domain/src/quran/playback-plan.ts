@@ -57,16 +57,55 @@ export const MAX_PLAYBACK_SPEED = 1.5;
 /** Play To's four ends, in the order the form lists them. */
 export const PLAY_TO_KINDS = ["page", "surah", "juz", "ayah"] as const;
 
-/** A plan that plays `from` once, at normal speed, up to the end `to` names. */
-export const playbackPlan = (from: AyahKey, to?: PlayTo): PlaybackPlan => ({
+/** What the Believer sets besides where playback starts and stops. */
+export type PlaybackSettings = Partial<Omit<PlaybackPlan, "from" | "to">>;
+
+/** The repeat counts the form offers, in order. */
+export const REPEAT_COUNTS: readonly RepeatCount[] = [
+  1,
+  2,
+  3,
+  5,
+  10,
+  "infinite",
+];
+
+/** The speeds the form offers, in order. */
+export const PLAYBACK_SPEEDS = [0.75, 1, 1.25, 1.5] as const;
+
+/** The multiples of an ayah's length the pause offers, in order. */
+export const AYAH_LENGTH_FACTORS = [0.5, 1, 1.5, 2] as const;
+
+/** The sleep timers the form offers, in order. */
+export const SLEEP_TIMERS: readonly SleepTimer[] = [
+  { kind: "off" },
+  { kind: "endOfSurah" },
+  { kind: "minutes", minutes: 15 },
+  { kind: "minutes", minutes: 30 },
+  { kind: "minutes", minutes: 60 },
+];
+
+const clampSpeed = (speed: number): number =>
+  Math.min(MAX_PLAYBACK_SPEED, Math.max(MIN_PLAYBACK_SPEED, speed));
+
+/**
+ * A plan that plays `from` once, at normal speed, up to the end `to` names;
+ * `settings` change the repeats, pause, speed, sleep timer and end prompt.
+ * Speed is held to 0.75–1.5.
+ */
+export const playbackPlan = (
+  from: AyahKey,
+  to?: PlayTo,
+  settings: PlaybackSettings = {}
+): PlaybackPlan => ({
   from,
   to: to ?? { kind: "quran" },
-  ayahRepeat: 1,
-  rangeRepeat: 1,
-  pause: { kind: "none" },
-  speed: 1,
-  sleep: { kind: "off" },
-  askToContinueAtEnd: true,
+  ayahRepeat: settings.ayahRepeat ?? 1,
+  rangeRepeat: settings.rangeRepeat ?? 1,
+  pause: settings.pause ?? { kind: "none" },
+  speed: clampSpeed(settings.speed ?? 1),
+  sleep: settings.sleep ?? { kind: "off" },
+  askToContinueAtEnd: settings.askToContinueAtEnd ?? true,
 });
 
 const isBefore = (a: AyahKey, b: AyahKey): boolean => {
