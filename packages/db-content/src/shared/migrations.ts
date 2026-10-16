@@ -63,4 +63,14 @@ export const migrations: readonly Migration[] = [
     tag: "20261016025717_announcement_archive",
     statements: ["ALTER TABLE `announcement` ADD `archived_at` integer;"],
   },
+  {
+    tag: "20261016123821_forced_hijri_date",
+    statements: [
+      "ALTER TABLE `global_settings` ADD `forced_hijri_year` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_month` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_day` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_from` text;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_until` text;",
+    ],
+  },
 ];

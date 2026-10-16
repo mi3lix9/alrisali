@@ -62,19 +62,30 @@ export const createContentDb = (
 };
 
 const MISSING_TABLE = /no such table/iu;
+const MISSING_COLUMN = /no such column/iu;
 
-/**
- * Whether a query failed because its table does not exist yet: a replica
- * that has never pulled is empty. Drizzle wraps the driver's error, so the
- * causes are searched too.
- */
-export const isMissingTable = (error: unknown): boolean => {
+const causedBy = (error: unknown, pattern: RegExp): boolean => {
   let current: unknown = error;
   while (current instanceof Error) {
-    if (MISSING_TABLE.test(current.message)) {
+    if (pattern.test(current.message)) {
       return true;
     }
     current = current.cause;
   }
   return false;
 };
+
+/**
+ * Whether a query failed because its table does not exist yet: a replica
+ * that has never pulled is empty. Drizzle wraps the driver's error, so the
+ * causes are searched too.
+ */
+export const isMissingTable = (error: unknown): boolean =>
+  causedBy(error, MISSING_TABLE);
+
+/**
+ * Whether a query failed because its column does not exist yet: a replica
+ * last pulled before the migration that added it.
+ */
+export const isMissingColumn = (error: unknown): boolean =>
+  causedBy(error, MISSING_COLUMN);
