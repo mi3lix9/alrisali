@@ -51,6 +51,7 @@ export const FEATURES = [
   { id: "calendar", area: "worship", shortcut: "shown" },
   { id: "gatherings", area: "more", shortcut: "hidden" },
   { id: "insights", area: "more", shortcut: "shown" },
+  { id: "khatmah", area: "quran", shortcut: "hidden" },
 ] as const satisfies readonly FeatureEntry[];
 
 export type Feature = (typeof FEATURES)[number];

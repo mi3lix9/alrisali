@@ -67,3 +67,5 @@ export type {
   ReminderSound,
   Salah,
 } from "./settings";
+export { khatmahReminderSource } from "./khatmah-reminders";
+export type { KhatmahReminderMessage } from "./khatmah-reminders";

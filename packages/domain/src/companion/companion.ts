@@ -28,6 +28,11 @@ export const xpEventSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("dhikr-session"), sessionId: id }),
   z.object({ kind: z.literal("reading"), supplicationId: id, date }),
   z.object({ kind: z.literal("lesson"), lessonId: id }),
+  z.object({
+    kind: z.literal("khatmah-session"),
+    khatmahId: id,
+    session: z.int().min(1),
+  }),
 ]);
 
 export type XpEvent = z.infer<typeof xpEventSchema>;
@@ -42,6 +47,7 @@ export const XP_FOR: Record<XpEventKind, number> = {
   "dhikr-session": 5,
   reading: 5,
   lesson: 20,
+  "khatmah-session": 10,
 };
 
 /** The parts of an event that identify it, in key order. */
@@ -64,6 +70,9 @@ const identity = (event: XpEvent): string[] => {
     }
     case "lesson": {
       return [event.lessonId];
+    }
+    case "khatmah-session": {
+      return [event.khatmahId, String(event.session)];
     }
     default: {
       throw new Error("Unknown XP event");
