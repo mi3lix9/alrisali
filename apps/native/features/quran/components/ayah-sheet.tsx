@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
   CopyIcon,
   PlayIcon,
+  RepeatIcon,
   ShareNodesIcon,
 } from "panelui-native/icons";
 import type { ReactNode } from "react";
@@ -51,6 +52,8 @@ interface AyahSheetProps {
   onSetLastRead: (ayah: AyahKey) => void;
   /** The header arrows: the sheet moves to the neighbouring ayah. */
   onMove: (direction: AyahSheetMove) => void;
+  /** Play To: the route opens its sheet at this ayah. */
+  onPlayTo: (ayah: AyahKey) => void;
   onClose: () => void;
   actions?: AyahActions | undefined;
 }
@@ -65,6 +68,7 @@ export const AyahSheet = ({
   lastReadAyah,
   onSetLastRead,
   onMove,
+  onPlayTo,
   onClose,
   actions,
 }: AyahSheetProps) => {
@@ -176,6 +180,12 @@ export const AyahSheet = ({
                     sendRecitation(playFromAyah(found.key, reciter));
                     onClose();
                   }}
+                />
+                <ActionRow
+                  testID="ayah-sheet-play-to"
+                  icon={<RepeatIcon size={20} />}
+                  label={t("sheet.playTo")}
+                  onPress={() => onPlayTo(found.key)}
                 />
                 {actions?.keep?.(found.key)}
                 <ActionRow

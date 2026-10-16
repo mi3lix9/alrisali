@@ -19,12 +19,24 @@ const run = (...events: RecitationEvent[]) => {
 
 describe(playFromAyah, () => {
   it("starts the queue at the long-pressed ayah", () => {
-    expect(run(playFromAyah("2:255", "ar.alafasy"))).toStrictEqual({
+    expect(run(playFromAyah("2:255", "ar.alafasy"))).toMatchObject({
       status: "loading",
       ayah: "2:255",
       reciter: "ar.alafasy",
-      until: null,
+      origin: "reader",
+      plan: { from: "2:255", to: { kind: "quran" } },
     });
+  });
+
+  it("stops at the end Play To chose", () => {
+    const state = run(
+      playFromAyah("1:6", "ar.alafasy", { kind: "page" }),
+      { type: "ready" },
+      { type: "finished" },
+      { type: "ready" },
+      { type: "finished" }
+    );
+    expect(state).toStrictEqual(idle);
   });
 
   it("continues past that ayah once it finishes", () => {

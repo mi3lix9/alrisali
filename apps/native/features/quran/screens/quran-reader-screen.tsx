@@ -30,6 +30,7 @@ import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions, AyahSheetMove } from "../components/ayah-sheet";
 import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
+import { PlayToSheet } from "../components/play-to-sheet";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
 import { QuranSearchSheet } from "../components/quran-search-sheet";
 import {
@@ -48,6 +49,7 @@ import {
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
+import { useRecitingAyah } from "../hooks/use-reciting-ayah";
 
 interface ReaderParams {
   /** `surah:ayah` to open at. */
@@ -189,6 +191,23 @@ const Reader = ({
     }
   };
 
+  /** The page behind follows the audio when recitation moves off it. */
+  const followRecitation = (key: AyahKey) => {
+    const ayah = findAyah(key);
+    if (!ayah) {
+      return;
+    }
+    if (state.mode === "page" && ayah.page !== state.currentPage) {
+      dispatch({ type: "page-shown", page: ayah.page });
+      setJumpCount((count) => count + 1);
+    }
+    if (state.mode === "surah" && ayah.surah !== state.currentSurah) {
+      dispatch({ type: "ayah-shown", ayah: ayah.key });
+      setJumpCount((count) => count + 1);
+    }
+  };
+  const recitingAyah = useRecitingAyah(followRecitation);
+
   const changeSettings = (change: Partial<QuranReaderSettings>) => {
     send({ type: "interact" });
     update.mutate(change);
@@ -201,6 +220,10 @@ const Reader = ({
   };
 
   const selectedAyah = chrome.sheet?.kind === "ayah" ? chrome.sheet.ayah : null;
+  const playToAyah =
+    chrome.sheet?.kind === "play-to" ? chrome.sheet.ayah : null;
+  const openPlayTo = (ayah: AyahKey) =>
+    send({ type: "open-sheet", sheet: { kind: "play-to", ayah } });
   const position =
     state.mode === "page"
       ? pagePosition(state.currentPage)
@@ -210,7 +233,8 @@ const Reader = ({
     onLongPressAyah,
     onPressInAyah,
     onPressOut,
-    selectedAyah,
+    // The ayah being recited is lit like the one whose sheet is open.
+    selectedAyah: selectedAyah ?? recitingAyah,
     pressingAyah: chrome.pressing,
     lastReadAyah: state.lastReadAyah,
   };
@@ -288,6 +312,7 @@ const Reader = ({
           (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
         }
         onReciterChange={(reciter) => update.mutate({ reciter })}
+        onOptions={openPlayTo}
         onInteract={() => send({ type: "interact" })}
       />
       {hint.shown ? <ReaderHint /> : null}
@@ -297,7 +322,13 @@ const Reader = ({
         lastReadAyah={state.lastReadAyah}
         onSetLastRead={(ayah) => dispatch({ type: "set-last-read", ayah })}
         onMove={moveSelection}
+        onPlayTo={openPlayTo}
         actions={ayahActions}
+        onClose={closeSheet}
+      />
+      <PlayToSheet
+        ayah={playToAyah}
+        reciter={settings.reciter}
         onClose={closeSheet}
       />
       <ReaderSettingsSheet

@@ -94,6 +94,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
+**Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
+
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
 
 **Daily Content**: The Supplication, ziyarah or prayer Admins feature for each weekday on Home.
