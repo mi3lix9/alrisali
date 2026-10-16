@@ -402,22 +402,16 @@ describe("high latitudes", () => {
     expect(local(times.maghrib)).toBe(local(times.sunset));
   });
 
-  it("leaves Fajr, Isha, Imsak and Midnight undefined when the sun never reaches their angle", () => {
-    for (const place of ["reykjavik", "london"] as const) {
-      const { fajr, isha, imsak, midnight, sunrise, dhuhr } = timesOn(
-        place,
-        "2025-06-21",
-        "jafari"
-      );
+  it("defines every Prayer Time for London on 21 June with the default rule", () => {
+    const times = timesOn("london", "2025-06-21", "jafari");
 
-      expect({ fajr, isha, imsak, midnight }).toStrictEqual({
-        fajr: null,
-        isha: null,
-        imsak: null,
-        midnight: null,
-      });
-      expect(sunrise && dhuhr).not.toBeNull();
-    }
+    expect(Object.values(times).every((time) => time !== null)).toBeTruthy();
+  });
+
+  it("defines every Prayer Time for Reykjavik on 21 June with the default rule", () => {
+    const times = timesOn("reykjavik", "2025-06-21", "jafari");
+
+    expect(Object.values(times).every((time) => time !== null)).toBeTruthy();
   });
 });
 
