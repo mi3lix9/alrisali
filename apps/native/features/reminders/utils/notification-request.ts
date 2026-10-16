@@ -3,6 +3,7 @@ import type {
   HabitReminderMessage,
   PlannedReminder,
   PrayerReminderMessage,
+  QadaReminderMessage,
   ReminderAlert,
 } from "@alrisali/domain/reminders";
 import type { Language } from "@alrisali/i18n";
@@ -109,20 +110,42 @@ const prayerTimeWording = (
   return { title, body };
 };
 
+/** A Reminder's title and body, by what it reminds of. */
+const wording = (
+  message: PrayerReminderMessage | HabitReminderMessage | QadaReminderMessage,
+  t: TFunction<"reminders">,
+  language: Language
+): { title: string; body: string } => {
+  switch (message.kind) {
+    case "habit": {
+      return {
+        title: message.name,
+        body: t(`notification.habit.${message.style}`),
+      };
+    }
+    case "qada": {
+      return {
+        title: t("notification.qada.title"),
+        body: t("notification.qada.body", {
+          n: formatNumber(message.salahPerDay),
+        }),
+      };
+    }
+    default: {
+      return prayerTimeWording(message, t, language);
+    }
+  }
+};
+
 /** The Reminder worded in the launch language and its Message Style. */
 export const toReminderRequest = (
-  reminder: PlannedReminder<PrayerReminderMessage | HabitReminderMessage>,
+  reminder: PlannedReminder<
+    PrayerReminderMessage | HabitReminderMessage | QadaReminderMessage
+  >,
   t: TFunction<"reminders">,
   language: Language
 ): ReminderRequest => {
-  const { message } = reminder;
-  const { title, body } =
-    message.kind === "habit"
-      ? {
-          title: message.name,
-          body: t(`notification.habit.${message.style}`),
-        }
-      : prayerTimeWording(message, t, language);
+  const { title, body } = wording(reminder.message, t, language);
   const fireAt = reminder.fireAt.epochMilliseconds;
   const { channelId, sound } = alertSound(reminder.alert);
   return {

@@ -84,6 +84,18 @@ export interface AppEvents {
    * `SalahLogged` (and with it the Khushu sheet opens).
    */
   SalahCompleted: { date: string; salah: Salah; completedAt: number };
+  /**
+   * The Believer made up a Qada Salah or fast on `date` (ISO `YYYY-MM-DD`),
+   * from the Qada dashboard or the Prayer Log. `logId` is stable, so a
+   * listener can react once per Qada Log. Never `SalahLogged`: a Qada Salah
+   * reduces the Qada Backlog, not the Prayer Streak, Companion XP or Insights.
+   */
+  QadaLogged: {
+    logId: string;
+    kind: "salah" | "fast";
+    date: string;
+    loggedAt: number;
+  };
 }
 
 export const events = createEventBus<AppEvents>();
