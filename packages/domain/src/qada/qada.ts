@@ -149,6 +149,23 @@ const salahItemId = (
   index: number
 ): string => `${date.toString()}:salah:${salah}:${index}`;
 
+/** The numbers of `salah`'s items ticked on `date`: the item ids the day's Qada Logs carry. */
+const loggedIndexes = (
+  logs: readonly QadaLog[],
+  date: Temporal.PlainDate,
+  salah: Salah
+): number[] => {
+  const prefix = salahItemId(date, salah, 0).slice(0, -1);
+  return distinct(logs)
+    .filter(
+      (log) =>
+        log.kind === "salah" && log.salah === salah && log.id.startsWith(prefix)
+    )
+    .map((log) => Number(log.id.slice(prefix.length)))
+    .filter((index) => Number.isInteger(index) && index > 0)
+    .toSorted((a, b) => a - b);
+};
+
 const fastItemId = (date: Temporal.PlainDate): string =>
   `${date.toString()}:fast`;
 
@@ -208,16 +225,17 @@ export const qadaToday = (
   const planned = plannedSalah(remaining, pace.salahPerDay);
 
   const salahItems = SALAH.flatMap((salah): QadaItem[] => {
-    const logged = today.filter(
-      (log) => log.kind === "salah" && log.salah === salah
-    ).length;
+    // An item is ticked when its own Qada Log exists: the Believer may
+    // tick any item, and un-ticking one leaves the others as they were.
+    const logged = new Set(loggedIndexes(today, date, salah));
+    const highest = Math.max(0, ...logged);
     return Array.from(
-      { length: Math.max(planned[salah], logged) },
+      { length: Math.max(planned[salah], highest) },
       (_, index): QadaItem => ({
         id: salahItemId(date, salah, index + 1),
         kind: "salah",
         salah,
-        logged: index < logged,
+        logged: logged.has(index + 1),
       })
     );
   });
@@ -248,6 +266,15 @@ export const qadaSalahCount = (
       log.kind === "salah" && log.salah === salah && log.date.equals(date)
   ).length;
 
+/** The lowest item number not yet ticked. */
+const firstFreeIndex = (taken: readonly number[]): number => {
+  let index = 1;
+  while (taken.includes(index)) {
+    index += 1;
+  }
+  return index;
+};
+
 /**
  * The Qada Log for one more `salah` on `date`: the day's next of that Salah,
  * whether it is ticked on the dashboard or in the Prayer Log.
@@ -257,7 +284,11 @@ export const nextQadaSalahLog = (
   date: Temporal.PlainDate,
   salah: Salah
 ): QadaLog => ({
-  id: salahItemId(date, salah, qadaSalahCount(logs, date, salah) + 1),
+  id: salahItemId(
+    date,
+    salah,
+    firstFreeIndex(loggedIndexes(logs, date, salah))
+  ),
   date,
   kind: "salah",
   salah,
@@ -269,11 +300,11 @@ export const lastQadaSalahLog = (
   date: Temporal.PlainDate,
   salah: Salah
 ): QadaLog | null => {
-  const count = qadaSalahCount(logs, date, salah);
-  return count === 0
+  const highest = loggedIndexes(logs, date, salah).at(-1);
+  return highest === undefined
     ? null
     : {
-        id: salahItemId(date, salah, count),
+        id: salahItemId(date, salah, highest),
         date,
         kind: "salah",
         salah,

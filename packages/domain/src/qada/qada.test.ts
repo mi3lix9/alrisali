@@ -202,6 +202,46 @@ describe(remainingBacklog, () => {
   });
 });
 
+describe("ticking any item of a Salah", () => {
+  const dhuhrItems = (logs: QadaLog[]) =>
+    qadaToday(MONTH, pace(10), logs, TODAY).filter(
+      (item) => item.kind === "salah" && item.salah === "dhuhr"
+    );
+  const second = dhuhrItems([]).at(1);
+  if (!second) {
+    throw new Error("the plan lists two Dhuhr");
+  }
+  const dhuhrTwo = qadaItemLog(second, TODAY);
+
+  it("checks the tapped item, not the first of the Salah", () => {
+    expect(dhuhrItems([dhuhrTwo]).map((item) => item.logged)).toStrictEqual([
+      false,
+      true,
+    ]);
+  });
+
+  it("un-ticks exactly that item by its own log id", () => {
+    const logs = [dhuhrTwo];
+    const item = dhuhrItems(logs).find((candidate) => candidate.logged);
+    expect(item?.id).toBe(dhuhrTwo.id);
+    const kept = logs.filter((log) => log.id !== item?.id);
+    expect(kept).toStrictEqual([]);
+    expect(remainingBacklog(MONTH, kept).salah.dhuhr).toBe(30);
+  });
+
+  it("makes the next tick from the lowest free item, never repeating a log id", () => {
+    const next = nextQadaSalahLog([dhuhrTwo], TODAY, "dhuhr");
+    expect(next.id).toBe("2026-10-15:salah:dhuhr:1");
+    expect(nextQadaSalahLog([dhuhrTwo, next], TODAY, "dhuhr").id).toBe(
+      "2026-10-15:salah:dhuhr:3"
+    );
+  });
+
+  it("gives back the highest ticked item from the Prayer Log", () => {
+    expect(lastQadaSalahLog([dhuhrTwo], TODAY, "dhuhr")?.id).toBe(dhuhrTwo.id);
+  });
+});
+
 describe(lastQadaSalahLog, () => {
   it("un-ticks the last Qada Salah of the day, giving it back", () => {
     const logs = tick(tick([], TODAY, "fajr"), TODAY, "fajr");
