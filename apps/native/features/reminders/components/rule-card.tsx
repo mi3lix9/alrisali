@@ -28,7 +28,14 @@ export const RuleCard = ({
   title: string;
   description?: string;
   rule: ReminderRule;
-  onChange: (change: Partial<ReminderRule>) => void;
+  onChange: (
+    change: Partial<
+      Pick<
+        ReminderRule,
+        "enabled" | "minutesBefore" | "sound" | "muted" | "voice"
+      >
+    >
+  ) => void;
 }) => {
   const { t } = useTranslation("reminders");
   const toneDisabled = !rule.enabled || rule.muted || rule.voice;

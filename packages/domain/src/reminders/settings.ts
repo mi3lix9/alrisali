@@ -1,5 +1,21 @@
 import { z } from "zod";
 
+/**
+ * The sound id that means "no recording": the device's own notification
+ * sound. Every At-Time Alert falls back to it, so one never fails for want of
+ * a recording.
+ */
+export const SYSTEM_SOUND_ID = "system";
+
+export const ADHAN_SOUND_ID_MAX_LENGTH = 64;
+
+/** An adhan catalogue voice's id, or `SYSTEM_SOUND_ID`. */
+export const adhanSoundIdSchema = z
+  .string()
+  .min(1)
+  .max(ADHAN_SOUND_ID_MAX_LENGTH)
+  .regex(/^[a-z0-9-]+$/u);
+
 /** The five Salah, each with its own Reminder rule. */
 export const SALAH = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
 
@@ -15,8 +31,23 @@ export type ReminderSound = (typeof REMINDER_SOUNDS)[number];
 export const MAX_MINUTES_BEFORE = 60;
 
 /**
- * How one Prayer Time reminds. `enabled: false` (disable) wins over `muted`,
- * which wins over `voice`, which wins over `sound`.
+ * What happens at the Prayer Time itself (the At-Time Alert), separately
+ * from the Reminder before it: nothing, a notification without sound, the
+ * short takbir, or the full adhan.
+ */
+export const AT_TIME_ALERTS = ["off", "silent", "takbir", "adhan"] as const;
+
+export type AtTimeAlert = (typeof AT_TIME_ALERTS)[number];
+
+/** Imsak has no full adhan: its At-Time Alert is at most the takbir. */
+export const IMSAK_AT_TIME_ALERTS = ["off", "silent", "takbir"] as const;
+
+export type ImsakAtTimeAlert = (typeof IMSAK_AT_TIME_ALERTS)[number];
+
+/**
+ * How one Prayer Time reminds. The Reminder before it: `enabled: false`
+ * (disable) wins over `muted`, which wins over `voice`, which wins over
+ * `sound`. The At-Time Alert is `atTime`, on its own.
  */
 export interface ReminderRule {
   enabled: boolean;
@@ -27,15 +58,31 @@ export interface ReminderRule {
   muted: boolean;
   /** Plays the recorded Adhan voice instead of the tone. */
   voice: boolean;
+  /** What happens at the Prayer Time itself. */
+  atTime: AtTimeAlert;
+  /**
+   * The adhan catalogue voice the takbir and the full adhan come from;
+   * `SYSTEM_SOUND_ID` (or a voice not installed) is the system's sound.
+   */
+  adhanSound: string;
 }
 
-/** What the Reminder sounds like, after the rule's precedence. */
+/** Imsak's rule: no full adhan, and by default only in Ramadan. */
+export interface ImsakRule extends ReminderRule {
+  atTime: ImsakAtTimeAlert;
+  /** The At-Time Alert comes only on the days of Ramadan. */
+  ramadanOnly: boolean;
+}
+
+/** What a Reminder or At-Time Alert sounds like, after the rule's precedence. */
 export type ReminderAlert =
   | { kind: "sound"; sound: ReminderSound }
   | { kind: "voice" }
-  | { kind: "silent" };
+  | { kind: "silent" }
+  | { kind: "takbir"; adhanSound: string }
+  | { kind: "adhan"; adhanSound: string };
 
-/** The alert a rule makes, or null when it is disabled. */
+/** The Reminder before a Prayer Time, or null when it is disabled. */
 export const reminderAlert = (rule: ReminderRule): ReminderAlert | null => {
   if (!rule.enabled) {
     return null;
@@ -47,6 +94,21 @@ export const reminderAlert = (rule: ReminderRule): ReminderAlert | null => {
     return { kind: "voice" };
   }
   return { kind: "sound", sound: rule.sound };
+};
+
+/** The alert at the Prayer Time itself, or null when it is off. */
+export const atTimeAlert = (rule: ReminderRule): ReminderAlert | null => {
+  switch (rule.atTime) {
+    case "off": {
+      return null;
+    }
+    case "silent": {
+      return { kind: "silent" };
+    }
+    default: {
+      return { kind: rule.atTime, adhanSound: rule.adhanSound };
+    }
+  }
 };
 
 export const MINUTES_PER_DAY = 1440;
@@ -64,7 +126,7 @@ export interface QuietHours {
 
 export interface ReminderSettings {
   salah: Record<Salah, ReminderRule>;
-  imsak: ReminderRule;
+  imsak: ImsakRule;
   quietHours: QuietHours;
 }
 
@@ -76,12 +138,15 @@ const salahRule = (enabled: boolean): ReminderRule => ({
   sound: "default",
   muted: false,
   voice: false,
+  atTime: enabled ? "takbir" : "off",
+  adhanSound: SYSTEM_SOUND_ID,
 });
 
 /**
  * Asr and Isha start off, like their Prayer Times on the timetable: most
- * Believers pray them joined with Dhuhr and Maghrib. Imsak starts off too;
- * it matters on fasting days.
+ * Believers pray them joined with Dhuhr and Maghrib. Fajr, Dhuhr and Maghrib
+ * start with the short takbir at the time. Imsak's Reminder starts off, and
+ * its silent At-Time Alert comes only in Ramadan, when it matters.
  */
 export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
   salah: {
@@ -91,7 +156,12 @@ export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = {
     maghrib: salahRule(true),
     isha: salahRule(false),
   },
-  imsak: { ...salahRule(false), minutesBefore: 0 },
+  imsak: {
+    ...salahRule(false),
+    minutesBefore: 0,
+    atTime: "silent",
+    ramadanOnly: true,
+  },
   quietHours: { enabled: false, start: 23 * 60, end: 5 * 60 },
 };
 
@@ -113,6 +183,14 @@ const ruleShape = {
   sound: z.enum(REMINDER_SOUNDS),
   muted: z.boolean(),
   voice: z.boolean(),
+  atTime: z.enum(AT_TIME_ALERTS),
+  adhanSound: adhanSoundIdSchema,
+};
+
+const imsakShape = {
+  ...ruleShape,
+  atTime: z.enum(IMSAK_AT_TIME_ALERTS),
+  ramadanOnly: z.boolean(),
 };
 
 const quietHoursShape = {
@@ -126,7 +204,7 @@ const ruleChangeSchema = z.object(ruleShape).partial();
 /** The settings to change; anything left out keeps its value. */
 export const reminderSettingsChangeSchema = z.object({
   salah: z.partialRecord(salahSchema, ruleChangeSchema).optional(),
-  imsak: ruleChangeSchema.optional(),
+  imsak: z.object(imsakShape).partial().optional(),
   quietHours: z.object(quietHoursShape).partial().optional(),
 });
 
@@ -166,6 +244,12 @@ export const readReminderRule = (
   fallback: ReminderRule
 ): ReminderRule => readFields(ruleShape, stored, fallback);
 
+/** Imsak's rule from a stored value of unknown shape. */
+export const readImsakRule = (
+  stored: unknown,
+  fallback: ImsakRule = DEFAULT_REMINDER_SETTINGS.imsak
+): ImsakRule => readFields(imsakShape, stored, fallback);
+
 /** Every Salah's rule from a stored map of unknown shape. */
 export const readSalahRules = (
   stored: unknown
@@ -201,7 +285,7 @@ export const applyReminderSettingsChange = (
         readReminderRule(parsed.salah?.[salah], settings.salah[salah]),
       ])
     ) as Record<Salah, ReminderRule>,
-    imsak: readReminderRule(parsed.imsak, settings.imsak),
+    imsak: readImsakRule(parsed.imsak, settings.imsak),
     quietHours: readFields(
       quietHoursShape,
       parsed.quietHours,

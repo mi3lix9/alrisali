@@ -17,24 +17,33 @@ const launch = (): Promise<UserDatabase> =>
     connect: connectNode,
   });
 
-const rule = (enabled: boolean, minutesBefore = 5) => ({
+const rule = (
+  enabled: boolean,
+  minutesBefore: number,
+  atTime: "off" | "silent" | "takbir" | "adhan"
+) => ({
   enabled,
   minutesBefore,
   sound: "default",
   muted: false,
   voice: false,
+  atTime,
+  adhanSound: "system",
 });
 
-/** A new Believer: Fajr, Dhuhr and Maghrib on; Asr, Isha and Imsak off. */
+/**
+ * A new Believer: Fajr, Dhuhr and Maghrib remind before and play the takbir
+ * at the time; Asr, Isha and Imsak's Reminder off; Imsak alerts in Ramadan.
+ */
 const NEW_BELIEVER = {
   salah: {
-    fajr: rule(true),
-    dhuhr: rule(true),
-    asr: rule(false),
-    maghrib: rule(true),
-    isha: rule(false),
+    fajr: rule(true, 5, "takbir"),
+    dhuhr: rule(true, 5, "takbir"),
+    asr: rule(false, 5, "off"),
+    maghrib: rule(true, 5, "takbir"),
+    isha: rule(false, 5, "off"),
   },
-  imsak: rule(false, 0),
+  imsak: { ...rule(false, 0, "silent"), ramadanOnly: true },
   quietHours: { enabled: false, start: 1380, end: 300 },
 };
 
@@ -77,10 +86,10 @@ describe(createReminderSettingsRepository, () => {
     ).resolves.toStrictEqual({
       salah: {
         ...NEW_BELIEVER.salah,
-        fajr: { ...rule(true, 10), sound: "bell", voice: true },
-        isha: rule(true),
+        fajr: { ...rule(true, 10, "takbir"), sound: "bell", voice: true },
+        isha: rule(true, 5, "off"),
       },
-      imsak: { ...rule(true, 0), muted: true },
+      imsak: { ...NEW_BELIEVER.imsak, enabled: true, muted: true },
       quietHours: { enabled: true, start: 1320, end: 300 },
     });
   });
@@ -101,6 +110,52 @@ describe(createReminderSettingsRepository, () => {
     await expect(reminders.get()).resolves.toStrictEqual(NEW_BELIEVER);
   });
 
+  it("keeps each Salah's At-Time Alert and Imsak's Ramadan choice", async () => {
+    const reminders = createReminderSettingsRepository(database.db);
+    await reminders.update({
+      salah: { maghrib: { atTime: "adhan" }, asr: { atTime: "silent" } },
+      imsak: { atTime: "takbir", ramadanOnly: false },
+    });
+
+    await database.close();
+    database = await launch();
+
+    await expect(
+      createReminderSettingsRepository(database.db).get()
+    ).resolves.toStrictEqual({
+      ...NEW_BELIEVER,
+      salah: {
+        ...NEW_BELIEVER.salah,
+        maghrib: rule(true, 5, "adhan"),
+        asr: rule(false, 5, "silent"),
+      },
+      imsak: { ...rule(false, 0, "takbir"), ramadanOnly: false },
+    });
+  });
+
+  it("refuses the full adhan for Imsak", async () => {
+    const reminders = createReminderSettingsRepository(database.db);
+
+    await expect(
+      // @ts-expect-error -- Imsak has no full adhan
+      reminders.update({ imsak: { atTime: "adhan" } })
+    ).rejects.toThrow("atTime");
+    await expect(reminders.get()).resolves.toStrictEqual(NEW_BELIEVER);
+  });
+
+  it("gives a rule saved before At-Time Alerts existed its default one", async () => {
+    await database.db.run(
+      sql`INSERT INTO reminder_settings (id, salah_rules) VALUES ('believer', '{"fajr":{"enabled":false,"minutesBefore":10}}')`
+    );
+
+    await expect(
+      createReminderSettingsRepository(database.db).get()
+    ).resolves.toStrictEqual({
+      ...NEW_BELIEVER,
+      salah: { ...NEW_BELIEVER.salah, fajr: rule(false, 10, "takbir") },
+    });
+  });
+
   it("reads values it does not know (written by a newer app) as the defaults", async () => {
     await createReminderSettingsRepository(database.db).update({
       salah: { asr: { enabled: true } },
@@ -113,7 +168,7 @@ describe(createReminderSettingsRepository, () => {
       createReminderSettingsRepository(database.db).get()
     ).resolves.toStrictEqual({
       ...NEW_BELIEVER,
-      salah: { ...NEW_BELIEVER.salah, asr: rule(true) },
+      salah: { ...NEW_BELIEVER.salah, asr: rule(true, 5, "off") },
     });
   });
 });

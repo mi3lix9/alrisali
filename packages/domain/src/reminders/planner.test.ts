@@ -1,9 +1,11 @@
 import { Temporal } from "temporal-polyfill";
 import { describe, expect, it } from "vitest";
 
+import { createHijriCalendar } from "../shared";
 import type { PrayerTimesSettings } from "../shared";
-import { diffSchedule, planReminders } from "./planner";
+import { diffSchedule, isStaleAlert, planReminders } from "./planner";
 import type {
+  PlannedReminder,
   PlanRemindersInput,
   PrayerReminderMessage,
   ReminderCandidate,
@@ -31,7 +33,13 @@ const at = (iso: string) => Temporal.ZonedDateTime.from(iso);
 
 const NOON_IN_NAJAF = at("2026-10-15T12:00[Asia/Baghdad]");
 
-const everyReminderOn = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+/** The defaults without any At-Time Alert: the Reminders before alone. */
+const BEFORE_ONLY = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+  salah: Object.fromEntries(SALAH.map((salah) => [salah, { atTime: "off" }])),
+  imsak: { atTime: "off" },
+});
+
+const everyReminderOn = applyReminderSettingsChange(BEFORE_ONLY, {
   salah: Object.fromEntries(SALAH.map((salah) => [salah, { enabled: true }])),
   imsak: { enabled: true },
 });
@@ -42,7 +50,7 @@ const plan = <Extra = never>(
   planReminders<Extra>({
     now: NOON_IN_NAJAF,
     prayerTimes: NAJAF,
-    settings: DEFAULT_REMINDER_SETTINGS,
+    settings: BEFORE_ONLY,
     messageStyle: "classic",
     ...overrides,
   });
@@ -75,12 +83,12 @@ const fajrWith = (rule: Partial<ReminderRule>) =>
   plan({
     now: at("2026-10-16T00:00[Asia/Baghdad]"),
     days: 1,
-    settings: applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+    settings: applyReminderSettingsChange(BEFORE_ONLY, {
       salah: { fajr: { sound: "bell", ...rule } },
     }),
-  }).find(({ id }) => id === "salah:fajr:2026-10-16");
+  }).find(({ id }) => id === "prayer:2026-10-16:fajr:before");
 
-const QUIET_NIGHTS = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+const QUIET_NIGHTS = applyReminderSettingsChange(BEFORE_ONLY, {
   quietHours: { enabled: true, start: 22 * 60, end: 5 * 60 },
 });
 
@@ -119,15 +127,19 @@ const sayingTopics = (
       )
   );
 
+/** The At-Time Alerts of a plan, without the Reminders before. */
+const atTime = (reminders: readonly PlannedReminder[]) =>
+  reminders.filter(({ message }) => message.timing === "at-time");
+
 describe(planReminders, () => {
   it("plans the coming days' Reminders, minutes before each Salah, in order", () => {
     const reminders = plan({ days: 2 });
 
     expect(reminders.map(({ id }) => id)).toStrictEqual([
-      "salah:maghrib:2026-10-15",
-      "salah:fajr:2026-10-16",
-      "salah:dhuhr:2026-10-16",
-      "salah:maghrib:2026-10-16",
+      "prayer:2026-10-15:maghrib:before",
+      "prayer:2026-10-16:fajr:before",
+      "prayer:2026-10-16:dhuhr:before",
+      "prayer:2026-10-16:maghrib:before",
     ]);
     expect(localFireTimes(reminders)).toStrictEqual([
       "2026-10-15T17:41",
@@ -147,7 +159,7 @@ describe(planReminders, () => {
   });
 
   it("uses each Salah's own minutes before, and Imsak at its time", () => {
-    const settings = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+    const settings = applyReminderSettingsChange(BEFORE_ONLY, {
       salah: { fajr: { minutesBefore: 0 }, dhuhr: { minutesBefore: 30 } },
       imsak: { enabled: true },
     });
@@ -159,10 +171,10 @@ describe(planReminders, () => {
     });
 
     expect(reminders.map(({ id }) => id)).toStrictEqual([
-      "imsak:2026-10-16",
-      "salah:fajr:2026-10-16",
-      "salah:dhuhr:2026-10-16",
-      "salah:maghrib:2026-10-16",
+      "prayer:2026-10-16:imsak:before",
+      "prayer:2026-10-16:fajr:before",
+      "prayer:2026-10-16:dhuhr:before",
+      "prayer:2026-10-16:maghrib:before",
     ]);
     expect(localFireTimes(reminders)).toStrictEqual([
       "2026-10-16T04:35",
@@ -178,8 +190,8 @@ describe(planReminders, () => {
     // Asr, Maghrib and Isha are left today; then six a day (Imsak and the
     // five Salah) for ten days make 63, and the 64th is the next Imsak.
     expect(reminders).toHaveLength(64);
-    expect(reminders.at(0)?.id).toBe("salah:asr:2026-10-15");
-    expect(reminders.at(-1)?.id).toBe("imsak:2026-10-26");
+    expect(reminders.at(0)?.id).toBe("prayer:2026-10-15:asr:before");
+    expect(reminders.at(-1)?.id).toBe("prayer:2026-10-26:imsak:before");
   });
 
   it("can keep fewer when asked", () => {
@@ -225,11 +237,27 @@ describe(planReminders, () => {
       expect(ids).toContain("habit:morning");
     });
 
-    it("never holds back a Salah", () => {
+    it("holds back a Salah's Reminder before it", () => {
       const ids = plan({ days: 2, settings: QUIET_NIGHTS }).map(({ id }) => id);
 
-      // Fajr fires at 04:40, inside the quiet hours.
-      expect(ids).toContain("salah:fajr:2026-10-16");
+      // Fajr's Reminder fires at 04:40, inside the quiet hours.
+      expect(ids).not.toContain("prayer:2026-10-16:fajr:before");
+      expect(ids).toContain("prayer:2026-10-16:dhuhr:before");
+    });
+
+    it("never holds back an At-Time Alert or Imsak", () => {
+      const ids = plan({
+        days: 2,
+        settings: applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+          imsak: { enabled: true, ramadanOnly: false },
+          quietHours: { enabled: true, start: 22 * 60, end: 5 * 60 },
+        }),
+      }).map(({ id }) => id);
+
+      // Imsak (04:35) and Fajr (04:45) fall inside the quiet hours.
+      expect(ids).toContain("prayer:2026-10-16:fajr:at-time");
+      expect(ids).toContain("prayer:2026-10-16:imsak:before");
+      expect(ids).toContain("prayer:2026-10-16:imsak:at-time");
     });
 
     it("lets an essential Reminder from a source through", () => {
@@ -274,10 +302,10 @@ describe(planReminders, () => {
       // Najaf's Maghrib (17:46 there) is 15:46 in London, so it is still
       // the 15th there; the window now ends at London's midnight.
       expect(reminders.map(({ id }) => id)).toStrictEqual([
-        "salah:maghrib:2026-10-15",
-        "salah:fajr:2026-10-16",
-        "salah:dhuhr:2026-10-16",
-        "salah:maghrib:2026-10-16",
+        "prayer:2026-10-15:maghrib:before",
+        "prayer:2026-10-16:fajr:before",
+        "prayer:2026-10-16:dhuhr:before",
+        "prayer:2026-10-16:maghrib:before",
       ]);
       expect(localFireTimes(reminders)).toStrictEqual([
         "2026-10-15T17:41",
@@ -301,7 +329,7 @@ describe(planReminders, () => {
           coordinates: { latitude: 51.5074, longitude: -0.1278 },
         },
         days: 3,
-      }).filter(({ id }) => id.startsWith("salah:dhuhr"));
+      }).filter(({ id }) => id.includes(":dhuhr:"));
 
       expect(localFireTimes(reminders, "Europe/London")).toStrictEqual([
         "2026-10-24T12:41",
@@ -356,6 +384,152 @@ describe(planReminders, () => {
     });
   });
 
+  describe("At-Time Alerts", () => {
+    it("plays the short takbir at Fajr, Dhuhr and Maghrib by default", () => {
+      const alerts = atTime(
+        plan({ settings: DEFAULT_REMINDER_SETTINGS, days: 2 })
+      );
+
+      expect(alerts.map(({ id }) => id)).toStrictEqual([
+        "prayer:2026-10-15:maghrib:at-time",
+        "prayer:2026-10-16:fajr:at-time",
+        "prayer:2026-10-16:dhuhr:at-time",
+        "prayer:2026-10-16:maghrib:at-time",
+      ]);
+      // At the Prayer Time itself, not minutes before.
+      expect(localFireTimes(alerts)).toStrictEqual([
+        "2026-10-15T17:46",
+        "2026-10-16T04:45",
+        "2026-10-16T11:49",
+        "2026-10-16T17:44",
+      ]);
+      expect(new Set(alerts.map(({ alert }) => alert.kind))).toStrictEqual(
+        new Set(["takbir"])
+      );
+    });
+
+    it("comes as well as the Reminder before, each with its own identity", () => {
+      const ids = plan({ settings: DEFAULT_REMINDER_SETTINGS, days: 1 }).map(
+        ({ id }) => id
+      );
+
+      expect(ids).toStrictEqual([
+        "prayer:2026-10-15:maghrib:before",
+        "prayer:2026-10-15:maghrib:at-time",
+      ]);
+    });
+
+    it("plays each Salah's own choice", () => {
+      const settings = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+        salah: {
+          asr: { atTime: "silent" },
+          maghrib: { atTime: "adhan", adhanSound: "najaf-voice" },
+          isha: { atTime: "takbir" },
+        },
+      });
+
+      const alerts = atTime(plan({ settings, days: 1 }));
+
+      expect(
+        alerts.map(({ message, alert }) => [message.prayerTime, alert])
+      ).toStrictEqual([
+        ["asr", { kind: "silent" }],
+        ["maghrib", { kind: "adhan", adhanSound: "najaf-voice" }],
+        ["isha", { kind: "takbir", adhanSound: "system" }],
+      ]);
+    });
+
+    it("drops a Salah whose At-Time Alert is off", () => {
+      const settings = applyReminderSettingsChange(DEFAULT_REMINDER_SETTINGS, {
+        salah: { maghrib: { atTime: "off" } },
+      });
+
+      expect(atTime(plan({ settings, days: 1 }))).toStrictEqual([]);
+    });
+
+    it("keeps Reminders before and At-Time Alerts together within 64, the soonest", () => {
+      const settings = applyReminderSettingsChange(everyReminderOn, {
+        salah: Object.fromEntries(
+          SALAH.map((salah) => [salah, { atTime: "takbir" }])
+        ),
+        imsak: { atTime: "takbir", ramadanOnly: false },
+      });
+
+      const reminders = plan({ settings, days: 14 });
+
+      expect(reminders).toHaveLength(64);
+      expect(new Set(reminders.map(({ id }) => id)).size).toBe(64);
+      expect(
+        new Set(reminders.map(({ message }) => message.timing))
+      ).toStrictEqual(new Set(["before", "at-time"]));
+      // Twelve alerts a day: the plan reaches only into the sixth day.
+      expect(
+        reminders.at(-1)?.fireAt.toZonedDateTimeISO("Asia/Baghdad").day
+      ).toBe(20);
+      const fireTimes = reminders.map(({ fireAt }) => fireAt.epochMilliseconds);
+      expect(fireTimes).toStrictEqual(fireTimes.toSorted((a, b) => a - b));
+    });
+
+    describe("Imsak", () => {
+      const calendar = createHijriCalendar();
+      // The first of Ramadan 1448, and the day before it (Sha'ban).
+      const firstOfRamadan = calendar.toGregorian({
+        year: 1448,
+        month: 9,
+        day: 1,
+      });
+      const lastOfShaban = firstOfRamadan.subtract({ days: 1 });
+      const imsakAlerts = (settings = DEFAULT_REMINDER_SETTINGS) =>
+        atTime(
+          plan({
+            now: lastOfShaban.toZonedDateTime("Asia/Baghdad"),
+            settings,
+            days: 2,
+            hijri: calendar,
+          })
+        )
+          .filter(({ message }) => message.prayerTime === "imsak")
+          .map(({ id }) => id);
+
+      it("alerts at Imsak only on the days of Ramadan by default", () => {
+        expect(imsakAlerts()).toStrictEqual([
+          `prayer:${firstOfRamadan.toString()}:imsak:at-time`,
+        ]);
+      });
+
+      it("alerts all year once the Believer asks for it", () => {
+        const settings = applyReminderSettingsChange(
+          DEFAULT_REMINDER_SETTINGS,
+          { imsak: { ramadanOnly: false } }
+        );
+
+        expect(imsakAlerts(settings)).toStrictEqual([
+          `prayer:${lastOfShaban.toString()}:imsak:at-time`,
+          `prayer:${firstOfRamadan.toString()}:imsak:at-time`,
+        ]);
+      });
+
+      it("follows the Hijri Adjustment into Ramadan", () => {
+        const shifted = createHijriCalendar({ adjustment: 1 });
+        const ids = atTime(
+          plan({
+            now: lastOfShaban.toZonedDateTime("Asia/Baghdad"),
+            settings: DEFAULT_REMINDER_SETTINGS,
+            days: 1,
+            hijri: shifted,
+          })
+        )
+          .filter(({ message }) => message.prayerTime === "imsak")
+          .map(({ id }) => id);
+
+        // A day later by the adjustment, the last of Sha'ban is Ramadan's 1st.
+        expect(ids).toStrictEqual([
+          `prayer:${lastOfShaban.toString()}:imsak:at-time`,
+        ]);
+      });
+    });
+  });
+
   it("plans only the sources' Reminders without a location", () => {
     const reminders = plan({
       prayerTimes: null,
@@ -388,6 +562,20 @@ describe(planReminders, () => {
     });
 
     expect(reminders).toStrictEqual([]);
+  });
+});
+
+describe(isStaleAlert, () => {
+  const fireAt = Temporal.Instant.from("2026-10-15T14:46:00Z");
+
+  it("shows an alert delivered up to 30 minutes late", () => {
+    expect(isStaleAlert(fireAt, fireAt)).toBeFalsy();
+    expect(isStaleAlert(fireAt, fireAt.add({ minutes: 30 }))).toBeFalsy();
+  });
+
+  it("drops an alert that would arrive more than 30 minutes late", () => {
+    expect(isStaleAlert(fireAt, fireAt.add({ minutes: 31 }))).toBeTruthy();
+    expect(isStaleAlert(fireAt, fireAt.add({ hours: 5 }))).toBeTruthy();
   });
 });
 
