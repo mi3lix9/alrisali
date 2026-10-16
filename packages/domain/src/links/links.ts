@@ -22,6 +22,8 @@ export type AppLink =
   | { kind: "khatmah"; id?: string }
   | { kind: "qibla" }
   | { kind: "tasbih" }
+  /** The Hijri calendar. */
+  | { kind: "calendar" }
   /** The Prayer tab, where the next Salah is counted down. */
   | { kind: "next-salah" };
 
@@ -46,6 +48,7 @@ export const linkFeatureId = (link: AppLink): string => {
     case "next-salah": {
       return "prayer";
     }
+    case "calendar":
     case "khatmah":
     case "qibla":
     case "tasbih": {
@@ -158,6 +161,7 @@ const fromSegments = (
     case "khatmah": {
       return khatmahLink(arg ?? params.get("id"));
     }
+    case "calendar":
     case "qibla":
     case "tasbih": {
       return arg === undefined ? { kind: head } : null;
@@ -239,6 +243,7 @@ const pathOf = (link: AppLink): string => {
     case "next-salah": {
       return "next-salah";
     }
+    case "calendar":
     case "qibla":
     case "tasbih": {
       return link.kind;
