@@ -1,3 +1,4 @@
+import { writeDigits } from "@alrisali/domain/shared";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
   DarkTheme,
@@ -15,6 +16,7 @@ import { LayoutDirection, useCSSVariable, useUniwind } from "uniwind";
 
 import { useContentSync } from "./content-database";
 import { i18n, launchDirection } from "./i18n";
+import { useDigits } from "./numbers";
 import { queryClient } from "./orpc";
 import { useUserDataSync } from "./user-database";
 
@@ -61,6 +63,8 @@ const NavigationTheme = ({ children }: { children: ReactNode }) => (
 /** Panel UI, its controls speaking to VoiceOver in the interface's language. */
 const TranslatedPanelUI = ({ children }: { children: ReactNode }) => {
   const { t } = useTranslation();
+  // The spoken percent is written in the Believer's digits.
+  const digits = useDigits();
   const labels = useMemo<PanelUILabels>(
     () => ({
       closeSheet: t("controls.closeSheet"),
@@ -78,8 +82,10 @@ const TranslatedPanelUI = ({ children }: { children: ReactNode }) => {
       minute: t("controls.minute"),
       amPm: t("controls.amPm"),
       time: t("controls.time"),
+      percent: (fraction) =>
+        writeDigits(`${Math.round(fraction * 100)}%`, digits),
     }),
-    [t]
+    [t, digits]
   );
   return <PanelUIProvider labels={labels}>{children}</PanelUIProvider>;
 };

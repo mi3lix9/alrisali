@@ -183,6 +183,53 @@ index 959b20b6e18bd02df05a4476dd3da6667aae2993..be9af00c8064494cac8a628821e8ea1d
          accessibilityState: {
            disabled: disabled || atMax
          },
+diff --git a/lib/module/components/progress/index.js b/lib/module/components/progress/index.js
+index 5f6eddac5da1844b7cfbef256e6c957e13b0eef3..c4d2f18a88db5b2feb2cb199cecb374894b50d26 100644
+--- a/lib/module/components/progress/index.js
++++ b/lib/module/components/progress/index.js
+@@ -7,6 +7,7 @@ import { tv } from 'tailwind-variants';
+ import { useDirectionSign } from "../../hooks/use-direction.js";
+ import { Text } from "../../primitives/text.js";
+ import { cn } from "../../utils/cn.js";
++import { useLabels } from "../../providers/labels.js";
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+ const SPRING = {
+   damping: 20,
+@@ -93,7 +94,7 @@ function fractionOf(value, min, max) {
+  * of the range means; every other style is given the value, because a currency
+  * or a byte count is a quantity and not a proportion.
+  */
+-function formatValue(value, fraction, valueLabel, formatOptions) {
++function formatValue(value, fraction, valueLabel, formatOptions, percent) {
+   if (valueLabel != null) return valueLabel;
+   if (formatOptions) {
+     try {
+@@ -102,7 +103,7 @@ function formatValue(value, fraction, valueLabel, formatOptions) {
+       // Some engines ship a partial Intl; fall through to the plain percent.
+     }
+   }
+-  return `${Math.round(fraction * 100)}%`;
++  return percent(fraction);
+ }
+ 
+ /**
+@@ -139,6 +140,7 @@ export const Progress = /*#__PURE__*/forwardRef(({
+   size,
+   ...props
+ }, ref) => {
++  const labels = useLabels();
+   const slots = progressVariants({
+     color,
+     size
+@@ -232,7 +234,7 @@ export const Progress = /*#__PURE__*/forwardRef(({
+   // The value label is meaningless while looping, so it is dropped there.
+   const showValue = showValueLabel && !indeterminate;
+   const hasHeader = label != null || showValue;
+-  const spoken = formatValue(clamp(value, minValue, maxValue), target, valueLabel, formatOptions);
++  const spoken = formatValue(clamp(value, minValue, maxValue), target, valueLabel, formatOptions, labels.percent);
+   const track = /*#__PURE__*/_jsx(View, {
+     ref: ref,
+     accessibilityRole: "progressbar",
 diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
 index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
 --- a/lib/module/components/textarea/index.js
@@ -338,10 +385,10 @@ index 17ee04fb80d88b3566cdd49ced2ab1aae5fbfcdf..6e932959204423ca38b5db15fcf34df7
  export { useTheme, useThemeMode, PANEL_THEMES, PANEL_THEME_NAMES, PANEL_EXTRA_THEMES } from "./theme/use-theme.js";
 diff --git a/node_modules/panelui-native/lib/module/providers/labels.js b/lib/module/providers/labels.js
 new file mode 100644
-index 0000000000000000000000000000000000000000..4200907fae904a884223fa5579825d4f51e51928
+index 0000000000000000000000000000000000000000..1fcbbda1a32d10f45b4c4a866208bda217a86546
 --- /dev/null
 +++ b/lib/module/providers/labels.js
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,43 @@
 +"use strict";
 +
 +import { createContext, useContext, useMemo } from 'react';
@@ -365,7 +412,8 @@ index 0000000000000000000000000000000000000000..4200907fae904a884223fa5579825d4f
 +  hour: 'Hour',
 +  minute: 'Minute',
 +  amPm: 'AM or PM',
-+  time: 'Time'
++  time: 'Time',
++  percent: fraction => `${Math.round(fraction * 100)}%`
 +};
 +const LabelsContext = /*#__PURE__*/createContext(DEFAULT_LABELS);
 +
@@ -451,10 +499,10 @@ index 9f4ebba2a3e33c3529c7ba33db7ef973c530f7eb..b20121f2e113bf49fe8a34c81de2c3fb
  export { Scrim, hasBlur, type ScrimProps } from './primitives/scrim.js';
 diff --git a/node_modules/panelui-native/lib/typescript/src/providers/labels.d.ts b/lib/typescript/src/providers/labels.d.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..27578482b54a67dc08fb83fac545524b737c6dce
+index 0000000000000000000000000000000000000000..b78ffbd126ba87b6fab8c913e1fc2db1370aafbf
 --- /dev/null
 +++ b/lib/typescript/src/providers/labels.d.ts
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,38 @@
 +import { type ReactNode } from 'react';
 +/**
 + * The words Panel UI's controls speak to assistive technology. English by
@@ -483,6 +531,8 @@ index 0000000000000000000000000000000000000000..27578482b54a67dc08fb83fac545524b
 +    minute: string;
 +    amPm: string;
 +    time: string;
++    /** How far along a Progress bar is, 0–1, as its spoken value: "25%". */
++    percent: (fraction: number) => string;
 +}
 +export declare const DEFAULT_LABELS: PanelUILabels;
 +/** The labels in effect: the app's, over the English defaults. */
@@ -721,6 +771,66 @@ index 5a9dad400e76b139252830fd369ac189916d6309..749443c3dc501fa1f334d59bf099d614
              accessibilityState={{ disabled: disabled || atMax }}
              style={atMax ? { opacity: 0.4 } : undefined}
            >
+diff --git a/src/components/progress/index.tsx b/src/components/progress/index.tsx
+index a1dd8839c938134fc29b524e606f7c25e67e1766..e7b6608b400ecb9fa30ab9a19a9c484e8b2d54bc 100644
+--- a/src/components/progress/index.tsx
++++ b/src/components/progress/index.tsx
+@@ -15,6 +15,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
+ import { useDirectionSign } from '../../hooks/use-direction';
+ import { Text } from '../../primitives/text';
+ import { cn } from '../../utils/cn';
++import { useLabels } from '../../providers/labels';
+ 
+ const SPRING = { damping: 20, stiffness: 180, mass: 0.6 } as const;
+ /** Fraction of the track covered by the sliding bar in indeterminate mode. */
+@@ -129,7 +130,7 @@ function fractionOf(value: number, min: number, max: number) {
+ 
+ /**
+  * The right-hand caption: an explicit override, an `Intl` rendering, or a
+- * rounded percent.
++ * rounded percent written by the labels' `percent`.
+  *
+  * A `percent` style is given the fraction, because that is what a percentage
+  * of the range means; every other style is given the value, because a currency
+@@ -138,8 +139,9 @@ function fractionOf(value: number, min: number, max: number) {
+ function formatValue(
+   value: number,
+   fraction: number,
+-  valueLabel?: string,
+-  formatOptions?: Intl.NumberFormatOptions
++  valueLabel: string | undefined,
++  formatOptions: Intl.NumberFormatOptions | undefined,
++  percent: (fraction: number) => string
+ ) {
+   if (valueLabel != null) return valueLabel;
+   if (formatOptions) {
+@@ -151,7 +153,7 @@ function formatValue(
+       // Some engines ship a partial Intl; fall through to the plain percent.
+     }
+   }
+-  return `${Math.round(fraction * 100)}%`;
++  return percent(fraction);
+ }
+ 
+ /**
+@@ -192,6 +194,7 @@ export const Progress = forwardRef<View, ProgressProps>(
+     },
+     ref
+   ) => {
++    const labels = useLabels();
+     const slots = progressVariants({ color, size });
+     const trackWidth = useSharedValue(0);
+     // Yoga mirrors the track; the bar sliding along it is a transform, so it
+@@ -295,7 +298,8 @@ export const Progress = forwardRef<View, ProgressProps>(
+       clamp(value, minValue, maxValue),
+       target,
+       valueLabel,
+-      formatOptions
++      formatOptions,
++      labels.percent
+     );
+ 
+     const track = (
 diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
 index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
 --- a/src/components/textarea/index.tsx
@@ -880,10 +990,10 @@ index c05902c715ea18e09c6523e28e70157b6e1a16a5..2ceb2988882b0aaadc82b121c841d300
  export {
 diff --git a/node_modules/panelui-native/src/providers/labels.tsx b/src/providers/labels.tsx
 new file mode 100644
-index 0000000000000000000000000000000000000000..44f604102806336be01b8817e90ba8eba5f22048
+index 0000000000000000000000000000000000000000..31ed8df6bb527c44cf257e81a3f9b68427286fdc
 --- /dev/null
 +++ b/src/providers/labels.tsx
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,65 @@
 +import { createContext, useContext, useMemo, type ReactNode } from 'react';
 +
 +/**
@@ -913,6 +1023,8 @@ index 0000000000000000000000000000000000000000..44f604102806336be01b8817e90ba8eb
 +  minute: string;
 +  amPm: string;
 +  time: string;
++  /** How far along a Progress bar is, 0–1, as its spoken value: "25%". */
++  percent: (fraction: number) => string;
 +}
 +
 +export const DEFAULT_LABELS: PanelUILabels = {
@@ -929,6 +1041,7 @@ index 0000000000000000000000000000000000000000..44f604102806336be01b8817e90ba8eb
 +  minute: 'Minute',
 +  amPm: 'AM or PM',
 +  time: 'Time',
++  percent: (fraction) => `${Math.round(fraction * 100)}%`,
 +};
 +
 +const LabelsContext = createContext<PanelUILabels>(DEFAULT_LABELS);
