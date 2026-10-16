@@ -19,6 +19,9 @@
     @variant dark {
       --color-destructive: #e5484d;
       --color-destructive-solid-foreground: #ffffff;
+      /* Unticked checkboxes and radios are outlined in this colour. Panel
+         UI's 8% white vanished on a dark card. */
+      --color-input: rgba(255, 255, 255, 0.24);
     }
   }
 }
