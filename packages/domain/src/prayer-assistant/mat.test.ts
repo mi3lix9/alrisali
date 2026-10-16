@@ -30,6 +30,7 @@ import { paceHolds } from "./pace";
 import type { PaceChoice } from "./pace";
 import { currentStep, observe, startSalah } from "./rakah-machine";
 import type { Sighting } from "./rakah-machine";
+import { SALAH_DEFINITIONS } from "./salah-definition";
 
 const NORMAL: PaceChoice = { pace: "normal" };
 
@@ -43,7 +44,7 @@ const pray = (
   frames: readonly LumaFrame[],
   storedDip: number | null = null
 ) => {
-  let state = startSalah(salah, NORMAL);
+  let state = startSalah(SALAH_DEFINITIONS[salah], NORMAL);
   let sensor = startMatSensor(storedDip);
   const sightings: Sighting[] = [];
   const readings: MatReading[] = [];

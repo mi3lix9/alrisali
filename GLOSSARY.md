@@ -44,6 +44,12 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Pace**: How long the Prayer Assistant waits in each Position before moving on: Slow, Normal, Fast or Custom.
 
+**Salah Definition**: A prayer the Prayer Assistant follows, as data: its Segments in order, each with its Rak'ahs, Ruku per Rak'ah (five in the Ayat prayer) and middle Tashahhud. Covers the five Salah (optionally with their nafila), the Night prayer, Ayat, Ghufayla, Friday, Eid, Ziyarah and a Custom count. Only one that fulfils a Salah is logged.
+
+**Segment**: One prayer within a Salah Definition, closed by its own Tashahhud and Tasleem, such as one pair of nafila, the Shaf' or the Witr. _Avoid_: Unit
+
+**Haste Warning**: The gentle notice the Prayer Assistant shows when Positions advance less than 3 seconds apart. _Avoid_: Pace warning (Pace is the hold length)
+
 ## Calendar
 
 **Hijri Date**: The date in the Islamic lunar calendar, after applying the Hijri Adjustment.

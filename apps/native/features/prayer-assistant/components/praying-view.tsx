@@ -1,4 +1,8 @@
-import { completesAt, currentStep } from "@alrisali/domain/prayer-assistant";
+import {
+  completesAt,
+  HASTE_WARNING_MS,
+  stepPlace,
+} from "@alrisali/domain/prayer-assistant";
 import type {
   AssistantState,
   Sighting,
@@ -12,8 +16,9 @@ import { Alert, Pressable, View } from "react-native";
 
 const FINAL_HOLD_REDRAW_MS = 250;
 
-// No Salah has more than four Rak'ahs.
+// Every prayer is prayed in segments of at most four Rak'ahs.
 const RAKAH_ORDINALS = ["first", "second", "third", "fourth"] as const;
+const MS_PER_SECOND = 1000;
 
 /** How far through the final Tashahhud hold the Believer is, 0 to 1. */
 const useFinalHoldProgress = (state: AssistantState): number | null => {
@@ -58,12 +63,29 @@ export const PrayingView = ({
 }: PrayingViewProps) => {
   useKeepAwake();
   const { t } = useTranslation("prayer-assistant");
-  const step = currentStep(state);
+  const place = stepPlace(state);
+  const { step } = place;
   const finalHold = useFinalHoldProgress(state);
-  const position = step.final
+  const posture = step.final
     ? t("position.finalTashahhud")
     : t(`position.${step.position}`);
-  const rakah = t(`rakah.${RAKAH_ORDINALS[step.rakah - 1] ?? "fourth"}`);
+  const position = place.ruku
+    ? t("praying.rukuOf", { position: posture, ...place.ruku })
+    : posture;
+  const ordinal = RAKAH_ORDINALS[place.rakah - 1];
+  const rakah = ordinal
+    ? t(`rakah.${ordinal}`)
+    : t("rakah.numbered", { value: place.rakah });
+  const prayer =
+    place.segments > 1
+      ? t("praying.segmentOf", {
+          name: place.part
+            ? t(`part.${place.part}`)
+            : t(`salah.${state.definition.type}`),
+          segment: place.segment,
+          segments: place.segments,
+        })
+      : null;
 
   const confirmStop = () =>
     Alert.alert(t("praying.stopTitle"), t("praying.stopMessage"), [
@@ -87,12 +109,19 @@ export const PrayingView = ({
         className="border-border flex-1 items-center justify-center gap-4 rounded-3xl border"
         onPress={() => send({ kind: "advance" })}
       >
+        {prayer ? <Text muted>{prayer}</Text> : null}
         <Text size="xl" muted>
           {rakah}
         </Text>
+        {place.seated ? <Text muted>{t("praying.seated")}</Text> : null}
         <Text size="3xl" weight="bold" className="text-center">
           {position}
         </Text>
+        {state.hasty ? (
+          <Text className="text-warning px-6 text-center">
+            {t("praying.haste", { value: HASTE_WARNING_MS / MS_PER_SECOND })}
+          </Text>
+        ) : null}
         {finalHold === null ? (
           <Text muted className="px-6 text-center">
             {t("praying.tapHint")}

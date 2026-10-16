@@ -4,9 +4,9 @@ import type {
   AssistantState,
   PaceChoice,
   RecognitionMode,
+  SalahDefinition,
   Sighting,
 } from "@alrisali/domain/prayer-assistant";
-import type { Salah } from "@alrisali/domain/shared";
 import { router, Stack } from "expo-router";
 import { Spinner } from "panelui-native";
 import { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ import {
 import { useRakahMachine } from "../hooks/use-rakah-machine";
 
 interface PrayingProps {
-  salah: Salah;
+  definition: SalahDefinition;
   pace: PaceChoice;
   mode: RecognitionMode;
   bowSensitivity: number;
@@ -70,27 +70,32 @@ const Sensor = ({ mode, bowSensitivity, state, send }: SensorProps) => {
 };
 
 /**
- * Follows one Salah to its end. Finishing emits `SalahCompleted` (the Prayer
- * Log ticks it and the Khushu sheet opens) and shows the completion screen.
+/**
+ * Follows one prayer to its end. Finishing an obligatory Salah emits
+ * `SalahCompleted` (the Prayer Log ticks it and the Khushu sheet opens); any
+ * other prayer is never logged. Either way the completion screen follows.
  */
 const Praying = ({
-  salah,
+  definition,
   pace,
   mode,
   bowSensitivity,
   completionActions,
 }: PrayingProps & { completionActions?: CompletionActions | undefined }) => {
-  const { state, send } = useRakahMachine(salah, pace);
+  const { state, send } = useRakahMachine(definition, pace);
+  const { salah } = definition;
 
   useEffect(() => {
     if (!state.completed) {
       return;
     }
-    events.emit("SalahCompleted", {
-      date: Temporal.Now.plainDateISO().toString(),
-      salah,
-      completedAt: Date.now(),
-    });
+    if (salah) {
+      events.emit("SalahCompleted", {
+        date: Temporal.Now.plainDateISO().toString(),
+        salah,
+        completedAt: Date.now(),
+      });
+    }
   }, [state.completed, salah]);
 
   if (state.completed) {
@@ -131,7 +136,7 @@ export const PrayerAssistantScreen = ({
       <>
         <Stack.Screen options={{ title: t("title") }} />
         <Praying
-          salah={praying.salah}
+          definition={praying.definition}
           pace={praying.pace}
           mode={praying.mode}
           bowSensitivity={praying.bowSensitivity}
@@ -148,9 +153,9 @@ export const PrayerAssistantScreen = ({
         <SalahSetup
           settings={settings}
           onChange={update}
-          onStart={(salah) =>
+          onStart={(definition) =>
             setPraying({
-              salah,
+              definition,
               pace: paceChoice(settings),
               mode: settings.recognitionMode,
               bowSensitivity: settings.bowSensitivity,
