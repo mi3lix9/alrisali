@@ -25,6 +25,8 @@ interface OnboardingScreenProps {
   location: ReactNode;
   calculationMethod: ReactNode;
   messageStyle: ReactNode;
+  /** The At-Time Alert choices, with a notification preview. */
+  alerts: ReactNode;
   signIn: ReactNode;
 }
 
@@ -37,6 +39,7 @@ export const OnboardingScreen = ({
   location,
   calculationMethod,
   messageStyle,
+  alerts,
   signIn,
 }: OnboardingScreenProps) => {
   const { t } = useTranslation("onboarding");
@@ -59,7 +62,7 @@ export const OnboardingScreen = ({
     location,
     calculationMethod,
     messageStyle,
-    notifications: <NotificationsStep />,
+    notifications: <NotificationsStep alerts={alerts} />,
     account: signIn,
   };
 
