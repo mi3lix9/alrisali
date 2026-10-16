@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useDescribe } from "../hooks/use-describe";
@@ -153,9 +154,11 @@ export const ActSheet = ({
           {act ? (
             <View className="gap-4 pb-4">
               <Text muted size="sm">
-                {[describe.timing(act), describe.schedule(act)]
-                  .filter((part) => part !== null)
-                  .join(" · ")}
+                {joinParts(
+                  [describe.timing(act), describe.schedule(act)].filter(
+                    (part): part is string => part !== null
+                  )
+                )}
               </Text>
               {description ? <Text selectable>{description}</Text> : null}
               {act.detail.type === "dua" ? (

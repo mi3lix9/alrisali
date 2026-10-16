@@ -5,6 +5,7 @@ import { Badge, Card, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useDescribe } from "../hooks/use-describe";
@@ -70,9 +71,11 @@ export const ProgramCard = ({
             )}
           </View>
           <Text muted size="sm">
-            {[season, describe.actCount(program)]
-              .filter((part) => part !== null)
-              .join(" · ")}
+            {joinParts(
+              [season, describe.actCount(program)].filter(
+                (part): part is string => part !== null
+              )
+            )}
           </Text>
         </Card.Content>
       </Pressable>

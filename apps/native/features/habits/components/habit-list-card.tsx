@@ -3,6 +3,7 @@ import { Button, Card, Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Alert } from "react-native";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { formatDateTime } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
 
@@ -43,7 +44,9 @@ const ScheduleLine = ({ habit }: { habit: Habit }) => {
     habit.archived ? t("manage.archived") : null,
   ];
   return (
-    <Item.Description>{parts.filter(Boolean).join(" · ")}</Item.Description>
+    <Item.Description>
+      {joinParts(parts.filter((part): part is string => Boolean(part)))}
+    </Item.Description>
   );
 };
 

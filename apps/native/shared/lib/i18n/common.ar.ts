@@ -11,6 +11,8 @@ export const ar = {
   },
   settings: "الإعدادات",
   account: "الحساب",
+  // Separates the parts of one line: a middle dot after an Arabic-Indic number reads as a zero.
+  separator: "، ",
   search: {
     label: "بحث",
     clear: "مسح البحث",

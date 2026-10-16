@@ -85,3 +85,6 @@ export const registerCatalog = (
 
 /** The layout direction this launch runs in, from its language. */
 export const launchDirection = textDirection(launchLanguage);
+/** The parts of one line, joined with the language's separator. */
+export const joinParts = (parts: readonly string[]): string =>
+  parts.join(i18n.t("separator"));

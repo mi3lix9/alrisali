@@ -10,6 +10,8 @@ import { Alert, Card, Text } from "panelui-native";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
+import { joinParts } from "@/shared/lib/i18n";
+
 import { useCompass } from "../hooks/use-compass";
 import { bearingSector, formatWholeNumber } from "../utils/format";
 import { CompassStatus } from "./compass-status";
@@ -63,7 +65,7 @@ export const QiblaCard = ({ location }: { location: Location }) => {
             {t("bearing", { degrees, direction })}
           </Card.Title>
           <Card.Description>
-            {location.name ? `${location.name} · ${distance}` : distance}
+            {location.name ? joinParts([location.name, distance]) : distance}
           </Card.Description>
         </Card.Header>
         <Card.Content className="gap-4">

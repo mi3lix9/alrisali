@@ -5,6 +5,7 @@ import { router } from "expo-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 import type { SearchSection } from "@/shared/ui/search-panel";
 
@@ -25,7 +26,10 @@ export const useLibraryAssetSearch = (query: string): SearchSection => {
     results: found.map((asset) => ({
       key: asset.id,
       title: localized(asset.title, launchLanguage),
-      description: `${t(`category.${asset.category}`)} · ${t(`kind.${asset.kind}`)}`,
+      description: joinParts([
+        t(`category.${asset.category}`),
+        t(`kind.${asset.kind}`),
+      ]),
       testID: `search-library-asset-${asset.id}`,
       open: () =>
         router.push({
