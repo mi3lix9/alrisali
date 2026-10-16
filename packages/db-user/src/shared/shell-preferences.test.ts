@@ -13,6 +13,7 @@ const NONE_CHOSEN = {
   textSize: null,
   hiddenTabs: null,
   digits: null,
+  homeShortcuts: null,
 };
 
 let directory: TemporaryDirectory;
@@ -55,6 +56,7 @@ describe(createShellPreferencesRepository, () => {
       textSize: "larger",
       hiddenTabs: ["library", "tasbih"],
       digits: "latin",
+      homeShortcuts: { order: ["tasbih", "quran"], hidden: ["quran"] },
     });
 
     await relaunch();
@@ -67,6 +69,7 @@ describe(createShellPreferencesRepository, () => {
       textSize: "larger",
       hiddenTabs: ["library", "tasbih"],
       digits: "latin",
+      homeShortcuts: { order: ["tasbih", "quran"], hidden: ["quran"] },
     });
   });
 
@@ -84,6 +87,7 @@ describe(createShellPreferencesRepository, () => {
       textSize: "small",
       hiddenTabs: [],
       digits: "arabic-indic",
+      homeShortcuts: null,
     });
     await expect(preferences.get()).resolves.toStrictEqual({
       language: null,
@@ -91,6 +95,7 @@ describe(createShellPreferencesRepository, () => {
       textSize: "small",
       hiddenTabs: [],
       digits: "arabic-indic",
+      homeShortcuts: null,
     });
   });
 
@@ -110,9 +115,10 @@ describe(createShellPreferencesRepository, () => {
       language: "ar",
       hiddenTabs: ["prayer"],
       digits: "latin",
+      homeShortcuts: { order: ["qibla"], hidden: [] },
     });
     await database.db.run(
-      sql`UPDATE shell_preferences SET language = 'fr', theme = 'sepia', text_size = 'huge', hidden_tabs = 'not json', digits = 'roman'`
+      sql`UPDATE shell_preferences SET language = 'fr', theme = 'sepia', text_size = 'huge', hidden_tabs = 'not json', digits = 'roman', home_shortcuts = '["qibla"]'`
     );
 
     await expect(preferences.get()).resolves.toStrictEqual(NONE_CHOSEN);
@@ -127,6 +133,18 @@ describe(createShellPreferencesRepository, () => {
 
     await expect(preferences.get()).resolves.toMatchObject({
       hiddenTabs: ["worship"],
+    });
+  });
+
+  it("drops shortcuts it does not know from the Home shortcut layout", async () => {
+    const preferences = createShellPreferencesRepository(database.db);
+    await preferences.update({ language: "ar" });
+    await database.db.run(
+      sql`UPDATE shell_preferences SET home_shortcuts = '{"order":["future","qibla","home"],"hidden":["future","qibla"]}'`
+    );
+
+    await expect(preferences.get()).resolves.toMatchObject({
+      homeShortcuts: { order: ["qibla"], hidden: ["qibla"] },
     });
   });
 });

@@ -1,0 +1,1 @@
+ALTER TABLE `shell_preferences` ADD `home_shortcuts` text;

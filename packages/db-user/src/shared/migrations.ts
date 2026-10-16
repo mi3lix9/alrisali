@@ -171,4 +171,8 @@ export const migrations: readonly Migration[] = [
     tag: "20261016002557_shell_digits",
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
+  {
+    tag: "20261016123758_home_shortcuts",
+    statements: ["ALTER TABLE `shell_preferences` ADD `home_shortcuts` text;"],
+  },
 ];
