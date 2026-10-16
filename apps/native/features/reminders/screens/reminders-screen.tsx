@@ -27,7 +27,7 @@ export const RemindersScreen = () => {
       <Text muted>{t("screen.intro")}</Text>
       {access && !access.granted ? (
         <Card>
-          <Card.Content className="gap-4">
+          <Card.Content className="gap-4 pt-6">
             <Text>{t("screen.denied")}</Text>
             <Button onPress={() => allow()}>
               {access.canAsk ? t("screen.allow") : t("screen.openSettings")}
@@ -37,7 +37,7 @@ export const RemindersScreen = () => {
       ) : null}
       {access?.granted && !access.exactAlarms ? (
         <Card>
-          <Card.Content className="gap-4">
+          <Card.Content className="gap-4 pt-6">
             <Text>{t("screen.exactAlarms")}</Text>
             <Button onPress={() => allowExactAlarms()}>
               {t("screen.allowExactAlarms")}
