@@ -81,4 +81,11 @@ export const migrations: readonly Migration[] = [
       "INSERT OR IGNORE INTO `worship_mapping` (`kind`, `day`, `supplication_id`) VALUES ('night-dua', 'thursday', 'mafatih-dua-kumayl'), ('every-day', 'every', 'mafatih-dua-sabah');",
     ],
   },
+  {
+    tag: "20261016150936_adhan_catalogue",
+    statements: [
+      "CREATE TABLE `adhans` (\n\t`id` text PRIMARY KEY,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`credit` text DEFAULT '' NOT NULL,\n\t`full_key` text NOT NULL,\n\t`full_seconds` real NOT NULL,\n\t`full_bytes` integer NOT NULL,\n\t`takbir_key` text NOT NULL,\n\t`takbir_seconds` real NOT NULL,\n\t`takbir_bytes` integer NOT NULL,\n\t`position` integer NOT NULL\n);",
+      "CREATE INDEX `adhans_position` ON `adhans` (`position`);",
+    ],
+  },
 ];

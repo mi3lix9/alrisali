@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MAX_TAKBIR_SECONDS } from "../shared";
 import { adhanSoundIdSchema } from "./settings";
 import type { ReminderAlert } from "./settings";
 
@@ -14,12 +15,6 @@ export const adhanRecordingSchema = z.object({
 export type AdhanRecording = z.infer<typeof adhanRecordingSchema>;
 
 /**
- * iOS plays at most 30 seconds of a notification sound, so a takbir cut must
- * fit in it.
- */
-export const MAX_TAKBIR_SECONDS = 30;
-
-/**
  * One entry of the adhan catalogue: a voice, with its full adhan and the
  * short takbir cut of the same voice.
  */
@@ -30,8 +25,8 @@ export const adhanSoundSchema = z.object({
   takbir: adhanRecordingSchema.extend({
     seconds: z.number().positive().max(MAX_TAKBIR_SECONDS),
   }),
-  /** The content source it is credited to (`CONTENT_SOURCES`). */
-  sourceId: z.string().min(1),
+  /** Who recorded it and under what licence, as the Admin entered it. */
+  credit: z.string(),
 });
 
 export type AdhanSound = z.infer<typeof adhanSoundSchema>;

@@ -4,7 +4,6 @@ import {
   IMSAK_AT_TIME_ALERTS,
   isFullAdhanAvailable,
   MAX_MINUTES_BEFORE,
-  MAX_TAKBIR_SECONDS,
   SYSTEM_SOUND_ID,
 } from "@alrisali/domain/reminders";
 import type {
@@ -12,6 +11,7 @@ import type {
   ImsakRule,
   ReminderRule,
 } from "@alrisali/domain/reminders";
+import { MAX_TAKBIR_SECONDS } from "@alrisali/domain/shared";
 import {
   Alert,
   Button,

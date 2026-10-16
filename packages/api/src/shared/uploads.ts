@@ -17,6 +17,25 @@ export const UPLOAD_RULES = {
     },
     maxBytes: 5 * MEBIBYTE,
   },
+  /** A voice's full adhan in the adhan catalogue. */
+  "adhan-full": {
+    contentTypes: {
+      "audio/mpeg": "mp3",
+      "audio/mp4": "m4a",
+      "audio/x-m4a": "m4a",
+      "audio/wav": "wav",
+      "audio/x-wav": "wav",
+    },
+    maxBytes: 100 * MEBIBYTE,
+  },
+  /**
+   * A voice's takbir cut. WAV only: iOS plays a notification sound from a
+   * linear PCM file, and the cut is at most 30 seconds.
+   */
+  "adhan-takbir": {
+    contentTypes: { "audio/wav": "wav", "audio/x-wav": "wav" },
+    maxBytes: 20 * MEBIBYTE,
+  },
   /** A Library Asset's file: its extension decides its kind. */
   "library-asset": {
     contentTypes: {

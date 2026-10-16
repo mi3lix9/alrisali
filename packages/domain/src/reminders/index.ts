@@ -9,13 +9,13 @@ export type {
   AlertCheckId,
   AlertHealthReadings,
 } from "./alert-health";
+export { installedAdhanSounds, selectableAdhanSound } from "./adhan-catalogue";
 export {
   adhanRecordingSchema,
   adhanSoundSchema,
   atTimeSound,
   findAdhanSound,
   isFullAdhanAvailable,
-  MAX_TAKBIR_SECONDS,
 } from "./adhan-sounds";
 export type { AdhanRecording, AdhanSound, AtTimeSound } from "./adhan-sounds";
 export { habitReminderSource } from "./habit-reminders";
