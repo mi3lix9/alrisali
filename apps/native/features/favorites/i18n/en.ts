@@ -17,6 +17,8 @@ export const en: Catalog<typeof ar> = {
   },
   ayahTitle: "{{surah}}, ayah {{ayah}}",
   open: "All Favorites",
+  ayahEmpty:
+    "No favorite ayat yet. Long-press any ayah in the mushaf, then add it to your Favorites.",
   emptyTab: "Nothing in this tab yet.",
   tabs: {
     label: "Favorites tabs",

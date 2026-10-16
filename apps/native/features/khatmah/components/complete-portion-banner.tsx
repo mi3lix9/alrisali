@@ -1,7 +1,7 @@
 import "../i18n";
 import type { AyahKey } from "@alrisali/content/quran";
 import { completePortionAt } from "@alrisali/domain/khatmah";
-import { Button, Card, Text } from "panelui-native";
+import { Button, Card, toast } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
 import { formatNumber } from "@/shared/lib/numbers";
@@ -19,7 +19,7 @@ export const CompletePortionBanner = ({ ayah }: { ayah: AyahKey }) => {
   const { t } = useTranslation("khatmah");
   const today = useToday();
   const active = useActiveKhatmah();
-  const { mutate: complete, isPending, isError } = useCompleteKhatmahSession();
+  const { mutateAsync: complete, isPending } = useCompleteKhatmahSession();
 
   const log = active
     ? completePortionAt(active.khatmah, active.logs, ayah, today)
@@ -39,19 +39,23 @@ export const CompletePortionBanner = ({ ayah }: { ayah: AyahKey }) => {
           })}
         </Card.Description>
       </Card.Header>
-      <Card.Footer className="flex-col items-stretch gap-2">
+      <Card.Footer>
         <Button
           testID="khatmah-complete-portion"
           disabled={isPending}
-          onPress={() => complete(log)}
+          onPress={async () => {
+            // The banner leaves as soon as the portion counts as done, so the
+            // outcome is told in a toast.
+            try {
+              await complete(log);
+              toast.show({ variant: "success", label: t("banner.completed") });
+            } catch {
+              toast.show({ variant: "warning", label: t("banner.error") });
+            }
+          }}
         >
           {t("banner.complete")}
         </Button>
-        {isError ? (
-          <Text size="sm" className="text-destructive">
-            {t("banner.error")}
-          </Text>
-        ) : null}
       </Card.Footer>
     </Card>
   );

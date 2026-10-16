@@ -1,12 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "6c2eaad5-61a5-40d9-b71d-7d62bb895267",
-  "prevIds": [
-    "5fc0cade-ae87-496d-80fa-a834820c55bb",
-    "9ec60b0a-919e-4b51-88d9-b7092d44e6e1",
-    "ad09400b-d308-4cfe-97d3-a1df0d1038c7"
-  ],
+  "id": "5d11cf34-fe5b-48f4-a04e-eb5d684baaa1",
+  "prevIds": ["5b51b0ce-444c-4dd5-b4a1-de57481373f1"],
   "ddl": [
     {
       "name": "supplication_positions",
@@ -94,6 +90,10 @@
     },
     {
       "name": "qada_plan",
+      "entityType": "tables"
+    },
+    {
+      "name": "quran_bookmark_ribbons",
       "entityType": "tables"
     },
     {
@@ -1158,6 +1158,46 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "color",
+      "entityType": "columns",
+      "table": "quran_bookmark_ribbons"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name",
+      "entityType": "columns",
+      "table": "quran_bookmark_ribbons"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "ayah",
+      "entityType": "columns",
+      "table": "quran_bookmark_ribbons"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "quran_bookmark_ribbons"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "quran_last_read"
@@ -1794,6 +1834,13 @@
       "nameExplicit": false,
       "name": "qada_plan_pk",
       "table": "qada_plan",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["color"],
+      "nameExplicit": false,
+      "name": "quran_bookmark_ribbons_pk",
+      "table": "quran_bookmark_ribbons",
       "entityType": "pks"
     },
     {

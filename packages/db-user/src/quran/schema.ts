@@ -32,3 +32,18 @@ export const quranLastRead = sqliteTable("quran_last_read", {
   /** ISO instant. */
   setAt: text("set_at").notNull(),
 });
+
+/**
+ * The six Bookmark Ribbons, one row per colour (the primary key keeps it at
+ * six). A ribbon is unused while `ayah` is null; a colour with no row is
+ * unused too, so nothing is seeded.
+ */
+export const quranBookmarkRibbons = sqliteTable("quran_bookmark_ribbons", {
+  color: text("color").primaryKey(),
+  /** The Believer's own name; null shows the colour's default name. */
+  name: text("name"),
+  /** `surah:ayah` the ribbon rests on; null while unused. */
+  ayah: text("ayah"),
+  /** ISO instant it was last moved or renamed; across devices the row last written wins. */
+  updatedAt: text("updated_at"),
+});

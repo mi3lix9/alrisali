@@ -3,6 +3,7 @@
 // font ships as `@alrisali/content/quran/font.ttf`; the notice as
 // `KFGQPC_NOTICE`.
 import { HAFS } from "./data/hafs";
+import { REVELATION } from "./data/revelation";
 import { SURAH_HEADER_PREFIX } from "./dataset";
 
 export const PAGE_COUNT = 604;
@@ -23,6 +24,10 @@ export interface Surah {
   number: number;
   nameAr: string;
   nameEn: string;
+  /** Where the surah was revealed (Tanzil Quran Metadata, CC BY 3.0). */
+  revelationPlace: "meccan" | "medinan";
+  /** 1 for the first surah revealed, 114 for the last (Tanzil's order). */
+  revelationOrder: number;
 }
 
 export interface Ayah {
@@ -64,7 +69,13 @@ export const KFGQPC_NOTICE = HAFS.notice;
 export const QURAN_SOURCE = HAFS.source;
 
 export const SURAHS: readonly Surah[] = HAFS.surahs.map(
-  ([nameAr, nameEn], index) => ({ number: index + 1, nameAr, nameEn })
+  ([nameAr, nameEn], index) => ({
+    number: index + 1,
+    nameAr,
+    nameEn,
+    revelationPlace: REVELATION[index]?.[0] ?? "meccan",
+    revelationOrder: REVELATION[index]?.[1] ?? index + 1,
+  })
 );
 
 export const AYAT: readonly Ayah[] = HAFS.ayat.map(

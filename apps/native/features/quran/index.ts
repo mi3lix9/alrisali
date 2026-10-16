@@ -1,7 +1,10 @@
 export type { AyahActions, AyahSlot } from "./components/ayah-sheet";
+export { RibbonRows } from "./components/ribbon-rows";
+export type { SavedFavorites } from "./components/saved-list";
 export { ContinueReadingCard } from "./components/continue-reading-card";
 export { QuranLibraryCard } from "./components/quran-library-card";
 export { QuranReaderSettingsCard } from "./components/reader-settings-card";
 export { VerseOfTheDayCard } from "./components/verse-of-the-day-card";
 export { QuranReaderScreen } from "./screens/quran-reader-screen";
 export { useSurahSearch } from "./hooks/use-surah-search";
+export type { AyahDecoration, AyahDecorations } from "./utils/decorations";

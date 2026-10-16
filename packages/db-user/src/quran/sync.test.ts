@@ -10,6 +10,7 @@ import {
 } from "../shared/testing";
 import type { SyncServer, TemporaryDirectory } from "../shared/testing";
 import { createQuranLastReadRepository } from "./last-read";
+import { createQuranRibbonsRepository } from "./ribbons";
 
 let server: SyncServer;
 let serverDirectory: TemporaryDirectory;
@@ -83,5 +84,22 @@ describe("Last-Read Ayah sync", () => {
         )
       )
     ).resolves.toMatchObject([{ ayah: "36:1" }, { ayah: "36:1" }]);
+  });
+
+  it("brings a moved Bookmark Ribbon and its name to a second device", async () => {
+    const { phone, tablet } = await openPhoneAndTablet();
+    const onPhone = createQuranRibbonsRepository(phone.db);
+    await onPhone.move("red", "2:255");
+    await onPhone.rename("red", "Hifz");
+    await onPhone.move("red", "112:1");
+    await phone.sync();
+    await tablet.sync();
+
+    const ribbons = await createQuranRibbonsRepository(tablet.db).list();
+    expect(ribbons.find((ribbon) => ribbon.color === "red")).toMatchObject({
+      ayah: "112:1",
+      name: "Hifz",
+    });
+    expect(ribbons).toHaveLength(6);
   });
 });
