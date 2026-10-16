@@ -42,7 +42,7 @@ export const ar = {
   habits: {
     title: "سلاسل العادات",
     empty: "لا عادات بعد.",
-    streak: "الآن {{current}} · الأطول {{longest}}",
+    streak: "الآن {{current}}، الأطول {{longest}}",
     preset: {
       "quran-page": "قراءة صفحة من القرآن",
       "morning-adhkar": "أذكار الصباح",

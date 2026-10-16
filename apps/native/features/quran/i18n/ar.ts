@@ -22,7 +22,7 @@ export const ar = {
     label: "أدوات القارئ",
     back: "رجوع",
     settings: "إعدادات القراءة",
-    position: "الجزء {{juz}} · الصفحة {{page}}",
+    position: "الجزء {{juz}}، الصفحة {{page}}",
     surahNumber: "السورة {{number}}",
   },
   hint: {
@@ -42,7 +42,7 @@ export const ar = {
     bookmark: "انتقل إلى آخر ما قرأت",
     bookmarkHere: "آخر ما قرأت في هذه الصفحة",
     continue: "تابع القراءة",
-    position: "{{surah}} · الآية {{ayah}} · الصفحة {{page}}",
+    position: "{{surah}}، الآية {{ayah}}، الصفحة {{page}}",
     resume: "تابع",
     empty: "ابدأ القراءة من الفاتحة، وسنحفظ موضعك.",
     start: "ابدأ القراءة",
