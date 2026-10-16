@@ -7,6 +7,7 @@ import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { Screen } from "@/shared/ui/screen";
 
 import { AdhanServiceCard } from "../components/adhan-service-card";
+import { OccasionAlertsCard } from "../components/occasion-alerts-card";
 import { QuietHoursCard } from "../components/quiet-hours-card";
 import { RuleCard } from "../components/rule-card";
 import {
@@ -74,6 +75,7 @@ export const RemindersScreen = () => {
           />
         </>
       ) : null}
+      <OccasionAlertsCard />
       <AdhanServiceCard />
     </Screen>
   );

@@ -1,12 +1,16 @@
 import {
   habitReminderSource,
   khatmahReminderSource,
+  maghribFrom,
+  occasionReminderSource,
   planReminders,
   qadaReminderSource,
 } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
   KhatmahReminderMessage,
+  OccasionAlertSettings,
+  OccasionReminderMessage,
   QadaReminderMessage,
   ReminderSettings,
 } from "@alrisali/domain/reminders";
@@ -18,6 +22,7 @@ import type {
   KhatmahReminderPlan,
   Location,
   MessageStyle,
+  Occasion,
   QadaReminderPlan,
 } from "@alrisali/domain/shared";
 import { captureException } from "@sentry/react-native";
@@ -33,6 +38,8 @@ import { events } from "@/shared/lib/events";
 import { useHijriCalendar } from "@/shared/lib/hijri-calendar";
 import { launchLanguage } from "@/shared/lib/preferences";
 
+import { useOccasionAlertSettings } from "../data/occasion-alert-settings";
+import { useAlertOccasions } from "../data/occasions";
 import { useReminderSettings } from "../data/reminder-settings";
 import { toReminderRequest } from "../utils/notification-request";
 import { syncReminders } from "../utils/scheduler";
@@ -59,7 +66,9 @@ const planAndSync = async (
   qada: QadaReminderPlan | null,
   khatmah: KhatmahReminderPlan | null,
   t: TFunction<"reminders">,
-  hijri: HijriCalendar
+  hijri: HijriCalendar,
+  occasionAlerts: OccasionAlertSettings,
+  occasions: readonly Occasion[]
 ): Promise<void> => {
   const {
     location,
@@ -68,28 +77,38 @@ const planAndSync = async (
     imsakMinutes,
     messageStyle,
   } = believer;
+  const prayerTimes = location
+    ? {
+        coordinates: {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        calculationMethod,
+        imsakMinutes,
+        customAngles,
+      }
+    : null;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
   const reminders = planReminders<
-    HabitReminderMessage | QadaReminderMessage | KhatmahReminderMessage
+    | HabitReminderMessage
+    | QadaReminderMessage
+    | KhatmahReminderMessage
+    | OccasionReminderMessage
   >({
     now: Temporal.Now.zonedDateTimeISO(timeZone),
-    prayerTimes: location
-      ? {
-          coordinates: {
-            latitude: location.latitude,
-            longitude: location.longitude,
-          },
-          calculationMethod,
-          imsakMinutes,
-          customAngles,
-        }
-      : null,
+    prayerTimes,
     settings,
     messageStyle,
     sources: [
       habitReminderSource(habits, messageStyle),
       qadaReminderSource(qada),
       khatmahReminderSource(khatmah),
+      occasionReminderSource({
+        settings: occasionAlerts,
+        occasions,
+        calendar: hijri,
+        maghribOf: maghribFrom(prayerTimes),
+      }),
     ],
     hijri,
   });
@@ -121,6 +140,8 @@ export const useReminderScheduler = (
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
   const { data: settings } = useReminderSettings();
+  const { data: occasionAlerts } = useOccasionAlertSettings();
+  const occasions = useAlertOccasions();
   // Imsak's At-Time Alert follows Ramadan by the Believer's Hijri calendar.
   const hijri = useHijriCalendar();
   const { access, refresh } = useNotificationAccess();
@@ -139,6 +160,7 @@ export const useReminderScheduler = (
     if (
       !believer ||
       !settings ||
+      !occasionAlerts ||
       !habits ||
       qada === undefined ||
       khatmah === undefined ||
@@ -146,12 +168,36 @@ export const useReminderScheduler = (
     ) {
       return;
     }
-    void planAndSync(believer, settings, habits, qada, khatmah, t, hijri);
+    const sync = () => {
+      void planAndSync(
+        believer,
+        settings,
+        habits,
+        qada,
+        khatmah,
+        t,
+        hijri,
+        occasionAlerts,
+        occasions
+      );
+    };
+    sync();
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void planAndSync(believer, settings, habits, qada, khatmah, t, hijri);
+        sync();
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, habits, qada, khatmah, t, granted, hijri]);
+  }, [
+    believer,
+    settings,
+    habits,
+    qada,
+    khatmah,
+    t,
+    granted,
+    hijri,
+    occasionAlerts,
+    occasions,
+  ]);
 };
