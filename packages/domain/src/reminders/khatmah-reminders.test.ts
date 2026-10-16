@@ -9,6 +9,7 @@ const TODAY = Temporal.PlainDate.from("2026-10-01");
 const PLAN: KhatmahReminderPlan = {
   reminderAt: 5 * 60,
   firstDate: TODAY,
+  everyDays: 1,
   portions: [
     { from: "1:1", to: "2:141" },
     { from: "2:142", to: "2:252" },

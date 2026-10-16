@@ -12,8 +12,8 @@ export interface KhatmahReminderMessage {
 }
 
 /**
- * The Khatmah's daily Reminder for the planner's `sources`: one a day while
- * portions remain, at its time on the device's clock, naming that day's
+ * The Khatmah's daily Reminder for the planner's `sources`: one per session
+ * day while portions remain, at its time on the device's clock, naming that day's
  * portion; none without a Khatmah reminder (`null`). It is not essential, so
  * quiet hours hold it back.
  */
@@ -26,8 +26,8 @@ export const khatmahReminderSource =
           const offset = plan.firstDate.until(date, {
             largestUnit: "days",
           }).days;
-          const portion = plan.portions[offset];
-          if (offset < 0 || !portion) {
+          const portion = plan.portions[Math.floor(offset / plan.everyDays)];
+          if (offset < 0 || offset % plan.everyDays !== 0 || !portion) {
             return [];
           }
           return [
