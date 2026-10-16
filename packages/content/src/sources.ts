@@ -68,6 +68,15 @@ export const CONTENT_SOURCES = [
     },
   },
   {
+    id: "wmm",
+    name: "World Magnetic Model WMM2025 (NOAA NCEI and BGS)",
+    url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    licence: {
+      name: "Public domain (U.S. Government work)",
+      url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    },
+  },
+  {
     id: "amiri",
     name: "Amiri, The Amiri Project Authors",
     url: "https://github.com/aliftype/amiri",

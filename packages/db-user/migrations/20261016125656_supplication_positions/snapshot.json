@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "02234ef9-9e1b-44be-88e4-340878140bd3",
-  "prevIds": ["5a86bc5c-9581-4dea-be17-47d5c9804222"],
+  "id": "9ec60b0a-919e-4b51-88d9-b7092d44e6e1",
+  "prevIds": ["68e708c8-ca31-4158-85e9-9b898b2fcb0f"],
   "ddl": [
     {
       "name": "supplication_positions",
@@ -106,6 +106,10 @@
     },
     {
       "name": "tasbih",
+      "entityType": "tables"
+    },
+    {
+      "name": "tasbih_settings",
       "entityType": "tables"
     },
     {
@@ -1309,6 +1313,26 @@
       "table": "tasbih"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "tasbih_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "feedback_mode",
+      "entityType": "columns",
+      "table": "tasbih_settings"
+    },
+    {
       "columns": ["supplication_id"],
       "nameExplicit": false,
       "name": "supplication_positions_pk",
@@ -1488,6 +1512,13 @@
       "nameExplicit": false,
       "name": "tasbih_pk",
       "table": "tasbih",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "tasbih_settings_pk",
+      "table": "tasbih_settings",
       "entityType": "pks"
     },
     {

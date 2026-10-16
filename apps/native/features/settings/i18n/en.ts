@@ -105,6 +105,7 @@ export const en: Catalog<typeof ar> = {
         "The Adhan voice of Prayer Time Reminders: the opening of a Shia Adhan recorded by Saeed Hatamzadeh-Varmazyar, from Wikimedia Commons, under CC BY-SA 4.0, shortened and converted to WAV.",
       tanzil:
         "Where each hizb quarter begins, from Tanzil's Quran metadata, corrected to the quarter signs in the KFGQPC text.",
+      wmm: "The magnetic declination that corrects the Qibla compass to true north, from the World Magnetic Model WMM2025 by NOAA and the British Geological Survey, in the public domain.",
       "panel-ui": "The app's interface components.",
       "open-source":
         "Built on Expo, React Native and other open-source libraries, each under its own licence. Al-Risali's own code is MIT-licensed.",

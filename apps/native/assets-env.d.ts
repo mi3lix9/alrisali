@@ -9,3 +9,9 @@ declare module "*.tflite" {
   const asset: number;
   export default asset;
 }
+
+// Metro turns an imported sound into an asset id for expo-audio.
+declare module "*.wav" {
+  const asset: number;
+  export default asset;
+}

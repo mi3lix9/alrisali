@@ -1,16 +1,19 @@
 import "../i18n";
-import { favoriteId } from "@alrisali/domain/favorites";
 import { router } from "expo-router";
-import { Card, Item, Text } from "panelui-native";
+import { Button, Card, Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
-import { useFavorites } from "../data/favorites";
-import { favoriteEntry } from "../utils/favorite-entry";
+import { useFavoriteEntries } from "../hooks/use-favorite-entries";
+import { FavoriteEntryContent } from "./favorite-entry-content";
+
+/** How many of the newest Favorites the card shows; the screen lists all. */
+const SHOWN = 3;
 
 /**
- * The Believer's Favorites in the Library, newest first, each opening its
- * item. Library Assets are listed when the route names them
- * (`libraryAssetTitle`, undefined for one not on the device).
+ * The Believer's newest Favorites in the Library, each opening its
+ * item, with the way into the Favorites screen. Library Assets are listed
+ * when the route names them (`libraryAssetTitle`, undefined for one not on
+ * the device).
  */
 export const FavoritesCard = ({
   libraryAssetTitle,
@@ -18,45 +21,35 @@ export const FavoritesCard = ({
   libraryAssetTitle?: (id: string) => string | undefined;
 }) => {
   const { t } = useTranslation("favorites");
-  const favorites = useFavorites();
-  const entries = (favorites.data ?? []).flatMap((favorite) => {
-    const entry = favoriteEntry(favorite, libraryAssetTitle);
-    return entry ? [{ id: favoriteId(favorite), ...entry }] : [];
-  });
+  const { listed } = useFavoriteEntries(libraryAssetTitle);
+  const shown = listed.slice(0, SHOWN);
 
   return (
     <Card>
       <Card.Header>
         <Card.Title>{t("title")}</Card.Title>
       </Card.Header>
-      <Card.Content>
-        {entries.length === 0 ? (
+      <Card.Content className="items-start gap-3">
+        {shown.length === 0 ? (
           <Text muted size="sm">
             {t("empty")}
           </Text>
         ) : (
-          <Item.Group>
-            {entries.map((entry) => (
-              <Item
-                key={entry.id}
-                size="sm"
-                onPress={() => router.push(entry.href)}
-              >
-                <Item.Content>
-                  <Item.Title>
-                    {entry.kind === "ayah"
-                      ? t("ayahTitle", {
-                          surah: entry.surah,
-                          ayah: entry.ayah,
-                        })
-                      : entry.title}
-                  </Item.Title>
-                  <Item.Description>{t(`kind.${entry.kind}`)}</Item.Description>
-                </Item.Content>
+          <Item.Group className="self-stretch">
+            {shown.map(({ id, entry }) => (
+              <Item key={id} size="sm" onPress={() => router.push(entry.href)}>
+                <FavoriteEntryContent entry={entry} />
               </Item>
             ))}
           </Item.Group>
         )}
+        <Button
+          variant="outline"
+          onPress={() => router.push("/library/favorites")}
+          testID="favorites-open"
+        >
+          {t("open")}
+        </Button>
       </Card.Content>
     </Card>
   );

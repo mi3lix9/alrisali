@@ -70,4 +70,14 @@ export const ar = {
     failed: "حاول مرة أخرى.",
     ok: "حسنًا",
   },
+  feedback: {
+    title: "التنبيه عند كل تسبيحة",
+    "sound-and-haptic": "صوت واهتزاز",
+    haptic: "اهتزاز فقط",
+    silent: "صامت",
+  },
+  settings: {
+    title: "التسبيح",
+    description: "يسري على تسبيح الزهراء وكل تسبيح مفتوح.",
+  },
 };

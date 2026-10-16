@@ -1,16 +1,15 @@
 import { HijriCalendarButton } from "@/features/calendar";
-import { FavoriteButton } from "@/features/favorites";
-import { QuranReaderScreen, SetLastReadButton } from "@/features/quran";
+import { FavoriteRow } from "@/features/favorites";
+import { QuranReaderScreen } from "@/features/quran";
 
+// The ayah sheet's slots sit at fixed places in its order (see AyahActions);
+// within a slot, rows show in the order listed here.
 const QuranRoute = () => (
   <QuranReaderScreen
     topBarActions={<HijriCalendarButton />}
-    ayahActions={(ayah) => (
-      <>
-        <SetLastReadButton ayah={ayah} />
-        <FavoriteButton item={{ kind: "ayah", key: ayah }} />
-      </>
-    )}
+    ayahActions={{
+      keep: (ayah) => <FavoriteRow item={{ kind: "ayah", key: ayah }} />,
+    }}
   />
 );
 

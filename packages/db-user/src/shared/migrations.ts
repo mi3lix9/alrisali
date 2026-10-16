@@ -172,7 +172,13 @@ export const migrations: readonly Migration[] = [
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
   {
-    tag: "20261016123802_supplication_positions",
+    tag: "20261016123449_tasbih_settings",
+    statements: [
+      "CREATE TABLE `tasbih_settings` (\n\t`id` text PRIMARY KEY,\n\t`feedback_mode` text\n);",
+    ],
+  },
+  {
+    tag: "20261016125656_supplication_positions",
     statements: [
       "CREATE TABLE `supplication_positions` (\n\t`supplication_id` text PRIMARY KEY,\n\t`section` integer NOT NULL,\n\t`saved_at` text NOT NULL\n);",
     ],
