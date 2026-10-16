@@ -4,6 +4,7 @@ import { atTimeSound, classicSayingById } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
   KhatmahReminderMessage,
+  OccasionReminderMessage,
   PlannedReminder,
   PrayerReminderMessage,
   QadaReminderMessage,
@@ -202,7 +203,8 @@ const wording = (
     | PrayerReminderMessage
     | HabitReminderMessage
     | QadaReminderMessage
-    | KhatmahReminderMessage,
+    | KhatmahReminderMessage
+    | OccasionReminderMessage,
   t: TFunction<"reminders">,
   language: Language
 ): { title: string; body: string } => {
@@ -230,6 +232,15 @@ const wording = (
         }),
       };
     }
+    case "occasion": {
+      const name = message.name[language];
+      return message.timing === "day-of"
+        ? { title: t("notification.occasion.dayOf", { name }), body: "" }
+        : {
+            title: t("notification.occasion.eveningBefore", { name }),
+            body: t("notification.occasion.body"),
+          };
+    }
     default: {
       return prayerTimeWording(message, t, language);
     }
@@ -243,6 +254,7 @@ export const toReminderRequest = (
     | HabitReminderMessage
     | QadaReminderMessage
     | KhatmahReminderMessage
+    | OccasionReminderMessage
   >,
   t: TFunction<"reminders">,
   language: Language

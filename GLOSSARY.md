@@ -124,6 +124,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Night Hijri Date**: The Hijri Date that night content follows: the next day's from Maghrib on. The Hijri Date shown elsewhere stays the civil day's.
 
+**Occasion Alert**: An opt-in notification for an Occasion, on its day or on the evening before (from Maghrib, by the Night Hijri Date), at a chosen time and for the chosen Occasion types. Quiet hours hold it back.
+
 **Verse of the Day**: The Quran verse, with recitation, featured on Home for each weekday.
 
 **A'mal**: The acts of a Hijri day or month (duas, ziyarat, prayers, fasts, tasbih), each read from a Supplication; day 0 means every day of the month. _Avoid_: Deeds, acts (unqualified)
