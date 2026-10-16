@@ -266,6 +266,7 @@ const Reader = ({
           insetTop={insets.top}
           insetBottom={insets.bottom}
           initialAyah={state.lastReadAyah}
+          followAyah={recitingAyah}
           onNextSurah={() => dispatch({ type: "next-surah" })}
           onScrollStart={onScrollStart}
           onAyahShown={onAyahShown}
