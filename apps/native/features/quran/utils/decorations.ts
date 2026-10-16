@@ -13,7 +13,7 @@ export type AyahDecoration =
   | { kind: "note" }
   /** A prostration (sajdah) is due at the ayah: wajib or mustahabb. */
   | { kind: "sajdah"; obligatory: boolean }
-  /** The ayah ends today's Khatmah Portion. */
+  /** The ayah starts or ends today's Khatmah Portion. */
   | { kind: "khatmah-portion" };
 
 export type AyahDecorations = ReadonlyMap<AyahKey, readonly AyahDecoration[]>;

@@ -1,28 +1,26 @@
 import type { AyahKey } from "@alrisali/content/quran";
 import { useMemo } from "react";
 
+import { portionMarks } from "../utils/portion-marks";
+import type { KhatmahDecoration } from "../utils/portion-marks";
 import { useActiveKhatmah } from "./use-active-khatmah";
 
-/** What the reader draws on an ayah for the Khatmah: today's portion's end. */
-export interface KhatmahDecoration {
-  kind: "khatmah-portion";
-}
+export type { KhatmahDecoration } from "../utils/portion-marks";
 
 /**
- * The reader's decorations for today's portion: its last ayah, where the
- * Believer stops, carries a mark. Empty without an unfinished Khatmah.
+ * The reader's decorations for today's portion: its first ayah, where the
+ * Believer starts, and its last, where they stop, carry a mark. Empty
+ * without an unfinished Khatmah.
  */
 export const useKhatmahDecorations = (): ReadonlyMap<
   AyahKey,
   readonly KhatmahDecoration[]
 > => {
   const active = useActiveKhatmah();
-  const end = active?.status.current?.to;
+  const from = active?.status.current?.from;
+  const to = active?.status.current?.to;
   return useMemo(
-    () =>
-      new Map<AyahKey, readonly KhatmahDecoration[]>(
-        end ? [[end, [{ kind: "khatmah-portion" }]]] : []
-      ),
-    [end]
+    () => portionMarks(from && to ? { from, to } : null),
+    [from, to]
   );
 };
