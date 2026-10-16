@@ -70,7 +70,9 @@ export const ReaderTopBar = ({
       accessibilityRole="toolbar"
       accessibilityLabel={t("chrome.label")}
     >
-      <View className="h-14 flex-row items-center gap-2 px-2">
+      {/* Six icons share the row with the title: no gaps between them, so a
+          long surah name (At-Tawbah) still fits. */}
+      <View className="h-14 flex-row items-center px-1">
         <Button
           variant="ghost"
           size="icon"
@@ -89,8 +91,13 @@ export const ReaderTopBar = ({
         >
           <ListIcon size={22} />
         </Button>
-        <View className="flex-1 items-center">
-          <Text weight="semibold" numberOfLines={1}>
+        <View className="flex-1 items-center px-1">
+          <Text
+            weight="semibold"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
             {i18n.language === "ar" ? entry?.nameAr : entry?.nameEn}
           </Text>
           <Text

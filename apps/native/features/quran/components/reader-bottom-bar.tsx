@@ -89,20 +89,19 @@ export const ReaderBottomBar = ({
         style={{ height: READER_BOTTOM_BAR_HEIGHT }}
         className="flex-row items-center gap-3 px-3"
       >
-        <Button
-          variant="ghost"
-          size="sm"
-          disabled={returnPage === undefined}
-          accessibilityLabel={
-            returnPage === undefined
-              ? t("navigation.noReturn")
-              : t("navigation.returnTo", { page: formatNumber(returnPage) })
-          }
-          startContent={<RotateCcwIcon size={18} />}
-          onPress={onReturn}
-        >
-          {returnPage === undefined ? "—" : formatNumber(returnPage)}
-        </Button>
+        {returnPage === undefined ? null : (
+          <Button
+            variant="ghost"
+            size="sm"
+            accessibilityLabel={t("navigation.returnTo", {
+              page: formatNumber(returnPage),
+            })}
+            startContent={<RotateCcwIcon size={18} />}
+            onPress={onReturn}
+          >
+            {formatNumber(returnPage)}
+          </Button>
+        )}
         <Direction dir="rtl" className="flex-1">
           <Slider
             min={min}

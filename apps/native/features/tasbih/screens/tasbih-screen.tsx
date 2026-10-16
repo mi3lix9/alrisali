@@ -7,7 +7,7 @@ import type {
 import { Stack } from "expo-router";
 import { Button, Direction, Progress, Spinner, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
-import { Alert, View } from "react-native";
+import { Alert, ScrollView, View } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
@@ -55,7 +55,7 @@ const Counter = ({
     TASBIH_AL_ZAHRA_STEPS[progress.step] ?? TASBIH_AL_ZAHRA_STEPS[0];
 
   return (
-    <View className="flex-1 items-center justify-center gap-8 p-6">
+    <View className="items-center gap-4 px-6 py-2">
       <View className="items-center gap-2">
         <Direction dir="rtl">
           <Text size="3xl" weight="semibold" className="text-primary">
@@ -110,7 +110,14 @@ export const TasbihScreen = () => {
     ]);
 
   return (
-    <View className="bg-background flex-1">
+    <ScrollView
+      className="bg-background flex-1"
+      alwaysBounceVertical={false}
+      // Under the large title: the picker starts below the header, not
+      // behind the status bar. The content keeps its own height: grown to
+      // the frame it would overflow by the header's inset.
+      contentInsetAdjustmentBehavior="automatic"
+    >
       <Stack.Screen options={{ headerRight: () => <ExportButton /> }} />
       <TasbihPicker />
       {progress ? (
@@ -121,10 +128,10 @@ export const TasbihScreen = () => {
           onReset={confirmReset}
         />
       ) : (
-        <View className="flex-1 items-center justify-center">
+        <View className="items-center py-16">
           <Spinner />
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
