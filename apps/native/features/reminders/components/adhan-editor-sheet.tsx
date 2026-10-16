@@ -1,5 +1,5 @@
 import "../i18n";
-import { SALAH } from "@alrisali/domain/reminders";
+import { SALAH, sendsNotifications } from "@alrisali/domain/reminders";
 import type {
   ImsakRule,
   ReminderRule,
@@ -7,7 +7,7 @@ import type {
   ReminderSettingsChange,
   Salah,
 } from "@alrisali/domain/reminders";
-import { BottomSheet, Button, Chip, toast } from "panelui-native";
+import { Alert, BottomSheet, Button, Chip, toast } from "panelui-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
@@ -16,7 +16,9 @@ import {
   useReminderSettings,
   useUpdateReminderSettings,
 } from "../data/reminder-settings";
+import { useNotificationAccess } from "../hooks/use-notification-permission";
 import { stopAdhan } from "../utils/adhan-player";
+import { askNotificationsInContext } from "../utils/ask-notifications";
 import {
   AtTimeChoices,
   BeforeReminderOptions,
@@ -71,6 +73,7 @@ export const AdhanEditorSheet = ({
   const update = useUpdateReminderSettings();
   const [editing, setEditing] = useState(prayerTime);
   const [draft, setDraft] = useState<AlertDraft | null>(null);
+  const { access, refresh } = useNotificationAccess();
 
   // Whatever the Test plays stops with the sheet.
   useEffect(() => stopAdhan, []);
@@ -95,7 +98,12 @@ export const AdhanEditorSheet = ({
       return;
     }
     update.mutate(draftChange(editing, rule), {
-      onSuccess: () => {
+      onSuccess: async (saved) => {
+        // The first alert that will arrive asks for notifications.
+        if (sendsNotifications(saved)) {
+          await askNotificationsInContext();
+          await refresh();
+        }
         toast.show({
           variant: "success",
           label: t("editor.saved", {
@@ -108,6 +116,8 @@ export const AdhanEditorSheet = ({
     });
   };
 
+  const asksPermission =
+    access !== undefined && !access.granted && access.canAsk;
   const sounding = rule?.atTime === "takbir" || rule?.atTime === "adhan";
 
   return (
@@ -143,6 +153,17 @@ export const AdhanEditorSheet = ({
           </ScrollView>
           {rule ? (
             <>
+              {asksPermission && rule.atTime !== "off" ? (
+                <Alert variant="info" testID="adhan-editor-permission-reason">
+                  <Alert.Indicator />
+                  <Alert.Content>
+                    <Alert.Title>{t("editor.permissionTitle")}</Alert.Title>
+                    <Alert.Description>
+                      {t("editor.permissionReason")}
+                    </Alert.Description>
+                  </Alert.Content>
+                </Alert>
+              ) : null}
               <AtTimeChoices
                 rule={rule}
                 imsak={editing === "imsak"}
