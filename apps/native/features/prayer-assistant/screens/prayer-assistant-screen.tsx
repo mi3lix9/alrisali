@@ -19,6 +19,8 @@ import { Screen } from "@/shared/ui/screen";
 import { MatSensor } from "../components/mat-sensor";
 import { PoseSensor } from "../components/pose-sensor";
 import { PrayingView } from "../components/praying-view";
+import { SalahCompletion } from "../components/salah-completion";
+import type { CompletionActions } from "../components/salah-completion";
 import { SalahSetup } from "../components/salah-setup";
 import { TakbirSensor } from "../components/takbir-sensor";
 import {
@@ -69,9 +71,15 @@ const Sensor = ({ mode, bowSensitivity, state, send }: SensorProps) => {
 
 /**
  * Follows one Salah to its end. Finishing emits `SalahCompleted` (the Prayer
- * Log ticks it and the Khushu sheet opens) and closes the assistant.
+ * Log ticks it and the Khushu sheet opens) and shows the completion screen.
  */
-const Praying = ({ salah, pace, mode, bowSensitivity }: PrayingProps) => {
+const Praying = ({
+  salah,
+  pace,
+  mode,
+  bowSensitivity,
+  completionActions,
+}: PrayingProps & { completionActions?: CompletionActions | undefined }) => {
   const { state, send } = useRakahMachine(salah, pace);
 
   useEffect(() => {
@@ -83,8 +91,11 @@ const Praying = ({ salah, pace, mode, bowSensitivity }: PrayingProps) => {
       salah,
       completedAt: Date.now(),
     });
-    router.back();
   }, [state.completed, salah]);
+
+  if (state.completed) {
+    return <SalahCompletion salah={salah} actions={completionActions} />;
+  }
 
   return (
     <PrayingView
@@ -104,7 +115,12 @@ const Praying = ({ salah, pace, mode, bowSensitivity }: PrayingProps) => {
 };
 
 /** The Prayer Assistant: choose the Salah and Pace, then pray with it. */
-export const PrayerAssistantScreen = () => {
+export const PrayerAssistantScreen = ({
+  completionActions,
+}: {
+  /** Offered on the completion screen for the daily Salah just prayed. */
+  completionActions?: CompletionActions;
+}) => {
   const { t } = useTranslation("prayer-assistant");
   const { data: settings } = usePrayerAssistantSettings();
   const { mutate: update } = useUpdatePrayerAssistantSettings();
@@ -119,6 +135,7 @@ export const PrayerAssistantScreen = () => {
           pace={praying.pace}
           mode={praying.mode}
           bowSensitivity={praying.bowSensitivity}
+          completionActions={completionActions}
         />
       </>
     );

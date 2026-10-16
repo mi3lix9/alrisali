@@ -132,4 +132,8 @@ export const en: Catalog<typeof ar> = {
     privacy:
       "Only the ceiling's light is measured, on this device. Nothing is kept.",
   },
+  completion: {
+    title: "Salah complete",
+    done: "Done",
+  },
 };

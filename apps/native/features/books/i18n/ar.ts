@@ -25,4 +25,5 @@ export const ar = {
     loading: "جارٍ فتح النص…",
     loadError: "تعذّر فتح النص.",
   },
+  taqibat: "التعقيبات",
 };

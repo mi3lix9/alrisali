@@ -116,4 +116,8 @@ export const ar = {
     recalibrate: "أعد المعايرة",
     privacy: "يُقاس ضوء السقف فقط على جهازك، ولا يُحفظ شيء.",
   },
+  completion: {
+    title: "تمّت الصلاة",
+    done: "تم",
+  },
 };
