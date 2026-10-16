@@ -18,8 +18,12 @@ import type { WidgetEnvironment } from "expo-widgets";
  * Draws the view of `props` in force now: the last whose `from` has passed.
  * Android has no timeline: the app's alarm at each `from` makes the system
  * render again (modules/widget-refresh). Android gives the layout no size or
- * date: the size comes in the props, the time from the clock. A countdown
- * cannot tick here, so it shows the clock time of the Prayer Time.
+ * date: the size comes in the props, the time from the clock. The Android
+ * widget runtime (Glance, through Expo UI) has no chronometer or timer text,
+ * so the countdown cannot tick on its own: in the last hour before the Prayer
+ * Time it shows the hours:minutes left as of this draw (the app arms an alarm
+ * every minute of that hour, `countdownTicks`), and before that the Prayer
+ * Time's clock time.
  *
  * A widget runs in its own runtime, from this function's body alone: no
  * imports, no module constants, no helpers outside it.
@@ -98,13 +102,25 @@ export const renderWidget = (
             );
           }
           if (block.type === "countdown") {
+            const left = block.to - now;
+            let shown = block.text;
+            if (left > 0 && left <= block.window) {
+              const minutes = Math.ceil(left / 60_000);
+              const rest = minutes % 60;
+              const time = `${Math.floor(minutes / 60)}:${rest < 10 ? "0" : ""}${rest}`;
+              const local = time
+                .split("")
+                .map((char) => block.digits[Number(char)] ?? char)
+                .join("");
+              shown = block.remaining.replace("{time}", local);
+            }
             return (
               <Text
                 key={index}
                 color={ink}
                 style={{ fontSize: 28, fontWeight: "bold" }}
               >
-                {block.text}
+                {shown}
               </Text>
             );
           }
