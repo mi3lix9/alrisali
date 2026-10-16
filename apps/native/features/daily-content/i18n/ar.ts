@@ -1,4 +1,9 @@
 export const ar = {
-  title: "محتوى اليوم",
-  read: "اقرأ",
+  title: "عبادات اليوم",
+  kind: {
+    dua: "دعاء اليوم",
+    ziyarah: "زيارة اليوم",
+    everyDay: "كل يوم",
+    tonight: "دعاء الليلة",
+  },
 };

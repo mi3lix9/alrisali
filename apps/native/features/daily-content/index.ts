@@ -1,1 +1,1 @@
-export { DailyContentCard } from "./components/daily-content-card";
+export { TodaysWorshipCard } from "./components/todays-worship-card";

@@ -14,6 +14,12 @@ const positionQueryKey = (supplicationId: string) => [
   supplicationId,
 ];
 
+const LATEST_POSITION_KEY = [
+  ...USER_DATA_QUERY_KEY,
+  "supplication-position",
+  "latest",
+];
+
 /** Where the Believer stopped in the Supplication; null if never saved. */
 export const useSavedSupplicationPosition = (supplicationId: string) =>
   useQuery({
@@ -35,4 +41,15 @@ export const saveSupplicationSection = async (
     positionQueryKey(supplicationId),
     { section, savedAt: new Date() }
   );
+  await queryClient.invalidateQueries({ queryKey: LATEST_POSITION_KEY });
 };
+
+/** Where the Believer last stopped inside a Supplication, past its first section; null if nowhere. */
+export const useLatestSupplicationPosition = () =>
+  useQuery({
+    queryKey: LATEST_POSITION_KEY,
+    queryFn: async () => {
+      const { db } = await getUserDatabase();
+      return createSupplicationPositionsRepository(db).latest();
+    },
+  });

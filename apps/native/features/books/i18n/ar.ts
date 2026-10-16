@@ -98,4 +98,7 @@ export const ar = {
     emptyMonth: "لا أعمال مدرجة لهذا الشهر بعد.",
     emptyGeneral: "لا أعمال عامة مدرجة لهذا الشهر بعد.",
   },
+  continue: {
+    label: "تابع الدعاء",
+  },
 };
