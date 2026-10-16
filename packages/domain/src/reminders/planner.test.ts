@@ -332,7 +332,7 @@ describe(planReminders, () => {
       });
 
       expect(reminders.map(({ id }) => id)).toContain(
-        "salah:maghrib:2026-10-16"
+        "prayer:2026-10-16:maghrib:before"
       );
     });
 
