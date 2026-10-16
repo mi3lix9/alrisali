@@ -1,10 +1,12 @@
 import {
   habitReminderSource,
+  khatmahReminderSource,
   planReminders,
   qadaReminderSource,
 } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
+  KhatmahReminderMessage,
   QadaReminderMessage,
   ReminderSettings,
 } from "@alrisali/domain/reminders";
@@ -13,6 +15,7 @@ import type {
   CustomAngles,
   HabitReminderPlan,
   HijriCalendar,
+  KhatmahReminderPlan,
   Location,
   MessageStyle,
   QadaReminderPlan,
@@ -54,6 +57,7 @@ const planAndSync = async (
   settings: ReminderSettings,
   habits: readonly HabitReminderPlan[],
   qada: QadaReminderPlan | null,
+  khatmah: KhatmahReminderPlan | null,
   t: TFunction<"reminders">,
   hijri: HijriCalendar
 ): Promise<void> => {
@@ -65,7 +69,9 @@ const planAndSync = async (
     messageStyle,
   } = believer;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
-  const reminders = planReminders<HabitReminderMessage | QadaReminderMessage>({
+  const reminders = planReminders<
+    HabitReminderMessage | QadaReminderMessage | KhatmahReminderMessage
+  >({
     now: Temporal.Now.zonedDateTimeISO(timeZone),
     prayerTimes: location
       ? {
@@ -83,6 +89,7 @@ const planAndSync = async (
     sources: [
       habitReminderSource(habits, messageStyle),
       qadaReminderSource(qada),
+      khatmahReminderSource(khatmah),
     ],
     hijri,
   });
@@ -103,12 +110,13 @@ const planAndSync = async (
  * app returns to the foreground (topping it up and following a new time
  * zone), as soon as any setting or Habit it depends on changes, and when
  * notifications are allowed (in onboarding or on the Reminders screen).
- * `habits` and `qada` are undefined while they load, so their Reminders are
+ * `habits`, `qada` and `khatmah` are undefined while they load, so their Reminders are
  * not cancelled meanwhile.
  */
 export const useReminderScheduler = (
   habits: readonly HabitReminderPlan[] | undefined,
-  qada: QadaReminderPlan | null | undefined
+  qada: QadaReminderPlan | null | undefined,
+  khatmah: KhatmahReminderPlan | null | undefined
 ): void => {
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
@@ -133,16 +141,17 @@ export const useReminderScheduler = (
       !settings ||
       !habits ||
       qada === undefined ||
+      khatmah === undefined ||
       granted === undefined
     ) {
       return;
     }
-    void planAndSync(believer, settings, habits, qada, t, hijri);
+    void planAndSync(believer, settings, habits, qada, khatmah, t, hijri);
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void planAndSync(believer, settings, habits, qada, t, hijri);
+        void planAndSync(believer, settings, habits, qada, khatmah, t, hijri);
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, habits, qada, t, granted, hijri]);
+  }, [believer, settings, habits, qada, khatmah, t, granted, hijri]);
 };

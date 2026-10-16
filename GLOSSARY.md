@@ -90,6 +90,12 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Page Palette**: The colour of the paper the Quran is read on (white, cream, soft dark or black); it sets its own text colours and does not follow the app theme.
 
+**Khatmah**: A plan to read the whole Quran, divided into Khatmah Sessions and followed from a start date; it is on track, ahead or behind by whole sessions, and finished once every session is done. _Avoid_: Khatm plan, Quran challenge
+
+**Khatmah Session**: One scheduled portion of a Khatmah: a run of ayat, first to last, due on its own date. Today's portion is the first session not yet completed; completing it records a Khatmah Log. _Avoid_: Day, ward (in code)
+
+**Khatmah Log**: The record that a Khatmah Session was completed on a date; the same session on two devices is one record.
+
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
 **Supplication**: A single readable text inside a Book (a dua, ziyarah, munajat or sermon). _Avoid_: Item, section, content
@@ -179,6 +185,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 - A **Program** contains many **Acts**; an **Act** may be tied to one **Salah** and a before/after timing.
 - A **Believer** holds at most five active **Subscriptions**, of which at most one General and one Seasonal **Official Program**.
 - **Tasbih al-Zahra** exists exactly once per Believer and cannot be removed or renamed.
+- A **Khatmah** is divided into many **Khatmah Sessions**, each completed by at most one **Khatmah Log**; a **Khatmah**'s status is derived from its Logs, never entered.
 - A **Book** contains many **Supplications**; **Daily Content** points at a Supplication.
 - A **Believer** has exactly six **Bookmark Ribbons**, each on at most one ayah; unlike **Favorites**, they never accumulate.
 - An **Occasion** recurs every Hijri year; a **Gathering** happens once on a Gregorian date.
