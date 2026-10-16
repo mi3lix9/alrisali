@@ -40,7 +40,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Prayer Assistant**: The guided companion that follows the Believer through a Salah and keeps count of Rak'ahs and Positions. _Avoid_: Prayer recognition, pose tracker
 
-**Recognition Mode**: How the Prayer Assistant senses the Believer's Position: Camera, Head Height, Sound (Takbir) or Mat.
+**Recognition Mode**: How the Prayer Assistant senses the Believer's Position: Camera, Head Height, Sound (Takbir), Mat or Proximity (the forehead covers the phone's proximity sensor in sujud).
 
 **Position**: A posture within a Rak'ah: Qiyam, Ruku, I'tidal, Sujud, Jalsa, Tashahhud. _Avoid_: Pose, step
 

@@ -57,6 +57,7 @@ export const en: Catalog<typeof ar> = {
     "head-height": "Head height",
     sound: "Sound (Takbir)",
     mat: "Mat",
+    proximity: "Proximity sensor",
   },
   salah: {
     fajr: "Fajr",
@@ -174,6 +175,15 @@ export const en: Catalog<typeof ar> = {
     recalibrate: "Recalibrate",
     privacy:
       "Only the ceiling's light is measured, on this device. Nothing is kept.",
+  },
+  proximity: {
+    placing:
+      "Lay the phone on the mat where you prostrate, screen facing up. Starting in {{value}} s.",
+    watching:
+      "Each sujud with your forehead over the top of the phone counts. Tap if one is missed.",
+    near: "Sujud seen.",
+    unsupported: "This device has no proximity sensor.",
+    privacy: "Only the proximity sensor is read, on this device.",
   },
   completion: {
     title: "Salah complete",

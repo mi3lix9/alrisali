@@ -15,6 +15,7 @@ import { View } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
 
+import { hasProximitySensor } from "../data/proximity-module";
 import { SalahPicker } from "./salah-picker";
 
 const HOLD_STEP_MS = 100;
@@ -37,6 +38,10 @@ export const SalahSetup = ({
 }: SalahSetupProps) => {
   const { t } = useTranslation("prayer-assistant");
   const [definition, setDefinition] = useState<SalahDefinition | null>(null);
+  // Proximity needs the device's sensor; the other modes need nothing here.
+  const offeredModes = RECOGNITION_MODES.filter(
+    (mode) => mode !== "proximity" || hasProximitySensor()
+  );
   const seconds = (ms: number) =>
     t("setup.seconds", { value: ms / MS_PER_SECOND });
 
@@ -62,7 +67,7 @@ export const SalahSetup = ({
               }
             }}
           >
-            {RECOGNITION_MODES.map((option) => (
+            {offeredModes.map((option) => (
               <RadioGroup.Item
                 key={option}
                 value={option}

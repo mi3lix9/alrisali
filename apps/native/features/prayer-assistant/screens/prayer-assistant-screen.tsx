@@ -19,6 +19,7 @@ import { Screen } from "@/shared/ui/screen";
 import { MatSensor } from "../components/mat-sensor";
 import { PoseSensor } from "../components/pose-sensor";
 import { PrayingView } from "../components/praying-view";
+import { ProximitySensor } from "../components/proximity-sensor";
 import { SalahCompletion } from "../components/salah-completion";
 import type { CompletionActions } from "../components/salah-completion";
 import { SalahSetup } from "../components/salah-setup";
@@ -62,6 +63,9 @@ const Sensor = ({ mode, bowSensitivity, state, send }: SensorProps) => {
     }
     case "mat": {
       return <MatSensor state={state} send={send} />;
+    }
+    case "proximity": {
+      return <ProximitySensor state={state} send={send} />;
     }
     default: {
       return null;

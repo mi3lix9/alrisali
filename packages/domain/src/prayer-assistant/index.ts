@@ -6,6 +6,19 @@ export {
 } from "./mat";
 export type { LumaFrame, MatReading, MatSensor } from "./mat";
 export {
+  defaultThresholds,
+  PROXIMITY_MIN_MS,
+  readProximity,
+  startProximitySensor,
+  thresholdsFromDistance,
+} from "./proximity";
+export type {
+  ProximityReading,
+  ProximitySample,
+  ProximitySensor,
+  ProximityThresholds,
+} from "./proximity";
+export {
   CUSTOM_PACE_LIMITS,
   customPaceSchema,
   PACE_PRESETS,

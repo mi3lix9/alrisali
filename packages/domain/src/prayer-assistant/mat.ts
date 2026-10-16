@@ -396,7 +396,7 @@ const detect = (
  * standing); before the final Tashahhud it is a sujud said again, not a new
  * Rak'ah.
  */
-const sujudSightings = (state: AssistantState): Sighting[] => {
+export const sujudSightings = (state: AssistantState): Sighting[] => {
   if (currentStep(state).final) {
     return [];
   }
@@ -417,7 +417,7 @@ const sujudSightings = (state: AssistantState): Sighting[] => {
 };
 
 /** What rising from a sujud proves, by the step after it. */
-const risenSightings = (
+export const risenSightings = (
   state: AssistantState
 ): { sightings: Sighting[]; sitting: boolean } => {
   const step = currentStep(state);
