@@ -44,6 +44,12 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Pace**: How long the Prayer Assistant waits in each Position before moving on: Slow, Normal, Fast or Custom.
 
+**Qada**: Making up missed Salah or fasts. A Qada Salah the Believer logs (on the Qada dashboard or in the Prayer Log) is one record, and it never counts as the day's Salah in the Prayer Log or Prayer Streak. _Avoid_: Make-up prayer (in code)
+
+**Qada Backlog**: What remains to be made up: missed Salah counted per Salah, and missed fasts. It is what the Believer entered, less every Qada Salah and fast they logged.
+
+**Qada Pace**: How many Qada Salah the Believer plans each day and Qada fasts each week; it turns the Qada Backlog into today's items. _Avoid_: Pace (that is the Prayer Assistant's)
+
 ## Calendar
 
 **Hijri Date**: The date in the Islamic lunar calendar, after applying the Hijri Adjustment.
