@@ -1,6 +1,7 @@
 import {
   calculatePrayerTimes,
   currentPrayerTime,
+  locationTimeZone,
   PRAYER_TIMES,
 } from "@alrisali/domain/shared";
 import type { PrayerTimeName } from "@alrisali/domain/shared";
@@ -14,7 +15,10 @@ import { formatClockTime } from "../utils/format";
 
 const MINUTE_MS = 60_000;
 
-/** Today's visible Prayer Times, with the one in progress marked. */
+/**
+ * Today's visible Prayer Times on the location's clock, with the one in
+ * progress marked.
+ */
 export const TimetableCard = ({
   view,
 }: {
@@ -25,16 +29,13 @@ export const TimetableCard = ({
   const { t } = useTranslation("prayer-times");
   const now = useNow(MINUTE_MS);
   const { settings, hidden, timeFormat } = view;
-  const times = calculatePrayerTimes(
-    now.toPlainDate(),
-    now.timeZoneId,
-    settings
-  );
+  const timeZone = locationTimeZone(settings.coordinates);
+  const today = now.toZonedDateTimeISO(timeZone).toPlainDate();
+  const times = calculatePrayerTimes(today, timeZone, settings);
   const current = currentPrayerTime(now, settings, hidden);
   const shown = PRAYER_TIMES.filter((name) => !hidden.includes(name));
   const isCurrent = (name: PrayerTimeName) =>
-    current?.name === name &&
-    current.at.toPlainDate().equals(now.toPlainDate());
+    current?.name === name && current.at.toPlainDate().equals(today);
 
   return (
     <Card>

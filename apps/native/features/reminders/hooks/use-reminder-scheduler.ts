@@ -23,10 +23,6 @@ import { toReminderRequest } from "../utils/notification-request";
 import { syncReminders } from "../utils/scheduler";
 import { useNotificationAccess } from "./use-notification-permission";
 
-/**
- * Plans from now, on the device's current time zone (it changes when the
- * Believer travels), and brings the scheduled Reminders in line.
- */
 /** The Believer settings the Reminders depend on. */
 interface PlanningSettings {
   location: Location | null;
@@ -35,6 +31,11 @@ interface PlanningSettings {
   messageStyle: MessageStyle;
 }
 
+/**
+ * Plans from now and brings the scheduled Reminders in line. The window and
+ * Habit Reminders follow the device's current time zone (it changes when the
+ * Believer travels); Prayer Time Reminders follow the location's own.
+ */
 const planAndSync = async (
   believer: PlanningSettings,
   settings: ReminderSettings,
