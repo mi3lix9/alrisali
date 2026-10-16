@@ -144,6 +144,15 @@ export {
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
 export {
+  AYAH_NOTE_MAX,
+  cleanNoteText,
+  insertAtCursor,
+  notedAyat,
+  sortNotes,
+  writeNote,
+} from "./ayah-notes";
+export type { AyahNote, TextSelection } from "./ayah-notes";
+export {
   canRotateReader,
   pagesOfSpread,
   shownPageOfSpread,

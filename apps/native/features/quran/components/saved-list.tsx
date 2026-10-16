@@ -23,6 +23,7 @@ import { useRibbons } from "../data/ribbons";
 import { ribbonName, ribbonPlace } from "../utils/ribbons";
 import { RibbonRenameSheet } from "./ribbon-rename-sheet";
 import { RibbonSwatch } from "./ribbon-swatch";
+import { SavedNotes } from "./saved-notes";
 
 /**
  * The Favorites the index's Saved tab lists, drawn by the route: this
@@ -105,7 +106,7 @@ export const SavedList = ({
     null
   );
   const filters = SAVED_FILTERS.filter(
-    (candidate) => candidate === "ribbons" || Favorites
+    (candidate) => candidate !== "favorites" || Favorites
   );
   const all = ribbons.data ?? [];
   const inUse = all.filter((ribbon) => ribbon.ayah !== null);
@@ -139,7 +140,9 @@ export const SavedList = ({
       ) : null}
       {filter === "favorites" && Favorites ? (
         <Favorites onSelect={(ayah) => onSelect({ ayah })} />
-      ) : (
+      ) : null}
+      {filter === "notes" ? <SavedNotes onSelect={onSelect} /> : null}
+      {filter === "ribbons" || (filter === "favorites" && !Favorites) ? (
         <>
           <Text size="sm" muted>
             {t("ribbons.hint")}
@@ -168,7 +171,7 @@ export const SavedList = ({
             />
           ))}
         </>
-      )}
+      ) : null}
       <RibbonRenameSheet
         ribbon={renamingRibbon ?? null}
         onClose={() => setRenaming(null)}

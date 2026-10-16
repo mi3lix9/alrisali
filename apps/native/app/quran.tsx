@@ -4,7 +4,7 @@ import {
   CompletePortionBanner,
   useKhatmahDecorations,
 } from "@/features/khatmah";
-import { QuranReaderScreen, RibbonRows } from "@/features/quran";
+import { AyahNoteRow, QuranReaderScreen, RibbonRows } from "@/features/quran";
 import { ShareAyahImageRow } from "@/features/share-image";
 
 // The ayah sheet's slots sit at fixed places in its order (see AyahActions);
@@ -22,6 +22,7 @@ const QuranRoute = () => {
           <>
             <FavoriteRow item={{ kind: "ayah", key: ayah }} />
             <RibbonRows ayah={ayah} />
+            <AyahNoteRow ayah={ayah} />
           </>
         ),
         share: (ayah) => <ShareAyahImageRow ayah={ayah} />,
