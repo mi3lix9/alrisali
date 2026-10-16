@@ -2,7 +2,7 @@
   "version": "7",
   "dialect": "sqlite",
   "id": "ad09400b-d308-4cfe-97d3-a1df0d1038c7",
-  "prevIds": ["68e708c8-ca31-4158-85e9-9b898b2fcb0f"],
+  "prevIds": ["9ec60b0a-919e-4b51-88d9-b7092d44e6e1"],
   "ddl": [
     {
       "name": "companion",
