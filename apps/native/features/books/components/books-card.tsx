@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { joinParts } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
-/** The Library's list of Books, each opening its contents. */
+/** The Library's list of Books, each opening its contents, then the A'mal. */
 export const BooksCard = () => {
   const { t } = useTranslation("books");
 
@@ -43,6 +43,16 @@ export const BooksCard = () => {
               </Item.Content>
             </Item>
           ))}
+          <Item
+            size="sm"
+            testID="books-amal"
+            onPress={() => router.push("/library/amal")}
+          >
+            <Item.Content>
+              <Item.Title>{t("amal.entry")}</Item.Title>
+              <Item.Description>{t("amal.entryDescription")}</Item.Description>
+            </Item.Content>
+          </Item>
         </Item.Group>
       </Card.Content>
     </Card>

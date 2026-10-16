@@ -51,3 +51,5 @@ export const loadSupplicationText = async (
 export const TAQIBAT: Readonly<
   Partial<Record<"fajr" | "dhuhr" | "asr" | "maghrib" | "isha", string>>
 > = taqibat;
+export { AMAL, AMAL_KINDS } from "./data/amal";
+export type { AmalEntry, AmalKind } from "./types";

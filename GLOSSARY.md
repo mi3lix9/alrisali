@@ -88,6 +88,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Verse of the Day**: The Quran verse, with recitation, featured on Home for each weekday.
 
+**A'mal**: The acts of a Hijri day or month (duas, ziyarat, prayers, fasts, tasbih), each read from a Supplication; day 0 means every day of the month. _Avoid_: Deeds, acts (unqualified)
+
 ## Dhikr
 
 **Tasbih**: A counter the Believer uses to keep count of a dhikr. _Avoid_: Counter (unqualified), masbaha (in code)

@@ -6,3 +6,5 @@ export type {
   SupplicationSearchResult,
 } from "./search";
 export { taqibatFor } from "./taqibat";
+export { amalOfMonth } from "./amal";
+export type { AmalDay, MonthAmal } from "./amal";
