@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  FACING_QIBLA_TOLERANCE,
-  isFacingQibla,
+  FACING_QIBLA_DEGREES,
   KAABA,
+  NEAR_QIBLA_DEGREES,
+  qiblaAlignment,
   qiblaBearing,
   qiblaDistanceKm,
   qiblaOffset,
+  smoothHeading,
 } from "./qibla";
 
 // Reference values: WGS84 geodesics from GeographicLib (Geodesic.Inverse to
@@ -117,23 +119,80 @@ describe(qiblaOffset, () => {
   );
 });
 
-describe(isFacingQibla, () => {
+describe(qiblaAlignment, () => {
+  it("counts within 5° as facing and within 15° as near", () => {
+    expect(FACING_QIBLA_DEGREES).toBe(5);
+    expect(NEAR_QIBLA_DEGREES).toBe(15);
+  });
+
   it.each([
-    { heading: 118, bearing: 119 },
-    { heading: 119 + FACING_QIBLA_TOLERANCE, bearing: 119 },
-    { heading: 119 - FACING_QIBLA_TOLERANCE, bearing: 119 },
-    { heading: 359, bearing: 2 },
+    { heading: 119, bearing: 119, alignment: "facing" },
+    { heading: 124, bearing: 119, alignment: "facing" },
+    { heading: 114, bearing: 119, alignment: "facing" },
+    { heading: 358, bearing: 2, alignment: "facing" },
+    { heading: 125, bearing: 119, alignment: "near" },
+    { heading: 104, bearing: 119, alignment: "near" },
+    { heading: 350, bearing: 4, alignment: "near" },
+    { heading: 135, bearing: 119, alignment: "away" },
+    { heading: 299, bearing: 119, alignment: "away" },
+  ] as const)(
+    "is $alignment at $heading° for a Qibla at $bearing°",
+    ({ heading, bearing, alignment }) => {
+      expect(qiblaAlignment(heading, bearing)).toBe(alignment);
+    }
+  );
+});
+
+describe(smoothHeading, () => {
+  it("starts from the first reading", () => {
+    expect(smoothHeading(null, 120)).toBe(120);
+  });
+
+  it("moves part of the way towards a new reading", () => {
+    const smoothed = smoothHeading(100, 120);
+    expect(smoothed).toBeGreaterThan(100);
+    expect(smoothed).toBeLessThan(120);
+  });
+
+  it.each([
+    { previous: 359, reading: 1 },
+    { previous: 350, reading: 10 },
   ])(
-    "faces $bearing° from $heading° (within the tolerance)",
-    ({ heading, bearing }) => {
-      expect(isFacingQibla(heading, bearing)).toBeTruthy();
+    "crosses north from $previous° to $reading° the short way",
+    ({ previous, reading }) => {
+      const smoothed = smoothHeading(previous, reading, 0.5);
+      expect(qiblaOffset(previous, smoothed)).toBeGreaterThan(0);
+      expect(qiblaOffset(previous, smoothed)).toBeLessThanOrEqual(
+        qiblaOffset(previous, reading)
+      );
+      expect(smoothed).toBeCloseTo(
+        (previous + qiblaOffset(previous, reading) / 2) % 360,
+        10
+      );
     }
   );
 
-  it.each([
-    { heading: 119 + FACING_QIBLA_TOLERANCE + 1, bearing: 119 },
-    { heading: 299, bearing: 119 },
-  ])("doesn't face $bearing° from $heading°", ({ heading, bearing }) => {
-    expect(isFacingQibla(heading, bearing)).toBeFalsy();
+  it("crosses north from 1° to 359° the short way, anticlockwise", () => {
+    expect(smoothHeading(1, 359, 0.5)).toBeCloseTo(0, 10);
+  });
+
+  it("settles on a steady reading", () => {
+    let heading: number | null = 300;
+    for (let step = 0; step < 50; step += 1) {
+      heading = smoothHeading(heading, 10);
+    }
+    expect(Math.abs(qiblaOffset(heading ?? 0, 10))).toBeLessThan(0.1);
+  });
+
+  it("stays within 0–360°", () => {
+    for (const [previous, reading] of [
+      [359, 1],
+      [1, 359],
+      [180, 0],
+    ] as const) {
+      const smoothed = smoothHeading(previous, reading);
+      expect(smoothed).toBeGreaterThanOrEqual(0);
+      expect(smoothed).toBeLessThan(360);
+    }
   });
 });
