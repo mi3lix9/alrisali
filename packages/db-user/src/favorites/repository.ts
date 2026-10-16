@@ -1,6 +1,6 @@
 import { favoriteId, favoriteItemSchema } from "@alrisali/domain/favorites";
 import type { FavoriteItem } from "@alrisali/domain/favorites";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 
 import type { UserDb } from "../shared";
 import { favorites } from "./schema";
@@ -17,6 +17,8 @@ export interface FavoritesRepository {
   /** Favourites the item; one already a Favorite keeps its first date. */
   add: (item: FavoriteItem) => Promise<void>;
   remove: (item: FavoriteItem) => Promise<void>;
+  /** Removes every listed item from the Favorites in one write. */
+  removeMany: (items: readonly FavoriteItem[]) => Promise<void>;
 }
 
 export const createFavoritesRepository = (
@@ -63,5 +65,13 @@ export const createFavoritesRepository = (
       .where(eq(favorites.id, favoriteId(favoriteItemSchema.parse(item))));
   };
 
-  return { list, has, add, remove };
+  const removeMany = async (items: readonly FavoriteItem[]): Promise<void> => {
+    const ids = items.map((item) => favoriteId(favoriteItemSchema.parse(item)));
+    if (ids.length === 0) {
+      return;
+    }
+    await db.delete(favorites).where(inArray(favorites.id, ids));
+  };
+
+  return { list, has, add, remove, removeMany };
 };

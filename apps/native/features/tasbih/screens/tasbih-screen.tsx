@@ -14,6 +14,7 @@ import { launchLanguage } from "@/shared/lib/preferences";
 
 import { CounterButton } from "../components/counter-button";
 import { ExportButton } from "../components/export-button";
+import { FeedbackModePicker } from "../components/feedback-mode-picker";
 import { TasbihPicker } from "../components/tasbih-picker";
 import { useTasbihAlZahra } from "../hooks/use-tasbih-al-zahra";
 
@@ -132,6 +133,9 @@ export const TasbihScreen = () => {
           <Spinner />
         </View>
       )}
+      <View className="items-center px-6 pb-6">
+        <FeedbackModePicker />
+      </View>
     </ScrollView>
   );
 };
