@@ -5,7 +5,7 @@ import {
   findAyah,
   firstPageOfSurah,
   openReader,
-  PAGE_PALETTE_COLORS,
+  pagePaletteColors,
   pagePosition,
   readerReducer,
   recitationStart,
@@ -26,6 +26,7 @@ import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import Animated, { FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUniwind } from "uniwind";
 
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions, AyahSheetMove } from "../components/ayah-sheet";
@@ -124,6 +125,11 @@ const Reader = ({
     }
   }, [state.lastReadAyah, saveLastRead]);
   useReaderKeepAwake(settings.keepAwake);
+  const { theme } = useUniwind();
+  const pageColors = pagePaletteColors(
+    settings.pagePalette,
+    theme === "dark" ? "dark" : "light"
+  );
   const [chrome, send] = useReaderChrome();
   // Bumped by every jump, so the page list or surah remounts at the target.
   const [jumpCount, setJumpCount] = useState(0);
@@ -227,15 +233,13 @@ const Reader = ({
       <View
         className="flex-1"
         style={{
-          backgroundColor: PAGE_PALETTE_COLORS[settings.pagePalette].background,
+          backgroundColor: pageColors.background,
         }}
       >
         <StatusBar
           hidden={!chrome.visible}
           animated
-          style={
-            PAGE_PALETTE_COLORS[settings.pagePalette].dark ? "light" : "dark"
-          }
+          style={pageColors.dark ? "light" : "dark"}
         />
         {state.mode === "page" ? (
           <PageMode

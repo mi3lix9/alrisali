@@ -53,7 +53,7 @@ export const DEFAULT_QURAN_READER_SETTINGS: QuranReaderSettings = {
   pageNav: "horizontal",
   surahFontSize: 26,
   reciter: DEFAULT_RECITER,
-  pagePalette: "white",
+  pagePalette: "theme",
   keepAwake: true,
 };
 

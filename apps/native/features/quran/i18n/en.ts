@@ -68,6 +68,7 @@ export const en: Catalog<typeof ar> = {
     },
     pagePalette: {
       title: "Page colour",
+      theme: "Match app theme",
       white: "White",
       cream: "Cream",
       "soft-dark": "Soft dark",

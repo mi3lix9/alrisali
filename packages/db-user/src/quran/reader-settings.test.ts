@@ -36,7 +36,7 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "horizontal",
       surahFontSize: 26,
       reciter: "ar.alafasy",
-      pagePalette: "white",
+      pagePalette: "theme",
       keepAwake: true,
     });
   });
@@ -78,7 +78,7 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "vertical",
       surahFontSize: 30,
       reciter: "everyayah.minshawy-murattal",
-      pagePalette: "white",
+      pagePalette: "theme",
       keepAwake: true,
     });
   });
@@ -102,7 +102,7 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "vertical",
       surahFontSize: 26,
       reciter: "ar.alafasy",
-      pagePalette: "white",
+      pagePalette: "theme",
       keepAwake: true,
     });
   });

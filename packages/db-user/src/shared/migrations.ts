@@ -196,9 +196,9 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261016132136_reader-comfort",
+    tag: "20261016133358_reader-comfort",
     statements: [
-      "ALTER TABLE `quran_reader_settings` ADD `page_palette` text DEFAULT 'white' NOT NULL;",
+      "ALTER TABLE `quran_reader_settings` ADD `page_palette` text DEFAULT 'theme' NOT NULL;",
       "ALTER TABLE `quran_reader_settings` ADD `keep_awake` integer DEFAULT true NOT NULL;",
     ],
   },

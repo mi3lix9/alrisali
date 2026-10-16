@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "a41dbeff-4fcf-4788-8772-d04782ba2191",
+  "id": "3220d129-fb69-422b-8d6f-4028d470dd2c",
   "prevIds": [
     "5fc0cade-ae87-496d-80fa-a834820c55bb",
     "9ec60b0a-919e-4b51-88d9-b7092d44e6e1",
@@ -1138,7 +1138,7 @@
       "type": "text",
       "notNull": true,
       "autoincrement": false,
-      "default": "'white'",
+      "default": "'theme'",
       "generated": null,
       "name": "page_palette",
       "entityType": "columns",

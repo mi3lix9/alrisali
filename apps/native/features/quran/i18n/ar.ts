@@ -63,6 +63,7 @@ export const ar = {
     },
     pagePalette: {
       title: "لون الصفحة",
+      theme: "حسب مظهر التطبيق",
       white: "أبيض",
       cream: "كريمي",
       "soft-dark": "داكن هادئ",
