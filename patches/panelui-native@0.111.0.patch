@@ -1,3 +1,6 @@
+diff --git a/node_modules/panelui-native/.bun-tag-6d0a1e846a1ae269 b/.bun-tag-6d0a1e846a1ae269
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/panelui-native/.bun-tag-c448b08ff4784157 b/.bun-tag-c448b08ff4784157
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
@@ -272,6 +275,47 @@ index 5f6eddac5da1844b7cfbef256e6c957e13b0eef3..c4d2f18a88db5b2feb2cb199cecb3748
    const track = /*#__PURE__*/_jsx(View, {
      ref: ref,
      accessibilityRole: "progressbar",
+diff --git a/lib/module/components/switch/index.js b/lib/module/components/switch/index.js
+index 4f2f85c9a6ca93d9b71ca4f68bb2cf928c4d2e8e..43ca1a3fd88f0b06d7c4eebe96113fdd7b9944a0 100644
+--- a/lib/module/components/switch/index.js
++++ b/lib/module/components/switch/index.js
+@@ -18,7 +18,7 @@ const switchVariants = tv({
+   slots: {
+     track: 'justify-center rounded-full border border-transparent bg-input p-[3px]',
+     activeTrack: 'absolute inset-0 rounded-full bg-primary',
+-    thumb: 'rounded-full bg-white shadow-sm'
++    thumb: 'rounded-full shadow-sm'
+   },
+   variants: {
+     // Each track is its thumb plus the 3pt of padding and 1pt of border on
+@@ -50,6 +50,17 @@ const switchVariants = tv({
+       true: {
+         track: 'opacity-50'
+       }
++    },
++    // On, the thumb sits on `bg-primary`, which is near-white in dark mode, so
++    // it takes the primary's foreground there. Off, it stays white on the
++    // input-coloured track.
++    checked: {
++      true: {
++        thumb: 'bg-primary-foreground'
++      },
++      false: {
++        thumb: 'bg-white'
++      }
+     }
+   },
+   defaultVariants: {
+@@ -140,7 +151,8 @@ export const Switch = /*#__PURE__*/forwardRef(({
+   const nativeUI = native ? getNativeUI() : null;
+   const slots = switchVariants({
+     size,
+-    disabled: !!disabled
++    disabled: !!disabled,
++    checked: value
+   });
+   // React Native's labelled-by relationship is Android-only. `label` or an
+   // explicit accessibilityLabel remains the portable name on iOS.
 diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
 index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
 --- a/lib/module/components/textarea/index.js
@@ -1006,6 +1050,42 @@ index a1dd8839c938134fc29b524e606f7c25e67e1766..e7b6608b400ecb9fa30ab9a19a9c484e
      );
  
      const track = (
+diff --git a/src/components/switch/index.tsx b/src/components/switch/index.tsx
+index f745b1e2b189c57e585e251d586920a3717009be..6226e2b48ffde95c79ba49f06036f61b72904745 100644
+--- a/src/components/switch/index.tsx
++++ b/src/components/switch/index.tsx
+@@ -18,7 +18,7 @@ const switchVariants = tv({
+   slots: {
+     track: 'justify-center rounded-full border border-transparent bg-input p-[3px]',
+     activeTrack: 'absolute inset-0 rounded-full bg-primary',
+-    thumb: 'rounded-full bg-white shadow-sm',
++    thumb: 'rounded-full shadow-sm',
+   },
+   variants: {
+     // Each track is its thumb plus the 3pt of padding and 1pt of border on
+@@ -34,6 +34,13 @@ const switchVariants = tv({
+     disabled: {
+       true: { track: 'opacity-50' },
+     },
++    // On, the thumb sits on `bg-primary`, which is near-white in dark mode, so
++    // it takes the primary's foreground there. Off, it stays white on the
++    // input-coloured track.
++    checked: {
++      true: { thumb: 'bg-primary-foreground' },
++      false: { thumb: 'bg-white' },
++    },
+   },
+   defaultVariants: {
+     size: 'md',
+@@ -123,7 +130,7 @@ export const Switch = forwardRef<View, SwitchProps>(
+     // as the toggle running backwards.
+     const sign = useDirectionSign();
+     const nativeUI = native ? getNativeUI() : null;
+-    const slots = switchVariants({ size, disabled: !!disabled });
++    const slots = switchVariants({ size, disabled: !!disabled, checked: value });
+     // React Native's labelled-by relationship is Android-only. `label` or an
+     // explicit accessibilityLabel remains the portable name on iOS.
+     const fieldLabelledBy = useFieldLabelledBy();
 diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
 index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
 --- a/src/components/textarea/index.tsx
