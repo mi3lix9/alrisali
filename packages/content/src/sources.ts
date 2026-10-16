@@ -67,6 +67,24 @@ export const CONTENT_SOURCES = [
       url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },
+  {
+    id: "amiri",
+    name: "Amiri, The Amiri Project Authors",
+    url: "https://github.com/aliftype/amiri",
+    licence: {
+      name: "SIL Open Font License 1.1",
+      url: "https://openfontlicense.org",
+    },
+  },
+  {
+    id: "ibm-plex-sans-arabic",
+    name: "IBM Plex Sans Arabic, IBM Corp.",
+    url: "https://github.com/IBM/plex",
+    licence: {
+      name: "SIL Open Font License 1.1",
+      url: "https://openfontlicense.org",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];

@@ -108,6 +108,10 @@ export const en: Catalog<typeof ar> = {
       "panel-ui": "The app's interface components.",
       "open-source":
         "Built on Expo, React Native and other open-source libraries, each under its own licence. Al-Risali's own code is MIT-licensed.",
+      amiri:
+        "The Amiri (Naskh) face of the supplication reader, under the SIL Open Font License 1.1.",
+      "ibm-plex-sans-arabic":
+        "The IBM Plex Sans Arabic face of the supplication reader, under the SIL Open Font License 1.1.",
     },
   },
 };

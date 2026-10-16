@@ -20,6 +20,9 @@ const credits = {
   "panel-ui": "مكوّنات واجهة التطبيق.",
   "open-source":
     "بُني التطبيق على Expo وReact Native ومكتبات مفتوحة المصدر أخرى، لكلٍّ منها ترخيصه. شيفرة الرسالي نفسها مرخّصة بترخيص MIT.",
+  amiri: "خط أميري (نسخ) في قارئ الأدعية، بترخيص SIL Open Font License 1.1.",
+  "ibm-plex-sans-arabic":
+    "خط IBM Plex Sans Arabic في قارئ الأدعية، بترخيص SIL Open Font License 1.1.",
 } satisfies Record<ContentSourceId | SoftwareCreditId, string>;
 
 export const ar = {
