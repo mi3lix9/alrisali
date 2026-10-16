@@ -165,3 +165,10 @@ export type {
 export { METHOD_RULES } from "./prayer-times";
 export type { MethodRules, TwilightRule } from "./prayer-times";
 export { locationTimeZone } from "./time-zone";
+export {
+  adminHijriAdjustmentSchema,
+  DEFAULT_ADMIN_HIJRI_ADJUSTMENT,
+  forcedHijriDateProblem,
+  forcedHijriDateSchema,
+} from "./hijri";
+export type { AdminHijriAdjustment, ForcedHijriDate } from "./hijri";

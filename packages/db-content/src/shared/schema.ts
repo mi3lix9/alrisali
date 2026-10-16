@@ -9,10 +9,20 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
  */
 export const globalSettings = sqliteTable("global_settings", {
   id: text("id").primaryKey(),
-  /** The Admins' Hijri Adjustment in days, added to every Believer's own. */
+  /** The Admins' Hijri Adjustment offset in days, added to every Believer's own. */
   hijriAdjustment: integer("hijri_adjustment")
     .notNull()
     .default(DEFAULT_HIJRI_ADJUSTMENT),
+  /**
+   * A forced Hijri Date that replaces the offset from `forcedHijriFrom`
+   * through `forcedHijriUntil` (ISO dates): the Hijri year, month and day of
+   * that first day. All null when none is published.
+   */
+  forcedHijriYear: integer("forced_hijri_year"),
+  forcedHijriMonth: integer("forced_hijri_month"),
+  forcedHijriDay: integer("forced_hijri_day"),
+  forcedHijriFrom: text("forced_hijri_from"),
+  forcedHijriUntil: text("forced_hijri_until"),
 });
 
 /**

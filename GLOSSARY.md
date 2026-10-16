@@ -48,7 +48,7 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Hijri Date**: The date in the Islamic lunar calendar, after applying the Hijri Adjustment.
 
-**Hijri Adjustment**: A shift of whole days applied to the computed Hijri Date: one set by Admins for everyone, plus one the Believer adds for themselves. _Avoid_: Hijri offset
+**Hijri Adjustment**: A shift of whole days applied to the computed Hijri Date: one set by Admins for everyone, plus one the Believer adds for themselves. The Admins' one is a day offset or, after a moon-sighting announcement, a forced Hijri Date for a given day that lasts until its expiry and then falls back to the offset. _Avoid_: Hijri offset
 
 **Occasion**: A recurring Hijri-dated commemoration (birth, martyrdom, Eid, fast) that is either a celebration, a mourning, a religious day or a fast. _Avoid_: Calendar event, munasaba (in code)
 

@@ -439,7 +439,7 @@ describe.skipIf(!live)("Turso Cloud (ADR-0001)", () => {
     async () => {
       const admin = await signIn("admin");
       await grantAdminRole(db, believer("admin").email);
-      await callAs(admin, "hijriAdjustment.set", { adjustment: -1 });
+      await callAs(admin, "hijriAdjustment.set", { offset: -1, forced: null });
 
       const replicaAccess = await callAs<{
         url: string;
@@ -458,15 +458,18 @@ describe.skipIf(!live)("Turso Cloud (ADR-0001)", () => {
       expect({
         fromContentDatabase: replicaAccess.url.includes(contentName),
         adjustment: await settings.hijriAdjustment(),
-      }).toStrictEqual({ fromContentDatabase: true, adjustment: -1 });
+      }).toStrictEqual({
+        fromContentDatabase: true,
+        adjustment: { offset: -1, forced: null },
+      });
 
-      await callAs(admin, "hijriAdjustment.set", { adjustment: 2 });
+      await callAs(admin, "hijriAdjustment.set", { offset: 2, forced: null });
       expect({
         outcome: await replica.sync(),
         adjustment: await settings.hijriAdjustment(),
       }).toStrictEqual({
         outcome: { status: "pulled", pulledChanges: true },
-        adjustment: 2,
+        adjustment: { offset: 2, forced: null },
       });
 
       // A device that tries anyway: a sync connection (with push) on the
@@ -499,8 +502,8 @@ describe.skipIf(!live)("Turso Cloud (ADR-0001)", () => {
       ).rejects.toThrow(/SQL write operations are forbidden/u);
 
       await expect(
-        callAs<{ adjustment: number }>(admin, "hijriAdjustment.get")
-      ).resolves.toStrictEqual({ adjustment: 2 });
+        callAs<{ offset: number }>(admin, "hijriAdjustment.get")
+      ).resolves.toStrictEqual({ offset: 2, forced: null });
     },
     CLOUD_TIMEOUT_MS
   );
