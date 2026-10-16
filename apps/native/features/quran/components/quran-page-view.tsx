@@ -35,8 +35,14 @@ export interface AyahGestures {
   /** A plain tap anywhere on the page, ayat included: toggles the chrome. */
   onTap: () => void;
   onLongPressAyah: (ayah: AyahKey) => void;
+  /** A finger came down on an ayah: it lights at once, before a long-press. */
+  onPressInAyah: (ayah: AyahKey) => void;
+  /** The finger lifted or left the ayah. */
+  onPressOut: () => void;
   /** The ayah whose sheet is open, drawn highlighted. */
   selectedAyah: AyahKey | null;
+  /** The ayah under the finger, drawn highlighted like the selected one. */
+  pressingAyah: AyahKey | null;
   /** The Last-Read Ayah, its rosette drawn in the accent colour. */
   lastReadAyah: AyahKey | null;
 }
@@ -68,7 +74,7 @@ const wordKey = (word: QuranWord): AyahKey => `${word.surah}:${word.ayah}`;
 
 interface WordProps extends Omit<
   AyahGestures,
-  "selectedAyah" | "lastReadAyah"
+  "selectedAyah" | "pressingAyah" | "lastReadAyah"
 > {
   word: QuranWord;
   fontSize: number;
@@ -83,10 +89,14 @@ const Word = ({
   lastRead,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
 }: WordProps) => (
   <Text
     onPress={onTap}
     onLongPress={() => onLongPressAyah(wordKey(word))}
+    onPressIn={() => onPressInAyah(wordKey(word))}
+    onPressOut={onPressOut}
     suppressHighlighting
     className={`${selected ? "bg-accent" : ""} ${
       lastRead && word.isAyahEnd ? "text-info" : "text-foreground"
@@ -116,7 +126,10 @@ const Line = ({
   stretch,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
 }: LineProps) => {
   const { t } = useTranslation("quran");
@@ -164,10 +177,14 @@ const Line = ({
           key={index}
           word={word}
           fontSize={fontSize}
-          selected={selectedAyah === wordKey(word)}
+          selected={
+            selectedAyah === wordKey(word) || pressingAyah === wordKey(word)
+          }
           lastRead={lastReadAyah === wordKey(word)}
           onTap={onTap}
           onLongPressAyah={onLongPressAyah}
+          onPressInAyah={onPressInAyah}
+          onPressOut={onPressOut}
         />
       ))}
     </View>
@@ -188,7 +205,10 @@ const PageView = ({
   insetBottom,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
 }: QuranPageViewProps) => {
   const { t, i18n } = useTranslation("quran");
@@ -227,7 +247,15 @@ const PageView = ({
     setMeasured({ key: fitKey, fit: next });
   };
 
-  const gestures = { onTap, onLongPressAyah, selectedAyah, lastReadAyah };
+  const gestures = {
+    onTap,
+    onLongPressAyah,
+    onPressInAyah,
+    onPressOut,
+    selectedAyah,
+    pressingAyah,
+    lastReadAyah,
+  };
 
   return (
     <Pressable

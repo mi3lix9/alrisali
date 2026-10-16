@@ -75,4 +75,14 @@ export const en: Catalog<typeof ar> = {
     failed: "Try again.",
     ok: "OK",
   },
+  feedback: {
+    title: "Feedback on each count",
+    "sound-and-haptic": "Sound and haptic",
+    haptic: "Haptic only",
+    silent: "Silent",
+  },
+  settings: {
+    title: "Tasbih",
+    description: "Applies to Tasbih al-Zahra and every Open Tasbih.",
+  },
 };
