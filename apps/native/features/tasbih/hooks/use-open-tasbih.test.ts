@@ -1,13 +1,17 @@
 // @vitest-environment jsdom
 import type { OpenTasbih } from "@alrisali/db-user/tasbih";
-import type { DhikrSession } from "@alrisali/domain/tasbih";
+import type { DhikrSession, TasbihSettings } from "@alrisali/domain/tasbih";
+import type { UseQueryResult } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { AppState } from "react-native";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { saveOpenTasbihSession } from "../data/tasbih";
 import type { saveOpenTasbihCount, useSavedOpenTasbih } from "../data/tasbih";
-import type { playHaptic } from "../utils/haptics";
+import type { useTasbihSettings } from "../data/tasbih-settings";
+import { playHaptic } from "../utils/haptics";
+import { playTasbihSound } from "../utils/sounds";
+import type { preloadTasbihSounds } from "../utils/sounds";
 import { useOpenTasbih } from "./use-open-tasbih";
 
 type UseSavedOpenTasbih = typeof useSavedOpenTasbih;
@@ -31,8 +35,21 @@ vi.mock(import("../data/tasbih"), () => ({
   saveOpenTasbihCount: vi.fn<SaveOpenTasbihCount>(() => Promise.resolve()),
   saveOpenTasbihSession: vi.fn<SaveOpenTasbihSession>(),
 }));
+vi.mock(import("../data/tasbih-settings"), () => ({
+  useTasbihSettings: vi.fn<typeof useTasbihSettings>(
+    () =>
+      ({
+        data: { feedbackMode: "silent" },
+        isError: false,
+      }) as UseQueryResult<TasbihSettings>
+  ),
+}));
 vi.mock(import("../utils/haptics"), () => ({
   playHaptic: vi.fn<PlayHaptic>(),
+}));
+vi.mock(import("../utils/sounds"), () => ({
+  playTasbihSound: vi.fn<typeof playTasbihSound>(),
+  preloadTasbihSounds: vi.fn<typeof preloadTasbihSounds>(),
 }));
 vi.mock(import("expo-crypto"), () => ({ randomUUID: () => "session-1" }));
 vi.mock(import("@sentry/react-native"), () => ({
@@ -59,6 +76,18 @@ const pendingSave = () => {
 describe(useOpenTasbih, () => {
   beforeEach(() => {
     vi.mocked(saveOpenTasbihSession).mockReset();
+  });
+
+  it("counts every tap at once in silent mode, with no sound or vibration", () => {
+    const { result } = renderHook(() => useOpenTasbih("open-1"));
+
+    act(() => result.current.tap());
+    expect(result.current.count).toBe(41);
+    act(() => result.current.tap());
+    expect(result.current.count).toBe(42);
+
+    expect(playHaptic).not.toHaveBeenCalled();
+    expect(playTasbihSound).not.toHaveBeenCalled();
   });
 
   it("says the session is saved only once the save succeeds", async () => {
