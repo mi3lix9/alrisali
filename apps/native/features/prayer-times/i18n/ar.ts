@@ -17,6 +17,15 @@ export const ar = {
     current: "الوقت الحالي",
     allHidden: "كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت.",
   },
+  day: {
+    previous: "اليوم السابق",
+    next: "اليوم التالي",
+    today: "اليوم",
+    pick: "اختر تاريخًا",
+    hijri: "التاريخ الهجري",
+    timetableTitle: "مواقيت {{date}}",
+    countdown: "{{name}} بعد {{countdown}}",
+  },
   next: {
     title: "الصلاة القادمة",
     remaining: "بعد {{countdown}}",
