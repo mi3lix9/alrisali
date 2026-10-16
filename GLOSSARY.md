@@ -108,11 +108,17 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Bookmark Ribbon**: One of six coloured, nameable bookmarks, each resting on one ayah; setting a colour on another ayah moves that ribbon there, as in a printed mushaf. A ribboned ayah shows a coloured rosette on the page. _Avoid_: Bookmark (alone), Favorite
 
+**Sajdah Ayah**: An ayah at which a prostration is due; the four whose prostration is wajib (32:15, 41:37, 53:62, 96:19) are obligatory, the rest recommended. Its rosette shows a crimson (obligatory) or amber (recommended) marker.
+
+**Spread**: On a tablet or foldable in landscape, two Quran Pages shown side by side as in an open mushaf, the odd page on the right.
+
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
 
 **Continue Prompt**: The question "continue to the next ayat?" a Playback Plan asks when its range, after every repeat, ends; yes plays the same kind of range from the next ayah, no ends recitation. It is skipped at the end of the Quran and when the Believer turns it off. _Avoid_: Auto-continue
+
+**Reciter**: A person whose recitation is bundled, with one identity and both an Arabic and an English name across every style they are recorded in (murattal, mujawwad, muallim). The picker groups reciters by style, then region, and plays a sample on the current page without choosing them. The choice is a synced Believer setting. _Avoid_: Qari (in UI copy), Voice
 
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
 

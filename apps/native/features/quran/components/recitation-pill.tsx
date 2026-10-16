@@ -189,6 +189,7 @@ export const RecitationPill = ({
       <ReciterSheet
         open={choosing}
         reciter={reciter}
+        start={start}
         onSelect={selectReciter}
         onClose={() => setChoosing(false)}
       />

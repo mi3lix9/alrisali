@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_RECITER, findReciter, RECITERS, recitationUrl } from ".";
+import {
+  DEFAULT_RECITER,
+  findReciter,
+  groupReciters,
+  RECITERS,
+  recitationUrl,
+} from ".";
 
 describe(recitationUrl, () => {
   it("numbers alquran.cloud files by the ayah's place in the whole Quran", () => {
@@ -50,5 +56,61 @@ describe(findReciter, () => {
   it("gives every bundled reciter its own key", () => {
     const keys = RECITERS.map((reciter) => reciter.key);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe("reciter identity", () => {
+  it("gives a person one identity and both names in every style", () => {
+    const byPerson = Map.groupBy(RECITERS, (reciter) => reciter.person.id);
+    expect(
+      byPerson.get("husary")?.map((reciter) => reciter.style)
+    ).toStrictEqual(["murattal", "mujawwad", "muallim"]);
+    for (const reciters of byPerson.values()) {
+      const [first] = reciters;
+      for (const reciter of reciters) {
+        expect(reciter.person).toBe(first?.person);
+        expect(reciter.name).toStrictEqual(first?.person.name);
+        expect(reciter.region).toBe(first?.person.region);
+      }
+    }
+  });
+
+  it("names every reciter in Arabic and English", () => {
+    for (const reciter of RECITERS) {
+      expect(reciter.name.ar.trim()).not.toBe("");
+      expect(reciter.name.en.trim()).not.toBe("");
+    }
+  });
+
+  it("never gives two people the same id or name", () => {
+    const people = [
+      ...new Map(RECITERS.map((r) => [r.person.id, r.person])).values(),
+    ];
+    expect(new Set(people.map((p) => p.name.en)).size).toBe(people.length);
+    expect(new Set(people.map((p) => p.name.ar)).size).toBe(people.length);
+  });
+});
+
+describe(groupReciters, () => {
+  it("groups by style, then region, in the picker's order", () => {
+    const groups = groupReciters();
+    expect(groups.map((group) => group.style)).toStrictEqual([
+      "murattal",
+      "mujawwad",
+      "muallim",
+    ]);
+    const mujawwad = groups.find((group) => group.style === "mujawwad");
+    expect(mujawwad?.regions.map((group) => group.region)).toStrictEqual([
+      "egypt",
+    ]);
+  });
+
+  it("places every reciter in exactly one group", () => {
+    const keys = groupReciters().flatMap((style) =>
+      style.regions.flatMap((region) => region.reciters.map((r) => r.key))
+    );
+    expect(keys.toSorted()).toStrictEqual(
+      RECITERS.map((r) => r.key).toSorted()
+    );
   });
 });

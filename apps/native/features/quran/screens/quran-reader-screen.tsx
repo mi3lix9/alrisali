@@ -51,6 +51,7 @@ import {
   useUpdateQuranReaderSettings,
 } from "../data/reader-settings";
 import { useAyahDecorations } from "../hooks/use-ayah-decorations";
+import { useLandscapeOnWideScreens } from "../hooks/use-landscape-on-wide-screens";
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
@@ -420,6 +421,7 @@ export const QuranReaderScreen = ({
   savedFavorites,
   topBarActions,
 }: QuranReaderScreenProps) => {
+  useLandscapeOnWideScreens();
   const params = useLocalSearchParams<ReaderParams>();
   const fontLoaded = useQuranFont();
   const settings = useQuranReaderSettings();
