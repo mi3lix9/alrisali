@@ -45,3 +45,6 @@ export const loadSupplicationText = async (
   const text = await load();
   return text.default;
 };
+
+export { AMAL, AMAL_KINDS } from "./data/amal";
+export type { AmalEntry, AmalKind } from "./types";
