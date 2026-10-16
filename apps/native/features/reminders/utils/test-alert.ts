@@ -1,12 +1,10 @@
 import { atTimeAlert, atTimeSound } from "@alrisali/domain/reminders";
 import type { ReminderRule } from "@alrisali/domain/reminders";
-import {
-  getPermissionsAsync,
-  scheduleNotificationAsync,
-} from "expo-notifications";
+import { scheduleNotificationAsync } from "expo-notifications";
 
 import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
 import { playAdhan } from "./adhan-player";
+import { askNotificationsInContext } from "./ask-notifications";
 import { AT_TIME_SYSTEM_CHANNEL } from "./notification-request";
 import { ensureChannels } from "./scheduler";
 
@@ -36,8 +34,8 @@ export const testAtTimeAlert = async (
   if (recording && playAdhan(recording.file, onEnd)) {
     return "playing";
   }
-  const { granted } = await getPermissionsAsync();
-  if (!granted) {
+  // The first playback that needs a notification asks for them.
+  if (!(await askNotificationsInContext())) {
     return "denied";
   }
   await ensureChannels();
