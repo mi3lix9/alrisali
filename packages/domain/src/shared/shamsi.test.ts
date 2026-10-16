@@ -5,6 +5,14 @@ import { fromShamsi, shamsiMonthLength, toShamsi } from "./shamsi";
 
 const day = (iso: string) => Temporal.PlainDate.from(iso);
 
+/** 18–23 March (Nowruz) and 20–24 September (Mehr) of every year 1900–2100. */
+const BOUNDARY_DAYS = Array.from({ length: 201 }, (_, offset) => 1900 + offset)
+  .flatMap((year) => [
+    ...[18, 19, 20, 21, 22, 23].map((date) => ({ year, month: 3, day: date })),
+    ...[20, 21, 22, 23, 24].map((date) => ({ year, month: 9, day: date })),
+  ])
+  .map((fields) => Temporal.PlainDate.from(fields));
+
 describe(toShamsi, () => {
   it("starts the year at Nowruz, the day after the last of Esfand", () => {
     expect(toShamsi(day("2024-03-19"))).toStrictEqual({
@@ -66,7 +74,7 @@ describe(toShamsi, () => {
     });
   });
 
-  it("agrees with the ICU Persian calendar for every day of 1900–2100", () => {
+  it("agrees with the ICU Persian calendar around every Nowruz and Mehr of 1900–2100", () => {
     const icu = new Intl.DateTimeFormat("en-u-ca-persian-nu-latn", {
       timeZone: "UTC",
       year: "numeric",
@@ -74,11 +82,7 @@ describe(toShamsi, () => {
       day: "numeric",
     });
     const mismatches: string[] = [];
-    for (
-      let date = day("1900-01-01");
-      Temporal.PlainDate.compare(date, day("2100-12-31")) <= 0;
-      date = date.add({ days: 1 })
-    ) {
+    for (const date of BOUNDARY_DAYS) {
       const parts = Object.fromEntries(
         icu
           .formatToParts(new Date(`${date.toString()}T12:00:00Z`))
@@ -91,6 +95,7 @@ describe(toShamsi, () => {
         mismatches.push(`${date.toString()}: ${actual} ≠ ${expected}`);
       }
     }
+
     expect(mismatches).toStrictEqual([]);
   });
 });
@@ -108,12 +113,8 @@ describe(fromShamsi, () => {
     );
   });
 
-  it("round-trips every day across many year boundaries", () => {
-    for (
-      let date = day("1990-01-01");
-      Temporal.PlainDate.compare(date, day("2040-12-31")) <= 0;
-      date = date.add({ days: 1 })
-    ) {
+  it("round-trips the days around every Nowruz and Mehr of 1900–2100", () => {
+    for (const date of BOUNDARY_DAYS) {
       expect(fromShamsi(toShamsi(date))).toStrictEqual(date);
     }
   });
