@@ -1,4 +1,5 @@
 import catalog from "./data/catalog.json";
+import taqibat from "./data/taqibat.json";
 import { TEXT_LOADERS } from "./data/texts";
 import type { Book, Passage, SupplicationEntry } from "./types";
 
@@ -45,3 +46,8 @@ export const loadSupplicationText = async (
   const text = await load();
   return text.default;
 };
+
+/** In-house Taqibat map: each daily Salah's Supplication, where one is bundled. */
+export const TAQIBAT: Readonly<
+  Partial<Record<"fajr" | "dhuhr" | "asr" | "maghrib" | "isha", string>>
+> = taqibat;

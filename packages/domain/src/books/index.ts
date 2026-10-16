@@ -5,3 +5,4 @@ export type {
   SupplicationSearchOptions,
   SupplicationSearchResult,
 } from "./search";
+export { taqibatFor } from "./taqibat";
