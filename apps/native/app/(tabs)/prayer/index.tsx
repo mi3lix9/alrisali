@@ -3,6 +3,7 @@ import { KhushuButton } from "@/features/khushu";
 import { PrayerAssistantCard } from "@/features/prayer-assistant";
 import { PrayerLogCard } from "@/features/prayer-log";
 import { PrayerTimesScreen } from "@/features/prayer-times";
+import { QadaCard, QadaSalahToggle } from "@/features/qada";
 import { QiblaToolbarButton } from "@/features/qibla";
 import { AtTimeAlertButton } from "@/features/reminders";
 
@@ -20,7 +21,11 @@ const PrayerRoute = () => (
             <TaqibatButton salah={salah} />
           </>
         )}
+        salahActions={(date, salah) => (
+          <QadaSalahToggle date={date} salah={salah} />
+        )}
       />
+      <QadaCard />
     </PrayerTimesScreen>
   </>
 );

@@ -43,6 +43,7 @@ bunx e2e run tests/native/prayer-log.e2e.ts --target ios   # one file
 - `tests/native/supplication.e2e.ts`: opening a Supplication from the Library's Books and marking it read today.
 - `tests/native/quran-resume.e2e.ts`: starting the Quran from Home, jumping to page 50, leaving the reader and the app, and resuming at page 50.
 - `tests/native/companion.e2e.ts`: the Companion earning 10 XP for a logged Salah.
+- `tests/native/qada.e2e.ts`: setting up a Qada Plan of ten days, logging a Qada Fajr from the Prayer Log, and the dashboard showing one fewer Fajr left.
 - `tests/native/sign-in-sync.e2e.ts` (Google credentials): a Guest's Open Tasbih comes back on a new device after signing in to the same account.
 - `tests/native/admin-publish.e2e.ts` (Admin session): an Official Program an Admin publishes shows on a running device after its next launch.
 - `tests/native/at-time-alert.e2e.ts`: opening Maghrib's At-Time Alert from the Prayer timetable, seeing the full adhan disabled while no recording is installed, testing the takbir, saving a silent notification and finding it kept.

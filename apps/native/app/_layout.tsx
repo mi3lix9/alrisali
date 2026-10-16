@@ -10,6 +10,7 @@ import { HabitReminderPlans } from "@/features/habits";
 import { KhushuSheet } from "@/features/khushu";
 import { useOnboarded } from "@/features/onboarding";
 import { CompletedSalahLogger } from "@/features/prayer-log";
+import { QadaReminderPlans } from "@/features/qada";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
@@ -53,6 +54,8 @@ const RootStack = () => {
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
         <Stack.Screen name="date-converter" />
+        <Stack.Screen name="qada" />
+        <Stack.Screen name="qada-setup" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
@@ -68,7 +71,11 @@ const RootStack = () => {
 const Layout = () => (
   <AppProviders>
     <HabitReminderPlans>
-      {(habits) => <ReminderScheduler habits={habits} />}
+      {(habits) => (
+        <QadaReminderPlans>
+          {(qada) => <ReminderScheduler habits={habits} qada={qada} />}
+        </QadaReminderPlans>
+      )}
     </HabitReminderPlans>
     <UsageAnalytics />
     <CompanionAwards />

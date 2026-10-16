@@ -22,18 +22,23 @@ const DATE_FORMAT: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
-/** What another feature shows beside a logged Salah, composed by the route. */
+/** What another feature shows beside a Salah, composed by the route. */
 type LoggedSalahActions = (date: Temporal.PlainDate, salah: Salah) => ReactNode;
 
 interface PrayerLogCardProps {
   loggedSalahActions?: LoggedSalahActions | undefined;
+  /** Shown beside every Salah, logged or not (the Qada tick). */
+  salahActions?: LoggedSalahActions | undefined;
 }
 
 /**
  * The Prayer tab's Prayer Log: tick each Salah for today or step back to
  * log or correct a past date. Future dates cannot be reached.
  */
-export const PrayerLogCard = ({ loggedSalahActions }: PrayerLogCardProps) => {
+export const PrayerLogCard = ({
+  loggedSalahActions,
+  salahActions,
+}: PrayerLogCardProps) => {
   const { t } = useTranslation("prayer-log");
   const today = useToday();
   // null follows today, so the card moves on at midnight.
@@ -90,6 +95,7 @@ export const PrayerLogCard = ({ loggedSalahActions }: PrayerLogCardProps) => {
                       />
                     </View>
                     {performed ? loggedSalahActions?.(date, salah) : null}
+                    {salahActions?.(date, salah)}
                   </View>
                 );
               })}

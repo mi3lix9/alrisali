@@ -9,6 +9,8 @@ export {
 export type { AdhanRecording, AdhanSound, AtTimeSound } from "./adhan-sounds";
 export { habitReminderSource } from "./habit-reminders";
 export type { HabitReminderMessage } from "./habit-reminders";
+export { qadaReminderSource } from "./qada-reminders";
+export type { QadaReminderMessage } from "./qada-reminders";
 export {
   diffSchedule,
   isStaleAlert,

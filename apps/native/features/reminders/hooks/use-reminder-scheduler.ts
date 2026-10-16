@@ -1,11 +1,20 @@
-import { habitReminderSource, planReminders } from "@alrisali/domain/reminders";
-import type { ReminderSettings } from "@alrisali/domain/reminders";
+import {
+  habitReminderSource,
+  planReminders,
+  qadaReminderSource,
+} from "@alrisali/domain/reminders";
+import type {
+  HabitReminderMessage,
+  QadaReminderMessage,
+  ReminderSettings,
+} from "@alrisali/domain/reminders";
 import type {
   CalculationMethod,
   HabitReminderPlan,
   HijriCalendar,
   Location,
   MessageStyle,
+  QadaReminderPlan,
 } from "@alrisali/domain/shared";
 import { captureException } from "@sentry/react-native";
 import { getCalendars } from "expo-localization";
@@ -42,12 +51,13 @@ const planAndSync = async (
   believer: PlanningSettings,
   settings: ReminderSettings,
   habits: readonly HabitReminderPlan[],
+  qada: QadaReminderPlan | null,
   t: TFunction<"reminders">,
   hijri: HijriCalendar
 ): Promise<void> => {
   const { location, calculationMethod, imsakMinutes, messageStyle } = believer;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
-  const reminders = planReminders({
+  const reminders = planReminders<HabitReminderMessage | QadaReminderMessage>({
     now: Temporal.Now.zonedDateTimeISO(timeZone),
     prayerTimes: location
       ? {
@@ -61,7 +71,10 @@ const planAndSync = async (
       : null,
     settings,
     messageStyle,
-    sources: [habitReminderSource(habits, messageStyle)],
+    sources: [
+      habitReminderSource(habits, messageStyle),
+      qadaReminderSource(qada),
+    ],
     hijri,
   });
   try {
@@ -81,11 +94,12 @@ const planAndSync = async (
  * app returns to the foreground (topping it up and following a new time
  * zone), as soon as any setting or Habit it depends on changes, and when
  * notifications are allowed (in onboarding or on the Reminders screen).
- * `habits` is undefined while they load, so their Reminders are not cancelled
- * meanwhile.
+ * `habits` and `qada` are undefined while they load, so their Reminders are
+ * not cancelled meanwhile.
  */
 export const useReminderScheduler = (
-  habits: readonly HabitReminderPlan[] | undefined
+  habits: readonly HabitReminderPlan[] | undefined,
+  qada: QadaReminderPlan | null | undefined
 ): void => {
   const { t } = useTranslation("reminders");
   const { data: believer } = useBelieverSettings();
@@ -105,15 +119,21 @@ export const useReminderScheduler = (
   );
 
   useEffect(() => {
-    if (!believer || !settings || !habits || granted === undefined) {
+    if (
+      !believer ||
+      !settings ||
+      !habits ||
+      qada === undefined ||
+      granted === undefined
+    ) {
       return;
     }
-    void planAndSync(believer, settings, habits, t, hijri);
+    void planAndSync(believer, settings, habits, qada, t, hijri);
     const subscription = AppState.addEventListener("change", (state) => {
       if (state === "active") {
-        void planAndSync(believer, settings, habits, t, hijri);
+        void planAndSync(believer, settings, habits, qada, t, hijri);
       }
     });
     return () => subscription.remove();
-  }, [believer, settings, habits, t, granted, hijri]);
+  }, [believer, settings, habits, qada, t, granted, hijri]);
 };

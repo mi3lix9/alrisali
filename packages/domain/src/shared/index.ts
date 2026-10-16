@@ -194,3 +194,4 @@ export {
   setShortcutShown,
 } from "./home-shortcuts";
 export type { ArrangedShortcut, ShortcutLayout } from "./home-shortcuts";
+export type { QadaReminderPlan } from "./qada-reminder";
