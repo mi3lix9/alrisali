@@ -14,6 +14,7 @@ import { formatNumber } from "@/shared/lib/numbers";
 import { Screen } from "@/shared/ui/screen";
 
 import { CounterButton } from "../components/counter-button";
+import { FeedbackModePicker } from "../components/feedback-mode-picker";
 import { useOpenTasbih } from "../hooks/use-open-tasbih";
 import type { OpenTasbihNotice } from "../hooks/use-open-tasbih";
 
@@ -149,6 +150,8 @@ export const OpenTasbihScreen = () => {
             {tasbih.notes}
           </Text>
         ) : null}
+
+        <FeedbackModePicker />
       </ScrollView>
     </>
   );
