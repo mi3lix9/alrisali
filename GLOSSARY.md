@@ -96,6 +96,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Khatmah Log**: The record that a Khatmah Session was completed on a date; the same session on two devices is one record.
 
+**Khatmah Plan**: How a Khatmah is divided: the suggested 30 days, an even split, by meaning (7, 29 or 60 days along the Quran's own divisions), by amount (a number of ayat, pages, hizb quarters, hizb, juz or surahs a session) or by deadline (a Gregorian or Hijri day the last session falls on). Its sessions are daily, every other day or weekly, and a Believer may join at session N, skipping the earlier ones; each choice shows its amount, minutes a session and finish day before it starts.
+
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
 **Supplication**: A single readable text inside a Book (a dua, ziyarah, munajat or sermon). _Avoid_: Item, section, content
