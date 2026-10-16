@@ -196,7 +196,13 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261016132923_bookmark_ribbons",
+    tag: "20261016132110_recent_cities",
+    statements: [
+      "ALTER TABLE `prayer_times_settings` ADD `recent_cities` text;",
+    ],
+  },
+  {
+    tag: "20261016134056_bookmark_ribbons",
     statements: [
       "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
     ],

@@ -1,7 +1,7 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "5b51b0ce-444c-4dd5-b4a1-de57481373f1",
+  "id": "41a1d730-ba08-4769-aeb2-576a2019949e",
   "prevIds": [
     "5fc0cade-ae87-496d-80fa-a834820c55bb",
     "9ec60b0a-919e-4b51-88d9-b7092d44e6e1",
@@ -86,10 +86,6 @@
     },
     {
       "name": "qada_plan",
-      "entityType": "tables"
-    },
-    {
-      "name": "quran_bookmark_ribbons",
       "entityType": "tables"
     },
     {
@@ -704,6 +700,16 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
+      "name": "recent_cities",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "act_completions"
@@ -1047,46 +1053,6 @@
       "name": "updated_at",
       "entityType": "columns",
       "table": "qada_plan"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "color",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "name",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "ayah",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
     },
     {
       "type": "text",
@@ -1716,13 +1682,6 @@
       "nameExplicit": false,
       "name": "qada_plan_pk",
       "table": "qada_plan",
-      "entityType": "pks"
-    },
-    {
-      "columns": ["color"],
-      "nameExplicit": false,
-      "name": "quran_bookmark_ribbons_pk",
-      "table": "quran_bookmark_ribbons",
       "entityType": "pks"
     },
     {
