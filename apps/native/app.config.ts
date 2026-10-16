@@ -40,6 +40,7 @@ export const LINK_PATH_ROOTS = [
   "quran",
   "supplication",
   "khatmah",
+  "calendar",
   "qibla",
   "tasbih",
   "next-salah",
@@ -83,6 +84,89 @@ export const universalLinks = (
     },
   };
 };
+
+/**
+ * The home-screen widgets, by the names `features/widgets/data/names.ts`
+ * registers (app.config.test.ts keeps the two equal). Their layout file is the
+ * one the native builds run to draw them before the app first opens.
+ */
+const WIDGET_LAYOUT = "features/widgets/definitions.ts";
+const ANDROID_CELL_DP = 70;
+const android = (cells: { width: number; height: number }) => ({
+  // A cell is about 70 dp; the launcher snaps the widget to whole cells.
+  minWidth: cells.width * ANDROID_CELL_DP - 30,
+  minHeight: cells.height * ANDROID_CELL_DP - 30,
+  targetCellWidth: cells.width,
+  targetCellHeight: cells.height,
+  // The layout is drawn for one size (the app passes it in the props).
+  resizeMode: "none" as const,
+  initialLayout: WIDGET_LAYOUT,
+});
+export const WIDGETS = [
+  {
+    name: "AlrisaliNextSalah",
+    displayName: "الصلاة القادمة · Next prayer",
+    description:
+      "الصلاة القادمة مع العدّ التنازلي. The next Salah with a countdown.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliTodayTimes",
+    displayName: "أوقات اليوم · Today's times",
+    description: "مواقيت الصلاة لليوم. Today's Prayer Times.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium", "systemLarge"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 3 }),
+  },
+  {
+    name: "AlrisaliHijriDate",
+    displayName: "التاريخ الهجري · Hijri date",
+    description: "تاريخ اليوم بالهجري. Today's Hijri Date.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliVerseOfTheDay",
+    displayName: "آية اليوم · Verse of the Day",
+    description: "آية اليوم. The Verse of the Day.",
+    ios: {
+      supportedFamilies: ["systemMedium", "systemLarge"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 4, height: 2 }),
+  },
+  {
+    name: "AlrisaliKeepReading",
+    displayName: "تابع القراءة · Keep reading",
+    description:
+      "آخر آية قرأتها، وتفتح المصحف عندها. Your Last-Read Ayah; opens the reader there.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliKhatmah",
+    displayName: "الختمة · Khatmah",
+    description:
+      "تقدّم ختمتك وورد اليوم. Your Khatmah's progress and today's portion.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 4, height: 2 }),
+  },
+];
 
 const appConfig = ({ config }: ConfigContext): ExpoConfig => {
   const links = universalLinks(process.env.EXPO_PUBLIC_LINK_DOMAIN);
@@ -192,6 +276,21 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => {
       // Toolchain (`xcodebuild -downloadComponent MetalToolchain`).
       ["expo-build-properties", { android: { minSdkVersion: 26 } }],
       ["@hot-updater/expo", { channel: OTA_CHANNEL }],
+      // Home-screen widgets (features/widgets). On iOS they need the App Group
+      // `group.<bundle id>` on the app and its widget extension
+      // (`<bundle id>.ExpoWidgetsTarget`): EAS registers both from this config
+      // when it syncs credentials. Android widgets are opt-in in the plugin.
+      [
+        "expo-widgets",
+        {
+          enableAndroid: true,
+          // The App Group the app and its widget extension share: register it
+          // for both bundle ids in the Apple developer portal.
+          groupIdentifier: `group.${APP_ID}`,
+          bundleIdentifier: `${APP_ID}.ExpoWidgetsTarget`,
+          widgets: WIDGETS,
+        },
+      ],
       [
         "@sentry/react-native/expo",
         {

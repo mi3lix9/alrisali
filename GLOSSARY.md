@@ -182,7 +182,9 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Share Image**: A picture of an ayah, a Supplication excerpt or today's Prayer Times that the Believer composes (square, portrait or story size, on a flat colour, with an optional Bismillah or A'udhu and an attribution they can turn off) and sends through the system share sheet. _Avoid_: Screenshot, card
 
-**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+**Link**: An `alrisali://` or universal (web-domain) URL that opens the app at an ayah, a Supplication, a Khatmah, the Hijri calendar, the Qibla, Tasbih or the next Salah, found through the Feature Registry; one that names nothing opens Home. The app-icon long-press shortcuts open the same links. _Avoid_: Deep link (as a second term), route
+
+**Home-screen Widget**: A widget on the phone's home screen showing the next Salah with a countdown, today's times, the Hijri Date, the Verse of the Day, Keep Reading (the Last-Read Ayah) or Khatmah progress. It draws only what the app wrote for it, one view per moment something changes (every Prayer Time, and midnight); a tap opens the matching screen through a Link. _Avoid_: Snapshot (the widget's data), tile (the in-app Home shortcut)
 
 ## Relationships
 
