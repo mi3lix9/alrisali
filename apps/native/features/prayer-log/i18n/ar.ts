@@ -13,7 +13,7 @@ export const ar = {
   },
   streak: {
     label: "سلسلة الصلاة",
-    days_zero: "{{count}} يوم",
+    days_zero: "لا أيام",
     days_one: "يوم واحد",
     days_two: "يومان",
     days_few: "{{count}} أيام",
