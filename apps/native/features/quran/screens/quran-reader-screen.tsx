@@ -5,6 +5,7 @@ import {
   findAyah,
   firstPageOfSurah,
   openReader,
+  pagePaletteColors,
   pagePosition,
   readerReducer,
   recitationStart,
@@ -25,9 +26,11 @@ import { View } from "react-native";
 import type { LayoutChangeEvent } from "react-native";
 import Animated, { FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useUniwind } from "uniwind";
 
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions, AyahSheetMove } from "../components/ayah-sheet";
+import { PageColorsProvider } from "../components/page-colors";
 import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
@@ -48,6 +51,7 @@ import {
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
+import { useReaderKeepAwake } from "../hooks/use-reader-keep-awake";
 
 interface ReaderParams {
   /** `surah:ayah` to open at. */
@@ -120,6 +124,12 @@ const Reader = ({
       saveLastRead(state.lastReadAyah);
     }
   }, [state.lastReadAyah, saveLastRead]);
+  useReaderKeepAwake(settings.keepAwake);
+  const { theme } = useUniwind();
+  const pageColors = pagePaletteColors(
+    settings.pagePalette,
+    theme === "dark" ? "dark" : "light"
+  );
   const [chrome, send] = useReaderChrome();
   // Bumped by every jump, so the page list or surah remounts at the target.
   const [jumpCount, setJumpCount] = useState(0);
@@ -219,112 +229,123 @@ const Reader = ({
     findAyah(state.lastReadAyah)?.page === state.currentPage;
 
   return (
-    <View className="bg-background flex-1 dark:bg-black">
-      <StatusBar hidden={!chrome.visible} animated />
-      {state.mode === "page" ? (
-        <PageMode
-          key={jumpCount}
-          pageNav={state.pageNav}
+    <PageColorsProvider palette={settings.pagePalette}>
+      <View
+        className="flex-1"
+        style={{
+          backgroundColor: pageColors.background,
+        }}
+      >
+        <StatusBar
+          hidden={!chrome.visible}
+          animated
+          style={pageColors.dark ? "light" : "dark"}
+        />
+        {state.mode === "page" ? (
+          <PageMode
+            key={jumpCount}
+            pageNav={state.pageNav}
+            initialPage={state.currentPage}
+            width={width}
+            height={height}
+            insetTop={insets.top}
+            insetBottom={insets.bottom}
+            onPageShown={onPageShown}
+            onScrollStart={onScrollStart}
+            {...gestures}
+          />
+        ) : (
+          <SurahMode
+            key={jumpCount}
+            surah={state.currentSurah}
+            fontSize={settings.surahFontSize}
+            insetTop={insets.top}
+            insetBottom={insets.bottom}
+            initialAyah={state.lastReadAyah}
+            onNextSurah={() => dispatch({ type: "next-surah" })}
+            onScrollStart={onScrollStart}
+            onAyahShown={onAyahShown}
+            {...gestures}
+          />
+        )}
+        {chrome.visible ? (
+          <ReaderTopBar
+            mode={state.mode}
+            position={position}
+            surah={state.mode === "page" ? position.surah : state.currentSurah}
+            insetTop={insets.top}
+            onBack={() =>
+              router.canGoBack() ? router.back() : router.replace("/")
+            }
+            onIndex={() => openSheet("index")}
+            onSearch={() => openSheet("search")}
+            onSettings={() =>
+              send({ type: "open-sheet", sheet: { kind: "settings" } })
+            }
+            lastReadOnScreen={lastReadOnScreen}
+            actions={topBarActions}
+          />
+        ) : null}
+        {chrome.visible ? (
+          <ReaderBottomBar
+            mode={state.mode}
+            value={scrubberValue(state)}
+            returnTo={state.returnTo}
+            insetBottom={insets.bottom}
+            onReturn={() => move({ type: "return" })}
+            onScrubberHold={() => send({ type: "scrubber-hold" })}
+            onScrubberRelease={() => send({ type: "scrubber-release" })}
+            onJump={jumpTo}
+          />
+        ) : null}
+        <RecitationPill
+          start={recitationStart(state)}
+          reciter={settings.reciter}
+          chromeVisible={chrome.visible}
+          bottom={
+            insets.bottom +
+            RECITATION_PILL_GAP +
+            (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
+          }
+          onReciterChange={(reciter) => update.mutate({ reciter })}
+          onInteract={() => send({ type: "interact" })}
+        />
+        {hint.shown ? <ReaderHint /> : null}
+        <AyahSheet
+          ayah={selectedAyah}
+          reciter={settings.reciter}
+          lastReadAyah={state.lastReadAyah}
+          onSetLastRead={(ayah) => dispatch({ type: "set-last-read", ayah })}
+          onMove={moveSelection}
+          actions={ayahActions}
+          onClose={closeSheet}
+        />
+        <ReaderSettingsSheet
+          open={chrome.sheet?.kind === "settings"}
+          settings={{ ...settings, mode: state.mode, pageNav: state.pageNav }}
+          onChange={changeSettings}
+          onClose={() => send({ type: "close-sheet" })}
+        />
+        <QuranIndexSheet
+          open={chrome.sheet?.kind === "index"}
+          current={{ surah: state.currentSurah, juz: position.juz }}
+          onSelect={jumpTo}
+          onPageJump={() => openSheet("page-jump")}
+          onClose={closeSheet}
+        />
+        <PageJumpSheet
+          open={chrome.sheet?.kind === "page-jump"}
           initialPage={state.currentPage}
-          width={width}
-          height={height}
-          insetTop={insets.top}
-          insetBottom={insets.bottom}
-          onPageShown={onPageShown}
-          onScrollStart={onScrollStart}
-          {...gestures}
+          onSelect={jumpTo}
+          onClose={closeSheet}
         />
-      ) : (
-        <SurahMode
-          key={jumpCount}
-          surah={state.currentSurah}
-          fontSize={settings.surahFontSize}
-          insetTop={insets.top}
-          insetBottom={insets.bottom}
-          initialAyah={state.lastReadAyah}
-          onNextSurah={() => dispatch({ type: "next-surah" })}
-          onScrollStart={onScrollStart}
-          onAyahShown={onAyahShown}
-          {...gestures}
+        <QuranSearchSheet
+          open={chrome.sheet?.kind === "search"}
+          onSelect={jumpTo}
+          onClose={closeSheet}
         />
-      )}
-      {chrome.visible ? (
-        <ReaderTopBar
-          mode={state.mode}
-          position={position}
-          surah={state.mode === "page" ? position.surah : state.currentSurah}
-          insetTop={insets.top}
-          onBack={() =>
-            router.canGoBack() ? router.back() : router.replace("/")
-          }
-          onIndex={() => openSheet("index")}
-          onSearch={() => openSheet("search")}
-          onSettings={() =>
-            send({ type: "open-sheet", sheet: { kind: "settings" } })
-          }
-          lastReadOnScreen={lastReadOnScreen}
-          actions={topBarActions}
-        />
-      ) : null}
-      {chrome.visible ? (
-        <ReaderBottomBar
-          mode={state.mode}
-          value={scrubberValue(state)}
-          returnTo={state.returnTo}
-          insetBottom={insets.bottom}
-          onReturn={() => move({ type: "return" })}
-          onScrubberHold={() => send({ type: "scrubber-hold" })}
-          onScrubberRelease={() => send({ type: "scrubber-release" })}
-          onJump={jumpTo}
-        />
-      ) : null}
-      <RecitationPill
-        start={recitationStart(state)}
-        reciter={settings.reciter}
-        chromeVisible={chrome.visible}
-        bottom={
-          insets.bottom +
-          RECITATION_PILL_GAP +
-          (chrome.visible ? READER_BOTTOM_BAR_HEIGHT : 0)
-        }
-        onReciterChange={(reciter) => update.mutate({ reciter })}
-        onInteract={() => send({ type: "interact" })}
-      />
-      {hint.shown ? <ReaderHint /> : null}
-      <AyahSheet
-        ayah={selectedAyah}
-        reciter={settings.reciter}
-        lastReadAyah={state.lastReadAyah}
-        onSetLastRead={(ayah) => dispatch({ type: "set-last-read", ayah })}
-        onMove={moveSelection}
-        actions={ayahActions}
-        onClose={closeSheet}
-      />
-      <ReaderSettingsSheet
-        open={chrome.sheet?.kind === "settings"}
-        settings={{ ...settings, mode: state.mode, pageNav: state.pageNav }}
-        onChange={changeSettings}
-        onClose={() => send({ type: "close-sheet" })}
-      />
-      <QuranIndexSheet
-        open={chrome.sheet?.kind === "index"}
-        current={{ surah: state.currentSurah, juz: position.juz }}
-        onSelect={jumpTo}
-        onPageJump={() => openSheet("page-jump")}
-        onClose={closeSheet}
-      />
-      <PageJumpSheet
-        open={chrome.sheet?.kind === "page-jump"}
-        initialPage={state.currentPage}
-        onSelect={jumpTo}
-        onClose={closeSheet}
-      />
-      <QuranSearchSheet
-        open={chrome.sheet?.kind === "search"}
-        onSelect={jumpTo}
-        onClose={closeSheet}
-      />
-    </View>
+      </View>
+    </PageColorsProvider>
   );
 };
 

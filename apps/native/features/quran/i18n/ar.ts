@@ -61,6 +61,18 @@ export const ar = {
       horizontal: "أفقي",
       vertical: "عمودي",
     },
+    pagePalette: {
+      title: "لون الصفحة",
+      theme: "حسب مظهر التطبيق",
+      white: "أبيض",
+      cream: "كريمي",
+      "soft-dark": "داكن هادئ",
+      black: "أسود",
+    },
+    keepAwake: {
+      title: "إبقاء الشاشة مضاءة",
+      description: "أثناء قراءة القرآن",
+    },
     fontSize: {
       title: "حجم الخط في وضع السورة",
       smaller: "تصغير الخط",

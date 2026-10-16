@@ -33,6 +33,11 @@ const toSettings = (row: Row | undefined): QuranReaderSettings => {
       shape.surahFontSize.safeParse(row?.surahFontSize).data ??
       defaults.surahFontSize,
     reciter: shape.reciter.safeParse(row?.reciter).data ?? defaults.reciter,
+    pagePalette:
+      shape.pagePalette.safeParse(row?.pagePalette).data ??
+      defaults.pagePalette,
+    keepAwake:
+      shape.keepAwake.safeParse(row?.keepAwake).data ?? defaults.keepAwake,
   };
 };
 
@@ -58,6 +63,8 @@ export const createQuranReaderSettingsRepository = (
       pageNav: parsed.pageNav ?? current.pageNav,
       surahFontSize: parsed.surahFontSize ?? current.surahFontSize,
       reciter: parsed.reciter ?? current.reciter,
+      pagePalette: parsed.pagePalette ?? current.pagePalette,
+      keepAwake: parsed.keepAwake ?? current.keepAwake,
     };
     await db
       .insert(quranReaderSettings)

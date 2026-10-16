@@ -48,6 +48,16 @@ export type {
   ReaderAction,
   ReaderMode,
 } from "./reader";
+export {
+  PAGE_PALETTE_COLORS,
+  PAGE_PALETTES,
+  pagePaletteColors,
+} from "./page-palette";
+export type {
+  FixedPagePalette,
+  PagePalette,
+  PagePaletteColors,
+} from "./page-palette";
 export { scrubberDomain, scrubberTarget, scrubberValue } from "./scrubber";
 export type { ScrubberDomain } from "./scrubber";
 export { findSurahsByName, parseQuranQuery, QURAN_QUERY_KINDS } from "./query";

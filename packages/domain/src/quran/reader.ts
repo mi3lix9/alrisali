@@ -11,6 +11,7 @@ import {
   SURAH_COUNT,
 } from "./mushaf";
 import type { Ayah, AyahKey } from "./mushaf";
+import { PAGE_PALETTES } from "./page-palette";
 import { DEFAULT_RECITER, findReciter } from "./reciters";
 
 // The Quran reader's position and how it moves. The UI renders the state and
@@ -38,6 +39,10 @@ export const quranReaderSettingsSchema = z.object({
   reciter: z
     .string()
     .refine((key) => findReciter(key) !== undefined, "No such reciter"),
+  /** The colour of the paper the Quran is read on. */
+  pagePalette: z.enum(PAGE_PALETTES),
+  /** Keeps the screen awake while the reader is open. */
+  keepAwake: z.boolean(),
 });
 
 /** How the Believer likes to read; kept in their database. */
@@ -48,6 +53,8 @@ export const DEFAULT_QURAN_READER_SETTINGS: QuranReaderSettings = {
   pageNav: "horizontal",
   surahFontSize: 26,
   reciter: DEFAULT_RECITER,
+  pagePalette: "theme",
+  keepAwake: true,
 };
 
 export interface QuranReaderState {

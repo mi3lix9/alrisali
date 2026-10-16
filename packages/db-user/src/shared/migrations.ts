@@ -211,4 +211,11 @@ export const migrations: readonly Migration[] = [
     tag: "20261016132340_custom_angles",
     statements: ["ALTER TABLE `believer_settings` ADD `custom_angles` text;"],
   },
+  {
+    tag: "20261016133358_reader-comfort",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `page_palette` text DEFAULT 'theme' NOT NULL;",
+      "ALTER TABLE `quran_reader_settings` ADD `keep_awake` integer DEFAULT true NOT NULL;",
+    ],
+  },
 ];
