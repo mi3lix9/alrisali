@@ -1,6 +1,9 @@
 diff --git a/node_modules/expo-widgets/.bun-tag-3abfbb9186f59358 b/.bun-tag-3abfbb9186f59358
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/expo-widgets/.bun-tag-8e77513d269aed65 b/.bun-tag-8e77513d269aed65
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt b/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt
 index b0b6479c2292763fd18eaee78b5e8d2dc4234493..83d24410750a5ed9771a90409ae39a1f85ace569 100644
 --- a/android/src/main/java/expo/modules/widgets/WidgetInteractionAction.kt
@@ -34,6 +37,24 @@ index b0b6479c2292763fd18eaee78b5e8d2dc4234493..83d24410750a5ed9771a90409ae39a1f
    val intent = when (source) {
      is InteractionSource.Widget -> Intent(WIDGET_INTERACTION_ACTION)
        .setComponent(widgetProviderComponentName(context, source.name))
+diff --git a/android/src/main/java/expo/modules/widgets/WidgetsModule.kt b/android/src/main/java/expo/modules/widgets/WidgetsModule.kt
+index f947f46fb8879a6fe42e934885a7065661a6466d..da0a8663ecbcdfc91e0432fc36c6b35654c0a177 100644
+--- a/android/src/main/java/expo/modules/widgets/WidgetsModule.kt
++++ b/android/src/main/java/expo/modules/widgets/WidgetsModule.kt
+@@ -84,6 +84,13 @@ class WidgetsModule : Module() {
+     }
+ 
+     Class("CustomNotification", CustomNotification::class) {
++      // Instances come only from CustomNotificationFactory. expo-modules-core
++      // refuses a SharedObject class with no constructor at module load, which
++      // crashed every Android build with widgets enabled.
++      Constructor { ->
++        throw IllegalStateException("CustomNotification is created by CustomNotificationFactory")
++      }
++
+       Function("getId") { notification: CustomNotification ->
+         notification.id
+       }
 diff --git a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt b/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt
 index 07eca412c873c7fc6d77d40e3ec76f6338081b31..82cabeaa5dc7d73ace29c813d3a7e3e64a1c2972 100644
 --- a/android/src/main/java/expo/modules/widgets/notifications/CustomNotificationBuilder.kt
