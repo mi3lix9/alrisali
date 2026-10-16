@@ -213,6 +213,14 @@ export const ar = {
       mujawwad: "مجوّد",
       muallim: "معلّم",
     },
+    region: {
+      "saudi-arabia": "السعودية",
+      egypt: "مصر",
+      kuwait: "الكويت",
+      iran: "إيران",
+    },
+    sample: "استمع إلى عيّنة من تلاوة {{reciter}} في هذه الصفحة",
+    stopSample: "إيقاف عيّنة {{reciter}}",
   },
   verseOfTheDay: {
     title: "آية اليوم",
