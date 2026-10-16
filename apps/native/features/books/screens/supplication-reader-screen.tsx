@@ -1,11 +1,19 @@
 import "../i18n";
-import { getSupplication, loadSupplicationText } from "@alrisali/content/books";
+import {
+  countersOf,
+  getSupplication,
+  loadSupplicationText,
+} from "@alrisali/content/books";
 import type { Passage } from "@alrisali/content/books";
-import { resumeSection } from "@alrisali/domain/books";
+import {
+  DEFAULT_AUTO_SCROLL_SPEED,
+  resumeSection,
+  tapCounter,
+} from "@alrisali/domain/books";
 import { useQuery } from "@tanstack/react-query";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { Spinner, Text, ToggleButton, ToggleButtonGroup } from "panelui-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ComponentType, ReactElement, ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { FlatList, View } from "react-native";
@@ -13,11 +21,14 @@ import { FlatList, View } from "react-native";
 import { launchLanguage } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
+import { AutoScrollBar } from "../components/auto-scroll-bar";
 import { FormatSheet } from "../components/format-sheet";
+import { PassageCounter } from "../components/passage-counter";
 import { PassageView } from "../components/passage-view";
 import { ReaderToolbar } from "../components/reader-toolbar";
 import { ResumeBanner } from "../components/resume-banner";
 import { useSavedSupplicationPosition } from "../data/supplication-positions";
+import { useAutoScroll } from "../hooks/use-auto-scroll";
 import { useReaderFontFamily } from "../hooks/use-reader-fonts";
 import {
   READER_LANGUAGES,
@@ -79,10 +90,13 @@ const SupplicationText = ({
   supplicationId,
   passages,
   savedSection,
+  autoScroll,
 }: {
   supplicationId: string;
   passages: readonly Passage[];
   savedSection: number | null;
+  /** Scrolls the text down by itself while `active`, pausing on touch. */
+  autoScroll: { active: boolean; speed: number; onFinish: () => void };
 }) => {
   const { language, font, fontSize, spacing, theme } = useReaderPreferences();
   const format = { font, fontSize, spacing, theme };
@@ -91,6 +105,9 @@ const SupplicationText = ({
   const report = useSectionSaver(supplicationId);
   const listRef = useRef<FlatList<Passage>>(null);
   const movedRef = useRef(false);
+  const scrollProps = useAutoScroll({ listRef, ...autoScroll });
+  const counters = useMemo(() => countersOf(supplicationId), [supplicationId]);
+  const [counts, setCounts] = useState<ReadonlyMap<number, number>>(new Map());
   const reportRef = useRef(report);
   useEffect(() => {
     reportRef.current = report;
@@ -141,7 +158,7 @@ const SupplicationText = ({
       contentInsetAdjustmentBehavior="automatic"
       data={passages}
       keyExtractor={(_, index) => String(index)}
-      extraData={`${language}-${font}-${fontSize}-${spacing}-${theme}-${fontFamily}-${resumed}`}
+      extraData={`${language}-${font}-${fontSize}-${spacing}-${theme}-${fontFamily}-${resumed}-${[...counts.values()].join(",")}`}
       ListHeaderComponent={
         <View>
           <LanguageControl />
@@ -162,6 +179,7 @@ const SupplicationText = ({
           ) : null}
         </View>
       }
+      {...scrollProps}
       viewabilityConfig={VIEWABILITY}
       onViewableItemsChanged={onViewableItemsChanged}
       onScrollBeginDrag={() => {
@@ -177,17 +195,40 @@ const SupplicationText = ({
           listRef.current?.scrollToIndex({ index, animated: true });
         }, 100);
       }}
-      renderItem={({ item, index }) => (
-        <PassageView
-          passage={item}
-          language={language}
-          format={format}
-          fontFamily={fontFamily}
-          colors={colors}
-          number={index + 1}
-          highlighted={resumed && index === offer}
-        />
-      )}
+      renderItem={({ item, index }) => {
+        const counter = counters.get(index);
+        return (
+          <PassageView
+            passage={item}
+            language={language}
+            format={format}
+            fontFamily={fontFamily}
+            colors={colors}
+            number={index + 1}
+            highlighted={resumed && index === offer}
+            counter={
+              counter ? (
+                <PassageCounter
+                  count={counts.get(index) ?? 0}
+                  target={counter.target}
+                  colors={colors}
+                  onTap={() =>
+                    setCounts((current) =>
+                      new Map(current).set(
+                        index,
+                        tapCounter(current.get(index) ?? 0)
+                      )
+                    )
+                  }
+                  onReset={() =>
+                    setCounts((current) => new Map(current).set(index, 0))
+                  }
+                />
+              ) : undefined
+            }
+          />
+        );
+      }}
     />
   );
 };
@@ -224,6 +265,9 @@ export const SupplicationReaderScreen = ({
   const { fontSize } = useReaderPreferences();
   const [reciting, setReciting] = useState(false);
   const [formatOpen, setFormatOpen] = useState(false);
+  const [autoScrolling, setAutoScrolling] = useState(false);
+  const [speed, setSpeed] = useState(DEFAULT_AUTO_SCROLL_SPEED);
+  const stopAutoScroll = useCallback(() => setAutoScrolling(false), []);
   const text = useQuery({
     queryKey: ["books", "supplication-text", id],
     queryFn: () => loadSupplicationText(id),
@@ -266,6 +310,11 @@ export const SupplicationReaderScreen = ({
         supplicationId={supplication.id}
         passages={text.data}
         savedSection={saved.data?.section ?? null}
+        autoScroll={{
+          active: autoScrolling,
+          speed,
+          onFinish: stopAutoScroll,
+        }}
       />
     );
   }
@@ -280,8 +329,15 @@ export const SupplicationReaderScreen = ({
       />
       <View className="bg-background flex-1">
         {content}
+        {autoScrolling && !reciting ? (
+          <AutoScrollBar speed={speed} onSpeed={setSpeed} />
+        ) : null}
         <ReaderToolbar
           reciting={reciting}
+          autoScrolling={autoScrolling && !reciting}
+          onToggleAutoScroll={
+            reciting ? undefined : () => setAutoScrolling((current) => !current)
+          }
           onFormat={() => setFormatOpen(true)}
           onToggleRecite={
             ReciteAlong ? () => setReciting((current) => !current) : undefined

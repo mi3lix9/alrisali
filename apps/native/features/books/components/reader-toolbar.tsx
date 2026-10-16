@@ -1,5 +1,10 @@
 import { Button, Text } from "panelui-native";
-import { HeadingIcon, MicIcon } from "panelui-native/icons";
+import {
+  HeadingIcon,
+  MicIcon,
+  PauseIcon,
+  PlayIcon,
+} from "panelui-native/icons";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -41,12 +46,18 @@ export const ReaderToolbar = ({
   reciting,
   onFormat,
   onToggleRecite,
+  autoScrolling,
+  onToggleAutoScroll,
   actions,
 }: {
   reciting: boolean;
   onFormat: () => void;
   /** Offers Recite-Along when given. */
   onToggleRecite: (() => void) | undefined;
+  /** Whether auto-scroll is running. */
+  autoScrolling: boolean;
+  /** Offers auto-scroll when given (not while the text is shown as Recite-Along). */
+  onToggleAutoScroll: (() => void) | undefined;
   actions: ReactNode;
 }) => {
   const { t } = useTranslation("books");
@@ -67,6 +78,17 @@ export const ReaderToolbar = ({
           icon={<HeadingIcon size={22} />}
           onPress={onFormat}
         />
+        {onToggleAutoScroll ? (
+          <Tool
+            testID="books-reader-auto-scroll"
+            label={t("reader.toolbar.autoScroll")}
+            icon={
+              autoScrolling ? <PauseIcon size={22} /> : <PlayIcon size={22} />
+            }
+            selected={autoScrolling}
+            onPress={onToggleAutoScroll}
+          />
+        ) : null}
         {onToggleRecite ? (
           <Tool
             testID="books-reader-recite"
