@@ -12,13 +12,15 @@ import "../i18n";
 import { signInWithSheet, useSignIn } from "../hooks/use-sign-in";
 import { appleIdToken, googleIdToken } from "../utils/native-sign-in";
 import { EmailSignInForm } from "./email-sign-in-form";
+import { GuestNudge } from "./guest-nudge";
 
 const APPLE_BUTTON_STYLE = { height: 48, width: "100%" } as const;
 const APPLE_BUTTON_RADIUS = 12;
 
 /**
  * A Guest's way in: Apple (iOS) and Google, each through its native sheet;
- * in development, email and password too.
+ * in development, email and password too. Once the Guest has recorded
+ * enough, it tells them how many records are only on this device.
  */
 export const SignInCard = () => {
   const { t } = useTranslation("account");
@@ -32,6 +34,7 @@ export const SignInCard = () => {
         <Card.Description>{t("guest.description")}</Card.Description>
       </Card.Header>
       <Card.Content className="gap-3">
+        <GuestNudge />
         {Platform.OS === "ios" ? (
           <AppleAuthenticationButton
             buttonType={AppleAuthenticationButtonType.CONTINUE}

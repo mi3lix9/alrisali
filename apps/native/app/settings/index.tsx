@@ -1,4 +1,8 @@
-import { DeleteAccountCard } from "@/features/account";
+import {
+  DeleteAccountCard,
+  ExportDataCard,
+  GuestNudge,
+} from "@/features/account";
 import { BirthYearCard } from "@/features/analytics";
 import { AnnouncementsCard } from "@/features/announcements";
 import { QuranReaderSettingsCard } from "@/features/quran";
@@ -13,6 +17,8 @@ const SettingsRoute = () => (
         <QuranReaderSettingsCard />
         <BirthYearCard />
         <TasbihSettingsCard />
+        <GuestNudge showSignIn />
+        <ExportDataCard />
         <DeleteAccountCard />
       </>
     }
