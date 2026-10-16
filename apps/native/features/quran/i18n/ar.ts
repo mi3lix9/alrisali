@@ -91,7 +91,6 @@ export const ar = {
     moreAyat: "تُعرض أول {{shown}} من {{total}} آية؛ زد كلمات البحث لتضييقها.",
     ayahRef: "{{name}} · {{ayah}}",
     returnTo: "العودة إلى الصفحة {{page}}",
-    noReturn: "لا موضع سابق",
     scrubPage: "انتقل إلى صفحة",
     scrubSurah: "انتقل إلى سورة",
     scrubPageValue: "صفحة {{page}} · {{name}}",
@@ -119,7 +118,9 @@ export const ar = {
     title: "آية اليوم",
     reference: "سورة {{surah}} · الآية {{ayah}}",
     play: "استمع إلى آية اليوم",
+    playShort: "استمع",
     pause: "إيقاف آية اليوم مؤقتًا",
+    pauseShort: "إيقاف مؤقت",
     open: "افتح في المصحف",
   },
 };

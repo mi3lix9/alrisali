@@ -52,6 +52,7 @@ export const VerseOfTheDayCard = () => {
       case "loading": {
         return {
           label: t("verseOfTheDay.pause"),
+          text: t("verseOfTheDay.pauseShort"),
           icon: <Spinner size="sm" />,
           handlePress: () => sendRecitation({ type: "pause" }),
         };
@@ -59,6 +60,7 @@ export const VerseOfTheDayCard = () => {
       case "playing": {
         return {
           label: t("verseOfTheDay.pause"),
+          text: t("verseOfTheDay.pauseShort"),
           icon: <PauseIcon size={18} />,
           handlePress: () => sendRecitation({ type: "pause" }),
         };
@@ -66,6 +68,7 @@ export const VerseOfTheDayCard = () => {
       case "paused": {
         return {
           label: t("verseOfTheDay.play"),
+          text: t("verseOfTheDay.playShort"),
           icon: <PlayIcon size={18} />,
           handlePress: () => sendRecitation({ type: "resume" }),
         };
@@ -73,6 +76,7 @@ export const VerseOfTheDayCard = () => {
       case "error": {
         return {
           label: t("recitation.retry"),
+          text: t("recitation.retry"),
           icon: <RotateCwIcon size={18} />,
           handlePress: play,
         };
@@ -80,6 +84,7 @@ export const VerseOfTheDayCard = () => {
       default: {
         return {
           label: t("verseOfTheDay.play"),
+          text: t("verseOfTheDay.playShort"),
           icon: <PlayIcon size={18} />,
           handlePress: play,
         };
@@ -117,13 +122,13 @@ export const VerseOfTheDayCard = () => {
           </Text>
         ) : null}
       </Card.Content>
-      <Card.Footer className="gap-2">
+      <Card.Footer className="flex-wrap gap-2">
         <Button
           accessibilityLabel={listen.label}
           startContent={listen.icon}
           onPress={listen.handlePress}
         >
-          {listen.label}
+          {listen.text}
         </Button>
         <Button
           variant="outline"

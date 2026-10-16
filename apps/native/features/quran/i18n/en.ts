@@ -97,7 +97,6 @@ export const en: Catalog<typeof ar> = {
       "Showing the first {{shown}} of {{total}} ayat; add words to narrow it down.",
     ayahRef: "{{name}} · {{ayah}}",
     returnTo: "Back to page {{page}}",
-    noReturn: "No previous position",
     scrubPage: "Go to page",
     scrubSurah: "Go to Surah",
     scrubPageValue: "Page {{page}} · {{name}}",
@@ -125,7 +124,9 @@ export const en: Catalog<typeof ar> = {
     title: "Verse of the Day",
     reference: "Surah {{surah}} · Ayah {{ayah}}",
     play: "Listen to the Verse of the Day",
+    playShort: "Listen",
     pause: "Pause the Verse of the Day",
+    pauseShort: "Pause",
     open: "Open in the mushaf",
   },
 };
