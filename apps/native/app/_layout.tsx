@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { UsageAnalytics } from "@/features/analytics";
 import { PushDeviceRegistration } from "@/features/announcements";
 import { CompanionAwards } from "@/features/companion";
+import { WorshipMappingPlans } from "@/features/daily-content";
 import { HabitReminderPlans } from "@/features/habits";
 import { KhatmahReminderPlans } from "@/features/khatmah";
 import { KhushuSheet } from "@/features/khushu";
@@ -84,11 +85,16 @@ const Layout = () => (
           {(qada) => (
             <KhatmahReminderPlans>
               {(khatmah) => (
-                <ReminderScheduler
-                  habits={habits}
-                  qada={qada}
-                  khatmah={khatmah}
-                />
+                <WorshipMappingPlans>
+                  {(worship) => (
+                    <ReminderScheduler
+                      habits={habits}
+                      qada={qada}
+                      khatmah={khatmah}
+                      worship={worship}
+                    />
+                  )}
+                </WorshipMappingPlans>
               )}
             </KhatmahReminderPlans>
           )}

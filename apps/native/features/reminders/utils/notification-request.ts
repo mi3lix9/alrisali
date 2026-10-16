@@ -1,9 +1,11 @@
+import { getSupplication } from "@alrisali/content/books";
 import { SURAHS } from "@alrisali/content/quran";
 import type { AyahKey } from "@alrisali/content/quran";
 import { atTimeSound, classicSayingById } from "@alrisali/domain/reminders";
 import type {
   HabitReminderMessage,
   KhatmahReminderMessage,
+  NightDuaReminderMessage,
   PlannedReminder,
   PrayerReminderMessage,
   QadaReminderMessage,
@@ -202,7 +204,8 @@ const wording = (
     | PrayerReminderMessage
     | HabitReminderMessage
     | QadaReminderMessage
-    | KhatmahReminderMessage,
+    | KhatmahReminderMessage
+    | NightDuaReminderMessage,
   t: TFunction<"reminders">,
   language: Language
 ): { title: string; body: string } => {
@@ -230,6 +233,16 @@ const wording = (
         }),
       };
     }
+    case "night-dua": {
+      return {
+        title: t(`notification.nightDua.${message.alert}.title`),
+        body: t(`notification.nightDua.${message.alert}.body`, {
+          names: message.supplicationIds
+            .flatMap((id) => getSupplication(id)?.title[language] ?? [])
+            .join(language === "ar" ? "، " : ", "),
+        }),
+      };
+    }
     default: {
       return prayerTimeWording(message, t, language);
     }
@@ -243,6 +256,7 @@ export const toReminderRequest = (
     | HabitReminderMessage
     | QadaReminderMessage
     | KhatmahReminderMessage
+    | NightDuaReminderMessage
   >,
   t: TFunction<"reminders">,
   language: Language

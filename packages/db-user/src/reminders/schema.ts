@@ -12,3 +12,15 @@ export const reminderSettings = sqliteTable("reminder_settings", {
   quietHoursStart: integer("quiet_hours_start"),
   quietHoursEnd: integer("quiet_hours_end"),
 });
+
+/**
+ * Which night-dua Reminders the Believer turned on, one row: Kumayl, Tawassul,
+ * Nudba and the ziyarah of the day, each its own toggle, all off by default.
+ */
+export const nightDuaAlerts = sqliteTable("night_dua_alerts", {
+  id: text("id").primaryKey(),
+  kumayl: integer("kumayl", { mode: "boolean" }).notNull().default(false),
+  tawassul: integer("tawassul", { mode: "boolean" }).notNull().default(false),
+  nudba: integer("nudba", { mode: "boolean" }).notNull().default(false),
+  ziyarah: integer("ziyarah", { mode: "boolean" }).notNull().default(false),
+});

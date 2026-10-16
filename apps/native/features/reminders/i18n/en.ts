@@ -48,6 +48,24 @@ export const en: Catalog<typeof ar> = {
       imsak:
         "Finish your suhoor and renew your intention. May your fast be accepted.",
     },
+    nightDua: {
+      kumayl: {
+        title: "Dua Kumayl",
+        body: "Thursday night: time to recite Dua Kumayl.",
+      },
+      tawassul: {
+        title: "Dua Tawassul",
+        body: "Time to recite Dua Tawassul.",
+      },
+      nudba: {
+        title: "Dua Nudba",
+        body: "Friday morning: time to recite Dua Nudba.",
+      },
+      ziyarah: {
+        title: "Today's ziyarah",
+        body: "{{names}}",
+      },
+    },
   },
   adhanService: {
     stop: "Stop adhan",
@@ -109,6 +127,21 @@ export const en: Catalog<typeof ar> = {
     enabled: "Use quiet hours",
     start: "From",
     end: "To",
+  },
+  nightDua: {
+    title: "Night duas and ziyarah",
+    description:
+      "Optional alerts, each its own switch and off by default. Quiet hours hold them back.",
+    kumayl: "Dua Kumayl",
+    kumaylHint: "Thursday night, after Maghrib",
+    tawassul: "Dua Tawassul",
+    tawassulHint:
+      "Tuesday night, after Maghrib. The dua's text is not in the app yet.",
+    nudba: "Dua Nudba",
+    nudbaHint: "Friday morning, at sunrise",
+    ziyarah: "Ziyarah of the day",
+    ziyarahHint: "Each morning at sunrise, by that weekday's ziyarah",
+    noLocation: "Set your location so Maghrib and sunrise can be worked out.",
   },
   atTime: {
     off: { title: "Off", description: "Nothing at the Prayer Time" },
