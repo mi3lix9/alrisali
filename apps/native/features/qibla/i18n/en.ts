@@ -6,7 +6,21 @@ export const en: Catalog<typeof ar> = {
   title: "Qibla",
   bearing: "{{degrees}}° {{direction}}",
   bearingLabel: "Qibla at {{degrees}} degrees {{direction}} from north",
-  distance: "{{distance}} km to the Kaaba",
+  bearingTargetLabel:
+    "{{target}} at {{degrees}} degrees {{direction}} from north",
+  distance: "{{distance}} km to {{target}}",
+  targets: {
+    label: "Direction to",
+    kaaba: "Kaaba",
+    najaf: "Najaf",
+    karbala: "Karbala",
+    mashhad: "Mashhad",
+    madina: "Madina",
+    kadhimiya: "Kadhimiya",
+    samarra: "Samarra",
+  },
+  notQibla:
+    "This is the direction of {{target}}, not the Qibla. Choose the Kaaba to return to the Qibla.",
   directions: {
     n: "N",
     ne: "NE",
@@ -19,6 +33,7 @@ export const en: Catalog<typeof ar> = {
   },
   north: "N",
   facing: "You're facing the Qibla",
+  facingTarget: "You're facing {{target}}",
   turnRight: "Turn right {{degrees}}°",
   turnLeft: "Turn left {{degrees}}°",
   nearRight: "Nearly there · a little right",
@@ -28,6 +43,12 @@ export const en: Catalog<typeof ar> = {
     "Compass corrected to true north by a magnetic declination of {{degrees}} degrees {{direction}}",
   declinationEast: "east",
   declinationWest: "west",
+  level: {
+    label: "Bubble level",
+    level: "The phone is level",
+    tilted: "Hold the phone flat for a more accurate reading",
+    tilt: "Tilt {{degrees}}°",
+  },
   noLocation: {
     title: "Set your location",
     description:

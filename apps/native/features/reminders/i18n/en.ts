@@ -150,6 +150,18 @@ export const en: Catalog<typeof ar> = {
     save: "Save",
     cancel: "Cancel",
     saved: "{{name}} alert saved: {{alert}}",
+    permissionTitle: "Notifications are needed",
+    permissionReason:
+      "Alerts arrive as notifications from your device. Saving or testing an alert asks to allow them.",
+  },
+  onboarding: {
+    previewLabel: "What an alert looks like",
+    previewApp: "Al-Risali",
+    previewNow: "now",
+    enableAll: "Takbir at every Salah",
+    enableAllHint: "Turn the At-Time Alert on for all five Salah, or off.",
+    sectionTitle: "At the Prayer Time",
+    skipHint: "Skipping keeps the suggested choices.",
   },
   button: {
     label: "{{name}} At-Time Alert: {{alert}}",

@@ -1,5 +1,10 @@
-import { searchQuran } from "@alrisali/domain/quran";
-import type { JumpTarget } from "@alrisali/domain/quran";
+import {
+  pagePosition,
+  parseQuranQuery,
+  QURAN_QUERY_KINDS,
+  searchQuran,
+} from "@alrisali/domain/quran";
+import type { JumpTarget, QuranQueryCandidate } from "@alrisali/domain/quran";
 import {
   Badge,
   BottomSheet,
@@ -19,6 +24,14 @@ import { ClearSearchButton } from "@/shared/ui/search-panel";
 import { QURAN_FONT } from "../hooks/use-quran-font";
 import { surahName } from "../utils/format";
 
+const GROUP_KEYS = {
+  page: "navigation.groupPage",
+  surah: "navigation.groupSurah",
+  juz: "navigation.groupJuz",
+  hizb: "navigation.groupHizb",
+  ayah: "navigation.groupAyah",
+} as const;
+
 interface SearchFormProps {
   onSelect: (target: JumpTarget) => void;
 }
@@ -30,14 +43,51 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
   // Typing stays responsive while the 6236 ayat are scanned.
   const deferred = useDeferredValue(query);
   const result = useMemo(() => searchQuran(deferred), [deferred]);
+  const candidates = useMemo(() => parseQuranQuery(deferred), [deferred]);
+  // An ayah a candidate already offers is not listed again as a text match.
+  const offered = new Set(
+    candidates.flatMap((candidate) =>
+      candidate.kind === "ayah" ? [candidate.key] : []
+    )
+  );
+  const ayat = result.ayat.filter((ayah) => !offered.has(ayah.key));
   const empty =
-    deferred.trim() !== "" &&
-    result.surahs.length === 0 &&
-    result.ayat.length === 0;
+    deferred.trim() !== "" && candidates.length === 0 && ayat.length === 0;
+
+  const candidateTitle = (candidate: QuranQueryCandidate): string => {
+    switch (candidate.kind) {
+      case "page": {
+        return t("navigation.candidatePage", { page: candidate.value });
+      }
+      case "surah": {
+        return surahName(i18n.language, candidate.value);
+      }
+      case "juz": {
+        return t("navigation.candidateJuz", { juz: candidate.value });
+      }
+      case "hizb": {
+        return t("navigation.candidateHizb", { hizb: candidate.value });
+      }
+      case "ayah": {
+        return t("navigation.ayahRef", {
+          name: surahName(i18n.language, candidate.surah),
+          ayah: formatNumber(candidate.ayah),
+        });
+      }
+      default: {
+        return "";
+      }
+    }
+  };
+  const candidateDescription = (candidate: QuranQueryCandidate): string =>
+    candidate.kind === "page"
+      ? surahName(i18n.language, pagePosition(candidate.value).surah)
+      : "";
 
   return (
     <View className="gap-3">
       <Input
+        testID="quran-search-input"
         value={query}
         onChangeText={setQuery}
         placeholder={t("navigation.searchPlaceholder")}
@@ -61,38 +111,49 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
           {t("navigation.noResults")}
         </Text>
       ) : null}
-      {result.surahs.length > 0 ? (
-        <View>
-          <Text weight="semibold" accessibilityRole="header">
-            {t("navigation.surahs")}
-          </Text>
-          {result.surahs.map((surah) => (
-            <Item
-              key={surah.number}
-              size="sm"
-              accessibilityRole="button"
-              onPress={() => onSelect({ surah: surah.number })}
-            >
-              <Item.Media>
-                <Badge size="sm" variant="outline">
-                  {formatNumber(surah.number)}
-                </Badge>
-              </Item.Media>
-              <Item.Content>
-                <Item.Title>
-                  {surahName(i18n.language, surah.number)}
-                </Item.Title>
-              </Item.Content>
-            </Item>
-          ))}
-        </View>
-      ) : null}
-      {result.ayat.length > 0 ? (
+      {QURAN_QUERY_KINDS.map((kind) => {
+        const group = candidates.filter((candidate) => candidate.kind === kind);
+        return group.length > 0 ? (
+          <View key={kind}>
+            <Text weight="semibold" accessibilityRole="header">
+              {t(GROUP_KEYS[kind])}
+            </Text>
+            {group.map((candidate) => (
+              <Item
+                key={`${kind}-${candidate.kind === "ayah" ? candidate.key : candidate.value}`}
+                size="sm"
+                accessibilityRole="button"
+                testID={`quran-search-${kind}-${candidate.kind === "ayah" ? candidate.key : candidate.value}`}
+                onPress={() => onSelect(candidate.target)}
+              >
+                <Item.Media>
+                  <Badge size="sm" variant="outline">
+                    {formatNumber(
+                      candidate.kind === "ayah"
+                        ? candidate.ayah
+                        : candidate.value
+                    )}
+                  </Badge>
+                </Item.Media>
+                <Item.Content>
+                  <Item.Title>{candidateTitle(candidate)}</Item.Title>
+                  {candidateDescription(candidate) ? (
+                    <Item.Description>
+                      {candidateDescription(candidate)}
+                    </Item.Description>
+                  ) : null}
+                </Item.Content>
+              </Item>
+            ))}
+          </View>
+        ) : null;
+      })}
+      {ayat.length > 0 ? (
         <View>
           <Text weight="semibold" accessibilityRole="header">
             {t("navigation.ayat")}
           </Text>
-          {result.ayat.map((ayah) => (
+          {ayat.map((ayah) => (
             <Item
               key={ayah.key}
               size="sm"
@@ -122,10 +183,10 @@ const SearchForm = ({ onSelect }: SearchFormProps) => {
               </Item.Content>
             </Item>
           ))}
-          {result.ayatTotal > result.ayat.length ? (
+          {result.ayatTotal > ayat.length ? (
             <Text size="xs" muted className="pt-2">
               {t("navigation.moreAyat", {
-                shown: formatNumber(result.ayat.length),
+                shown: formatNumber(ayat.length),
                 total: formatNumber(result.ayatTotal),
               })}
             </Text>

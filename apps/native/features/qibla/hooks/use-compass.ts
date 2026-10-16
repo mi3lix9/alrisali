@@ -1,4 +1,8 @@
-import { smoothHeading, trueHeading } from "@alrisali/domain/qibla";
+import {
+  needsCompassCalibration,
+  smoothHeading,
+  trueHeading,
+} from "@alrisali/domain/qibla";
 import {
   getForegroundPermissionsAsync,
   requestForegroundPermissionsAsync,
@@ -16,8 +20,6 @@ import { AppState, Linking, Platform } from "react-native";
 const NO_READING_MS = 3000;
 /** Smaller changes than this aren't worth a re-render. */
 const MIN_CHANGE_DEGREES = 0.5;
-/** expo-location's calibration level at or below which to ask for one. */
-const LOW_ACCURACY = 1;
 
 type Permission = "checking" | "granted" | "ask" | "blocked";
 
@@ -97,7 +99,7 @@ const watchCompass = (
     smoothed = smoothHeading(smoothed, trueHeading(magHeading, declination));
     const reading = {
       heading: smoothed,
-      needsCalibration: accuracy <= LOW_ACCURACY,
+      needsCalibration: needsCompassCalibration(accuracy),
     };
     if (differs(last, reading)) {
       last = reading;

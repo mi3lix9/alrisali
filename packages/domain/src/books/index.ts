@@ -25,3 +25,10 @@ export type {
   ReaderTheme,
 } from "./reader-format";
 export { resumeSection } from "./position";
+export {
+  AUTO_SCROLL_SPEEDS,
+  DEFAULT_AUTO_SCROLL_SPEED,
+  advanceAutoScroll,
+  stepAutoScrollSpeed,
+} from "./auto-scroll";
+export { counterProgress, tapCounter } from "./counter";

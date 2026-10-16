@@ -22,6 +22,15 @@ export const en: Catalog<typeof ar> = {
     allHidden:
       "Every Prayer Time is hidden. Show the ones you want in Prayer Times options.",
   },
+  day: {
+    previous: "Previous day",
+    next: "Next day",
+    today: "Today",
+    pick: "Pick a date",
+    hijri: "Hijri date",
+    timetableTitle: "Prayer Times for {{date}}",
+    countdown: "{{name}} in {{countdown}}",
+  },
   next: {
     title: "Next Prayer Time",
     remaining: "in {{countdown}}",
@@ -49,6 +58,10 @@ export const en: Catalog<typeof ar> = {
     searching: "Searching…",
     noResults: "No city found with that name.",
     searchFailed: "Search failed. Searching needs an internet connection.",
+  },
+  recent: {
+    title: "Recent cities",
+    timeZone: "Time zone: {{timeZone}}",
   },
   options: {
     title: "Prayer Times options",

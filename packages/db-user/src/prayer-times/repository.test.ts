@@ -72,4 +72,45 @@ describe(createPrayerTimesRepository, () => {
       createPrayerTimesRepository(database.db).hiddenPrayerTimes()
     ).resolves.toStrictEqual(["isha"]);
   });
+
+  describe("Recent Cities", () => {
+    const cairo = { latitude: 30.0444, longitude: 31.2357, name: "Cairo" };
+    const tokyo = { latitude: 35.6762, longitude: 139.6503, name: "Tokyo" };
+
+    it("has none for a new Believer", async () => {
+      await expect(
+        createPrayerTimesRepository(database.db).recentCities()
+      ).resolves.toStrictEqual([]);
+    });
+
+    it("keeps cities with their time zones across a relaunch", async () => {
+      const prayerTimes = createPrayerTimesRepository(database.db);
+      await prayerTimes.rememberCity(cairo);
+      await prayerTimes.rememberCity(tokyo);
+
+      await database.close();
+      database = await launch();
+
+      const recent = await createPrayerTimesRepository(
+        database.db
+      ).recentCities();
+      expect(recent).toStrictEqual([
+        { ...tokyo, timeZone: "Asia/Tokyo" },
+        { ...cairo, timeZone: "Africa/Cairo" },
+      ]);
+    });
+
+    it("leaves the Hidden Prayer Times alone", async () => {
+      const prayerTimes = createPrayerTimesRepository(database.db);
+      await prayerTimes.rememberCity(cairo);
+      await expect(prayerTimes.hiddenPrayerTimes()).resolves.toStrictEqual([
+        "imsak",
+        "asr",
+        "sunset",
+        "isha",
+      ]);
+      await prayerTimes.setVisible("asr", true);
+      await expect(prayerTimes.recentCities()).resolves.toHaveLength(1);
+    });
+  });
 });

@@ -92,7 +92,15 @@ export const en: Catalog<typeof ar> = {
     open: "Open",
     searchPlaceholder: "A Surah name or words from an ayah",
     searchHint:
-      "No need to type diacritics. Type an ayah number such as {{surah}}:{{ayah}} to open it.",
+      "No need to type diacritics. Type a number (a page, Surah, juz or hizb), an ayah such as {{surah}}:{{ayah}}, or a Surah name and ayah number such as “Baqarah {{ayah}}”.",
+    groupPage: "Page",
+    groupSurah: "Surah",
+    groupJuz: "Juz",
+    groupHizb: "Hizb",
+    groupAyah: "Ayah",
+    candidatePage: "Page {{page}}",
+    candidateJuz: "Juz {{juz}}",
+    candidateHizb: "Hizb {{hizb}}",
     noResults: "No results. Try a Surah name or another word.",
     ayat: "Ayat",
     moreAyat:

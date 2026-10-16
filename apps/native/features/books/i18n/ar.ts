@@ -26,6 +26,18 @@ export const ar = {
     toolbar: {
       label: "أدوات القراءة",
       format: "التنسيق",
+      autoScroll: "التمرير التلقائي",
+    },
+    autoScroll: {
+      speed: "السرعة",
+      slower: "أبطأ",
+      faster: "أسرع",
+      speedValue: "السرعة {{speed}} من {{max}}",
+    },
+    counter: {
+      tap: "العدّ: {{count}} من {{target}}. اضغط للعدّ",
+      progress: "{{count}} / {{target}}",
+      reset: "إعادة العدّ",
     },
     format: {
       title: "تنسيق القراءة",
