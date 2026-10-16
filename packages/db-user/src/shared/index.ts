@@ -26,3 +26,9 @@ export type {
   InsightsSourceReader,
   InsightsSourceReaders,
 } from "./insights-sources";
+export {
+  countUserRecords,
+  listUserTables,
+  readUserTables,
+} from "./user-tables";
+export type { UserTableRows } from "./user-tables";
