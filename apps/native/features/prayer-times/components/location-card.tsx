@@ -1,9 +1,11 @@
+import { writeDigits } from "@alrisali/domain/shared";
 import type { Location } from "@alrisali/domain/shared";
 import { Button, Card, Input, Item } from "panelui-native";
 import { Fragment, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { joinParts } from "@/shared/lib/i18n";
+import { useDigits } from "@/shared/lib/numbers";
 
 import {
   useChooseLocation,
@@ -11,8 +13,8 @@ import {
   useLocateDevice,
 } from "../hooks/use-device-location";
 
-const coordinatesText = ({ latitude, longitude }: Location) =>
-  `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+const coordinatesKey = ({ latitude, longitude }: Location) =>
+  `${latitude},${longitude}`;
 
 /** Where the times are for: from the GPS, or a city the Believer searched. */
 export const LocationCard = ({
@@ -23,6 +25,13 @@ export const LocationCard = ({
   followsDevice: boolean;
 }) => {
   const { t } = useTranslation("prayer-times");
+  // Written in the digits read here, so a change of digits re-renders them.
+  const digits = useDigits();
+  const coordinatesText = ({ latitude, longitude }: Location) =>
+    t("location.coordinates", {
+      latitude: writeDigits(latitude.toFixed(4), digits),
+      longitude: writeDigits(longitude.toFixed(4), digits),
+    });
   const {
     mutate: locate,
     isPending: locating,
@@ -101,7 +110,7 @@ export const LocationCard = ({
         {search.data && search.data.length > 0 ? (
           <Item.Group>
             {search.data.map((result, index) => (
-              <Fragment key={coordinatesText(result.location)}>
+              <Fragment key={coordinatesKey(result.location)}>
                 {index > 0 && <Item.Separator />}
                 <Item
                   size="sm"
