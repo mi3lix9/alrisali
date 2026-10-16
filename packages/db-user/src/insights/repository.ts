@@ -28,6 +28,7 @@ export const createInsightsRepository = (
       habitCompletions,
       dhikrSessions,
       moodCheckIns,
+      khatmahs,
     ] = await Promise.all([
       readers.prayerLogs(db, timeZone),
       readers.khushu(db, timeZone),
@@ -35,6 +36,7 @@ export const createInsightsRepository = (
       readers.habitCompletions(db, timeZone),
       readers.dhikrSessions(db, timeZone),
       readers.moodCheckIns(db, timeZone),
+      readers.khatmahs(db, timeZone),
     ]);
     return {
       prayerLogs,
@@ -43,6 +45,7 @@ export const createInsightsRepository = (
       habitCompletions,
       dhikrSessions,
       moodCheckIns,
+      khatmahs,
     };
   },
 });

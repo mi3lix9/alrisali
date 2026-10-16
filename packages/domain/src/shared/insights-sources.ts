@@ -66,6 +66,21 @@ export interface MoodCheckInSource {
   date: Temporal.PlainDate;
 }
 
+/** A Khatmah as Insights read it: when it began and what was read. */
+export interface KhatmahSource {
+  id: string;
+  startDate: Temporal.PlainDate;
+  /** The day its last session was completed; null while it is unfinished. */
+  completedOn: Temporal.PlainDate | null;
+  /** Each completed session, in session order. */
+  sessions: readonly {
+    session: number;
+    date: Temporal.PlainDate;
+    /** The Quran Pages its portion touches. */
+    pages: number;
+  }[];
+}
+
 /** Everything Insights are computed from, read from the per-user database. */
 export interface InsightsSources {
   prayerLogs: readonly LoggedDay[];
@@ -74,4 +89,5 @@ export interface InsightsSources {
   habitCompletions: readonly HabitCompletionSource[];
   dhikrSessions: readonly DhikrSessionSource[];
   moodCheckIns: readonly MoodCheckInSource[];
+  khatmahs: readonly KhatmahSource[];
 }

@@ -1,10 +1,30 @@
 export {
+  NO_ADJUSTMENTS,
+  readKhatmahAdjustments,
+  withKhatmahAdjustments,
+} from "./adjustments";
+export type {
+  KhatmahAdjustments,
+  KhatmahEvery,
+  KhatmahPartial,
+  KhatmahSegment,
+} from "./adjustments";
+export {
+  lastAyahOnPage,
+  markDoneTill,
+  portionEndContaining,
+  reschedule,
+} from "./reschedule";
+export type { MarkedDoneTill, RescheduleMode, Rescheduled } from "./reschedule";
+export {
   completePortionAt,
   isPortionEnd,
+  khatmahDoneSessions,
   khatmahLogId,
   khatmahPlanSchema,
   khatmahReminderPlan,
   khatmahSessionRows,
+  khatmahSessions,
   khatmahStatus,
   MAX_EVEN_DAYS,
   MIN_EVEN_DAYS,

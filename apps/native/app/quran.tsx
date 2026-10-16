@@ -2,6 +2,7 @@ import { HijriCalendarButton } from "@/features/calendar";
 import { AyahFavoritesList, FavoriteRow } from "@/features/favorites";
 import {
   CompletePortionBanner,
+  MarkDoneTillRow,
   useKhatmahDecorations,
 } from "@/features/khatmah";
 import { QuranReaderScreen, RibbonRows } from "@/features/quran";
@@ -17,7 +18,12 @@ const QuranRoute = () => {
       savedFavorites={AyahFavoritesList}
       decorations={khatmahPortion}
       ayahActions={{
-        banner: (ayah) => <CompletePortionBanner ayah={ayah} />,
+        banner: (ayah) => (
+          <>
+            <CompletePortionBanner ayah={ayah} />
+            <MarkDoneTillRow ayah={ayah} />
+          </>
+        ),
         keep: (ayah) => (
           <>
             <FavoriteRow item={{ kind: "ayah", key: ayah }} />

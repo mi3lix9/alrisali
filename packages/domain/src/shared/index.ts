@@ -137,6 +137,7 @@ export type {
   HabitCompletionSource,
   InsightsHabit,
   InsightsSources,
+  KhatmahSource,
   KhushuRating,
   LoggedDay,
   MoodCheckInSource,

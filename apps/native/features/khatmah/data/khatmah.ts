@@ -3,9 +3,11 @@ import type {
   KhatmahDraft,
   KhatmahRepository,
 } from "@alrisali/db-user/khatmah";
+import { khatmahDoneSessions, khatmahSessions } from "@alrisali/domain/khatmah";
 import type { Khatmah, KhatmahLog } from "@alrisali/domain/khatmah";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
+import { router } from "expo-router";
 
 import { events } from "@/shared/lib/events";
 import { queryClient } from "@/shared/lib/orpc";
@@ -14,9 +16,9 @@ import {
   USER_DATA_QUERY_KEY,
 } from "@/shared/lib/user-database";
 
-const KHATMAH_QUERY_KEY = [...USER_DATA_QUERY_KEY, "khatmah"];
+export const KHATMAH_QUERY_KEY = [...USER_DATA_QUERY_KEY, "khatmah"];
 
-const khatmahRepository = async (): Promise<KhatmahRepository> => {
+export const khatmahRepository = async (): Promise<KhatmahRepository> => {
   const { db } = await getUserDatabase();
   return createKhatmahRepository(db);
 };
@@ -42,8 +44,42 @@ export const useKhatmahData = () =>
     },
   });
 
-const invalidateKhatmah = () =>
+export const invalidateKhatmah = () =>
   queryClient.invalidateQueries({ queryKey: KHATMAH_QUERY_KEY });
+
+/**
+ * Emits `KhatmahCompleted` and opens the celebration when the saved logs
+ * leave every session of the Khatmah done; nothing otherwise.
+ */
+export const announceCompletion = async (khatmahId: string): Promise<void> => {
+  const repository = await khatmahRepository();
+  const [khatmahs, logs] = await Promise.all([
+    repository.list(),
+    repository.logs(),
+  ]);
+  const khatmah = khatmahs.find(({ id }) => id === khatmahId);
+  if (!khatmah) {
+    return;
+  }
+  const done = khatmahDoneSessions(khatmah, logs);
+  if (done.size !== khatmahSessions(khatmah, logs).length) {
+    return;
+  }
+  const last = logs
+    .filter((log) => log.khatmahId === khatmahId)
+    .map(({ date }) => date.toString())
+    .toSorted()
+    .at(-1);
+  if (!last) {
+    return;
+  }
+  events.emit("KhatmahCompleted", {
+    khatmahId,
+    date: last,
+    completedAt: Date.now(),
+  });
+  router.push({ pathname: "/khatmah", params: { id: khatmahId } });
+};
 
 /** Starts a Khatmah; the caller catches validation errors. */
 export const useCreateKhatmah = () =>
@@ -118,6 +154,7 @@ export const useCompleteKhatmahSession = () =>
         date: log.date.toString(),
         completedAt: Date.now(),
       });
+      void announceCompletion(log.khatmahId);
     },
     onSettled: invalidateKhatmah,
   });

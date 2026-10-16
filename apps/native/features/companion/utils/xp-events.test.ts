@@ -49,6 +49,12 @@ describe(listenForXp, () => {
       completedAt: AT,
     });
 
+    bus.emit("KhatmahCompleted", {
+      khatmahId: "khatmah-1",
+      date: "2026-10-16",
+      completedAt: AT,
+    });
+
     expect(heard).toStrictEqual([
       { kind: "salah", date: "2026-10-16", salah: "fajr" },
       {
@@ -62,6 +68,7 @@ describe(listenForXp, () => {
       { kind: "reading", supplicationId: "sahifa-1", date: "2026-10-16" },
       { kind: "lesson", lessonId: "aqeedah-1" },
       { kind: "khatmah-session", khatmahId: "khatmah-1", session: 3 },
+      { kind: "khatmah", khatmahId: "khatmah-1" },
     ]);
   });
 
