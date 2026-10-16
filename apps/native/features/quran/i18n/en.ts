@@ -66,6 +66,17 @@ export const en: Catalog<typeof ar> = {
       horizontal: "Horizontal",
       vertical: "Vertical",
     },
+    pagePalette: {
+      title: "Page colour",
+      white: "White",
+      cream: "Cream",
+      "soft-dark": "Soft dark",
+      black: "Black",
+    },
+    keepAwake: {
+      title: "Keep screen awake",
+      description: "While you are reading the Quran",
+    },
     fontSize: {
       title: "Surah Mode text size",
       smaller: "Smaller text",

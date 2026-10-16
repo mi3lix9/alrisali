@@ -82,6 +82,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Last-Read Ayah**: The surah:ayah where the Believer stopped reading; Page Mode and Surah Mode both reopen at it. _Avoid_: Last-read page, Quran progress
 
+**Page Palette**: The colour of the paper the Quran is read on (white, cream, soft dark or black); it sets its own text colours and does not follow the app theme.
+
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
 **Supplication**: A single readable text inside a Book (a dua, ziyarah, munajat or sermon). _Avoid_: Item, section, content

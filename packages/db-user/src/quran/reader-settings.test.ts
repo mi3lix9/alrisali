@@ -36,7 +36,30 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "horizontal",
       surahFontSize: 26,
       reciter: "ar.alafasy",
+      pagePalette: "white",
+      keepAwake: true,
     });
+  });
+
+  it("keeps the page colour and keep-awake choice across a relaunch", async () => {
+    const settings = createQuranReaderSettingsRepository(database.db);
+    await settings.update({ pagePalette: "cream", keepAwake: false });
+
+    await database.close();
+    database = await launch();
+
+    await expect(
+      createQuranReaderSettingsRepository(database.db).get()
+    ).resolves.toMatchObject({ pagePalette: "cream", keepAwake: false });
+  });
+
+  it("rejects a page colour that does not exist", async () => {
+    await expect(
+      createQuranReaderSettingsRepository(database.db).update({
+        // @ts-expect-error not a palette
+        pagePalette: "sepia",
+      })
+    ).rejects.toThrow("Invalid option");
   });
 
   it("keeps the mode, page navigation, font size and reciter across a relaunch", async () => {
@@ -55,6 +78,8 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "vertical",
       surahFontSize: 30,
       reciter: "everyayah.minshawy-murattal",
+      pagePalette: "white",
+      keepAwake: true,
     });
   });
 
@@ -77,6 +102,8 @@ describe(createQuranReaderSettingsRepository, () => {
       pageNav: "vertical",
       surahFontSize: 26,
       reciter: "ar.alafasy",
+      pagePalette: "white",
+      keepAwake: true,
     });
   });
 

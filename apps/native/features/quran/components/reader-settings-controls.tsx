@@ -1,11 +1,19 @@
 import {
   PAGE_NAVS,
+  PAGE_PALETTES,
   READER_MODES,
   SURAH_FONT_SIZE,
 } from "@alrisali/domain/quran";
 import type { QuranReaderSettings } from "@alrisali/domain/quran";
 import { writeDigits } from "@alrisali/domain/shared";
-import { Button, Text, ToggleButton, ToggleButtonGroup } from "panelui-native";
+import {
+  Button,
+  Item,
+  Switch,
+  Text,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "panelui-native";
 import { MinusIcon, PlusIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -17,7 +25,7 @@ interface ReaderSettingsControlsProps {
   onChange: (change: Partial<QuranReaderSettings>) => void;
 }
 
-/** Reading mode, how pages turn, and the Surah Mode text size. */
+/** Reading mode, how pages turn, page colour, keep-awake and the Surah Mode text size. */
 export const ReaderSettingsControls = ({
   settings,
   onChange,
@@ -81,6 +89,44 @@ export const ReaderSettingsControls = ({
           ))}
         </ToggleButtonGroup>
       </View>
+      <View className="gap-2">
+        <Text weight="medium">{t("settings.pagePalette.title")}</Text>
+        <ToggleButtonGroup
+          selectionMode="single"
+          size="sm"
+          accessibilityLabel={t("settings.pagePalette.title")}
+          value={[settings.pagePalette]}
+          onValueChange={([next]) => {
+            const pagePalette = PAGE_PALETTES.find(
+              (candidate) => candidate === next
+            );
+            if (pagePalette) {
+              onChange({ pagePalette });
+            }
+          }}
+        >
+          {PAGE_PALETTES.map((option) => (
+            <ToggleButton key={option} id={option}>
+              {t(`settings.pagePalette.${option}`)}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+      </View>
+      <Item>
+        <Item.Content>
+          <Item.Title>{t("settings.keepAwake.title")}</Item.Title>
+          <Item.Description>
+            {t("settings.keepAwake.description")}
+          </Item.Description>
+        </Item.Content>
+        <Item.Actions>
+          <Switch
+            label={t("settings.keepAwake.title")}
+            value={settings.keepAwake}
+            onValueChange={(keepAwake) => onChange({ keepAwake })}
+          />
+        </Item.Actions>
+      </Item>
       <View className="flex-row items-center justify-between gap-3">
         <Text weight="medium">{t("settings.fontSize.title")}</Text>
         <View className="flex-row items-center gap-2">

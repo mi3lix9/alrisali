@@ -20,6 +20,14 @@ export const quranReaderSettings = sqliteTable("quran_reader_settings", {
   reciter: text("reciter")
     .notNull()
     .default(DEFAULT_QURAN_READER_SETTINGS.reciter),
+  /** The colour of the page: white, cream, soft-dark or black. */
+  pagePalette: text("page_palette")
+    .notNull()
+    .default(DEFAULT_QURAN_READER_SETTINGS.pagePalette),
+  /** Whether the reader keeps the screen awake (0 or 1). */
+  keepAwake: integer("keep_awake", { mode: "boolean" })
+    .notNull()
+    .default(DEFAULT_QURAN_READER_SETTINGS.keepAwake),
 });
 
 /**

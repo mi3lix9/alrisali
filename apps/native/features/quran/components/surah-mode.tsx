@@ -21,6 +21,7 @@ import type {
 import { formatNumber } from "@/shared/lib/numbers";
 
 import { QURAN_FONT } from "../hooks/use-quran-font";
+import { usePageColors } from "./page-colors";
 import type { AyahGestures } from "./quran-page-view";
 
 const LINE_HEIGHT = 2;
@@ -88,6 +89,7 @@ export const SurahMode = ({
   onAyahShown,
 }: SurahModeProps) => {
   const { t, i18n } = useTranslation("quran");
+  const colors = usePageColors();
   const opening = useOpening(surah);
   const ayat = useMemo(() => ayatOfSurah(surah), [surah]);
   // Where each ayah starts in the joined text (each ends with a space).
@@ -111,6 +113,7 @@ export const SurahMode = ({
     return i18n.language === "ar" ? entry?.nameAr : entry?.nameEn;
   };
   const quranText = {
+    color: colors.text,
     fontFamily: QURAN_FONT,
     fontSize,
     lineHeight: fontSize * LINE_HEIGHT,
@@ -167,7 +170,8 @@ export const SurahMode = ({
       ref={scrollRef}
       // Each surah opens at its top.
       key={surah}
-      className="bg-background flex-1 dark:bg-black"
+      className="flex-1"
+      style={{ backgroundColor: colors.background }}
       contentContainerStyle={{
         paddingTop: insetTop + 16,
         paddingBottom: insetBottom + 32,
@@ -184,12 +188,17 @@ export const SurahMode = ({
         <Direction dir="rtl" className="gap-4">
           {opening.header ? (
             <View
-              className="border-border bg-muted rounded-md border py-2"
+              className="rounded-md border py-2"
+              style={{
+                backgroundColor: colors.plate,
+                borderColor: colors.border,
+              }}
               accessibilityRole="header"
             >
               <Text
                 className="text-center"
                 style={{
+                  color: colors.text,
                   fontFamily: QURAN_FONT,
                   fontSize: fontSize * 1.1,
                   lineHeight: fontSize * 1.1 * LINE_HEIGHT,
@@ -220,13 +229,14 @@ export const SurahMode = ({
                 onPressIn={() => onPressInAyah(ayah.key)}
                 onPressOut={onPressOut}
                 suppressHighlighting
-                className={`${
-                  selectedAyah === ayah.key || pressingAyah === ayah.key
-                    ? "bg-accent"
-                    : ""
-                } ${
-                  lastReadAyah === ayah.key ? "text-info" : "text-foreground"
-                }`}
+                style={{
+                  backgroundColor:
+                    selectedAyah === ayah.key || pressingAyah === ayah.key
+                      ? colors.highlight
+                      : undefined,
+                  color:
+                    lastReadAyah === ayah.key ? colors.accent : colors.text,
+                }}
               >
                 {`${ayah.text} `}
               </NativeText>

@@ -195,4 +195,11 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `qada_logs_date_idx` ON `qada_logs` (`date`);",
     ],
   },
+  {
+    tag: "20261016132136_reader-comfort",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `page_palette` text DEFAULT 'white' NOT NULL;",
+      "ALTER TABLE `quran_reader_settings` ADD `keep_awake` integer DEFAULT true NOT NULL;",
+    ],
+  },
 ];
