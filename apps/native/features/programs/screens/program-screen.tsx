@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { useHijriToday } from "@/shared/lib/hijri-today";
 import { launchLanguage } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
@@ -17,7 +18,6 @@ import { useOfficialProgram } from "../data/official-programs";
 import { useMarkProgramSeen } from "../data/seen-programs";
 import { useSubscriptions } from "../data/subscriptions";
 import { useDescribe } from "../hooks/use-describe";
-import { useHijriToday } from "../hooks/use-hijri-today";
 
 /** One Official Program: what it is, its Acts, and the Subscription controls. */
 export const ProgramScreen = () => {

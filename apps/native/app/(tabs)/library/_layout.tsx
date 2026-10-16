@@ -4,7 +4,7 @@ import { TabStack } from "@/shared/ui/tab-stack";
 
 const LibraryLayout = () => {
   const { t } = useTranslation();
-  return <TabStack title={t("tabs.library")} />;
+  return <TabStack title={t("features.library")} />;
 };
 
 export default LibraryLayout;

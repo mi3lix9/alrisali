@@ -2,12 +2,29 @@
 // their strings in their own `i18n/` folder and namespace.
 export const ar = {
   appName: "الرسالي",
-  tabs: {
+  // The Feature Registry's labels: tabs, Home shortcuts and All Tools.
+  features: {
     home: "الرئيسية",
+    quran: "القرآن",
     prayer: "الصلاة",
+    qibla: "القبلة",
+    "prayer-assistant": "مساعد الصلاة",
     library: "المكتبة",
+    lessons: "الدروس",
     worship: "العبادات",
+    programs: "البرامج",
     tasbih: "التسبيح",
+    calendar: "التقويم",
+    gatherings: "المجالس",
+    insights: "إحصاءاتي",
+  },
+  featureAreas: {
+    quran: "القرآن",
+    prayer: "الصلاة",
+    worship: "العبادات",
+    library: "المكتبة",
+    seasonal: "موسمي",
+    more: "المزيد",
   },
   settings: "الإعدادات",
   account: "الحساب",
