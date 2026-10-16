@@ -31,10 +31,12 @@ export const ar = {
   },
   sheet: {
     title: "سورة {{surah}} · الآية {{ayah}}",
-    share: "مشاركة",
+    share: "مشاركة النص",
     play: "استمع من هنا",
     copy: "نسخ",
     copied: "نُسخت الآية",
+    previous: "الآية السابقة",
+    next: "الآية التالية",
   },
   lastRead: {
     set: "اجعلها آخر ما قرأت",

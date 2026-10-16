@@ -8,6 +8,7 @@ export const en: Catalog<typeof ar> = {
     "Tap the heart on a Surah, Supplication or Library material to keep it here.",
   add: "Add to Favorites",
   remove: "Remove from Favorites",
+  saved: "In Favorites",
   kind: {
     surah: "Surah",
     ayah: "Ayah",
