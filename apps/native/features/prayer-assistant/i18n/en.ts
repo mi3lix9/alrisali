@@ -144,7 +144,10 @@ export const en: Catalog<typeof ar> = {
     openSettings: "Open Settings",
   },
   camera: {
-    asking: "Asking for the camera…",
+    reasonTitle: "Follow your Salah with the camera",
+    reason:
+      "The camera sees your Positions so the assistant can count your Rak'ahs for you. Nothing is recorded or sent anywhere. Or carry on by tap, without it.",
+    allow: "Allow the camera",
     starting: "Getting the camera ready…",
     ready:
       "The camera sees you standing. Begin and it will follow your Positions.",

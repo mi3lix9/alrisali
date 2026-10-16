@@ -1,0 +1,1 @@
+ALTER TABLE `prayer_times_settings` ADD `recent_cities` text;

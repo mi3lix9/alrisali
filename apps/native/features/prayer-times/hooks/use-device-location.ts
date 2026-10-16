@@ -20,6 +20,7 @@ import {
 } from "@/shared/lib/believer-settings";
 import { joinParts } from "@/shared/lib/i18n";
 
+import { useRememberCity } from "../data/recent-cities";
 import { refreshFollowedLocation } from "../utils/refresh-followed-location";
 import type { Coordinates } from "../utils/refresh-followed-location";
 
@@ -112,9 +113,12 @@ export const useCitySearch = () =>
 /** Sets a location the Believer chose; it stays put when they travel. */
 export const useChooseLocation = () => {
   const { mutate: update, isPending } = useUpdateBelieverSettings();
+  const { mutate: remember } = useRememberCity();
   return {
-    choose: (location: Location) =>
-      update({ location, locationFollowsDevice: false }),
+    choose: (location: Location) => {
+      update({ location, locationFollowsDevice: false });
+      remember(location);
+    },
     isPending,
   };
 };

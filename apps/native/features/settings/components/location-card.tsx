@@ -1,12 +1,12 @@
 import {
-  locationSchema,
+  manualLocation,
   MAX_LATITUDE,
   MAX_LONGITUDE,
-  readNumber,
 } from "@alrisali/domain/shared";
 import type { Location } from "@alrisali/domain/shared";
 import { Button, Card, Input } from "panelui-native";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -15,7 +15,18 @@ import {
 } from "@/shared/lib/believer-settings";
 import { localizeDigits } from "@/shared/lib/numbers";
 
-const LocationForm = ({ saved }: { saved: Location | null }) => {
+interface LocationCardProps {
+  /** Told of each place the Believer types in, to keep it among Recent Cities. */
+  onLocationChosen?: (location: Location) => void;
+  /** Other features' content for this card, such as the Recent Cities. */
+  extras?: ReactNode;
+}
+
+const LocationForm = ({
+  saved,
+  onLocationChosen,
+  extras,
+}: { saved: Location | null } & LocationCardProps) => {
   const { t } = useTranslation("settings");
   const { mutate: update, isPending } = useUpdateBelieverSettings();
   const [name, setName] = useState(saved?.name ?? "");
@@ -27,17 +38,16 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
     saved ? localizeDigits(String(saved.longitude)) : ""
   );
   const [invalid, setInvalid] = useState(false);
+  const [timeZone, setTimeZone] = useState<string | null>(null);
 
   const save = () => {
-    const location = locationSchema.safeParse({
-      latitude: readNumber(latitude),
-      longitude: readNumber(longitude),
-      name: name.trim() === "" ? null : name,
-    });
-    setInvalid(!location.success);
-    if (location.success) {
+    const resolved = manualLocation(latitude, longitude, name);
+    setInvalid(resolved === null);
+    setTimeZone(resolved?.timeZone ?? null);
+    if (resolved) {
       // Typed by hand, so it stays put when the Believer travels.
-      update({ location: location.data, locationFollowsDevice: false });
+      update({ location: resolved.location, locationFollowsDevice: false });
+      onLocationChosen?.(resolved.location);
     }
   };
 
@@ -70,6 +80,12 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
           onChangeText={setLongitude}
           keyboardType="numbers-and-punctuation"
         />
+        {timeZone ? (
+          <Card.Description>
+            {t("location.timeZone", { timeZone })}
+          </Card.Description>
+        ) : null}
+        {extras}
       </Card.Content>
       <Card.Footer>
         <Button onPress={save} disabled={isPending}>
@@ -80,7 +96,10 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
   );
 };
 
-export const LocationCard = () => {
+export const LocationCard = ({
+  onLocationChosen,
+  extras,
+}: LocationCardProps) => {
   const { t } = useTranslation("settings");
   const { data: settings } = useBelieverSettings();
 
@@ -94,7 +113,15 @@ export const LocationCard = () => {
             : t("location.notSet")}
         </Card.Description>
       </Card.Header>
-      {settings ? <LocationForm saved={settings.location} /> : null}
+      {settings ? (
+        <LocationForm
+          // Starts over when another saved location (a Recent City) is chosen.
+          key={`${settings.location?.latitude},${settings.location?.longitude}`}
+          saved={settings.location}
+          {...(onLocationChosen ? { onLocationChosen } : {})}
+          {...(extras ? { extras } : {})}
+        />
+      ) : null}
     </Card>
   );
 };

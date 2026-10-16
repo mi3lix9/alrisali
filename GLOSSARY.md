@@ -22,6 +22,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Hidden Prayer Time**: A Prayer Time the Believer has chosen not to see on their timetable.
 
+**Recent City**: A place the Believer chose by search or typed coordinates, kept with its time zone so they can switch back to it. _Avoid_: History, saved city
+
 **Prayer Log**: The Believer's record, for one date, of which Salah they performed. _Avoid_: Prayer tracking entry
 
 **Prayer Streak**: The run of consecutive days, ending on a given date, on which all five Salah were logged. _Avoid_: Streak (unqualified)

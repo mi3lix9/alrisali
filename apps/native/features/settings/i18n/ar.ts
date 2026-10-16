@@ -51,6 +51,7 @@ export const ar = {
     longitude: "خط الطول",
     invalid:
       "خط العرض بين ‎-{{latitude}} و{{latitude}}، وخط الطول بين ‎-{{longitude}} و{{longitude}}.",
+    timeZone: "المنطقة الزمنية: {{timeZone}}",
     save: "حفظ الموقع",
   },
   calculationMethod: {

@@ -19,6 +19,15 @@ export const ar = {
     shareSeparator: " · ",
     allHidden: "كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت.",
   },
+  day: {
+    previous: "اليوم السابق",
+    next: "اليوم التالي",
+    today: "اليوم",
+    pick: "اختر تاريخًا",
+    hijri: "التاريخ الهجري",
+    timetableTitle: "مواقيت {{date}}",
+    countdown: "{{name}} بعد {{countdown}}",
+  },
   next: {
     title: "الصلاة القادمة",
     remaining: "بعد {{countdown}}",
@@ -45,6 +54,10 @@ export const ar = {
     searching: "جارٍ البحث…",
     noResults: "لم نجد مدينة بهذا الاسم.",
     searchFailed: "تعذّر البحث. يحتاج البحث إلى اتصال بالإنترنت.",
+  },
+  recent: {
+    title: "المدن الأخيرة",
+    timeZone: "المنطقة الزمنية: {{timeZone}}",
   },
   options: {
     title: "خيارات المواقيت",
