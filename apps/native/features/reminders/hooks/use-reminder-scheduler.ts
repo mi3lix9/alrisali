@@ -21,11 +21,14 @@ import type {
   CalculationMethod,
   CustomAngles,
   HabitReminderPlan,
+  HighLatitudeRule,
   HijriCalendar,
   KhatmahReminderPlan,
   Location,
   MessageStyle,
+  MidnightDefinition,
   Occasion,
+  PrayerAdjustments,
   QadaReminderPlan,
 } from "@alrisali/domain/shared";
 import { captureException } from "@sentry/react-native";
@@ -58,6 +61,9 @@ interface PlanningSettings {
   calculationMethod: CalculationMethod;
   customAngles: CustomAngles;
   imsakMinutes: number;
+  prayerAdjustments: PrayerAdjustments;
+  midnightDefinition: MidnightDefinition;
+  highLatitudeRule: HighLatitudeRule;
   messageStyle: MessageStyle;
 }
 
@@ -83,6 +89,9 @@ const planAndSync = async (
     calculationMethod,
     customAngles,
     imsakMinutes,
+    prayerAdjustments,
+    midnightDefinition,
+    highLatitudeRule,
     messageStyle,
   } = believer;
   const prayerTimes = location
@@ -94,6 +103,9 @@ const planAndSync = async (
         calculationMethod,
         imsakMinutes,
         customAngles,
+        adjustments: prayerAdjustments,
+        midnight: midnightDefinition,
+        highLatitudeRule,
       }
     : null;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();

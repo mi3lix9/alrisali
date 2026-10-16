@@ -136,6 +136,9 @@ describe("Guest → Believer sync", () => {
       timeFormat: null,
       messageStyle: "classic",
       customAngles: { fajr: 18, maghrib: 4, isha: 14 },
+      prayerAdjustments: {},
+      midnightDefinition: "sunsetToFajr",
+      highLatitudeRule: "angleBased",
     });
   });
 
@@ -163,6 +166,9 @@ describe("Guest → Believer sync", () => {
       timeFormat: null,
       messageStyle: "classic",
       customAngles: { fajr: 18, maghrib: 4, isha: 14 },
+      prayerAdjustments: {},
+      midnightDefinition: "sunsetToFajr",
+      highLatitudeRule: "angleBased",
     };
     await expect(onPhone.get()).resolves.toStrictEqual(mashhad);
     await expect(onTablet.get()).resolves.toStrictEqual(mashhad);

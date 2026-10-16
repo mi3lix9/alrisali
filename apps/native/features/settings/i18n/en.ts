@@ -64,6 +64,39 @@ export const en: Catalog<typeof ar> = {
     invalid: "Enter angles within the ranges shown.",
     save: "Save angles",
   },
+  prayerAdjustments: {
+    title: "Adjust times by minutes",
+    description:
+      "Add or subtract up to 30 minutes on any time. The adjustment is applied once to the time as shown and never changes with daylight saving.",
+    label: "{{name}}, minutes",
+    names: {
+      imsak: "Imsak",
+      fajr: "Fajr",
+      sunrise: "Sunrise",
+      dhuhr: "Dhuhr",
+      asr: "Asr",
+      sunset: "Sunset",
+      maghrib: "Maghrib",
+      isha: "Isha",
+      midnight: "Midnight",
+    },
+  },
+  midnightDefinition: {
+    title: "Midnight definition",
+    description: "The night that is halved to find Midnight.",
+    sunsetToFajr: "Sunset to Fajr",
+    sunsetToSunrise: "Sunset to Sunrise",
+    maghribToFajr: "Maghrib to Fajr",
+    maghribToSunrise: "Maghrib to Sunrise",
+  },
+  highLatitudeRule: {
+    title: "High-latitude rule",
+    description:
+      "Sets Fajr and Isha where the sun does not reach their angle or the night is short, as in summer in northern cities.",
+    angleBased: "Angle-based (default)",
+    oneSeventh: "One-seventh of the night",
+    middleOfNight: "Middle of the night",
+  },
   hijriAdjustment: {
     title: "Hijri Adjustment",
     description:

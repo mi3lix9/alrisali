@@ -68,6 +68,70 @@ export interface Coordinates {
   longitude: number;
 }
 
+export const MAX_ADJUSTMENT_MINUTES = 30;
+
+/** A Believer's correction of one Prayer Time, in whole minutes. */
+export const adjustmentMinutesSchema = z
+  .number()
+  .int()
+  .min(-MAX_ADJUSTMENT_MINUTES)
+  .max(MAX_ADJUSTMENT_MINUTES);
+
+/** Minutes to add to each Prayer Time; a time left out is not adjusted. */
+export const prayerAdjustmentsSchema = z.partialRecord(
+  prayerTimeNameSchema,
+  adjustmentMinutesSchema
+);
+
+export type PrayerAdjustments = z.infer<typeof prayerAdjustmentsSchema>;
+
+/**
+ * Adjustments from a stored value of unknown shape: each Prayer Time whose
+ * value is a valid number of minutes is kept, the rest are dropped, and
+ * zeros are not stored.
+ */
+export const readPrayerAdjustments = (stored: unknown): PrayerAdjustments => {
+  if (typeof stored !== "object" || stored === null) {
+    return {};
+  }
+  return Object.fromEntries(
+    PRAYER_TIMES.flatMap((name) => {
+      const minutes = adjustmentMinutesSchema.safeParse(
+        (stored as Record<string, unknown>)[name]
+      );
+      return minutes.success && minutes.data !== 0
+        ? [[name, minutes.data]]
+        : [];
+    })
+  );
+};
+
+/** Where the night that Midnight halves starts and ends. */
+export const MIDNIGHT_DEFINITIONS = [
+  "sunsetToFajr",
+  "sunsetToSunrise",
+  "maghribToFajr",
+  "maghribToSunrise",
+] as const;
+
+export type MidnightDefinition = (typeof MIDNIGHT_DEFINITIONS)[number];
+export const DEFAULT_MIDNIGHT_DEFINITION: MidnightDefinition = "sunsetToFajr";
+export const midnightDefinitionSchema = z.enum(MIDNIGHT_DEFINITIONS);
+
+/**
+ * How Fajr and Isha are found where the sun does not get as deep as their
+ * angle, or the night is short: the angle's share of the night (angle ÷ 60),
+ * a seventh of the night, or half of it.
+ */
+export const HIGH_LATITUDE_RULES = [
+  "angleBased",
+  "oneSeventh",
+  "middleOfNight",
+] as const;
+
+export type HighLatitudeRule = (typeof HIGH_LATITUDE_RULES)[number];
+export const DEFAULT_HIGH_LATITUDE_RULE: HighLatitudeRule = "angleBased";
+export const highLatitudeRuleSchema = z.enum(HIGH_LATITUDE_RULES);
 /** What a day's Prayer Times depend on, besides the date and time zone. */
 export interface PrayerTimesSettings {
   coordinates: Coordinates;
@@ -75,6 +139,12 @@ export interface PrayerTimesSettings {
   imsakMinutes: number;
   /** The angles of the Custom method; its defaults when left out. */
   customAngles?: CustomAngles;
+  /** Minutes added to each Prayer Time as shown; none when left out. */
+  adjustments?: PrayerAdjustments;
+  /** How Midnight is defined; Sunset to Fajr when left out. */
+  midnight?: MidnightDefinition;
+  /** How Fajr and Isha are found where the sun never reaches their angle. */
+  highLatitudeRule?: HighLatitudeRule;
 }
 
 /**
@@ -344,20 +414,133 @@ const FIRST_GUESS = {
   sunset: 18,
 } as const;
 
+const roundToMinute = (instant: Temporal.Instant) =>
+  instant.round({ smallestUnit: "minute", roundingMode: "halfExpand" });
+
+const instantBetween = (
+  start: Temporal.Instant,
+  end: Temporal.Instant,
+  fraction: number
+) =>
+  roundToMinute(
+    Temporal.Instant.fromEpochMilliseconds(
+      Math.round(
+        start.epochMilliseconds +
+          (end.epochMilliseconds - start.epochMilliseconds) * fraction
+      )
+    )
+  );
+
+/** The share of the night a twilight Prayer Time keeps from Sunset or Sunrise. */
+const nightShare = (rule: HighLatitudeRule, angle: number): number => {
+  switch (rule) {
+    case "angleBased": {
+      return angle / 60;
+    }
+    case "oneSeventh": {
+      return 1 / 7;
+    }
+    case "middleOfNight": {
+      return 1 / 2;
+    }
+    default: {
+      return rule satisfies never;
+    }
+  }
+};
+
+/**
+ * The physical night around a date: the sunrise of the date and the sunset
+ * before it (`nightBefore`) or the sunset of the date and the sunrise after
+ * it (`nightAfter`), on the true horizon whatever the method's Sunset.
+ */
+const horizonSun = (date: Temporal.PlainDate, coordinates: Coordinates) => {
+  const day = solarDay(date, coordinates);
+  return {
+    sunrise: day.toInstant(
+      day.sunAngleTime(HORIZON_ANGLE, FIRST_GUESS.sunrise, true)
+    ),
+    sunset: day.toInstant(
+      day.sunAngleTime(HORIZON_ANGLE, FIRST_GUESS.sunset, false)
+    ),
+  };
+};
+
+/**
+ * Fajr of `date`: the sun's own time at the method's angle, unless the sun
+ * never gets that deep or Fajr would fall further from Sunrise than the
+ * high-latitude rule allows; then it is that share of the night before Sunrise.
+ */
 const fajrInstant = (
   date: Temporal.PlainDate,
   settings: PrayerTimesSettings
-) => {
+): Temporal.Instant | null => {
   const day = solarDay(date, settings.coordinates);
-  const rules = methodRules(settings);
-  return day.toInstant(
-    day.sunAngleTime(rules.fajrAngle, FIRST_GUESS.fajr, true)
+  const { fajrAngle } = methodRules(settings);
+  const sun = day.toInstant(
+    day.sunAngleTime(fajrAngle, FIRST_GUESS.fajr, true)
   );
+  const { sunrise } = horizonSun(date, settings.coordinates);
+  const { sunset: previousSunset } = horizonSun(
+    date.subtract({ days: 1 }),
+    settings.coordinates
+  );
+  if (!(sunrise && previousSunset)) {
+    return sun;
+  }
+  const portion =
+    (sunrise.epochMilliseconds - previousSunset.epochMilliseconds) *
+    nightShare(
+      settings.highLatitudeRule ?? DEFAULT_HIGH_LATITUDE_RULE,
+      fajrAngle
+    );
+  return !sun || sunrise.epochMilliseconds - sun.epochMilliseconds > portion
+    ? roundToMinute(
+        Temporal.Instant.fromEpochMilliseconds(
+          Math.round(sunrise.epochMilliseconds - portion)
+        )
+      )
+    : sun;
+};
+
+/**
+ * Isha of `date` after an angle: as Fajr, a share of the night after Sunset
+ * at most. Isha a fixed number of minutes after Maghrib is never changed.
+ */
+const ishaAtAngle = (
+  date: Temporal.PlainDate,
+  settings: PrayerTimesSettings,
+  angle: number
+): Temporal.Instant | null => {
+  const day = solarDay(date, settings.coordinates);
+  const sun = day.toInstant(day.sunAngleTime(angle, FIRST_GUESS.sunset, false));
+  const { sunset } = horizonSun(date, settings.coordinates);
+  const { sunrise: nextSunrise } = horizonSun(
+    date.add({ days: 1 }),
+    settings.coordinates
+  );
+  if (!(sunset && nextSunrise)) {
+    return sun;
+  }
+  const portion =
+    (nextSunrise.epochMilliseconds - sunset.epochMilliseconds) *
+    nightShare(settings.highLatitudeRule ?? DEFAULT_HIGH_LATITUDE_RULE, angle);
+  return !sun || sun.epochMilliseconds - sunset.epochMilliseconds > portion
+    ? roundToMinute(
+        Temporal.Instant.fromEpochMilliseconds(
+          Math.round(sunset.epochMilliseconds + portion)
+        )
+      )
+    : sun;
 };
 
 /**
  * The Prayer Times of `date` at the settings' place, in `timeZone` (IANA):
  * the place's own zone, from `locationTimeZone`, never the device's.
+ *
+ * Times are found from the sun first. Each Believer adjustment is then added
+ * once, as minutes on the instant, to the time as shown, so it keeps its sign
+ * across a daylight-saving change and does not move the other times.
  */
 export const calculatePrayerTimes = (
   date: Temporal.PlainDate,
@@ -368,47 +551,60 @@ export const calculatePrayerTimes = (
   const day = solarDay(date, settings.coordinates);
 
   const fajr = fajrInstant(date, settings);
+  const sunrise = day.toInstant(
+    day.sunAngleTime(HORIZON_ANGLE, FIRST_GUESS.sunrise, true)
+  );
   const sunset = day.toInstant(
     day.sunAngleTime(rules.sunsetAngle, FIRST_GUESS.sunset, false)
   );
-  const after = (
-    rule: TwilightRule,
-    previous: Temporal.Instant | null
-  ): Temporal.Instant | null =>
-    "angle" in rule
-      ? day.toInstant(day.sunAngleTime(rule.angle, FIRST_GUESS.sunset, false))
-      : (previous?.add({ minutes: rule.minutesAfter }) ?? null);
   // At high latitudes the sun may never reach the Maghrib angle.
-  const maghrib = (rules.maghrib && after(rules.maghrib, sunset)) ?? sunset;
-  const nextFajr = fajrInstant(date.add({ days: 1 }), settings);
-  const midnight =
-    sunset && nextFajr
-      ? Temporal.Instant.fromEpochMilliseconds(
-          (sunset.epochMilliseconds + nextFajr.epochMilliseconds) / 2
-        ).round({ smallestUnit: "minute", roundingMode: "halfExpand" })
-      : null;
+  const maghrib =
+    (rules.maghrib &&
+      ("angle" in rules.maghrib
+        ? day.toInstant(
+            day.sunAngleTime(rules.maghrib.angle, FIRST_GUESS.sunset, false)
+          )
+        : (sunset?.add({ minutes: rules.maghrib.minutesAfter }) ?? null))) ??
+    sunset;
+  const isha =
+    "angle" in rules.isha
+      ? ishaAtAngle(date, settings, rules.isha.angle)
+      : (maghrib?.add({ minutes: rules.isha.minutesAfter }) ?? null);
 
-  const shown = (instant: Temporal.Instant | null) =>
-    instant?.toZonedDateTimeISO(timeZone) ?? null;
+  const definition = settings.midnight ?? DEFAULT_MIDNIGHT_DEFINITION;
+  const nightStart = definition.startsWith("sunset") ? sunset : maghrib;
+  const nightEnd = definition.endsWith("Fajr")
+    ? fajrInstant(date.add({ days: 1 }), settings)
+    : horizonSun(date.add({ days: 1 }), settings.coordinates).sunrise;
+  const midnight =
+    nightStart && nightEnd ? instantBetween(nightStart, nightEnd, 1 / 2) : null;
+
+  const shown = (name: PrayerTimeName, instant: Temporal.Instant | null) =>
+    instant
+      ?.add({ minutes: settings.adjustments?.[name] ?? 0 })
+      .toZonedDateTimeISO(timeZone) ?? null;
 
   return {
-    imsak: shown(fajr?.subtract({ minutes: settings.imsakMinutes }) ?? null),
-    fajr: shown(fajr),
-    sunrise: shown(
-      day.toInstant(day.sunAngleTime(HORIZON_ANGLE, FIRST_GUESS.sunrise, true))
+    imsak: shown(
+      "imsak",
+      fajr?.subtract({ minutes: settings.imsakMinutes }) ?? null
     ),
+    fajr: shown("fajr", fajr),
+    sunrise: shown("sunrise", sunrise),
     dhuhr: shown(
+      "dhuhr",
       day
         .toInstant(day.noonAt(FIRST_GUESS.noon))
         ?.add({ minutes: DHUHR_AFTER_NOON_MINUTES }) ?? null
     ),
     asr: shown(
+      "asr",
       day.toInstant(day.asrTime(rules.asrShadowFactor, FIRST_GUESS.asr))
     ),
-    sunset: shown(sunset),
-    maghrib: shown(maghrib),
-    isha: shown(after(rules.isha, maghrib)),
-    midnight: shown(midnight),
+    sunset: shown("sunset", sunset),
+    maghrib: shown("maghrib", maghrib),
+    isha: shown("isha", isha),
+    midnight: shown("midnight", midnight),
   };
 };
 
