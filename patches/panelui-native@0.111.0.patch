@@ -1,3 +1,95 @@
+diff --git a/lib/module/components/bottom-sheet/index.js b/lib/module/components/bottom-sheet/index.js
+index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..f2c19e527344c900ce711f9220065e1dba1fe502 100644
+--- a/lib/module/components/bottom-sheet/index.js
++++ b/lib/module/components/bottom-sheet/index.js
+@@ -33,6 +33,7 @@ import { impactKnock } from "../../utils/haptics.js";
+  * something coming up from the bottom.
+  */
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { useLabels } from "../../providers/labels.js";
+ const SPRING = {
+   duration: 420,
+   dampingRatio: 0.9
+@@ -290,6 +291,7 @@ function BottomSheetContent({
+   children,
+   ...props
+ }) {
++  const labels = useLabels();
+   const context = useBottomSheet('BottomSheet.Content');
+   const {
+     open,
+@@ -695,7 +697,7 @@ function BottomSheetContent({
+           children: [/*#__PURE__*/_jsx(Scrim, {
+             blur: blur
+           }), /*#__PURE__*/_jsx(Pressable, {
+-            accessibilityLabel: "Close sheet",
++            accessibilityLabel: labels.closeSheet,
+             className: "flex-1",
+             onPress: dismissible ? close : undefined
+           })]
+@@ -747,7 +749,7 @@ function BottomSheetContent({
+                   })
+                 }) : null, textChildren(children), showClose ? /*#__PURE__*/_jsx(Pressable, {
+                   accessibilityRole: "button",
+-                  accessibilityLabel: "Close",
++                  accessibilityLabel: labels.close,
+                   onPress: close,
+                   hitSlop: 8,
+                   className: "absolute end-4 top-3 z-10 h-8 w-8 items-center justify-center rounded-full bg-muted active:opacity-70",
+diff --git a/lib/module/components/calendar/index.js b/lib/module/components/calendar/index.js
+index fc3297892b2cbf255a3599165f7e0c9f019e3a92..f2cfca66d11bad3a40ddd2eea97e9075a4d10e1d 100644
+--- a/lib/module/components/calendar/index.js
++++ b/lib/module/components/calendar/index.js
+@@ -60,6 +60,7 @@ import { addCalendarMonths, calendarDayNumber, calendarLongDate, calendarMonthLa
+  * neither can be written as a list that stays right tomorrow.
+  */
+ import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
++import { useLabels } from "../../providers/labels.js";
+ /**
+  * The corner radius of a day, and so of the band that runs between days.
+  *
+@@ -445,6 +446,7 @@ function CalendarNav({
+   disabled = false,
+   onPress
+ }) {
++  const labels = useLabels();
+   const {
+     nav
+   } = calendarVariants();
+@@ -453,7 +455,7 @@ function CalendarNav({
+     onPress: onPress,
+     hitSlop: 8,
+     accessibilityRole: "button",
+-    accessibilityLabel: direction === 'next' ? 'Next month' : 'Previous month',
++    accessibilityLabel: direction === 'next' ? labels.nextMonth : labels.previousMonth,
+     accessibilityState: {
+       disabled
+     },
+@@ -482,6 +484,7 @@ function CalendarDropdowns({
+   month,
+   offset
+ }) {
++  const labels = useLabels();
+   const {
+     setMonth,
+     locale,
+@@ -558,14 +561,14 @@ function CalendarDropdowns({
+   return /*#__PURE__*/_jsxs(_Fragment, {
+     children: [/*#__PURE__*/_jsx(CaptionDropdown, {
+       label: months[current.month - 1] ?? String(current.month),
+-      accessibilityLabel: "Month",
++      accessibilityLabel: labels.month,
+       options: monthOptions.map(option => option.label),
+       active: monthOptions.findIndex(option => option.month === current.month),
+       width: MONTH_LIST_WIDTH,
+       onSelect: index => choose((monthOptions[index]?.month ?? current.month) - current.month)
+     }), /*#__PURE__*/_jsx(CaptionDropdown, {
+       label: String(current.year),
+-      accessibilityLabel: "Year",
++      accessibilityLabel: labels.year,
+       options: years.map(String),
+       active: years.indexOf(current.year),
+       width: YEAR_LIST_WIDTH,
 diff --git a/lib/module/components/input/index.js b/lib/module/components/input/index.js
 index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f1596e8ad 100644
 --- a/lib/module/components/input/index.js
@@ -30,10 +122,18 @@ index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f
      // decorators, but never last enough to drop the animated border.
      style],
 diff --git a/lib/module/components/number-input/index.js b/lib/module/components/number-input/index.js
-index 959b20b6e18bd02df05a4476dd3da6667aae2993..923d0245e5c87afe5937fee66f0f0e2b2acdb257 100644
+index 959b20b6e18bd02df05a4476dd3da6667aae2993..be9af00c8064494cac8a628821e8ea1df33fefde 100644
 --- a/lib/module/components/number-input/index.js
 +++ b/lib/module/components/number-input/index.js
-@@ -161,6 +161,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+@@ -42,6 +42,7 @@ import { createRepeater } from "./number-input-repeat.js";
+ 
+ /** Wait before a held button starts repeating — a tap must not trip it. */
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { useLabels } from "../../providers/labels.js";
+ const REPEAT_DELAY = 400;
+ /** Interval between repeats once holding — fast enough to cover ground. */
+ const REPEAT_INTERVAL = 80;
+@@ -161,6 +162,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
    step = 1,
    onValueChange,
    formatValue,
@@ -41,7 +141,15 @@ index 959b20b6e18bd02df05a4476dd3da6667aae2993..923d0245e5c87afe5937fee66f0f0e2b
    editable = true,
    variant = 'outline',
    size = 'md',
-@@ -238,13 +239,13 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+@@ -175,6 +177,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+   onBlur,
+   returnKeyType
+ }, ref) => {
++  const labels = useLabels();
+   const isControlled = controlledValue !== undefined;
+   const initial = normalize(controlledValue ?? defaultValue ?? (isFinite(min) ? min : 0), min, max, step);
+   const [uncontrolled, setUncontrolled] = useState(initial);
+@@ -238,13 +241,13 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
    const atMin = value <= min;
    const atMax = value >= max;
    const handleEndEditing = useCallback(() => {
@@ -57,6 +165,24 @@ index 959b20b6e18bd02df05a4476dd3da6667aae2993..923d0245e5c87afe5937fee66f0f0e2b
    return /*#__PURE__*/_jsxs(View, {
      className: slots.container({
        className: containerClassName
+@@ -267,7 +270,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+         },
+         onPressOut: stopRepeat,
+         accessibilityRole: "button",
+-        accessibilityLabel: `Decrease ${label ?? 'value'}`,
++        accessibilityLabel: labels.decrease(label),
+         accessibilityState: {
+           disabled: disabled || atMin
+         },
+@@ -314,7 +317,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+         },
+         onPressOut: stopRepeat,
+         accessibilityRole: "button",
+-        accessibilityLabel: `Increase ${label ?? 'value'}`,
++        accessibilityLabel: labels.increase(label),
+         accessibilityState: {
+           disabled: disabled || atMax
+         },
 diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
 index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
 --- a/lib/module/components/textarea/index.js
@@ -88,6 +214,214 @@ index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724
        placeholderTextColor: typeof placeholderColor === 'string' ? placeholderColor : undefined,
        ...props
      }), footer]
+diff --git a/lib/module/components/time-picker/index.js b/lib/module/components/time-picker/index.js
+index e154af9fb7cb8e3b9878955c67415a1b94d0a4ee..5caf38697753702daae18b2d7574003a56f78cca 100644
+--- a/lib/module/components/time-picker/index.js
++++ b/lib/module/components/time-picker/index.js
+@@ -65,6 +65,7 @@ import { Popover } from "../popover/index.js";
+ 
+ /** How the panel gets onto the screen. */
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { useLabels } from "../../providers/labels.js";
+ /** What a closed picker reads when nothing has been chosen. */
+ const DEFAULT_PLACEHOLDER = 'Choose a time';
+ 
+@@ -445,6 +446,7 @@ function WheelFace({
+   locale,
+   disabled
+ }) {
++  const labels = useLabels();
+   const slots = timePickerVariants();
+   const [am, pm] = useMemo(() => meridiemLabels(locale), [locale]);
+   const hours = useMemo(() => hourCycle === 24 ? Array.from({
+@@ -516,7 +518,7 @@ function WheelFace({
+       onIndexChange: setHour,
+       label: hour => hourCycle === 24 ? padTwo(hour) : String(hour),
+       disabled: disabled,
+-      accessibilityLabel: "Hour",
++      accessibilityLabel: labels.hour,
+       className: slots.column()
+     }), /*#__PURE__*/_jsx(Column, {
+       items: minutes,
+@@ -525,7 +527,7 @@ function WheelFace({
+       onIndexChange: setMinute,
+       label: padTwo,
+       disabled: disabled,
+-      accessibilityLabel: "Minute",
++      accessibilityLabel: labels.minute,
+       className: slots.column()
+     }), hourCycle === 12 ? /*#__PURE__*/_jsx(Column, {
+       items: meridiems,
+@@ -534,7 +536,7 @@ function WheelFace({
+       onIndexChange: setMeridiem,
+       label: entry => entry,
+       disabled: disabled,
+-      accessibilityLabel: "AM or PM",
++      accessibilityLabel: labels.amPm,
+       className: slots.column()
+     }) : null]
+   });
+@@ -660,6 +662,7 @@ function ClockFaceLayout({
+   locale,
+   disabled
+ }) {
++  const labels = useLabels();
+   const slots = timePickerVariants();
+   const {
+     times,
+@@ -683,7 +686,7 @@ function ClockFaceLayout({
+         locale
+       }),
+       disabled: disabled,
+-      accessibilityLabel: "Time",
++      accessibilityLabel: labels.time,
+       className: slots.column()
+     })]
+   });
+@@ -717,6 +720,7 @@ function RulerFace({
+   disabled,
+   readout = 'default'
+ }) {
++  const labels = useLabels();
+   const slots = timePickerVariants({
+     readout
+   });
+@@ -875,7 +879,7 @@ function RulerFace({
+         onMomentumScrollBegin: startMoving,
+         onMomentumScrollEnd: onMomentumEnd,
+         accessibilityRole: "adjustable",
+-        accessibilityLabel: "Time",
++        accessibilityLabel: labels.time,
+         accessibilityState: {
+           disabled
+         },
+diff --git a/lib/module/components/toast/index.js b/lib/module/components/toast/index.js
+index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72dfdeddc3bd 100644
+--- a/lib/module/components/toast/index.js
++++ b/lib/module/components/toast/index.js
+@@ -25,6 +25,7 @@ import { AlertTriangleIcon, CheckCircleIcon, InfoIcon, XIcon } from "../../icons
+ import { Button } from "../button/index.js";
+ import { toast, toastStore } from "./toast-store.js";
+ import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
++import { useLabels } from "../../providers/labels.js";
+ const SPRING = {
+   damping: 20,
+   stiffness: 260,
+@@ -307,6 +308,7 @@ const ToastClose = ({
+   className,
+   ...props
+ }) => {
++  const labels = useLabels();
+   const {
+     hide
+   } = useContext(ToastContext);
+@@ -317,7 +319,7 @@ const ToastClose = ({
+     children: /*#__PURE__*/_jsx(Button, {
+       variant: "ghost",
+       size: "icon",
+-      accessibilityLabel: "Dismiss notification",
++      accessibilityLabel: labels.dismissNotification,
+       className: "h-6 w-6 rounded-full",
+       onPress: hide,
+       children: /*#__PURE__*/_jsx(XIcon, {
+diff --git a/lib/module/index.js b/lib/module/index.js
+index 17ee04fb80d88b3566cdd49ced2ab1aae5fbfcdf..6e932959204423ca38b5db15fcf34df7dd117283 100644
+--- a/lib/module/index.js
++++ b/lib/module/index.js
+@@ -2,6 +2,7 @@
+ 
+ // Providers
+ export { PanelUIProvider } from "./providers/panel-ui-provider.js";
++export { DEFAULT_LABELS, useLabels } from "./providers/labels.js";
+ 
+ // Theme
+ export { useTheme, useThemeMode, PANEL_THEMES, PANEL_THEME_NAMES, PANEL_EXTRA_THEMES } from "./theme/use-theme.js";
+diff --git a/node_modules/panelui-native/lib/module/providers/labels.js b/lib/module/providers/labels.js
+new file mode 100644
+index 0000000000000000000000000000000000000000..4200907fae904a884223fa5579825d4f51e51928
+--- /dev/null
++++ b/lib/module/providers/labels.js
+@@ -0,0 +1,42 @@
++"use strict";
++
++import { createContext, useContext, useMemo } from 'react';
++
++/**
++ * The words Panel UI's controls speak to assistive technology. English by
++ * default; an app in another language passes its own through
++ * `PanelUIProvider`'s `labels`.
++ */
++import { jsx as _jsx } from "react/jsx-runtime";
++export const DEFAULT_LABELS = {
++  closeSheet: 'Close sheet',
++  close: 'Close',
++  dismissNotification: 'Dismiss notification',
++  decrease: label => `Decrease ${label ?? 'value'}`,
++  increase: label => `Increase ${label ?? 'value'}`,
++  previousMonth: 'Previous month',
++  nextMonth: 'Next month',
++  month: 'Month',
++  year: 'Year',
++  hour: 'Hour',
++  minute: 'Minute',
++  amPm: 'AM or PM',
++  time: 'Time'
++};
++const LabelsContext = /*#__PURE__*/createContext(DEFAULT_LABELS);
++
++/** The labels in effect: the app's, over the English defaults. */
++export const useLabels = () => useContext(LabelsContext);
++export function LabelsProvider({
++  labels,
++  children
++}) {
++  const value = useMemo(() => ({
++    ...DEFAULT_LABELS,
++    ...labels
++  }), [labels]);
++  return /*#__PURE__*/_jsx(LabelsContext.Provider, {
++    value: value,
++    children: children
++  });
++}
+diff --git a/lib/module/providers/panel-ui-provider.js b/lib/module/providers/panel-ui-provider.js
+index bee6f014f99e07224aefcd288430b2627ab53a08..cd95dfb5105486d1c578d21f801d8cc5d97165fb 100644
+--- a/lib/module/providers/panel-ui-provider.js
++++ b/lib/module/providers/panel-ui-provider.js
+@@ -4,6 +4,7 @@ import { Platform, StyleSheet, TurboModuleRegistry, View } from 'react-native';
+ import { GestureHandlerRootView } from 'react-native-gesture-handler';
+ import { PortalHost, PortalProvider, useModalIsolationActive } from "../primitives/portal.js";
+ import { ToastViewport } from "../components/toast/index.js";
++import { LabelsProvider } from "./labels.js";
+ import { cn } from "../utils/cn.js";
+ 
+ /**
+@@ -92,12 +93,15 @@ export function PanelUIProvider({
+   className,
+   background = true,
+   statusBarTranslucent,
+-  navigationBarTranslucent
++  navigationBarTranslucent,
++  labels
+ }) {
+   // Resolved once, on the first render of the first provider in the app, and
+   // cached from there. See {@link resolveKeyboardProvider}.
+   const KeyboardProvider = resolveKeyboardProvider();
+-  return /*#__PURE__*/_jsx(GestureHandlerRootView, {
++  return /*#__PURE__*/_jsx(LabelsProvider, {
++    labels: labels,
++    children: /*#__PURE__*/_jsx(GestureHandlerRootView, {
+     style: styles.root,
+     children: /*#__PURE__*/_jsx(KeyboardProvider, {
+       statusBarTranslucent: statusBarTranslucent,
+@@ -110,6 +114,7 @@ export function PanelUIProvider({
+         })
+       })
+     })
++  })
+   });
+ }
+ function ProviderSurface({
 diff --git a/lib/typescript/src/components/number-input/index.d.ts b/lib/typescript/src/components/number-input/index.d.ts
 index f052a73c11a985bd50dfa8b94a1900c5bb4a9a0a..28d58dafac43c8441c808853fcd8f552c7e6526b 100644
 --- a/lib/typescript/src/components/number-input/index.d.ts
@@ -105,6 +439,182 @@ index f052a73c11a985bd50dfa8b94a1900c5bb4a9a0a..28d58dafac43c8441c808853fcd8f552
      /** Let the middle field be typed into. When false it is display-only. */
      editable?: boolean;
      disabled?: boolean;
+diff --git a/lib/typescript/src/index.d.ts b/lib/typescript/src/index.d.ts
+index 9f4ebba2a3e33c3529c7ba33db7ef973c530f7eb..b20121f2e113bf49fe8a34c81de2c3fbbc41c7f2 100644
+--- a/lib/typescript/src/index.d.ts
++++ b/lib/typescript/src/index.d.ts
+@@ -1,4 +1,5 @@
+ export { PanelUIProvider, type PanelUIProviderProps } from './providers/panel-ui-provider.js';
++export { DEFAULT_LABELS, useLabels, type PanelUILabels } from './providers/labels.js';
+ export { useTheme, useThemeMode, PANEL_THEMES, PANEL_THEME_NAMES, PANEL_EXTRA_THEMES, type ThemeName, type ThemeMode, type PanelTheme, type PanelThemeFamily, } from './theme/use-theme.js';
+ export { Portal, PortalHost, PortalProvider } from './primitives/portal.js';
+ export { Scrim, hasBlur, type ScrimProps } from './primitives/scrim.js';
+diff --git a/node_modules/panelui-native/lib/typescript/src/providers/labels.d.ts b/lib/typescript/src/providers/labels.d.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..27578482b54a67dc08fb83fac545524b737c6dce
+--- /dev/null
++++ b/lib/typescript/src/providers/labels.d.ts
+@@ -0,0 +1,36 @@
++import { type ReactNode } from 'react';
++/**
++ * The words Panel UI's controls speak to assistive technology. English by
++ * default; an app in another language passes its own through
++ * `PanelUIProvider`'s `labels`.
++ */
++export interface PanelUILabels {
++    /** A sheet's backdrop, which closes it. */
++    closeSheet: string;
++    /** A sheet's close button. */
++    close: string;
++    /** A toast's close button. */
++    dismissNotification: string;
++    /** A NumberInput's minus button, given the field's label when it has one. */
++    decrease: (label: string | undefined) => string;
++    /** A NumberInput's plus button, given the field's label when it has one. */
++    increase: (label: string | undefined) => string;
++    /** The calendar's month arrows. */
++    previousMonth: string;
++    nextMonth: string;
++    /** The calendar caption's month and year pickers. */
++    month: string;
++    year: string;
++    /** The time picker's wheels and faces. */
++    hour: string;
++    minute: string;
++    amPm: string;
++    time: string;
++}
++export declare const DEFAULT_LABELS: PanelUILabels;
++/** The labels in effect: the app's, over the English defaults. */
++export declare const useLabels: () => PanelUILabels;
++export declare function LabelsProvider({ labels, children, }: {
++    labels?: Partial<PanelUILabels>;
++    children: ReactNode;
++}): import("react").JSX.Element;
+diff --git a/lib/typescript/src/providers/panel-ui-provider.d.ts b/lib/typescript/src/providers/panel-ui-provider.d.ts
+index 3d94b43d4cc8d1919afd70aced7d5e8de4d429af..50936b7a0675f9775bbe9f653e40f14354319bde 100644
+--- a/lib/typescript/src/providers/panel-ui-provider.d.ts
++++ b/lib/typescript/src/providers/panel-ui-provider.d.ts
+@@ -1,4 +1,5 @@
+ import { type ReactNode } from 'react';
++import { type PanelUILabels } from './labels';
+ export interface PanelUIProviderProps {
+     children: ReactNode;
+     /**
+@@ -30,6 +31,12 @@ export interface PanelUIProviderProps {
+      * Android only, and inert without `react-native-keyboard-controller`.
+      */
+     navigationBarTranslucent?: boolean;
++    /**
++     * The words the controls speak to assistive technology (close buttons,
++     * NumberInput's steppers, the calendar and time pickers), for an app not in
++     * English. Unset ones stay English. Keep the object stable across renders.
++     */
++    labels?: Partial<PanelUILabels>;
+ }
+ /**
+  * Root provider for PanelUI. Owns three things:
+@@ -43,5 +50,5 @@ export interface PanelUIProviderProps {
+  * Theme switching is handled natively by Uniwind — use the `useTheme()` hook
+  * exported from panelui-native.
+  */
+-export declare function PanelUIProvider({ children, className, background, statusBarTranslucent, navigationBarTranslucent, }: PanelUIProviderProps): import("react").JSX.Element;
++export declare function PanelUIProvider({ children, className, background, statusBarTranslucent, navigationBarTranslucent, labels, }: PanelUIProviderProps): import("react").JSX.Element;
+ //# sourceMappingURL=panel-ui-provider.d.ts.map
+\ No newline at end of file
+diff --git a/src/components/bottom-sheet/index.tsx b/src/components/bottom-sheet/index.tsx
+index f9125cf1bcd1de0baf5edf10e0742a0a15412f52..0336f6cfb9076136cb722ea398f6f3a682f4800c 100644
+--- a/src/components/bottom-sheet/index.tsx
++++ b/src/components/bottom-sheet/index.tsx
+@@ -51,6 +51,7 @@ import { Text, textChildren } from '../../primitives/text';
+ import { useBackHandler } from '../../hooks/use-back-handler';
+ import { cn } from '../../utils/cn';
+ import { impactKnock } from '../../utils/haptics';
++import { useLabels } from '../../providers/labels';
+ 
+ /**
+  * One spring for the whole surface, in Apple's two designer parameters rather
+@@ -458,6 +459,7 @@ function BottomSheetContent({
+   children,
+   ...props
+ }: BottomSheetContentProps) {
++  const labels = useLabels();
+   const context = useBottomSheet('BottomSheet.Content');
+   const { open, setOpen } = context;
+   const nativeSheet = useContext(NativeSheetContext);
+@@ -914,7 +916,7 @@ function BottomSheetContent({
+               is what closes the sheet, since the scrim takes no touches. */}
+           <Scrim blur={blur} />
+           <Pressable
+-            accessibilityLabel="Close sheet"
++            accessibilityLabel={labels.closeSheet}
+             className="flex-1"
+             onPress={dismissible ? close : undefined}
+           />
+@@ -975,7 +977,7 @@ function BottomSheetContent({
+               {showClose ? (
+                 <Pressable
+                   accessibilityRole="button"
+-                  accessibilityLabel="Close"
++                  accessibilityLabel={labels.close}
+                   onPress={close}
+                   hitSlop={8}
+                   className="absolute end-4 top-3 z-10 h-8 w-8 items-center justify-center rounded-full bg-muted active:opacity-70"
+diff --git a/src/components/calendar/index.tsx b/src/components/calendar/index.tsx
+index 5251db0cdb13a0ea32a74f4237d92ba7098ac0fd..14ff0b16a24f6305350dd808b7092ef02b39f577 100644
+--- a/src/components/calendar/index.tsx
++++ b/src/components/calendar/index.tsx
+@@ -79,6 +79,7 @@ import {
+   type CalendarSystem,
+   type DateLocale,
+ } from '../../utils/date';
++import { useLabels } from '../../providers/labels';
+ 
+ export type CalendarMode = 'single' | 'multiple' | 'range';
+ export type CalendarCaptionLayout = 'label' | 'dropdown';
+@@ -608,6 +609,7 @@ export interface CalendarNavProps {
+  * its own. The target is still 32px with another 8 of slop around it.
+  */
+ function CalendarNav({ direction, disabled = false, onPress }: CalendarNavProps) {
++  const labels = useLabels();
+   const { nav } = calendarVariants();
+ 
+   return (
+@@ -616,7 +618,7 @@ function CalendarNav({ direction, disabled = false, onPress }: CalendarNavProps)
+       onPress={onPress}
+       hitSlop={8}
+       accessibilityRole="button"
+-      accessibilityLabel={direction === 'next' ? 'Next month' : 'Previous month'}
++      accessibilityLabel={direction === 'next' ? labels.nextMonth : labels.previousMonth}
+       accessibilityState={{ disabled }}
+       className={cn(nav(), disabled ? 'opacity-30' : 'active:bg-accent')}
+     >
+@@ -638,6 +640,7 @@ function CalendarNav({ direction, disabled = false, onPress }: CalendarNavProps)
+  * choosing a number, and it cannot show a Hijri year at all.
+  */
+ function CalendarDropdowns({ month, offset }: { month: Date; offset: number }) {
++  const labels = useLabels();
+   const { setMonth, locale, system, minDate, maxDate, startMonth, endMonth } =
+     useCalendar('Calendar.Caption');
+ 
+@@ -710,7 +713,7 @@ function CalendarDropdowns({ month, offset }: { month: Date; offset: number }) {
+     <>
+       <CaptionDropdown
+         label={months[current.month - 1] ?? String(current.month)}
+-        accessibilityLabel="Month"
++        accessibilityLabel={labels.month}
+         options={monthOptions.map((option) => option.label)}
+         active={monthOptions.findIndex((option) => option.month === current.month)}
+         width={MONTH_LIST_WIDTH}
+@@ -718,7 +721,7 @@ function CalendarDropdowns({ month, offset }: { month: Date; offset: number }) {
+       />
+       <CaptionDropdown
+         label={String(current.year)}
+-        accessibilityLabel="Year"
++        accessibilityLabel={labels.year}
+         options={years.map(String)}
+         active={years.indexOf(current.year)}
+         width={YEAR_LIST_WIDTH}
 diff --git a/src/components/input/index.tsx b/src/components/input/index.tsx
 index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc5f144f30 100644
 --- a/src/components/input/index.tsx
@@ -137,10 +647,18 @@ index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc
            // decorators, but never last enough to drop the animated border.
            style,
 diff --git a/src/components/number-input/index.tsx b/src/components/number-input/index.tsx
-index 5a9dad400e76b139252830fd369ac189916d6309..d559c37ca1c1ceda47285e0187cb366200de079f 100644
+index 5a9dad400e76b139252830fd369ac189916d6309..749443c3dc501fa1f334d59bf099d614398fb90c 100644
 --- a/src/components/number-input/index.tsx
 +++ b/src/components/number-input/index.tsx
-@@ -141,6 +141,12 @@ export interface NumberInputProps
+@@ -37,6 +37,7 @@ import { selectionTick } from '../../utils/haptics';
+ import { Label } from '../label';
+ import { normalize, precisionOf } from './number-input-math';
+ import { createRepeater } from './number-input-repeat';
++import { useLabels } from '../../providers/labels';
+ 
+ /** Wait before a held button starts repeating — a tap must not trip it. */
+ const REPEAT_DELAY = 400;
+@@ -141,6 +142,12 @@ export interface NumberInputProps
     * rounded to `step`'s precision.
     */
    formatValue?: (value: number) => string;
@@ -153,7 +671,7 @@ index 5a9dad400e76b139252830fd369ac189916d6309..d559c37ca1c1ceda47285e0187cb3662
    /** Let the middle field be typed into. When false it is display-only. */
    editable?: boolean;
    disabled?: boolean;
-@@ -175,6 +181,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+@@ -175,6 +182,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
        step = 1,
        onValueChange,
        formatValue,
@@ -161,7 +679,15 @@ index 5a9dad400e76b139252830fd369ac189916d6309..d559c37ca1c1ceda47285e0187cb3662
        editable = true,
        variant = 'outline',
        size = 'md',
-@@ -271,13 +278,13 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+@@ -191,6 +199,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+     },
+     ref
+   ) => {
++    const labels = useLabels();
+     const isControlled = controlledValue !== undefined;
+     const initial = normalize(
+       controlledValue ?? defaultValue ?? (isFinite(min) ? min : 0),
+@@ -271,13 +280,13 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
      const atMax = value >= max;
  
      const handleEndEditing = useCallback(() => {
@@ -177,6 +703,24 @@ index 5a9dad400e76b139252830fd369ac189916d6309..d559c37ca1c1ceda47285e0187cb3662
  
      return (
        <View className={slots.container({ className: containerClassName })}>
+@@ -296,7 +305,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+             }}
+             onPressOut={stopRepeat}
+             accessibilityRole="button"
+-            accessibilityLabel={`Decrease ${label ?? 'value'}`}
++            accessibilityLabel={labels.decrease(label)}
+             accessibilityState={{ disabled: disabled || atMin }}
+             style={atMin ? { opacity: 0.4 } : undefined}
+           >
+@@ -339,7 +348,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+             }}
+             onPressOut={stopRepeat}
+             accessibilityRole="button"
+-            accessibilityLabel={`Increase ${label ?? 'value'}`}
++            accessibilityLabel={labels.increase(label)}
+             accessibilityState={{ disabled: disabled || atMax }}
+             style={atMax ? { opacity: 0.4 } : undefined}
+           >
 diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
 index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
 --- a/src/components/textarea/index.tsx
@@ -213,3 +757,271 @@ index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1
            placeholderTextColor={
              typeof placeholderColor === 'string' ? placeholderColor : undefined
            }
+diff --git a/src/components/time-picker/index.tsx b/src/components/time-picker/index.tsx
+index 55aba1be4f4bb66a203cfb75ab3644da7bb2280b..afe1ed1c3df935ff798c788d11e7ef8092b9f10c 100644
+--- a/src/components/time-picker/index.tsx
++++ b/src/components/time-picker/index.tsx
+@@ -97,6 +97,7 @@ import {
+ import { Button } from '../button';
+ import { Dialog } from '../dialog';
+ import { Popover } from '../popover';
++import { useLabels } from '../../providers/labels';
+ 
+ export type { HourCycle, TimeValue };
+ 
+@@ -547,6 +548,7 @@ function WheelFace({
+   locale,
+   disabled,
+ }: FaceProps) {
++  const labels = useLabels();
+   const slots = timePickerVariants();
+   const [am, pm] = useMemo(() => meridiemLabels(locale), [locale]);
+ 
+@@ -631,7 +633,7 @@ function WheelFace({
+         onIndexChange={setHour}
+         label={(hour) => (hourCycle === 24 ? padTwo(hour) : String(hour))}
+         disabled={disabled}
+-        accessibilityLabel="Hour"
++        accessibilityLabel={labels.hour}
+         className={slots.column()}
+       />
+       <Column
+@@ -641,7 +643,7 @@ function WheelFace({
+         onIndexChange={setMinute}
+         label={padTwo}
+         disabled={disabled}
+-        accessibilityLabel="Minute"
++        accessibilityLabel={labels.minute}
+         className={slots.column()}
+       />
+       {hourCycle === 12 ? (
+@@ -652,7 +654,7 @@ function WheelFace({
+           onIndexChange={setMeridiem}
+           label={(entry) => entry}
+           disabled={disabled}
+-          accessibilityLabel="AM or PM"
++          accessibilityLabel={labels.amPm}
+           className={slots.column()}
+         />
+       ) : null}
+@@ -776,6 +778,7 @@ function ClockFaceLayout({
+   locale,
+   disabled,
+ }: FaceProps) {
++  const labels = useLabels();
+   const slots = timePickerVariants();
+   const { times, index } = useBoundedTimes(minuteStep, minTime, maxTime, value);
+ 
+@@ -797,7 +800,7 @@ function ClockFaceLayout({
+         onIndexChange={setIndex}
+         label={(time) => formatTime(time, { hourCycle, locale })}
+         disabled={disabled}
+-        accessibilityLabel="Time"
++        accessibilityLabel={labels.time}
+         className={slots.column()}
+       />
+     </View>
+@@ -832,6 +835,7 @@ function RulerFace({
+   disabled,
+   readout = 'default',
+ }: FaceProps) {
++  const labels = useLabels();
+   const slots = timePickerVariants({ readout });
+   const ref = useRef<ScrollView>(null);
+   const { times, index } = useBoundedTimes(minuteStep, minTime, maxTime, value);
+@@ -1016,7 +1020,7 @@ function RulerFace({
+           onMomentumScrollBegin={startMoving}
+           onMomentumScrollEnd={onMomentumEnd}
+           accessibilityRole="adjustable"
+-          accessibilityLabel="Time"
++          accessibilityLabel={labels.time}
+           accessibilityState={{ disabled }}
+           accessibilityValue={accessibilityValueForIndex(
+             index,
+diff --git a/src/components/toast/index.tsx b/src/components/toast/index.tsx
+index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68bb710e1db 100644
+--- a/src/components/toast/index.tsx
++++ b/src/components/toast/index.tsx
+@@ -60,6 +60,7 @@ import {
+   type ToastPlacement,
+   type ToastVariant,
+ } from './toast-store';
++import { useLabels } from '../../providers/labels';
+ 
+ const SPRING = { damping: 20, stiffness: 260, mass: 0.6 } as const;
+ 
+@@ -272,6 +273,7 @@ export interface ToastCloseProps extends ViewProps {
+ }
+ 
+ const ToastClose = ({ className, ...props }: ToastCloseProps) => {
++  const labels = useLabels();
+   const { hide } = useContext(ToastContext);
+   const color = useCSSVariable('--color-muted-foreground');
+ 
+@@ -280,7 +282,7 @@ const ToastClose = ({ className, ...props }: ToastCloseProps) => {
+       <Button
+         variant="ghost"
+         size="icon"
+-        accessibilityLabel="Dismiss notification"
++        accessibilityLabel={labels.dismissNotification}
+         className="h-6 w-6 rounded-full"
+         onPress={hide}
+       >
+diff --git a/src/index.ts b/src/index.ts
+index c05902c715ea18e09c6523e28e70157b6e1a16a5..2ceb2988882b0aaadc82b121c841d3001e767b61 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -1,5 +1,6 @@
+ // Providers
+ export { PanelUIProvider, type PanelUIProviderProps } from './providers/panel-ui-provider';
++export { DEFAULT_LABELS, useLabels, type PanelUILabels } from './providers/labels';
+ 
+ // Theme
+ export {
+diff --git a/node_modules/panelui-native/src/providers/labels.tsx b/src/providers/labels.tsx
+new file mode 100644
+index 0000000000000000000000000000000000000000..44f604102806336be01b8817e90ba8eba5f22048
+--- /dev/null
++++ b/src/providers/labels.tsx
+@@ -0,0 +1,62 @@
++import { createContext, useContext, useMemo, type ReactNode } from 'react';
++
++/**
++ * The words Panel UI's controls speak to assistive technology. English by
++ * default; an app in another language passes its own through
++ * `PanelUIProvider`'s `labels`.
++ */
++export interface PanelUILabels {
++  /** A sheet's backdrop, which closes it. */
++  closeSheet: string;
++  /** A sheet's close button. */
++  close: string;
++  /** A toast's close button. */
++  dismissNotification: string;
++  /** A NumberInput's minus button, given the field's label when it has one. */
++  decrease: (label: string | undefined) => string;
++  /** A NumberInput's plus button, given the field's label when it has one. */
++  increase: (label: string | undefined) => string;
++  /** The calendar's month arrows. */
++  previousMonth: string;
++  nextMonth: string;
++  /** The calendar caption's month and year pickers. */
++  month: string;
++  year: string;
++  /** The time picker's wheels and faces. */
++  hour: string;
++  minute: string;
++  amPm: string;
++  time: string;
++}
++
++export const DEFAULT_LABELS: PanelUILabels = {
++  closeSheet: 'Close sheet',
++  close: 'Close',
++  dismissNotification: 'Dismiss notification',
++  decrease: (label) => `Decrease ${label ?? 'value'}`,
++  increase: (label) => `Increase ${label ?? 'value'}`,
++  previousMonth: 'Previous month',
++  nextMonth: 'Next month',
++  month: 'Month',
++  year: 'Year',
++  hour: 'Hour',
++  minute: 'Minute',
++  amPm: 'AM or PM',
++  time: 'Time',
++};
++
++const LabelsContext = createContext<PanelUILabels>(DEFAULT_LABELS);
++
++/** The labels in effect: the app's, over the English defaults. */
++export const useLabels = (): PanelUILabels => useContext(LabelsContext);
++
++export function LabelsProvider({
++  labels,
++  children,
++}: {
++  labels?: Partial<PanelUILabels>;
++  children: ReactNode;
++}) {
++  const value = useMemo(() => ({ ...DEFAULT_LABELS, ...labels }), [labels]);
++  return <LabelsContext.Provider value={value}>{children}</LabelsContext.Provider>;
++}
+diff --git a/src/providers/panel-ui-provider.tsx b/src/providers/panel-ui-provider.tsx
+index ddd4cdb94e6c6ee1542953f2f906cca73c87160e..0d86a889f5f034993d7e43d0ca0f80adcfcb5afd 100644
+--- a/src/providers/panel-ui-provider.tsx
++++ b/src/providers/panel-ui-provider.tsx
+@@ -7,6 +7,7 @@ import {
+   useModalIsolationActive,
+ } from '../primitives/portal';
+ import { ToastViewport } from '../components/toast';
++import { LabelsProvider, type PanelUILabels } from './labels';
+ import { cn } from '../utils/cn';
+ 
+ /**
+@@ -37,6 +38,12 @@ interface KeyboardHostProps {
+   children?: ReactNode;
+   statusBarTranslucent?: boolean;
+   navigationBarTranslucent?: boolean;
++  /**
++   * The words the controls speak to assistive technology (close buttons,
++   * NumberInput's steppers, the calendar and time pickers), for an app not in
++   * English. Unset ones stay English. Keep the object stable across renders.
++   */
++  labels?: Partial<PanelUILabels>;
+ }
+ 
+ /**
+@@ -133,31 +140,34 @@ export function PanelUIProvider({
+   background = true,
+   statusBarTranslucent,
+   navigationBarTranslucent,
++  labels,
+ }: PanelUIProviderProps) {
+   // Resolved once, on the first render of the first provider in the app, and
+   // cached from there. See {@link resolveKeyboardProvider}.
+   const KeyboardProvider = resolveKeyboardProvider();
+ 
+   return (
+-    <GestureHandlerRootView style={styles.root}>
+-      {/* Outermost of ours, so every field below it can avoid the keyboard.
+-          A pass-through when the controller is not installed. */}
+-      {/* Passed through rather than defaulted: the controller warns about a
+-          value it has to ignore, and under edge-to-edge it ignores both. */}
+-      <KeyboardProvider
+-        statusBarTranslucent={statusBarTranslucent}
+-        navigationBarTranslucent={navigationBarTranslucent}
+-      >
+-        <PortalProvider>
+-          <ProviderSurface
+-            background={background}
+-            className={className}
+-          >
+-            {children}
+-          </ProviderSurface>
+-        </PortalProvider>
+-      </KeyboardProvider>
+-    </GestureHandlerRootView>
++    <LabelsProvider labels={labels}>
++      <GestureHandlerRootView style={styles.root}>
++        {/* Outermost of ours, so every field below it can avoid the keyboard.
++            A pass-through when the controller is not installed. */}
++        {/* Passed through rather than defaulted: the controller warns about a
++            value it has to ignore, and under edge-to-edge it ignores both. */}
++        <KeyboardProvider
++          statusBarTranslucent={statusBarTranslucent}
++          navigationBarTranslucent={navigationBarTranslucent}
++        >
++          <PortalProvider>
++            <ProviderSurface
++              background={background}
++              className={className}
++            >
++              {children}
++            </ProviderSurface>
++          </PortalProvider>
++        </KeyboardProvider>
++      </GestureHandlerRootView>
++    </LabelsProvider>
+   );
+ }
+ 

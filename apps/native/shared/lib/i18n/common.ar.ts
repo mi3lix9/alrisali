@@ -19,6 +19,23 @@ export const ar = {
   library: {
     searchPlaceholder: "ابحث في السور والأدعية والمواد",
   },
+  // What Panel UI's controls say to VoiceOver (see AppProviders).
+  controls: {
+    closeSheet: "إغلاق النافذة",
+    close: "إغلاق",
+    dismissNotification: "إخفاء الإشعار",
+    decrease: "إنقاص {{label}}",
+    increase: "زيادة {{label}}",
+    value: "القيمة",
+    previousMonth: "الشهر السابق",
+    nextMonth: "الشهر التالي",
+    month: "الشهر",
+    year: "السنة",
+    hour: "الساعة",
+    minute: "الدقيقة",
+    amPm: "صباحًا أو مساءً",
+    time: "الوقت",
+  },
   notFound: {
     title: "الصفحة غير موجودة",
     goHome: "العودة إلى الرئيسية",
