@@ -1,11 +1,12 @@
 import "../i18n";
 import {
   addHijriMonths,
+  HIJRI_MONTHS,
   occasionsInMonth,
   occasionsOn,
 } from "@alrisali/domain/shared";
 import type { HijriYearMonth } from "@alrisali/domain/shared";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { Button, Card, Text } from "panelui-native";
 import { ChevronLeftIcon, ChevronRightIcon } from "panelui-native/icons";
 import { useState } from "react";
@@ -20,9 +21,11 @@ import {
 } from "@/shared/lib/hijri-calendar";
 import { Screen } from "@/shared/ui/screen";
 
+import { DateConverterButton } from "../components/date-converter-button";
 import { HijriMonthGridView } from "../components/hijri-month-grid";
 import { OccasionList } from "../components/occasion-list";
 import { useOccasions } from "../data/occasions";
+import { parseDay } from "../utils/parse-day";
 
 const GREGORIAN_MONTH = { month: "short", year: "numeric" } as const;
 
@@ -52,6 +55,23 @@ export const CalendarScreen = () => {
   const first = grid.days[0]?.date ?? today;
   const last = grid.days.at(-1)?.date ?? today;
 
+  // The date converter opens a day here (`?date=2026-10-15`): show its month.
+  const { date } = useLocalSearchParams<{ date?: string }>();
+  const [opened, setOpened] = useState<string>();
+  if (date !== opened) {
+    setOpened(date);
+    const day = parseDay(date);
+    if (day) {
+      const hijri = calendar.toHijri(day);
+      setSelected(day);
+      setMonthOffset(
+        (hijri.year - todayHijri.year) * HIJRI_MONTHS.length +
+          hijri.month -
+          todayHijri.month
+      );
+    }
+  }
+
   const showMonth = (offset: number) => {
     setMonthOffset(offset);
     const month = addHijriMonths(todayHijri, offset);
@@ -62,7 +82,12 @@ export const CalendarScreen = () => {
 
   return (
     <>
-      <Stack.Screen options={{ title: t("title") }} />
+      <Stack.Screen
+        options={{
+          title: t("title"),
+          headerRight: () => <DateConverterButton />,
+        }}
+      />
       <Screen>
         <Card>
           <Card.Header>

@@ -52,6 +52,7 @@ const RootStack = () => {
         <Stack.Screen name="qibla" />
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
+        <Stack.Screen name="date-converter" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
