@@ -1,8 +1,7 @@
 import { atTimeAlert, atTimeSound } from "@alrisali/domain/reminders";
-import type { ReminderRule } from "@alrisali/domain/reminders";
+import type { AdhanSound, ReminderRule } from "@alrisali/domain/reminders";
 import { scheduleNotificationAsync } from "expo-notifications";
 
-import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
 import { playAdhan } from "./adhan-player";
 import { askNotificationsInContext } from "./ask-notifications";
 import { AT_TIME_SYSTEM_CHANNEL } from "./notification-request";
@@ -22,6 +21,7 @@ export type TestOutcome = "playing" | "notified" | "no-sound" | "denied";
  */
 export const testAtTimeAlert = async (
   rule: ReminderRule,
+  installed: readonly AdhanSound[],
   title: string,
   onEnd: () => void
 ): Promise<TestOutcome> => {
@@ -29,7 +29,7 @@ export const testAtTimeAlert = async (
   if (!alert || alert.kind === "silent") {
     return "no-sound";
   }
-  const { notification, full } = atTimeSound(alert, INSTALLED_ADHAN_SOUNDS);
+  const { notification, full } = atTimeSound(alert, installed);
   const recording = full ?? notification;
   if (recording && playAdhan(recording.file, onEnd)) {
     return "playing";

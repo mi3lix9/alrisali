@@ -3,6 +3,7 @@ import { SURAHS } from "@alrisali/content/quran";
 import type { AyahKey } from "@alrisali/content/quran";
 import { atTimeSound, classicSayingById } from "@alrisali/domain/reminders";
 import type {
+  AdhanSound,
   HabitReminderMessage,
   KhatmahReminderMessage,
   NightDuaReminderMessage,
@@ -18,7 +19,7 @@ import { Platform } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
 
-import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
+import { adhanFileUri } from "../data/adhan-catalogue";
 
 /** Where each alert's sound comes from; the files are in assets/sounds. */
 const SOUND_FILES = {
@@ -29,8 +30,6 @@ const SOUND_FILES = {
 
 /** The channel of an At-Time Alert that plays the system's sound. */
 export const AT_TIME_SYSTEM_CHANNEL = "at-time-default";
-
-const atTimeChannel = (file: string) => `at-time-${file}`;
 
 /**
  * One Android channel per alert: Android fixes a channel's sound when the
@@ -47,12 +46,6 @@ export const REMINDER_CHANNELS: readonly {
   { id: "reminder-voice", sound: SOUND_FILES.voice },
   { id: "reminder-silent", sound: null },
   { id: AT_TIME_SYSTEM_CHANNEL, sound: "default" },
-  ...INSTALLED_ADHAN_SOUNDS.flatMap(({ full, takbir }) =>
-    [full.file, takbir.file].map((file) => ({
-      id: atTimeChannel(file),
-      sound: file,
-    }))
-  ),
 ];
 
 interface AlertSound {
@@ -65,25 +58,40 @@ interface AlertSound {
 }
 
 /**
- * The takbir and the full adhan from the installed voice, else the system
- * sound. iOS plays at most 30 seconds of a notification sound: it sounds the
- * takbir and plays the full adhan when opened. On Android the adhan service
- * plays the full adhan (`serviceFile`); where it is unavailable (a build made
- * without the module) the notification sounds the full adhan itself.
+ * The takbir and the full adhan from the installed (downloaded) voice, else
+ * the system sound. iOS plays at most 30 seconds of a notification sound: it
+ * sounds the takbir (copied to `Library/Sounds` by name) and plays the full
+ * adhan when opened. A downloaded file cannot be an Android channel's sound,
+ * so on Android the adhan service plays the recording (the full adhan, or the
+ * takbir for a takbir alert) as an alarm; where it is unavailable (a build
+ * made without the module) the notification sounds the system's.
  */
-const atTimeAlertSound = (alert: ReminderAlert): AlertSound => {
-  const { notification, full } = atTimeSound(alert, INSTALLED_ADHAN_SOUNDS);
-  const played =
-    Platform.OS === "android" ? (full ?? notification) : notification;
+const atTimeAlertSound = (
+  alert: ReminderAlert,
+  installed: readonly AdhanSound[]
+): AlertSound => {
+  const { notification, full } = atTimeSound(alert, installed);
+  if (Platform.OS === "android") {
+    const played = full ?? notification;
+    return {
+      channelId: AT_TIME_SYSTEM_CHANNEL,
+      sound: "default",
+      adhanOnOpen: null,
+      serviceFile: played ? adhanFileUri(played.file) : null,
+    };
+  }
   return {
-    channelId: played ? atTimeChannel(played.file) : AT_TIME_SYSTEM_CHANNEL,
-    sound: played?.file ?? "default",
-    adhanOnOpen: Platform.OS === "ios" ? (full?.file ?? null) : null,
-    serviceFile: Platform.OS === "android" ? (full?.file ?? null) : null,
+    channelId: AT_TIME_SYSTEM_CHANNEL,
+    sound: notification?.file ?? "default",
+    adhanOnOpen: full?.file ?? null,
+    serviceFile: null,
   };
 };
 
-const alertSound = (alert: ReminderAlert): AlertSound => {
+const alertSound = (
+  alert: ReminderAlert,
+  installed: readonly AdhanSound[]
+): AlertSound => {
   switch (alert.kind) {
     case "silent": {
       return {
@@ -103,7 +111,7 @@ const alertSound = (alert: ReminderAlert): AlertSound => {
     }
     case "takbir":
     case "adhan": {
-      return atTimeAlertSound(alert);
+      return atTimeAlertSound(alert, installed);
     }
     default: {
       return alert.sound === "default"
@@ -271,12 +279,14 @@ export const toReminderRequest = (
     | NightDuaReminderMessage
   >,
   t: TFunction<"reminders">,
-  language: Language
+  language: Language,
+  installed: readonly AdhanSound[]
 ): ReminderRequest => {
   const { title, body } = wording(reminder.message, t, language);
   const fireAt = reminder.fireAt.epochMilliseconds;
   const { channelId, sound, adhanOnOpen, serviceFile } = alertSound(
-    reminder.alert
+    reminder.alert,
+    installed
   );
   const adhanService = serviceFile
     ? {

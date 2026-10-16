@@ -1,10 +1,9 @@
 import {
   AT_TIME_ALERTS,
-  findAdhanSound,
   IMSAK_AT_TIME_ALERTS,
   isFullAdhanAvailable,
   MAX_MINUTES_BEFORE,
-  MAX_TAKBIR_SECONDS,
+  selectableAdhanSound,
   SYSTEM_SOUND_ID,
 } from "@alrisali/domain/reminders";
 import type {
@@ -12,6 +11,7 @@ import type {
   ImsakRule,
   ReminderRule,
 } from "@alrisali/domain/reminders";
+import { MAX_TAKBIR_SECONDS } from "@alrisali/domain/shared";
 import {
   Alert,
   Button,
@@ -28,16 +28,14 @@ import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 
 import { formatNumber, parseNumber } from "@/shared/lib/numbers";
-import { launchLanguage } from "@/shared/lib/preferences";
 
-import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
+import { useAdhanVoices } from "../hooks/use-adhan-voices";
 import { stopAdhan } from "../utils/adhan-player";
 import { testAtTimeAlert } from "../utils/test-alert";
+import { AdhanVoiceRow } from "./adhan-voice-row";
 
 /** The rule being edited; Imsak's also has its Ramadan choice. */
 export type AlertDraft = ReminderRule & Partial<Pick<ImsakRule, "ramadanOnly">>;
-
-const FULL_ADHAN_AVAILABLE = isFullAdhanAvailable(INSTALLED_ADHAN_SOUNDS);
 
 /** One choice in a list: a radio row with a check when chosen. */
 const Choice = ({
@@ -86,6 +84,8 @@ export const AtTimeChoices = ({
   onChange: (change: { atTime: AtTimeAlert }) => void;
 }) => {
   const { t } = useTranslation("reminders");
+  const { installed } = useAdhanVoices();
+  const fullAdhanAvailable = isFullAdhanAvailable(installed);
   const kinds: readonly AtTimeAlert[] = imsak
     ? IMSAK_AT_TIME_ALERTS
     : AT_TIME_ALERTS;
@@ -93,7 +93,7 @@ export const AtTimeChoices = ({
     if (kind !== "adhan") {
       return t(`atTime.${kind}.description`);
     }
-    if (!FULL_ADHAN_AVAILABLE) {
+    if (!fullAdhanAvailable) {
       return t("editor.adhanUnavailable");
     }
     return Platform.OS === "ios"
@@ -111,7 +111,7 @@ export const AtTimeChoices = ({
             title={t(`atTime.${kind}.title`)}
             description={describe(kind)}
             selected={rule.atTime === kind}
-            disabled={kind === "adhan" && !FULL_ADHAN_AVAILABLE}
+            disabled={kind === "adhan" && !fullAdhanAvailable}
             onPress={() => onChange({ atTime: kind })}
           />
         ))}
@@ -134,8 +134,9 @@ export const AtTimeChoices = ({
 };
 
 /**
- * The voice the takbir and the full adhan come from: the system's sound, or
- * an installed catalogue voice.
+ * The voice the takbir and the full adhan come from: the system's sound, or a
+ * catalogue voice. A voice must be downloaded before it can be chosen, so the
+ * row of one that is not offers its download instead.
  */
 export const SoundChoices = ({
   rule,
@@ -145,11 +146,9 @@ export const SoundChoices = ({
   onChange: (adhanSound: string) => void;
 }) => {
   const { t } = useTranslation("reminders");
-  // A voice no longer installed plays the system's sound.
-  const chosen = findAdhanSound(INSTALLED_ADHAN_SOUNDS, rule.adhanSound)
-    ? rule.adhanSound
-    : SYSTEM_SOUND_ID;
-  const noRecordings = INSTALLED_ADHAN_SOUNDS.length === 0;
+  const { catalogue, installed } = useAdhanVoices();
+  // A voice not on the device plays the system's sound.
+  const chosen = selectableAdhanSound(rule.adhanSound, installed);
   return (
     <>
       <Text weight="medium">{t("editor.soundSection")}</Text>
@@ -157,21 +156,22 @@ export const SoundChoices = ({
         <Choice
           testID={`adhan-editor-sound-${SYSTEM_SOUND_ID}`}
           title={t("editor.systemSound")}
-          description={noRecordings ? t("editor.systemSoundHint") : undefined}
+          description={
+            catalogue.length === 0 ? t("editor.systemSoundHint") : undefined
+          }
           selected={chosen === SYSTEM_SOUND_ID}
           onPress={() => onChange(SYSTEM_SOUND_ID)}
         />
-        {INSTALLED_ADHAN_SOUNDS.map((sound) => (
-          <Choice
-            key={sound.id}
-            testID={`adhan-editor-sound-${sound.id}`}
-            title={sound.name[launchLanguage]}
-            selected={chosen === sound.id}
-            onPress={() => onChange(sound.id)}
+        {catalogue.map((entry) => (
+          <AdhanVoiceRow
+            key={entry.id}
+            entry={entry}
+            selected={chosen === entry.id}
+            onSelect={() => onChange(entry.id)}
           />
         ))}
       </Item.Group>
-      {rule.atTime === "takbir" && !noRecordings ? (
+      {rule.atTime === "takbir" && installed.length > 0 ? (
         <Text muted size="xs">
           {t("editor.takbirFromVoice")}
         </Text>
@@ -265,6 +265,7 @@ export const TestCard = ({
   sounding: boolean;
 }) => {
   const { t } = useTranslation("reminders");
+  const { installed } = useAdhanVoices();
   const [playing, setPlaying] = useState(false);
 
   const test = async () => {
@@ -275,6 +276,7 @@ export const TestCard = ({
     }
     const outcome = await testAtTimeAlert(
       rule,
+      installed,
       t("editor.testNotification", { name }),
       () => setPlaying(false)
     );

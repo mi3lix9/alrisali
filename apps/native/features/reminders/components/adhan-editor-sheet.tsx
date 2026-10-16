@@ -1,6 +1,11 @@
 import "../i18n";
-import { SALAH, sendsNotifications } from "@alrisali/domain/reminders";
+import {
+  SALAH,
+  selectableAdhanSound,
+  sendsNotifications,
+} from "@alrisali/domain/reminders";
 import type {
+  AdhanSound,
   ImsakRule,
   ReminderRule,
   ReminderSettings,
@@ -16,6 +21,7 @@ import {
   useReminderSettings,
   useUpdateReminderSettings,
 } from "../data/reminder-settings";
+import { useAdhanVoices } from "../hooks/use-adhan-voices";
 import { useNotificationAccess } from "../hooks/use-notification-permission";
 import { stopAdhan } from "../utils/adhan-player";
 import { askNotificationsInContext } from "../utils/ask-notifications";
@@ -35,9 +41,15 @@ export type AlertedPrayerTime = (typeof ALERTED_PRAYER_TIMES)[number];
 /** The change that saves a draft for its Prayer Time. */
 const draftChange = (
   prayerTime: AlertedPrayerTime,
-  draft: AlertDraft
+  draft: AlertDraft,
+  installed: readonly AdhanSound[]
 ): ReminderSettingsChange => {
-  const { ramadanOnly, ...rule } = draft;
+  const { ramadanOnly, ...chosen } = draft;
+  // An adhan not downloaded cannot be the At-Time sound.
+  const rule = {
+    ...chosen,
+    adhanSound: selectableAdhanSound(chosen.adhanSound, installed),
+  };
   if (prayerTime === "imsak") {
     return {
       imsak: {
@@ -74,6 +86,7 @@ export const AdhanEditorSheet = ({
   const [editing, setEditing] = useState(prayerTime);
   const [draft, setDraft] = useState<AlertDraft | null>(null);
   const { access, refresh } = useNotificationAccess();
+  const { installed } = useAdhanVoices();
 
   // Whatever the Test plays stops with the sheet.
   useEffect(() => stopAdhan, []);
@@ -97,7 +110,7 @@ export const AdhanEditorSheet = ({
     if (!rule) {
       return;
     }
-    update.mutate(draftChange(editing, rule), {
+    update.mutate(draftChange(editing, rule, installed), {
       onSuccess: async (saved) => {
         // The first alert that will arrive asks for notifications.
         if (sendsNotifications(saved)) {

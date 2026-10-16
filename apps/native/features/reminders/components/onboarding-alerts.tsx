@@ -12,16 +12,11 @@ import { BellIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
 
-import { INSTALLED_ADHAN_SOUNDS } from "../data/adhan-catalogue";
 import {
   useReminderSettings,
   useUpdateReminderSettings,
 } from "../data/reminder-settings";
-
-/** The At-Time Alerts a Believer can pick: the full adhan only once installed. */
-const CHOICES: readonly AtTimeAlert[] = AT_TIME_ALERTS.filter(
-  (kind) => kind !== "adhan" || isFullAdhanAvailable(INSTALLED_ADHAN_SOUNDS)
-);
+import { useAdhanVoices } from "../hooks/use-adhan-voices";
 
 /** A prayer notification as it will look, shown before anything is asked. */
 const NotificationPreview = () => {
@@ -60,10 +55,15 @@ export const OnboardingAlerts = () => {
   const { t } = useTranslation("reminders");
   const { data: settings } = useReminderSettings();
   const { mutate: update } = useUpdateReminderSettings();
+  const { installed } = useAdhanVoices();
 
   if (!settings) {
     return null;
   }
+  // The full adhan can be picked only once an adhan voice is downloaded.
+  const choices: readonly AtTimeAlert[] = AT_TIME_ALERTS.filter(
+    (kind) => kind !== "adhan" || isFullAdhanAvailable(installed)
+  );
   const choose = (salah: Salah, atTime: AtTimeAlert) =>
     update({ salah: { [salah]: { atTime } } });
 
@@ -91,7 +91,7 @@ export const OnboardingAlerts = () => {
           <Text>{t(`names.${salah}`)}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View className="flex-row gap-2">
-              {CHOICES.map((kind) => (
+              {choices.map((kind) => (
                 <Chip
                   key={kind}
                   testID={`onboarding-alert-${salah}-${kind}`}

@@ -28,7 +28,7 @@ test(
     ).toBeSelected();
     await expect(
       screen.getByText(
-        "لا يتوفّر في التطبيق بعدُ تسجيل أذان مرخّص، فيُتاح الأذان الكامل حين يُضاف تسجيل."
+        "حمّل صوت أذان من قسم الصوت أدناه ليُتاح الأذان الكامل دون اتصال."
       )
     ).toBeVisible();
     // Disabled: tapping the full adhan leaves the takbir chosen.

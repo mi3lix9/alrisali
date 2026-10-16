@@ -202,6 +202,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **At-Time Alert**: What plays when a Prayer Time arrives (off, a silent notification, the short takbir or the full adhan), chosen per Salah and for Imsak, separately from the Reminder before it. Quiet hours never hold it back. _Avoid_: Adhan notification, prayer alarm
 
+**Adhan Catalogue**: The adhan voices Admins publish in the content database, each with a full adhan and a short takbir cut of the same voice; only licensed recordings are published. A voice must be downloaded (both recordings, listed on the Storage screen) before it can be chosen as an At-Time Alert's sound. _Avoid_: Adhan library, adhan store
+
 ## Learning & support
 
 **Lesson**: An Admin-published teaching made of ordered Slides on aqeedah, fiqh, akhlaq or history. _Avoid_: Learning module, module

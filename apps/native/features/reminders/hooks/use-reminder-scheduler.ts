@@ -8,6 +8,7 @@ import {
   qadaReminderSource,
 } from "@alrisali/domain/reminders";
 import type {
+  AdhanSound,
   HabitReminderMessage,
   KhatmahReminderMessage,
   NightDuaPlan,
@@ -44,11 +45,13 @@ import { events } from "@/shared/lib/events";
 import { useHijriCalendar } from "@/shared/lib/hijri-calendar";
 import { launchLanguage } from "@/shared/lib/preferences";
 
+import { useInstalledAdhanSounds } from "../data/adhan-catalogue";
 import { useNightDuaAlerts } from "../data/night-dua-alerts";
 import { useOccasionAlertSettings } from "../data/occasion-alert-settings";
 import { useAlertOccasions } from "../data/occasions";
 import { useReminderSettings } from "../data/reminder-settings";
 import { toReminderRequest } from "../utils/notification-request";
+import { syncNotificationSounds } from "../utils/notification-sounds";
 import { syncReminders } from "../utils/scheduler";
 import { useNotificationAccess } from "./use-notification-permission";
 
@@ -82,7 +85,8 @@ const planAndSync = async (
   hijri: HijriCalendar,
   occasionAlerts: OccasionAlertSettings,
   occasions: readonly Occasion[],
-  nightDuas: Pick<NightDuaPlan, "alerts" | "worship">
+  nightDuas: Pick<NightDuaPlan, "alerts" | "worship">,
+  adhans: readonly AdhanSound[]
 ): Promise<void> => {
   const {
     location,
@@ -139,9 +143,11 @@ const planAndSync = async (
     hijri,
   });
   try {
+    // The takbir cuts a notification sounds must be in place first.
+    syncNotificationSounds(adhans);
     await syncReminders(
       reminders.map((reminder) =>
-        toReminderRequest(reminder, t, launchLanguage)
+        toReminderRequest(reminder, t, launchLanguage, adhans)
       )
     );
   } catch (error) {
@@ -172,6 +178,8 @@ export const useReminderScheduler = (
   const { data: nightAlerts } = useNightDuaAlerts();
   // Imsak's At-Time Alert follows Ramadan by the Believer's Hijri calendar.
   const hijri = useHijriCalendar();
+  // The adhan voices downloaded: an At-Time Alert sounds one of them.
+  const adhans = useInstalledAdhanSounds();
   const { access, refresh } = useNotificationAccess();
   const granted = access?.granted;
 
@@ -194,6 +202,7 @@ export const useReminderScheduler = (
       khatmah === undefined ||
       granted === undefined ||
       nightAlerts === undefined ||
+      adhans === undefined ||
       // The ziyarah comes from the worship mapping.
       (nightAlerts.ziyarah && worship === undefined)
     ) {
@@ -211,7 +220,8 @@ export const useReminderScheduler = (
         hijri,
         occasionAlerts,
         occasions,
-        nightDuas
+        nightDuas,
+        adhans
       );
     };
     sync();
@@ -234,5 +244,6 @@ export const useReminderScheduler = (
     occasions,
     nightAlerts,
     worship,
+    adhans,
   ]);
 };

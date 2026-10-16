@@ -1,3 +1,5 @@
+export { createAdhansRepository } from "./adhans";
+export type { AdhansRepository } from "./adhans";
 export { createContentDb } from "./content-db";
 export type { ContentDb, Execute, SqlValue, Transaction } from "./content-db";
 export { createGlobalSettingsRepository } from "./global-settings";
@@ -15,4 +17,4 @@ export type {
   ReplicaConnectOptions,
   ReplicaSyncOutcome,
 } from "./replica";
-export { globalSettings, occasions } from "./schema";
+export { adhans, globalSettings, occasions } from "./schema";

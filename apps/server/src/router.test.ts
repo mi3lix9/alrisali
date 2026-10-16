@@ -12,6 +12,7 @@ import { createLibraryAssetsRepository } from "@alrisali/db-content/library-asse
 import { createProgramsRepository } from "@alrisali/db-content/programs";
 import {
   ContentReplicaReadOnlyError,
+  createAdhansRepository,
   createGlobalSettingsRepository,
   createOccasionsRepository,
   globalSettings,
@@ -218,6 +219,30 @@ const RAMADAN = {
   en: { title: "Ramadan Kareem", body: "May God accept your fasting" },
 };
 
+const adhanKey = (cut: "full" | "takbir", n: number, extension: string) =>
+  `adhan-${cut}/00000000-0000-4000-8000-${String(n).padStart(12, "0")}.${extension}`;
+
+/**
+ * A voice as an Admin saves it. A made-up one: no licensed adhan recording
+ * is published by this app.
+ */
+const adhanDraft = (
+  change: Partial<{ name: { ar: string; en: string }; n: number }> = {}
+) => ({
+  name: change.name ?? { ar: "صوت تجريبي", en: "Example voice" },
+  credit: "Example reciter, example licence",
+  full: {
+    key: adhanKey("full", change.n ?? 1, "mp3"),
+    seconds: 180,
+    bytes: 4_000_000,
+  },
+  takbir: {
+    key: adhanKey("takbir", change.n ?? 1, "wav"),
+    seconds: 8,
+    bytes: 200_000,
+  },
+});
+
 /** What a function preparing a procedure's input gets. */
 interface Prepared {
   content: ContentDatabase;
@@ -364,6 +389,10 @@ const ACCESS: Record<
     access: "anonymous",
     input: { pushToken: pushTokenOf("guard") },
   },
+  "adhans.list": { access: "admin" },
+  "adhans.save": { access: "admin", input: adhanDraft() },
+  "adhans.remove": { access: "admin", input: { id: "example-voice" } },
+  "adhans.reorder": { access: "admin", input: { ids: ["example-voice"] } },
   "dailyContent.list": { access: "admin" },
   "dailyContent.set": {
     access: "admin",
@@ -2227,6 +2256,112 @@ describe("Lessons and Slides", () => {
       createLessonsRepository(replica.db).list()
     ).resolves.toStrictEqual([]);
     await replica.close();
+  });
+});
+
+/** A device's view of the adhan catalogue it pulled. */
+const pulledAdhans = async (directory: TemporaryDirectory) => {
+  const { replica } = await openDeviceReplica(directory, () => true);
+  await replica.sync();
+  const adhans = await createAdhansRepository(replica.db).list();
+  await replica.close();
+  return adhans;
+};
+
+describe("Adhan catalogue", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(async () => {
+    await startLocalCloud();
+  });
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(async () => {
+    await stopLocalCloud();
+  });
+
+  it("has no voices until an Admin publishes one", async () => {
+    await expect(
+      callAs(await signInAsAdmin(), "adhans.list")
+    ).resolves.toStrictEqual({ adhans: [] });
+    await expect(pulledAdhans(device)).resolves.toStrictEqual([]);
+  });
+
+  it("lets an Admin create a voice that devices pull without a release", async () => {
+    const admin = await signInAsAdmin();
+
+    const created = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+
+    expect(created).toStrictEqual({ id: expect.any(String), ...adhanDraft() });
+    await expect(pulledAdhans(device)).resolves.toStrictEqual([created]);
+  });
+
+  it("rewrites a voice an Admin edits, keeping its place", async () => {
+    const admin = await signInAsAdmin();
+    const first = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+    await callAs(admin, "adhans.save", adhanDraft({ n: 2 }));
+
+    const edited = await callAs(admin, "adhans.save", {
+      ...adhanDraft(),
+      id: first.id,
+      name: { ar: "معدل", en: "Edited" },
+    });
+
+    const pulled = await pulledAdhans(device);
+    expect(pulled).toHaveLength(2);
+    expect(pulled[0]).toStrictEqual(edited);
+  });
+
+  it("orders and withdraws voices", async () => {
+    const admin = await signInAsAdmin();
+    const one = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+    const two = (await callAs(admin, "adhans.save", adhanDraft({ n: 2 }))) as {
+      id: string;
+    };
+
+    await callAs(admin, "adhans.reorder", { ids: [two.id, one.id] });
+    const reordered = await pulledAdhans(device);
+    expect(reordered.map(({ id }) => id)).toStrictEqual([two.id, one.id]);
+
+    await callAs(admin, "adhans.remove", { id: two.id });
+    const remaining = await pulledAdhans(device);
+    expect(remaining.map(({ id }) => id)).toStrictEqual([one.id]);
+  });
+
+  it("takes only recordings uploaded as their cut", async () => {
+    const admin = await signInAsAdmin();
+    const draft = adhanDraft();
+
+    await expect(
+      callAs(admin, "adhans.save", {
+        ...draft,
+        full: { ...draft.full, key: adhanKey("takbir", 3, "wav") },
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("refuses a takbir longer than iOS plays", async () => {
+    const draft = adhanDraft();
+
+    await expect(
+      callAs(await signInAsAdmin(), "adhans.save", {
+        ...draft,
+        takbir: { ...draft.takbir, seconds: 31 },
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 

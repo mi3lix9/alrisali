@@ -18,7 +18,7 @@ const VOICE: AdhanSound = {
     seconds: 8,
     bytes: 200_000,
   },
-  sourceId: "example-source",
+  credit: "Example reciter, example licence",
 };
 
 describe(atTimeSound, () => {

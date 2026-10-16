@@ -63,6 +63,12 @@ const SECTIONS = [
       "Create, order and publish Lessons by category, with their captioned image Slides.",
   },
   {
+    to: "/admin/adhans",
+    title: "Adhans",
+    description:
+      "Publish adhan voices with their full and takbir recordings, and order them for Believers to download.",
+  },
+  {
     to: "/admin/messages",
     title: "Messages",
     description:

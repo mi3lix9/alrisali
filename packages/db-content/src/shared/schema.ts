@@ -1,5 +1,11 @@
 import { DEFAULT_HIJRI_ADJUSTMENT } from "@alrisali/domain/shared";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  real,
+  sqliteTable,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 // `schema_version` is owned by the migrator (migrate.ts), not drizzle-kit.
 
@@ -42,3 +48,30 @@ export const occasions = sqliteTable("occasions", {
   /** Milliseconds since the epoch; orders Occasions of the same day. */
   createdAt: integer("created_at").notNull(),
 });
+
+/**
+ * The adhan catalogue: voices Admins publish, each with a full adhan and its
+ * takbir cut. Devices download the files; recordings are keys in the files
+ * bucket.
+ */
+export const adhans = sqliteTable(
+  "adhans",
+  {
+    id: text("id").primaryKey(),
+    nameAr: text("name_ar").notNull(),
+    nameEn: text("name_en").notNull(),
+    /** Who recorded it and under what licence. */
+    credit: text("credit").notNull().default(""),
+    fullKey: text("full_key").notNull(),
+    fullSeconds: real("full_seconds").notNull(),
+    /** In bytes. */
+    fullBytes: integer("full_bytes").notNull(),
+    takbirKey: text("takbir_key").notNull(),
+    takbirSeconds: real("takbir_seconds").notNull(),
+    /** In bytes. */
+    takbirBytes: integer("takbir_bytes").notNull(),
+    /** Place in the Admins' order, smallest first. */
+    position: integer("position").notNull(),
+  },
+  (table) => [index("adhans_position").on(table.position)]
+);

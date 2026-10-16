@@ -1,7 +1,7 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import type { AudioPlayer } from "expo-audio";
 
-import { adhanAsset } from "../data/adhan-catalogue";
+import { adhanFileUri } from "../data/adhan-catalogue";
 
 let player: AudioPlayer | null = null;
 
@@ -12,19 +12,19 @@ export const stopAdhan = (): void => {
 };
 
 /**
- * Plays an installed adhan recording in the app (the editor's Test, or the
+ * Plays a downloaded adhan recording in the app (the editor's Test, or the
  * full adhan when an At-Time Alert is opened on iOS), replacing any other.
- * False when the file is not installed.
+ * False when the file is not on the device.
  */
 export const playAdhan = (file: string, onEnd?: () => void): boolean => {
-  const asset = adhanAsset(file);
-  if (asset === undefined) {
+  const uri = adhanFileUri(file);
+  if (uri === null) {
     return false;
   }
   stopAdhan();
   // The Believer asked for it: play with the ringer off too.
   void setAudioModeAsync({ playsInSilentMode: true });
-  const audio = createAudioPlayer(asset);
+  const audio = createAudioPlayer(uri);
   player = audio;
   audio.addListener("playbackStatusUpdate", (status) => {
     if (status.didJustFinish && player === audio) {
