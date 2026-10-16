@@ -1,0 +1,164 @@
+import {
+  calculationMethodSchema,
+  DEFAULT_CALCULATION_METHOD,
+  DEFAULT_HIJRI_ADJUSTMENT,
+  DEFAULT_MESSAGE_STYLE,
+  hijriAdjustmentSchema,
+  DEFAULT_IMSAK_MINUTES,
+  imsakMinutesSchema,
+  locationSchema,
+  messageStyleSchema,
+  timeFormatSchema,
+} from "@alrisali/domain/shared";
+import type {
+  CalculationMethod,
+  Location,
+  MessageStyle,
+  TimeFormat,
+} from "@alrisali/domain/shared";
+import { eq } from "drizzle-orm";
+import { z } from "zod";
+
+import { believerSettings } from "./schema";
+import type { UserDb } from "./user-database";
+
+export interface BelieverSettings {
+  calculationMethod: CalculationMethod;
+  location: Location | null;
+  /** The Believer's own Hijri Adjustment, added to the Admins'. */
+  hijriAdjustment: number;
+  /** Whether the location follows the device's GPS, or was chosen by hand. */
+  locationFollowsDevice: boolean;
+  /** How many minutes before Fajr Imsak falls. */
+  imsakMinutes: number;
+  /** 12- or 24-hour times; null follows the device's clock setting. */
+  timeFormat: TimeFormat | null;
+  /** Classic (scriptural sources) or Modern (gentle coaching). */
+  messageStyle: MessageStyle;
+}
+
+/** The settings to change; anything left out keeps its saved value. */
+export type BelieverSettingsChange = Partial<BelieverSettings>;
+
+export interface BelieverSettingsRepository {
+  get: () => Promise<BelieverSettings>;
+  /** Validates and saves the change, then returns the saved settings. */
+  update: (change: BelieverSettingsChange) => Promise<BelieverSettings>;
+}
+
+/** The settings table holds one row, with a stable id so sync merges it. */
+const ROW_ID = "believer";
+
+const changeSchema = z.object({
+  calculationMethod: calculationMethodSchema.optional(),
+  location: locationSchema.nullable().optional(),
+  hijriAdjustment: hijriAdjustmentSchema.optional(),
+  locationFollowsDevice: z.boolean().optional(),
+  imsakMinutes: imsakMinutesSchema.optional(),
+  timeFormat: timeFormatSchema.nullable().optional(),
+  messageStyle: messageStyleSchema.optional(),
+});
+
+type Row = typeof believerSettings.$inferSelect;
+
+/** A stored value if this app knows it, else the fallback. */
+const known = <T>(schema: z.ZodType<T>, stored: unknown, fallback: T): T => {
+  const parsed = schema.safeParse(stored);
+  return parsed.success ? parsed.data : fallback;
+};
+
+const toSettings = (row: Row | undefined): BelieverSettings => {
+  // A newer app may have synced values this one does not know.
+  const latitude = row?.locationLatitude ?? null;
+  const longitude = row?.locationLongitude ?? null;
+  return {
+    calculationMethod: known(
+      calculationMethodSchema,
+      row?.calculationMethod,
+      DEFAULT_CALCULATION_METHOD
+    ),
+    location:
+      latitude === null || longitude === null
+        ? null
+        : { latitude, longitude, name: row?.locationName ?? null },
+    hijriAdjustment: known(
+      hijriAdjustmentSchema,
+      row?.hijriAdjustment,
+      DEFAULT_HIJRI_ADJUSTMENT
+    ),
+    locationFollowsDevice: row?.locationFollowsDevice ?? true,
+    imsakMinutes: known(
+      imsakMinutesSchema,
+      row?.imsakMinutes,
+      DEFAULT_IMSAK_MINUTES
+    ),
+    timeFormat: known(timeFormatSchema.nullable(), row?.timeFormat, null),
+    messageStyle: known(
+      messageStyleSchema,
+      row?.messageStyle,
+      DEFAULT_MESSAGE_STYLE
+    ),
+  };
+};
+
+const toColumns = ({
+  calculationMethod,
+  location,
+  hijriAdjustment,
+  locationFollowsDevice,
+  imsakMinutes,
+  timeFormat,
+  messageStyle,
+}: BelieverSettings) => ({
+  calculationMethod,
+  locationLatitude: location?.latitude ?? null,
+  locationLongitude: location?.longitude ?? null,
+  locationName: location?.name ?? null,
+  hijriAdjustment,
+  locationFollowsDevice,
+  imsakMinutes,
+  timeFormat,
+  messageStyle,
+});
+
+export const createBelieverSettingsRepository = (
+  db: UserDb
+): BelieverSettingsRepository => {
+  const get = async (): Promise<BelieverSettings> =>
+    toSettings(
+      await db
+        .select()
+        .from(believerSettings)
+        .where(eq(believerSettings.id, ROW_ID))
+        .get()
+    );
+
+  const update = async (
+    change: BelieverSettingsChange
+  ): Promise<BelieverSettings> => {
+    const parsed = changeSchema.parse(change);
+    const current = await get();
+    const next: BelieverSettings = {
+      calculationMethod: parsed.calculationMethod ?? current.calculationMethod,
+      location:
+        parsed.location === undefined ? current.location : parsed.location,
+      hijriAdjustment: parsed.hijriAdjustment ?? current.hijriAdjustment,
+      locationFollowsDevice:
+        parsed.locationFollowsDevice ?? current.locationFollowsDevice,
+      imsakMinutes: parsed.imsakMinutes ?? current.imsakMinutes,
+      timeFormat:
+        parsed.timeFormat === undefined
+          ? current.timeFormat
+          : parsed.timeFormat,
+      messageStyle: parsed.messageStyle ?? current.messageStyle,
+    };
+    const columns = toColumns(next);
+    await db
+      .insert(believerSettings)
+      .values({ id: ROW_ID, ...columns })
+      .onConflictDoUpdate({ target: believerSettings.id, set: columns });
+    return next;
+  };
+
+  return { get, update };
+};

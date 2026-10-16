@@ -1,0 +1,152 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "70c13088-e86c-461d-9a36-294d16a4698a",
+  "prevIds": ["c546db28-6005-43ce-aa01-a669133e7e08"],
+  "ddl": [
+    {
+      "name": "daily_content",
+      "entityType": "tables"
+    },
+    {
+      "name": "global_settings",
+      "entityType": "tables"
+    },
+    {
+      "name": "occasions",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "weekday",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "supplication_id",
+      "entityType": "columns",
+      "table": "daily_content"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "global_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": "0",
+      "generated": null,
+      "name": "hijri_adjustment",
+      "entityType": "columns",
+      "table": "global_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "month",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "day",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "type",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name_ar",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "name_en",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "occasions"
+    },
+    {
+      "columns": ["weekday"],
+      "nameExplicit": false,
+      "name": "daily_content_pk",
+      "table": "daily_content",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "global_settings_pk",
+      "table": "global_settings",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "occasions_pk",
+      "table": "occasions",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

@@ -8,5 +8,7 @@ export default defineConfig({
     ...(ultracite.ignorePatterns ?? []),
     ".agents/skills/**",
     ".claude/skills/**",
+    // Generated content bundles (packages/content scripts write them).
+    "packages/content/src/*/data/**",
   ],
 });

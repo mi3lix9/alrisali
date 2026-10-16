@@ -7,15 +7,20 @@
     "serve": "vite preview",
     "dev": "vite dev",
     "check-types": "tsc -b ../../packages/api && vite build && tsc --noEmit",
-    "env:generate": "varlock codegen"
+    "env:generate": "varlock codegen",
+    "start": "srvx serve --prod --entry dist/server/server.js --static ../client"
   },
   "dependencies": {
     "@alrisali/api": "workspace:*",
+    "@alrisali/auth": "workspace:*",
+    "@alrisali/content": "workspace:*",
+    "@alrisali/domain": "workspace:*",
     "@alrisali/i18n": "workspace:*",
     "@alrisali/ui": "workspace:*",
     "@orpc/client": "catalog:",
     "@orpc/server": "catalog:",
     "@orpc/tanstack-query": "catalog:",
+    "@sentry/tanstackstart-react": "^11.8.0",
     "@tailwindcss/vite": "^4.3.3",
     "@tanstack/react-form": "catalog:",
     "@tanstack/react-query": "catalog:",
@@ -31,7 +36,9 @@
     "react-dom": "catalog:",
     "react-i18next": "catalog:",
     "sonner": "catalog:",
+    "srvx": "1.0.5",
     "tailwindcss": "catalog:",
+    "temporal-polyfill": "catalog:",
     "varlock": "catalog:",
     "zod": "catalog:"
   },

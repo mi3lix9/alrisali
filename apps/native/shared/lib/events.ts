@@ -1,0 +1,89 @@
+import type { Salah } from "@alrisali/domain/shared";
+
+import { createEventBus } from "./event-bus";
+
+// Every cross-feature event, by name. A feature emits or listens to these
+// through `events`; it never imports the feature on the other side. Add an
+// event here when a feature needs another to react to it.
+export interface AppEvents {
+  /** A Believer signed in on this device. */
+  SignedIn: { userId: string };
+  /** The signed-in Believer signed out on this device. */
+  SignedOut: undefined;
+  /**
+   * The Believer's database may hold different data: it was opened or synced
+   * (launch, foreground, sign-in), or sign-out wiped it for a fresh Guest
+   * database. Readers kept outside queries (the shell preferences) re-read.
+   */
+  UserDatabaseChanged: undefined;
+  /**
+   * The Believer finished the first run on this device: their settings are
+   * in place and notifications were offered, so Reminders can be planned.
+   */
+  OnboardingCompleted: undefined;
+  /**
+   * A Dhikr Session was recorded on this device. `sessionId` is stable, so a
+   * listener (Companion XP) can award once per session.
+   */
+  DhikrSessionCompleted: {
+    sessionId: string;
+    tasbihId: string;
+    count: number;
+    completedAt: number;
+  };
+  /**
+   * The Believer ticked a Habit for today or a past `date` (ISO
+   * `YYYY-MM-DD`). `habitId` + `date` is stable, so a listener (Companion XP)
+   * can award once per Habit per date; un-ticking emits nothing.
+   */
+  HabitCompleted: { habitId: string; date: string; completedAt: number };
+  /**
+   * The Believer completed a Lesson on this device, at its last Slide or by
+   * Mark complete. Emitted once per Lesson (progress keeps `completedAt`),
+   * so a listener (Companion XP) can award once per `lessonId`.
+   */
+  LessonCompleted: { lessonId: string; completedAt: number };
+  /**
+   * The Believer marked a Supplication read on `date` (ISO `YYYY-MM-DD`), a
+   * Reading Completion. `supplicationId` + `date` is stable, so a listener
+   * (Companion XP) can award once per Supplication per date; unmarking emits
+   * nothing.
+   */
+  ReadingCompleted: {
+    supplicationId: string;
+    date: string;
+    completedAt: number;
+  };
+  /**
+   * The Believer completed an Act of one of their Programs, for today or a
+   * past `date` (ISO `YYYY-MM-DD`). `programId` + `actId` + `date` is stable,
+   * so a listener (Companion XP) can award once per Act per date; undoing
+   * emits nothing.
+   */
+  ActCompleted: {
+    programId: string;
+    actId: string;
+    date: string;
+    completedAt: number;
+  };
+  /**
+   * The Believer ticked a Salah in their Prayer Log, for today or a past
+   * `date` (ISO `YYYY-MM-DD`). `date` + `salah` is stable, so a listener
+   * (Companion XP, the Prayer Assistant) can react once per logged Salah.
+   */
+  SalahLogged: { date: string; salah: Salah; loggedAt: number };
+  /**
+   * The Believer un-ticked a Salah in their Prayer Log, for today or a past
+   * `date` (ISO `YYYY-MM-DD`). A listener (Khushu) drops what it kept for
+   * that `date` + `salah`, so nothing counts for a Salah no longer logged.
+   */
+  SalahUnlogged: { date: string; salah: Salah; unloggedAt: number };
+  /**
+   * The Prayer Assistant followed the Believer to the end of a Salah, on
+   * `date` (ISO `YYYY-MM-DD`). The Prayer Log ticks it, which then emits
+   * `SalahLogged` (and with it the Khushu sheet opens).
+   */
+  SalahCompleted: { date: string; salah: Salah; completedAt: number };
+}
+
+export const events = createEventBus<AppEvents>();

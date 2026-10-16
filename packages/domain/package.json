@@ -2,15 +2,16 @@
   "name": "@alrisali/domain",
   "version": "0.0.0",
   "private": true,
-  "description": "Pure TypeScript domain logic: prayer times, Hijri, streaks, tasbih, recite matcher, rak'ah machine.",
+  "description": "Pure TypeScript domain logic: prayer times, Hijri, streaks, tasbih, recite matcher, rak'ah machine, Quran reader.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    "./*": "./src/*/index.ts"
   },
   "scripts": {
     "check-types": "tsc -b"
   },
   "dependencies": {
+    "@alrisali/content": "workspace:*",
     "temporal-polyfill": "catalog:",
     "zod": "catalog:"
   },

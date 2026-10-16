@@ -1,18 +1,43 @@
-import { appRouter } from "@alrisali/api/routers/index";
-import { OpenAPIHandler } from "@orpc/openapi/fetch";
-import { OpenAPIReferencePlugin } from "@orpc/openapi/plugins";
-import { onError } from "@orpc/server";
-import { RPCHandler } from "@orpc/server/fetch";
-import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
+
+import { startAnnouncementScheduler } from "@/features/announcements";
+import { clientIpOf } from "@/features/contact";
+import { servesLibraryFile } from "@/features/library-assets";
+import { createOtaServer, mountOta, readOtaConfig } from "@/features/ota";
 
 import { createContext } from "./context";
 import { ENV } from "./env.server";
-import { auth } from "./services";
+import { appRouter } from "./router";
+import {
+  apple,
+  auth,
+  content,
+  db,
+  files,
+  push,
+  userDatabases,
+  signInOptions,
+} from "./services";
+import { createApiHandler, createRpcHandler } from "./shared/lib/handlers";
+import { initMonitoring, reportServerError } from "./shared/lib/monitoring";
+import { mountFiles } from "./shared/lib/uploads";
+
+initMonitoring({ dsn: ENV.SENTRY_DSN, environment: ENV.NODE_ENV });
 
 const app = new Hono();
+
+// oxlint-disable-next-line promise/prefer-await-to-callbacks -- Hono's error hook is callback-based
+app.onError((error, c) => {
+  // Expected refusals, such as the OTA admin routes' 401, keep their status.
+  if (error instanceof HTTPException) {
+    return error.getResponse();
+  }
+  reportServerError(error);
+  return c.text("Internal Server Error", 500);
+});
 
 app.use(logger());
 app.use(
@@ -26,31 +51,40 @@ app.use(
 );
 
 app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
-export const apiHandler = new OpenAPIHandler(appRouter, {
-  plugins: [
-    new OpenAPIReferencePlugin({
-      schemaConverters: [new ZodToJsonSchemaConverter()],
-    }),
-  ],
-  interceptors: [
-    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
-});
 
-export const rpcHandler = new RPCHandler(appRouter, {
-  interceptors: [
-    // oxlint-disable-next-line promise/prefer-await-to-callbacks -- oRPC interceptors are callback-based
-    onError((error) => {
-      console.error(error);
-    }),
-  ],
-});
+// Over-the-air updates (Hot Updater). Required in production by the env
+// schema; off in local development until the HOT_UPDATER_* variables are set.
+const otaConfig = readOtaConfig(ENV);
+if (otaConfig) {
+  mountOta(app, createOtaServer(otaConfig, db), otaConfig.adminToken);
+}
+
+// Published files (Speaker photos, Slides, Library Assets) from the private
+// files bucket; an unpublished Library Asset's files are not served.
+mountFiles(app, files, { canServe: servesLibraryFile(content) });
+// Sends scheduled Announcements when they fall due (Expo Push).
+if (ENV.NODE_ENV !== "test") {
+  startAnnouncementScheduler({ content, db, push });
+}
+
+const apiHandler = createApiHandler(appRouter);
+const rpcHandler = createRpcHandler(appRouter);
 
 app.use("/*", async (c, next) => {
-  const context = await createContext({ context: c });
+  const context = await createContext({
+    auth,
+    db,
+    userDatabases,
+    content,
+    files,
+    push,
+    apple,
+    signInOptions,
+    headers: c.req.raw.headers,
+    clientIp: clientIpOf(c.req.raw, c.env),
+    // The auth secret doubles as the IP hash key: one secret less to manage.
+    ipHashKey: ENV.BETTER_AUTH_SECRET,
+  });
 
   const rpcResult = await rpcHandler.handle(c.req.raw, {
     prefix: "/rpc",
@@ -74,5 +108,12 @@ app.use("/*", async (c, next) => {
 });
 
 app.get("/", (c) => c.text("OK"));
+
+if (ENV.NODE_ENV !== "production") {
+  // Forced error for checking that Sentry receives server errors.
+  app.get("/debug/sentry", () => {
+    throw new Error("Sentry test error (server)");
+  });
+}
 
 export default app;

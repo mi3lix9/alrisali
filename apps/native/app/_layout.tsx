@@ -1,39 +1,81 @@
+import "@/shared/lib/polyfills";
 import "@/global.css";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
-import { HeroUINativeProvider } from "heroui-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { KeyboardProvider } from "react-native-keyboard-controller";
+import { useTranslation } from "react-i18next";
 
-import { AppThemeProvider } from "@/contexts/app-theme-context";
-import { queryClient } from "@/utils/orpc";
+import { UsageAnalytics } from "@/features/analytics";
+import { PushDeviceRegistration } from "@/features/announcements";
+import { CompanionAwards } from "@/features/companion";
+import { HabitReminderPlans } from "@/features/habits";
+import { KhushuSheet } from "@/features/khushu";
+import { useOnboarded } from "@/features/onboarding";
+import { CompletedSalahLogger } from "@/features/prayer-log";
+import { ReminderScheduler } from "@/features/reminders";
+import { AppProviders } from "@/shared/lib/app-providers";
+import { applyOtaUpdate } from "@/shared/lib/hot-updater";
+import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
+import { ModalCloseButton } from "@/shared/ui/modal-close-button";
+
+initMonitoring();
+// Runs in the background; failures are reported to Sentry.
+void applyOtaUpdate();
 
 export const unstable_settings = {
-  initialRouteName: "(drawer)",
+  anchor: "(tabs)",
 };
 
-const StackLayout = () => (
-  <Stack screenOptions={{}}>
-    <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
-    <Stack.Screen
-      name="modal"
-      options={{ title: "Modal", presentation: "modal" }}
-    />
-  </Stack>
-);
+const RootStack = () => {
+  const { t } = useTranslation();
+  const onboarded = useOnboarded();
 
+  // Until the first run is over, onboarding is the only screen. A screen
+  // pushed over the tabs shows only the back chevron: the tabs screen has no
+  // title of its own, and its route name, "(tabs)", would label the button.
+  return (
+    <Stack screenOptions={{ headerBackButtonDisplayMode: "minimal" }}>
+      <Stack.Protected guard={onboarded}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="settings"
+          options={{ headerShown: false, presentation: "modal" }}
+        />
+        <Stack.Screen
+          name="account"
+          options={{
+            title: t("account"),
+            presentation: "modal",
+            headerRight: () => <ModalCloseButton />,
+          }}
+        />
+        <Stack.Screen name="calendar" />
+        <Stack.Screen name="insights" />
+        <Stack.Screen name="qibla" />
+        <Stack.Screen name="prayer-assistant" />
+        <Stack.Screen name="quran" />
+        <Stack.Screen name="debug-sentry" />
+      </Stack.Protected>
+      <Stack.Protected guard={!onboarded}>
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack.Protected>
+    </Stack>
+  );
+};
+
+// The Khushu sheet is mounted once, above every tab, because a Salah can be
+// ticked from Home or the Prayer tab, or logged when the Prayer Assistant
+// finishes one (which the Prayer Log hears at the root).
 const Layout = () => (
-  <QueryClientProvider client={queryClient}>
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <KeyboardProvider>
-        <AppThemeProvider>
-          <HeroUINativeProvider>
-            <StackLayout />
-          </HeroUINativeProvider>
-        </AppThemeProvider>
-      </KeyboardProvider>
-    </GestureHandlerRootView>
-  </QueryClientProvider>
+  <AppProviders>
+    <HabitReminderPlans>
+      {(habits) => <ReminderScheduler habits={habits} />}
+    </HabitReminderPlans>
+    <UsageAnalytics />
+    <CompanionAwards />
+    <PushDeviceRegistration />
+    <CompletedSalahLogger />
+    <RootStack />
+    <KhushuSheet />
+  </AppProviders>
 );
 
-export default Layout;
+export default withMonitoring(Layout);

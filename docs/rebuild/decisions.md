@@ -21,7 +21,12 @@ Vocabulary: `GLOSSARY.md`. Architectural decisions: `docs/adr/`. Feature invento
 - Database lifecycle: the server creates a Believer's database on their first sign-in (Platform API, one group, named after the user id). Short-lived tokens scoped to that one database are minted through an oRPC route. Deleting an account destroys the database. Signing out wipes the device.
 - Schema rule for synced tables: additive only, with a `schema_version` row; the app runs its bundled migrations before pushing.
 - Reminders are scheduled on the device with expo-notifications; the server only sends Announcements, through Expo Push (ADR-0003).
-- Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams from Quran Foundation and is cached for at most 7 days (ADR-0004).
+  - Each Salah and Imsak has one rule: on/off, minutes before (0–60, default 5; Imsak 0), a tone (system, chime, bell), silent, and the Adhan voice. Precedence: disabled, then silent, then voice, then tone. New Believers get Fajr, Dhuhr and Maghrib on; Asr, Isha and Imsak start off, matching the timetable's hidden defaults (joined prayers, fasting days only).
+  - The window is 14 days from today, capped at the 64 soonest (iOS's pending limit; Android uses the same cap). It is diffed against what is scheduled on launch, on every foreground and on any settings change. Fire times are instants of the location's Prayer Times; days and quiet hours follow the device's current time zone.
+  - Quiet hours hold back only non-essential Reminders; Salah and Imsak Reminders are essential. Habit Reminders (ticket 34) join through the planner's `sources` input.
+  - Message Style is a Believer setting (default Classic). Classic Reminders carry a rotating Qur'an or hadith saying with its source; Modern ones carry a short coaching line.
+  - The Adhan voice is a 27-second CC BY-SA 3.0 recording from Wikimedia Commons, credited in Sources & Credits; the chime and bell tones are synthesised for the app.
+- Quran: bundle KFGQPC Hafs v30 (text, page and line spans for each ayah, the font, and the PDF used to work out where each line breaks), from qurancomplex.gov.sa/quran-dev. Hafs only. Page Mode (horizontal swipe or vertical scroll, as a user setting) and Surah Mode (one Surah per screen, ending in a "Next Surah" button). Both modes share the Last-Read Ayah. Recitation streams straight to the device from alquran.cloud (Islamic Network), and from EveryAyah.com for reciters alquran.cloud lacks; the reciter list is bundled, no key or server is involved, and played files are cached for at most 7 days (ADR-0004).
 - Books (Mafatih, Sahifa, Nahj): bundled static data with stable Supplication ids. The content database refers to Supplications by those ids. Arabic and English texts are re-sourced from Thaqalayn (CC BY 4.0).
 
 ## Stack
@@ -71,7 +76,7 @@ packages/e2e    e2e tests
 
 Feature folder: `screens/ components/ hooks/ data/ i18n/ utils/ index.ts`; `index.ts` is the only public entry point, and empty subfolders are omitted. Features never import each other. Routes and Home compose them, and cross-feature events go through the typed event bus in `shared/lib`. `shared/` never imports a feature. oxlint `no-restricted-imports` and dependency-cruiser enforce this.
 
-Native features: onboarding, account, settings, home, prayer-times, prayer-log, khushu, qibla, prayer-assistant, reminders, calendar, gatherings, quran, books, recite-along, library-assets, lessons, tasbih, habits, programs, mood, companion, insights, announcements, contact. Web features: landing, admin-programs, admin-occasions, admin-gatherings, admin-lessons, admin-library, admin-daily-content, admin-announcements, admin-messages, admin-analytics.
+Native features: onboarding, account, settings, home, prayer-times, prayer-log, khushu, qibla, prayer-assistant, reminders, calendar, gatherings, quran, books, recite-along, library-assets, lessons, tasbih, habits, programs, mood, companion, insights, announcements, contact. Web features: landing, admin-programs, admin-occasions, admin-gatherings, admin-lessons, admin-library-assets, admin-daily-content, admin-announcements, admin-messages, admin-analytics.
 
 ## Spike results (2026-10-15, iOS simulator only; Android skipped)
 
@@ -102,7 +107,6 @@ Reports: `docs/rebuild/spikes/`.
 ## External actions (owner: you)
 
 - Email info@thaqalayn.net to confirm the rights to the translations, including Sayed Ali Raza's Nahj translation.
-- Create a Quran Foundation developer account (for streaming audio).
 
 ## Known old-app defects not to carry over
 
