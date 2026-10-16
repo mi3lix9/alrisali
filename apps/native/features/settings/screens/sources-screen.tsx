@@ -35,9 +35,14 @@ const CreditItem = ({ credit }: { credit: Credit }) => {
         <Item.Title>{credit.name}</Item.Title>
         <Item.Description>{t(`sources.credits.${credit.id}`)}</Item.Description>
       </Item.Content>
-      <Item.Footer>
+      {/* The licence is its own paragraph: an English licence inside an
+          Arabic line wraps its second half out of reading order. */}
+      <Item.Footer className="flex-col items-stretch gap-1">
         <Text size="sm" muted>
-          {t("sources.licence", { licence: credit.licence })}
+          {t("sources.licence")}
+        </Text>
+        <Text size="sm" muted>
+          {credit.licence}
         </Text>
       </Item.Footer>
     </Item>
