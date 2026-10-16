@@ -56,6 +56,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Speaker**: The sheikh or orator leading a Gathering. _Avoid_: Sheikh (as a field name)
 
+**Shamsi Date**: The date in the Solar Hijri (Iranian) calendar, whose year starts at Nowruz; shown only by the date converter, alongside the Hijri and Gregorian dates. _Avoid_: Jalali, Persian date
+
 ## Texts
 
 **Quran Page**: One of the 604 fifteen-line pages of the Madinah mushaf (Hafs). _Avoid_: Quran id

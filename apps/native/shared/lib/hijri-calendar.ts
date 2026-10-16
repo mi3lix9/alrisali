@@ -96,3 +96,12 @@ export const formatGregorianDate = (
   options?: Intl.DateTimeFormatOptions
 ): string =>
   formatDateTime(date, { calendar: "gregory", ...(options ?? LONG_DATE) });
+
+/** Writes a Hijri month's name in the app's language: "Ramadan". */
+export const useHijriMonthName = () => {
+  const { t } = useTranslation();
+  return useCallback(
+    (month: HijriMonth) => t(`hijri.months.${MONTH_KEYS[month]}`),
+    [t]
+  );
+};
