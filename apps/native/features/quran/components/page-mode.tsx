@@ -40,7 +40,10 @@ export const PageMode = ({
   onScrollStart,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
 }: PageModeProps) => {
   const horizontal = pageNav === "horizontal";
@@ -79,7 +82,7 @@ export const PageMode = ({
         maxToRenderPerBatch={2}
         windowSize={horizontal ? 3 : 5}
         keyExtractor={String}
-        extraData={`${selectedAyah}|${lastReadAyah}`}
+        extraData={`${selectedAyah}|${pressingAyah}|${lastReadAyah}`}
         viewabilityConfig={VIEWABILITY}
         onViewableItemsChanged={onViewableItemsChanged}
         onScrollBeginDrag={onScrollStart}
@@ -92,7 +95,10 @@ export const PageMode = ({
             insetBottom={insetBottom}
             onTap={onTap}
             onLongPressAyah={onLongPressAyah}
+            onPressInAyah={onPressInAyah}
+            onPressOut={onPressOut}
             selectedAyah={selectedAyah}
+            pressingAyah={pressingAyah}
             // Only its own page redraws when the Last-Read Ayah moves.
             lastReadAyah={item === lastReadPage ? lastReadAyah : null}
           />
