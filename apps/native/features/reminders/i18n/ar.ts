@@ -122,6 +122,18 @@ export const ar = {
     save: "حفظ",
     cancel: "إلغاء",
     saved: "حُفظ تنبيه {{name}}: {{alert}}",
+    permissionTitle: "الإشعارات مطلوبة",
+    permissionReason:
+      "تصلك التنبيهات كإشعارات من جهازك. عند حفظ تنبيه أو تجربته سيُطلب منك السماح بها.",
+  },
+  onboarding: {
+    previewLabel: "هكذا يبدو التنبيه",
+    previewApp: "الرسالي",
+    previewNow: "الآن",
+    enableAll: "التكبير عند كل صلاة",
+    enableAllHint: "فعّل التنبيه عند دخول الوقت للصلوات الخمس كلها، أو أوقفه.",
+    sectionTitle: "عند دخول الوقت",
+    skipHint: "عند التخطي تبقى الاختيارات المقترحة.",
   },
   button: {
     label: "تنبيه {{name}} عند دخول الوقت: {{alert}}",

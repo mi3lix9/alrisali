@@ -22,6 +22,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Hidden Prayer Time**: A Prayer Time the Believer has chosen not to see on their timetable.
 
+**Recent City**: A place the Believer chose by search or typed coordinates, kept with its time zone so they can switch back to it. _Avoid_: History, saved city
+
 **Prayer Log**: The Believer's record, for one date, of which Salah they performed. _Avoid_: Prayer tracking entry
 
 **Prayer Streak**: The run of consecutive days, ending on a given date, on which all five Salah were logged. _Avoid_: Streak (unqualified)
@@ -101,6 +103,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
+
+**In-text counter**: A tap counter marked on a passage of a bundled Supplication that itself says to repeat a phrase; the count lives only while the text is open and is not a Tasbih or Dhikr Session. _Avoid_: Tasbih (for this), inline tasbih
+
+**Auto-scroll**: Hands-free scrolling of a Supplication's text at a chosen speed that holds still while the Believer touches the text. _Avoid_: Autoplay
 
 **Daily Content**: The Supplication, ziyarah or prayer Admins feature for each weekday on Home.
 

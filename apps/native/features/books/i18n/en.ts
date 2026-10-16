@@ -30,6 +30,18 @@ export const en: Catalog<typeof ar> = {
     toolbar: {
       label: "Reading tools",
       format: "Format",
+      autoScroll: "Auto-scroll",
+    },
+    autoScroll: {
+      speed: "Speed",
+      slower: "Slower",
+      faster: "Faster",
+      speedValue: "Speed {{speed}} of {{max}}",
+    },
+    counter: {
+      tap: "Count: {{count}} of {{target}}. Tap to count",
+      progress: "{{count}} / {{target}}",
+      reset: "Reset count",
     },
     format: {
       title: "Reading format",

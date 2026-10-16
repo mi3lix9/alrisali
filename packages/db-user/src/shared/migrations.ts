@@ -196,16 +196,23 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
+    tag: "20261016132110_recent_cities",
+    statements: [
+      "ALTER TABLE `prayer_times_settings` ADD `recent_cities` text;",
+    ],
+  },
+  {
     tag: "20261016132923_bookmark_ribbons",
     statements: [
       "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
     ],
   },
   {
-    tag: "20261016133914_khatmah",
+    tag: "20261016134122_khatmah",
     statements: [
       "CREATE TABLE `khatmah_logs` (\n\t`id` text PRIMARY KEY,\n\t`khatmah_id` text NOT NULL,\n\t`session` integer NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
       "CREATE TABLE `khatmahs` (\n\t`id` text PRIMARY KEY,\n\t`plan` text NOT NULL,\n\t`start_date` text NOT NULL,\n\t`reminder_at` integer,\n\t`created_at` integer NOT NULL\n);",
+      "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
       "CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);",
     ],
   },

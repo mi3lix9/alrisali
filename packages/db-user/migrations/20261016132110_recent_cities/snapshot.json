@@ -1,8 +1,12 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "5d11cf34-fe5b-48f4-a04e-eb5d684baaa1",
-  "prevIds": ["5b51b0ce-444c-4dd5-b4a1-de57481373f1"],
+  "id": "41a1d730-ba08-4769-aeb2-576a2019949e",
+  "prevIds": [
+    "5fc0cade-ae87-496d-80fa-a834820c55bb",
+    "9ec60b0a-919e-4b51-88d9-b7092d44e6e1",
+    "ad09400b-d308-4cfe-97d3-a1df0d1038c7"
+  ],
   "ddl": [
     {
       "name": "supplication_positions",
@@ -30,14 +34,6 @@
     },
     {
       "name": "habits",
-      "entityType": "tables"
-    },
-    {
-      "name": "khatmah_logs",
-      "entityType": "tables"
-    },
-    {
-      "name": "khatmahs",
       "entityType": "tables"
     },
     {
@@ -90,10 +86,6 @@
     },
     {
       "name": "qada_plan",
-      "entityType": "tables"
-    },
-    {
-      "name": "quran_bookmark_ribbons",
       "entityType": "tables"
     },
     {
@@ -391,106 +383,6 @@
       "name": "created_at",
       "entityType": "columns",
       "table": "habits"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "id",
-      "entityType": "columns",
-      "table": "khatmah_logs"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "khatmah_id",
-      "entityType": "columns",
-      "table": "khatmah_logs"
-    },
-    {
-      "type": "integer",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "session",
-      "entityType": "columns",
-      "table": "khatmah_logs"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "date",
-      "entityType": "columns",
-      "table": "khatmah_logs"
-    },
-    {
-      "type": "integer",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "completed_at",
-      "entityType": "columns",
-      "table": "khatmah_logs"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "id",
-      "entityType": "columns",
-      "table": "khatmahs"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "plan",
-      "entityType": "columns",
-      "table": "khatmahs"
-    },
-    {
-      "type": "text",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "start_date",
-      "entityType": "columns",
-      "table": "khatmahs"
-    },
-    {
-      "type": "integer",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "reminder_at",
-      "entityType": "columns",
-      "table": "khatmahs"
-    },
-    {
-      "type": "integer",
-      "notNull": true,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "created_at",
-      "entityType": "columns",
-      "table": "khatmahs"
     },
     {
       "type": "text",
@@ -799,6 +691,16 @@
       "default": null,
       "generated": null,
       "name": "hidden_prayer_times",
+      "entityType": "columns",
+      "table": "prayer_times_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "recent_cities",
       "entityType": "columns",
       "table": "prayer_times_settings"
     },
@@ -1151,46 +1053,6 @@
       "name": "updated_at",
       "entityType": "columns",
       "table": "qada_plan"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "color",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "name",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "ayah",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "updated_at",
-      "entityType": "columns",
-      "table": "quran_bookmark_ribbons"
     },
     {
       "type": "text",
@@ -1734,20 +1596,6 @@
     {
       "columns": ["id"],
       "nameExplicit": false,
-      "name": "khatmah_logs_pk",
-      "table": "khatmah_logs",
-      "entityType": "pks"
-    },
-    {
-      "columns": ["id"],
-      "nameExplicit": false,
-      "name": "khatmahs_pk",
-      "table": "khatmahs",
-      "entityType": "pks"
-    },
-    {
-      "columns": ["id"],
-      "nameExplicit": false,
       "name": "khushu_pk",
       "table": "khushu",
       "entityType": "pks"
@@ -1834,13 +1682,6 @@
       "nameExplicit": false,
       "name": "qada_plan_pk",
       "table": "qada_plan",
-      "entityType": "pks"
-    },
-    {
-      "columns": ["color"],
-      "nameExplicit": false,
-      "name": "quran_bookmark_ribbons_pk",
-      "table": "quran_bookmark_ribbons",
       "entityType": "pks"
     },
     {
@@ -1947,20 +1788,6 @@
       "name": "habit_completions_date_idx",
       "entityType": "indexes",
       "table": "habit_completions"
-    },
-    {
-      "columns": [
-        {
-          "value": "khatmah_id",
-          "isExpression": false
-        }
-      ],
-      "isUnique": false,
-      "where": null,
-      "origin": "manual",
-      "name": "khatmah_logs_khatmah_id_idx",
-      "entityType": "indexes",
-      "table": "khatmah_logs"
     },
     {
       "columns": [

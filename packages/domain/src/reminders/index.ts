@@ -69,3 +69,8 @@ export type {
 } from "./settings";
 export { khatmahReminderSource } from "./khatmah-reminders";
 export type { KhatmahReminderMessage } from "./khatmah-reminders";
+export {
+  allSalahAtTime,
+  atTimeForAllSalah,
+  sendsNotifications,
+} from "./alerts-overview";

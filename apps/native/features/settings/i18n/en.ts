@@ -25,6 +25,7 @@ export const en: Catalog<typeof ar> = {
     longitude: "Longitude",
     invalid:
       "Latitude must be between -{{latitude}} and {{latitude}}, longitude between -{{longitude}} and {{longitude}}.",
+    timeZone: "Time zone: {{timeZone}}",
     save: "Save location",
   },
   calculationMethod: {

@@ -14,4 +14,11 @@ CREATE TABLE `khatmahs` (
 	`created_at` integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `quran_bookmark_ribbons` (
+	`color` text PRIMARY KEY,
+	`name` text,
+	`ayah` text,
+	`updated_at` text
+);
+--> statement-breakpoint
 CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);
