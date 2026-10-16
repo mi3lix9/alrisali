@@ -108,6 +108,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Bookmark Ribbon**: One of six coloured, nameable bookmarks, each resting on one ayah; setting a colour on another ayah moves that ribbon there, as in a printed mushaf. A ribboned ayah shows a coloured rosette on the page. _Avoid_: Bookmark (alone), Favorite
 
+**Ayah Note**: The Believer's own written note on one ayah; an ayah has at most one, and editing replaces it. It can insert the ayah's text and reference, is listed under Saved › Notes, and shows a badge on the ayah's rosette. _Avoid_: Annotation, Comment
+
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
