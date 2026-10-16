@@ -4,21 +4,24 @@ import { findAyah, findReciter } from "@alrisali/domain/quran";
 import { Button, Spinner, Text } from "panelui-native";
 import {
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
   PauseIcon,
   PlayIcon,
   RotateCwIcon,
   XIcon,
 } from "panelui-native/icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
+import { launchDirection } from "@/shared/lib/i18n";
 import { formatNumber } from "@/shared/lib/numbers";
 
 import {
   sendRecitation,
-  stopReaderRecitation,
   useRecitationPlayback,
 } from "../data/recitation-player";
 import { ReciterSheet, useReciterName } from "./reciter-sheet";
@@ -33,13 +36,16 @@ interface RecitationPillProps {
   /** Distance from the screen's bottom edge. */
   bottom: number;
   onReciterChange: (reciter: string) => void;
+  /** Opens Play To at the ayah reciting, to set where it stops. */
+  onOptions: (ayah: AyahKey) => void;
   /** Keeps the controls up while the Believer uses the pill. */
   onInteract: () => void;
 }
 
 /**
- * The reader's floating recitation pill: play from the first ayah on screen,
- * pause, stop, and choose the reciter.
+ * The reader's mini player bar: play from the first ayah on screen; while
+ * audio plays, the previous and next ayah, pause, options (Play To), stop,
+ * and the reciter. It stays up, and playback goes on, when the reader closes.
  */
 export const RecitationPill = ({
   start,
@@ -47,16 +53,21 @@ export const RecitationPill = ({
   chromeVisible,
   bottom,
   onReciterChange,
+  onOptions,
   onInteract,
 }: RecitationPillProps) => {
   const { t, i18n } = useTranslation("quran");
   const playback = useRecitationPlayback();
   const nameOf = useReciterName();
   const [choosing, setChoosing] = useState(false);
-  useEffect(() => stopReaderRecitation, []);
+  // The arrows point the way the text runs: in Arabic, onward is leftward.
+  const [PreviousIcon, NextIcon] =
+    launchDirection === "rtl"
+      ? [ChevronRightIcon, ChevronLeftIcon]
+      : [ChevronLeftIcon, ChevronRightIcon];
 
-  // Home's Verse of the Day plays one ayah (`until`); the reader plays on.
-  const active = playback.status !== "idle" && playback.until === null;
+  // Home's Verse of the Day plays on its own card, not on this bar.
+  const active = playback.status !== "idle" && playback.origin === "reader";
   if (!(chromeVisible || active || choosing)) {
     return null;
   }
@@ -123,7 +134,7 @@ export const RecitationPill = ({
     setChoosing(false);
     onReciterChange(key);
     if (active && key !== playback.reciter) {
-      sendRecitation({ type: "play", ayah: playback.ayah, reciter: key });
+      sendRecitation({ type: "reciter", reciter: key });
     }
   };
 
@@ -141,13 +152,51 @@ export const RecitationPill = ({
           accessibilityLabel={t("recitation.label")}
           className="bg-popover border-border flex-row items-center gap-1 rounded-full border p-1 shadow-lg"
         >
+          {active ? (
+            <Button
+              testID="recitation-previous"
+              variant="ghost"
+              size="icon"
+              accessibilityLabel={t("recitation.previousAyah")}
+              onPress={press(() =>
+                sendRecitation({ type: "skip", direction: "previous" })
+              )}
+            >
+              <PreviousIcon size={20} />
+            </Button>
+          ) : null}
           <Button
+            testID="recitation-main"
             size="icon"
             accessibilityLabel={main.label}
             onPress={press(main.handlePress)}
           >
             {main.icon}
           </Button>
+          {active ? (
+            <Button
+              testID="recitation-next"
+              variant="ghost"
+              size="icon"
+              accessibilityLabel={t("recitation.nextAyah")}
+              onPress={press(() =>
+                sendRecitation({ type: "skip", direction: "next" })
+              )}
+            >
+              <NextIcon size={20} />
+            </Button>
+          ) : null}
+          {active ? (
+            <Button
+              testID="recitation-options"
+              variant="ghost"
+              size="icon"
+              accessibilityLabel={t("recitation.options")}
+              onPress={press(() => onOptions(playback.ayah))}
+            >
+              <EllipsisIcon size={20} />
+            </Button>
+          ) : null}
           <Button
             variant="ghost"
             accessibilityLabel={t("recitation.chooseReciter")}
@@ -158,13 +207,14 @@ export const RecitationPill = ({
               size="sm"
               numberOfLines={1}
               accessibilityLiveRegion="polite"
-              style={{ maxWidth: 200 }}
+              style={{ maxWidth: active ? 120 : 200 }}
             >
               {label}
             </Text>
           </Button>
           {active ? (
             <Button
+              testID="recitation-stop"
               variant="ghost"
               size="icon"
               accessibilityLabel={t("recitation.stop")}

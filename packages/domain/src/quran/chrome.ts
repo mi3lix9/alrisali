@@ -15,7 +15,9 @@ export type ReaderSheet =
   /** The Surah and Juz index. */
   | { kind: "index" }
   | { kind: "page-jump" }
-  | { kind: "search" };
+  | { kind: "search" }
+  /** Play To: pick where recitation stops, starting at this ayah. */
+  | { kind: "play-to"; ayah: AyahKey };
 
 export interface ChromeState {
   visible: boolean;

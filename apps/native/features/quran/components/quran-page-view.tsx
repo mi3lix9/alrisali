@@ -40,7 +40,7 @@ export interface AyahGestures {
   onPressInAyah: (ayah: AyahKey) => void;
   /** The finger lifted or left the ayah. */
   onPressOut: () => void;
-  /** The ayah whose sheet is open, drawn highlighted. */
+  /** The ayah whose sheet is open, or being recited, drawn highlighted. */
   selectedAyah: AyahKey | null;
   /** The ayah under the finger, drawn highlighted like the selected one. */
   pressingAyah: AyahKey | null;

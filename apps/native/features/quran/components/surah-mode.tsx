@@ -7,7 +7,7 @@ import {
 } from "@alrisali/domain/quran";
 import { Button, Card, Direction, Text } from "panelui-native";
 import { ChevronRightIcon } from "panelui-native/icons";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ComponentRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable, Text as NativeText, ScrollView, View } from "react-native";
@@ -36,6 +36,11 @@ interface SurahModeProps extends AyahGestures {
    * mount; remount the component to jump again.
    */
   initialAyah?: AyahKey | null | undefined;
+  /**
+   * The ayah being recited: the text scrolls to keep it in view as it moves
+   * to another ayah.
+   */
+  followAyah?: AyahKey | null | undefined;
   onNextSurah: () => void;
   /** The Believer started a scroll. */
   onScrollStart: () => void;
@@ -86,6 +91,7 @@ export const SurahMode = ({
   pressingAyah,
   lastReadAyah,
   initialAyah,
+  followAyah,
   onAyahShown,
 }: SurahModeProps) => {
   const { t, i18n } = useTranslation("quran");
@@ -105,6 +111,7 @@ export const SurahMode = ({
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const layout = useRef<TextLayout>({ top: null, lines: [] });
   const jumped = useRef(false);
+  const scrolled = useRef({ y: 0, height: 0 });
   const dragged = useRef(false);
   const { nextSurah } = surahEnd(surah);
   const next = nextSurah ? SURAHS[nextSurah - 1] : undefined;
@@ -132,6 +139,29 @@ export const SurahMode = ({
     const line = lines.findLast((candidate) => candidate.start <= start);
     scrollRef.current?.scrollTo({ y: top + (line?.y ?? 0), animated: false });
   };
+
+  // Scrolls the recited ayah into view when it leaves it, one line under the top.
+  useEffect(() => {
+    const { top, lines } = layout.current;
+    const index = ayat.findIndex((ayah) => ayah.key === followAyah);
+    if (top === null || lines.length === 0 || index === -1) {
+      return;
+    }
+    const start = starts[index] ?? 0;
+    const first = lines.findLast((candidate) => candidate.start <= start);
+    if (!first) {
+      return;
+    }
+    const { y, height } = scrolled.current;
+    const above = top + first.y < y;
+    const below = top + first.bottom > y + height - insetBottom;
+    if (above || below) {
+      scrollRef.current?.scrollTo({
+        y: Math.max(top + first.y - LINE_HEIGHT * fontSize, 0),
+        animated: true,
+      });
+    }
+  }, [followAyah, ayat, starts, fontSize, insetBottom]);
 
   const onTextPlaced = ({ nativeEvent }: LayoutChangeEvent) => {
     layout.current.top = nativeEvent.layout.y;
@@ -176,6 +206,13 @@ export const SurahMode = ({
         paddingTop: insetTop + 16,
         paddingBottom: insetBottom + 32,
         paddingHorizontal: 16,
+      }}
+      scrollEventThrottle={100}
+      onScroll={({ nativeEvent }) => {
+        scrolled.current.y = nativeEvent.contentOffset.y;
+      }}
+      onLayout={({ nativeEvent }) => {
+        scrolled.current.height = nativeEvent.layout.height;
       }}
       onScrollBeginDrag={() => {
         dragged.current = true;

@@ -3,6 +3,8 @@ import type { Temporal } from "temporal-polyfill";
 
 import { ayatOfSurah, findAyah, firstAyahOfPage } from "./mushaf";
 import type { Ayah, AyahKey } from "./mushaf";
+import { playbackPlan, playToEnd } from "./playback-plan";
+import type { PlaybackPlan, PlayTo } from "./playback-plan";
 import type { QuranReaderState } from "./reader";
 import { recitationUrl } from "./reciters";
 
@@ -140,20 +142,31 @@ export const createRecitationCache = ({
   };
 };
 
+/** Who started recitation: the reader plays on its own; Home's Verse of the Day plays one ayah. */
+export type PlaybackOrigin = "reader" | "verse-of-the-day";
+
 /** Recitation as the player sees it; the device's audio follows it. */
 export type RecitationPlayback =
   | { status: "idle" }
   | {
       status: "loading" | "playing" | "paused" | "error";
+      /** The ayah being recited now. */
       ayah: AyahKey;
       reciter: string;
-      /** The last ayah to play; null plays on to the end of the Quran. */
-      until: AyahKey | null;
+      origin: PlaybackOrigin;
+      /** What was asked: where it started, where it stops, and how. */
+      plan: PlaybackPlan;
     };
 
 export type RecitationEvent =
-  /** Start at an ayah, replacing whatever was playing. */
-  | { type: "play"; ayah: AyahKey; reciter: string; until?: AyahKey }
+  /** Start at an ayah, replacing whatever was playing; `to` defaults to the end of the Quran. */
+  | {
+      type: "play";
+      ayah: AyahKey;
+      reciter: string;
+      to?: PlayTo;
+      origin?: PlaybackOrigin;
+    }
   /** The current ayah's audio loaded and started. */
   | { type: "ready" }
   /** The current ayah's audio ended. */
@@ -162,9 +175,22 @@ export type RecitationEvent =
   | { type: "pause" }
   /** Continue after a pause, or retry after a failure. */
   | { type: "resume" }
+  /** Recite the current ayah in another voice; the plan carries on. */
+  | { type: "reciter"; reciter: string }
+  /** Jump to the next or previous ayah, within the plan's range going forward. */
+  | { type: "skip"; direction: "next" | "previous" }
   | { type: "stop" };
 
 const IDLE: RecitationPlayback = { status: "idle" };
+
+/** The ayah after the one reciting, or idle once the plan's last ayah is done. */
+const advance = (
+  state: Exclude<RecitationPlayback, { status: "idle" }>
+): RecitationPlayback => {
+  const end = playToEnd(state.plan.from, state.plan.to);
+  const next = state.ayah === end ? null : nextAyah(state.ayah);
+  return next ? { ...state, status: "loading", ayah: next } : IDLE;
+};
 
 export const recitationPlayback = (
   state: RecitationPlayback,
@@ -175,7 +201,8 @@ export const recitationPlayback = (
       status: "loading",
       ayah: event.ayah,
       reciter: event.reciter,
-      until: event.until ?? null,
+      origin: event.origin ?? "reader",
+      plan: playbackPlan(event.ayah, event.to),
     };
   }
   if (event.type === "stop" || state.status === "idle") {
@@ -191,8 +218,17 @@ export const recitationPlayback = (
       if (state.status !== "playing") {
         return state;
       }
-      const next = state.ayah === state.until ? null : nextAyah(state.ayah);
-      return next ? { ...state, status: "loading", ayah: next } : IDLE;
+      return advance(state);
+    }
+    case "skip": {
+      if (event.direction === "next") {
+        return advance(state);
+      }
+      const previous = previousAyah(state.ayah);
+      return previous ? { ...state, status: "loading", ayah: previous } : state;
+    }
+    case "reciter": {
+      return { ...state, status: "loading", reciter: event.reciter };
     }
     case "failed": {
       return { ...state, status: "error" };

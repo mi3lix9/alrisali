@@ -79,6 +79,10 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     // `I18nManager.forceRTL` would be overwritten by this on every launch.
     ["expo-localization", { supportsRTL: true, forcesRTL: true }],
     "expo-apple-authentication",
+    // Recitation goes on with the screen locked: background audio on iOS, and
+    // the foreground media service behind the lock-screen controls on Android.
+    // No microphone: the app records nothing through expo-audio.
+    ["expo-audio", { microphonePermission: false, recordAudioAndroid: false }],
     [
       // The Qibla's bubble level reads the accelerometer.
       "expo-sensors",

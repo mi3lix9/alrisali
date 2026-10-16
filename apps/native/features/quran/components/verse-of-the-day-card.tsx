@@ -36,7 +36,7 @@ export const VerseOfTheDayCard = () => {
 
   const mine =
     playback.status !== "idle" &&
-    playback.until === ayah.key &&
+    playback.origin === "verse-of-the-day" &&
     playback.ayah === ayah.key;
   const status = mine ? playback.status : "idle";
 
@@ -45,7 +45,8 @@ export const VerseOfTheDayCard = () => {
       type: "play",
       ayah: ayah.key,
       reciter,
-      until: ayah.key,
+      to: { kind: "ayah", ayah: ayah.key },
+      origin: "verse-of-the-day",
     });
   const listen = (() => {
     switch (status) {
