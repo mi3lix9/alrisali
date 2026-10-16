@@ -49,6 +49,29 @@ export const en: Catalog<typeof ar> = {
         "Finish your suhoor and renew your intention. May your fast be accepted.",
     },
   },
+  adhanService: {
+    stop: "Stop adhan",
+    channel: "Adhan",
+    title: "Full adhan on Android",
+    description:
+      "The full adhan plays at its time even with the screen off, and you can stop it from the notification.",
+    stream: "Sound channel",
+    streamAlarm: "Alarm",
+    streamAlarmHint:
+      "At the alarm volume, and it sounds even if the phone is on silent.",
+    streamMedia: "Media",
+    streamMediaHint:
+      "At the media volume, like a recitation. Android lowers it in Do Not Disturb.",
+    playDuringDnd: "Play the adhan in Do Not Disturb",
+    playDuringDndHint:
+      "Android lets alarm sounds through Do Not Disturb, so the adhan plays on the alarm channel whichever you chose above. When this is off, you get a silent notification while Do Not Disturb is on.",
+    fullScreen: "Full-screen adhan",
+    fullScreenHint:
+      "A screen with a Stop button opens over the lock screen when the adhan starts.",
+    fullScreenDenied:
+      "Android has turned off the full-screen permission for this app, so you get an ordinary notification. Allow it in settings.",
+    openFullScreenSettings: "Open full-screen settings",
+  },
   screen: {
     intro:
       "Reminders come from your device itself, even offline, on your location's Prayer Times and your device's time zone.",

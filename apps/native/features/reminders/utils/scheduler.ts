@@ -12,6 +12,9 @@ import {
 import { Platform } from "react-native";
 import { Temporal } from "temporal-polyfill";
 
+import { androidAlerts } from "@/shared/lib/android-alerts";
+
+import { routeReminders } from "./adhan-routing";
 import { REMINDER_CHANNELS } from "./notification-request";
 import type { ReminderRequest } from "./notification-request";
 
@@ -98,14 +101,21 @@ export const ensureChannels = (): Promise<void> => {
 };
 
 const applyReminders = async (
-  requests: readonly ReminderRequest[]
+  allRequests: readonly ReminderRequest[]
 ): Promise<void> => {
+  // Full-adhan alarms go to the Android adhan service; it replaces the set it
+  // holds each time, so alarms no longer planned are cancelled with it.
+  const { notifications: requests, adhanAlarms } = routeReminders(
+    allRequests,
+    androidAlerts !== null
+  );
   // Never prompts: onboarding offers notifications, and the Reminders screen
   // fixes them when they are off.
   const { granted } = await getPermissionsAsync();
-  if (requests.length > 0 && !granted) {
+  if (allRequests.length > 0 && !granted) {
     return;
   }
+  androidAlerts?.scheduleAdhanAlarms(adhanAlarms);
   await ensureChannels();
   const pending = await getAllScheduledNotificationsAsync();
   const scheduled = pending.flatMap(({ identifier, content }) => {

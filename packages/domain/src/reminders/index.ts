@@ -70,6 +70,14 @@ export type {
 export { khatmahReminderSource } from "./khatmah-reminders";
 export type { KhatmahReminderMessage } from "./khatmah-reminders";
 export {
+  ADHAN_STREAMS,
+  adhanPlayback,
+  adhanServiceSettingsSchema,
+  adhanStreamSchema,
+  DEFAULT_ADHAN_SERVICE_SETTINGS,
+} from "./adhan-service";
+export type { AdhanServiceSettings, AdhanStream } from "./adhan-service";
+export {
   allSalahAtTime,
   atTimeForAllSalah,
   sendsNotifications,
