@@ -9,7 +9,7 @@ export const INDEX_TABS = ["surahs", "juz", "quarters", "saved"] as const;
 export type IndexTab = (typeof INDEX_TABS)[number];
 
 /** What the Saved tab can filter to. */
-export const SAVED_FILTERS = ["ribbons", "favorites"] as const;
+export const SAVED_FILTERS = ["ribbons", "favorites", "notes"] as const;
 export type SavedFilter = (typeof SAVED_FILTERS)[number];
 
 /** How the Surahs tab can be ordered. */

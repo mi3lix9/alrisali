@@ -65,3 +65,15 @@ export const quranSearchHistory = sqliteTable("quran_search_history", {
   /** ISO instant of the latest time it was searched. */
   searchedAt: text("searched_at").notNull(),
 });
+
+/**
+ * Ayah Notes, one row per ayah (the primary key keeps it at one note per
+ * ayah). A blank note is deleted, so no row holds empty text.
+ */
+export const quranAyahNotes = sqliteTable("quran_ayah_notes", {
+  /** `surah:ayah` the note is about. */
+  ayah: text("ayah").primaryKey(),
+  text: text("text").notNull(),
+  /** ISO instant it was last written; across devices the row last written wins. */
+  updatedAt: text("updated_at").notNull(),
+});
