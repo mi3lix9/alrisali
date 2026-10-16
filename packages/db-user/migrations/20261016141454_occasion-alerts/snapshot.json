@@ -1,14 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "6a57b641-d74f-4820-bb6b-1b40918c029c",
-  "prevIds": [
-    "2a90d17a-ac5b-487e-97d5-83fdb9fcdff3",
-    "3220d129-fb69-422b-8d6f-4028d470dd2c",
-    "74a6eac8-56fe-4ed1-b068-1038150e5071",
-    "8708a023-acd3-405a-b266-5c3a2dea4660",
-    "d14b9c61-cc99-4fb5-97a7-323512b8d576"
-  ],
+  "id": "01ab1bad-c868-4388-8d8f-ad189092d679",
+  "prevIds": ["8708a023-acd3-405a-b266-5c3a2dea4660"],
   "ddl": [
     {
       "name": "supplication_positions",
@@ -60,6 +54,10 @@
     },
     {
       "name": "mood_check_ins",
+      "entityType": "tables"
+    },
+    {
+      "name": "occasion_alert_settings",
       "entityType": "tables"
     },
     {
@@ -691,6 +689,56 @@
       "name": "checked_in_at",
       "entityType": "columns",
       "table": "mood_check_ins"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "occasion_alert_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "enabled",
+      "entityType": "columns",
+      "table": "occasion_alert_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "timing",
+      "entityType": "columns",
+      "table": "occasion_alert_settings"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "time",
+      "entityType": "columns",
+      "table": "occasion_alert_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "types",
+      "entityType": "columns",
+      "table": "occasion_alert_settings"
     },
     {
       "type": "text",
@@ -1558,36 +1606,6 @@
       "autoincrement": false,
       "default": null,
       "generated": null,
-      "name": "prayer_adjustments",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "midnight_definition",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
-      "name": "high_latitude_rule",
-      "entityType": "columns",
-      "table": "believer_settings"
-    },
-    {
-      "type": "text",
-      "notNull": false,
-      "autoincrement": false,
-      "default": null,
-      "generated": null,
       "name": "id",
       "entityType": "columns",
       "table": "shell_preferences"
@@ -1871,6 +1889,13 @@
       "nameExplicit": false,
       "name": "mood_check_ins_pk",
       "table": "mood_check_ins",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "occasion_alert_settings_pk",
+      "table": "occasion_alert_settings",
       "entityType": "pks"
     },
     {

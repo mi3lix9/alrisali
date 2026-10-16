@@ -234,7 +234,19 @@ export const migrations: readonly Migration[] = [
     ],
   },
   {
-    tag: "20261016141952_prayer_time_rules",
+    tag: "20261016141454_occasion-alerts",
+    statements: [
+      "CREATE TABLE `occasion_alert_settings` (\n\t`id` text PRIMARY KEY,\n\t`enabled` integer,\n\t`timing` text,\n\t`time` integer,\n\t`types` text\n);",
+    ],
+  },
+  {
+    tag: "20261016142956_quran-search-history",
+    statements: [
+      "CREATE TABLE `quran_search_history` (\n\t`query` text PRIMARY KEY,\n\t`searched_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016143531_prayer_time_rules",
     statements: [
       "ALTER TABLE `believer_settings` ADD `prayer_adjustments` text;",
       "ALTER TABLE `believer_settings` ADD `midnight_definition` text;",

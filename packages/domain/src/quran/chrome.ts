@@ -17,7 +17,9 @@ export type ReaderSheet =
   | { kind: "page-jump" }
   | { kind: "search" }
   /** Play To: pick where recitation stops, starting at this ayah. */
-  | { kind: "play-to"; ayah: AyahKey };
+  | { kind: "play-to"; ayah: AyahKey }
+  /** The return chip's list of earlier positions. */
+  | { kind: "returns" };
 
 export interface ChromeState {
   visible: boolean;

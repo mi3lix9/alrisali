@@ -82,3 +82,20 @@ export {
   atTimeForAllSalah,
   sendsNotifications,
 } from "./alerts-overview";
+export {
+  applyOccasionAlertSettingsChange,
+  DEFAULT_OCCASION_ALERT_SETTINGS,
+  maghribFrom,
+  OCCASION_ALERT_TIMINGS,
+  occasionAlertSettingsChangeSchema,
+  occasionAlertSettingsSchema,
+  occasionReminderSource,
+  readOccasionAlertSettings,
+} from "./occasion-alerts";
+export type {
+  MaghribOf,
+  OccasionAlertSettings,
+  OccasionAlertSettingsChange,
+  OccasionAlertTiming,
+  OccasionReminderMessage,
+} from "./occasion-alerts";
