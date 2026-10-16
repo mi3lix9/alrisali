@@ -9,9 +9,12 @@ import {
   locationSchema,
   messageStyleSchema,
   timeFormatSchema,
+  customAnglesSchema,
+  DEFAULT_CUSTOM_ANGLES,
 } from "@alrisali/domain/shared";
 import type {
   CalculationMethod,
+  CustomAngles,
   Location,
   MessageStyle,
   TimeFormat,
@@ -35,6 +38,8 @@ export interface BelieverSettings {
   timeFormat: TimeFormat | null;
   /** Classic (scriptural sources) or Modern (gentle coaching). */
   messageStyle: MessageStyle;
+  /** The angles of the Custom Calculation Method. */
+  customAngles: CustomAngles;
 }
 
 /** The settings to change; anything left out keeps its saved value. */
@@ -57,6 +62,7 @@ const changeSchema = z.object({
   imsakMinutes: imsakMinutesSchema.optional(),
   timeFormat: timeFormatSchema.nullable().optional(),
   messageStyle: messageStyleSchema.optional(),
+  customAngles: customAnglesSchema.optional(),
 });
 
 type Row = typeof believerSettings.$inferSelect;
@@ -65,6 +71,18 @@ type Row = typeof believerSettings.$inferSelect;
 const known = <T>(schema: z.ZodType<T>, stored: unknown, fallback: T): T => {
   const parsed = schema.safeParse(stored);
   return parsed.success ? parsed.data : fallback;
+};
+
+/** Custom angles stored as JSON, or the defaults if absent or unreadable. */
+const readCustomAngles = (stored: string | null | undefined): CustomAngles => {
+  if (!stored) {
+    return DEFAULT_CUSTOM_ANGLES;
+  }
+  try {
+    return known(customAnglesSchema, JSON.parse(stored), DEFAULT_CUSTOM_ANGLES);
+  } catch {
+    return DEFAULT_CUSTOM_ANGLES;
+  }
 };
 
 const toSettings = (row: Row | undefined): BelieverSettings => {
@@ -98,6 +116,7 @@ const toSettings = (row: Row | undefined): BelieverSettings => {
       row?.messageStyle,
       DEFAULT_MESSAGE_STYLE
     ),
+    customAngles: readCustomAngles(row?.customAngles),
   };
 };
 
@@ -109,6 +128,7 @@ const toColumns = ({
   imsakMinutes,
   timeFormat,
   messageStyle,
+  customAngles,
 }: BelieverSettings) => ({
   calculationMethod,
   locationLatitude: location?.latitude ?? null,
@@ -119,6 +139,7 @@ const toColumns = ({
   imsakMinutes,
   timeFormat,
   messageStyle,
+  customAngles: JSON.stringify(customAngles),
 });
 
 export const createBelieverSettingsRepository = (
@@ -151,6 +172,7 @@ export const createBelieverSettingsRepository = (
           ? current.timeFormat
           : parsed.timeFormat,
       messageStyle: parsed.messageStyle ?? current.messageStyle,
+      customAngles: parsed.customAngles ?? current.customAngles,
     };
     const columns = toColumns(next);
     await db

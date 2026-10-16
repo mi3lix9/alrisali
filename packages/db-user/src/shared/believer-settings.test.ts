@@ -16,6 +16,7 @@ const DEFAULTS = {
   timeFormat: null,
   hijriAdjustment: 0,
   messageStyle: "classic",
+  customAngles: { fajr: 18, maghrib: 4, isha: 14 },
 };
 
 let directory: TemporaryDirectory;
@@ -64,6 +65,7 @@ describe(createBelieverSettingsRepository, () => {
       timeFormat: "12h",
       hijriAdjustment: -1,
       messageStyle: "modern",
+      customAngles: { fajr: 15.5, maghrib: 0, isha: 12 },
     });
 
     await relaunch();
@@ -78,6 +80,7 @@ describe(createBelieverSettingsRepository, () => {
       timeFormat: "12h",
       hijriAdjustment: -1,
       messageStyle: "modern",
+      customAngles: { fajr: 15.5, maghrib: 0, isha: 12 },
     });
   });
 
@@ -172,6 +175,45 @@ describe(createBelieverSettingsRepository, () => {
       "imsakMinutes"
     );
     await expect(settings.get()).resolves.toMatchObject({ imsakMinutes: 10 });
+  });
+
+  it("rejects Custom angles outside their ranges and keeps the saved ones", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    const saved = { fajr: 17, maghrib: 3, isha: 15 };
+    await settings.update({ calculationMethod: "custom", customAngles: saved });
+
+    const outOfRange = [
+      { ...saved, fajr: 9 },
+      { ...saved, fajr: 26 },
+      { ...saved, maghrib: -1 },
+      { ...saved, maghrib: 11 },
+      { ...saved, isha: 9 },
+      { ...saved, isha: 26 },
+    ];
+    await Promise.all(
+      outOfRange.map((angles) =>
+        expect(settings.update({ customAngles: angles })).rejects.toThrow(
+          "customAngles"
+        )
+      )
+    );
+    await expect(settings.get()).resolves.toMatchObject({
+      calculationMethod: "custom",
+      customAngles: saved,
+    });
+  });
+
+  it("reads unreadable Custom angles as the defaults", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ calculationMethod: "egypt" });
+    await database.db.run(
+      sql`UPDATE believer_settings SET custom_angles = '{"fajr":99}'`
+    );
+    await expect(settings.get()).resolves.toMatchObject(DEFAULTS);
+    await database.db.run(
+      sql`UPDATE believer_settings SET custom_angles = 'not json'`
+    );
+    await expect(settings.get()).resolves.toMatchObject(DEFAULTS);
   });
 
   it("reads values it does not know (written by a newer app) as the defaults", async () => {

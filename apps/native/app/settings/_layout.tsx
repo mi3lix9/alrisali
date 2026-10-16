@@ -29,6 +29,10 @@ const SettingsLayout = () => {
         name="announcements"
         options={{ title: tAnnouncements("title") }}
       />
+      <Stack.Screen
+        name="prayer"
+        options={{ title: t("prayerSettings.title") }}
+      />
       <Stack.Screen name="sources" options={{ title: t("sources.title") }} />
       <Stack.Screen name="privacy" options={{ title: t("about.privacy") }} />
       <Stack.Screen name="terms" options={{ title: t("about.terms") }} />

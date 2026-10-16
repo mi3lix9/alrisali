@@ -16,7 +16,9 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Prayer Time**: A computed moment in the day for a given place, on that place's own clock (its time zone, not the device's): Imsak, Fajr, Sunrise, Dhuhr, Asr, Sunset, Maghrib, Isha, Midnight. Only five of them are Salah.
 
-**Calculation Method**: The set of astronomical and juristic rules that turns a place and date into Prayer Times: Ja'fari (the default), Sunni, Hanafi or Ibadi. _Avoid_: "shia" method
+**Calculation Method**: The set of astronomical and juristic rules that turns a place and date into Prayer Times, kept as data (angles below the horizon, or minutes after a Prayer Time). Ja'fari is the default; the others are Leva/Qom, Tehran, Ithna-Ashari, Al-Hadi Bahrain, Sunni, Hanafi, Ibadi, MWL, ISNA, Egypt, Karachi, Umm al-Qura and Custom. _Avoid_: "shia" method
+
+**Custom Angles**: The Believer's own Fajr, Maghrib and Isha angles (degrees below the horizon) that the Custom Calculation Method uses; edited under Advanced in Prayer settings. A Maghrib angle of 0 puts Maghrib at Sunset.
 
 **Imsak**: The Prayer Time a set number of minutes before Fajr at which the fast begins.
 

@@ -195,4 +195,8 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `qada_logs_date_idx` ON `qada_logs` (`date`);",
     ],
   },
+  {
+    tag: "20261016132340_custom_angles",
+    statements: ["ALTER TABLE `believer_settings` ADD `custom_angles` text;"],
+  },
 ];

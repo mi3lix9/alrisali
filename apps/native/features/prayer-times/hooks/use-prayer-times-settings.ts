@@ -26,7 +26,13 @@ export const usePrayerTimesView = (): PrayerTimesView | undefined => {
   if (!believer || !hidden) {
     return undefined;
   }
-  const { location, calculationMethod, imsakMinutes, timeFormat } = believer;
+  const {
+    location,
+    calculationMethod,
+    customAngles,
+    imsakMinutes,
+    timeFormat,
+  } = believer;
   return {
     settings: location
       ? {
@@ -36,6 +42,7 @@ export const usePrayerTimesView = (): PrayerTimesView | undefined => {
           },
           calculationMethod,
           imsakMinutes,
+          customAngles,
         }
       : null,
     hidden,

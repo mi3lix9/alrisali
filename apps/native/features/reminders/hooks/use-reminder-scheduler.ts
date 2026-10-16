@@ -10,6 +10,7 @@ import type {
 } from "@alrisali/domain/reminders";
 import type {
   CalculationMethod,
+  CustomAngles,
   HabitReminderPlan,
   HijriCalendar,
   Location,
@@ -38,6 +39,7 @@ import { useNotificationAccess } from "./use-notification-permission";
 interface PlanningSettings {
   location: Location | null;
   calculationMethod: CalculationMethod;
+  customAngles: CustomAngles;
   imsakMinutes: number;
   messageStyle: MessageStyle;
 }
@@ -55,7 +57,13 @@ const planAndSync = async (
   t: TFunction<"reminders">,
   hijri: HijriCalendar
 ): Promise<void> => {
-  const { location, calculationMethod, imsakMinutes, messageStyle } = believer;
+  const {
+    location,
+    calculationMethod,
+    customAngles,
+    imsakMinutes,
+    messageStyle,
+  } = believer;
   const timeZone = getCalendars()[0]?.timeZone ?? Temporal.Now.timeZoneId();
   const reminders = planReminders<HabitReminderMessage | QadaReminderMessage>({
     now: Temporal.Now.zonedDateTimeISO(timeZone),
@@ -67,6 +75,7 @@ const planAndSync = async (
           },
           calculationMethod,
           imsakMinutes,
+          customAngles,
         }
       : null,
     settings,
