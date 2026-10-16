@@ -22,7 +22,6 @@ export const en: Catalog<typeof ar> = {
   sentTitle: "Message sent",
   sentDescription:
     "Thank you. The Al-Risali team reads every message and replies by email.",
-  sendAnother: "Send another message",
   tooMany:
     "You have sent several messages in the last hour. Please try again later.",
   failed: "The message could not be sent. Check your connection and try again.",

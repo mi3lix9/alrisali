@@ -1,6 +1,9 @@
 diff --git a/node_modules/panelui-native/.bun-tag-c448b08ff4784157 b/.bun-tag-c448b08ff4784157
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/panelui-native/.bun-tag-d06759162fb369ad b/.bun-tag-d06759162fb369ad
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/lib/module/components/bottom-sheet/index.js b/lib/module/components/bottom-sheet/index.js
 index e9df30a4e84e83c90a667c3aabbcffc359b2ba31..73658b6b296f10c4bab6659ea79d10f289bcebcd 100644
 --- a/lib/module/components/bottom-sheet/index.js
@@ -382,10 +385,25 @@ index e154af9fb7cb8e3b9878955c67415a1b94d0a4ee..5caf38697753702daae18b2d7574003a
            disabled
          },
 diff --git a/lib/module/components/toast/index.js b/lib/module/components/toast/index.js
-index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72dfdeddc3bd 100644
+index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..c65cffd3d44ed6df6a8ac98f678d6e270b489609 100644
 --- a/lib/module/components/toast/index.js
 +++ b/lib/module/components/toast/index.js
-@@ -25,6 +25,7 @@ import { AlertTriangleIcon, CheckCircleIcon, InfoIcon, XIcon } from "../../icons
+@@ -11,11 +11,12 @@
+  * The viewport is mounted for you by PanelUIProvider; `useToast()` works
+  * anywhere below it.
+  */
+-import { createContext, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
+-import { AppState, View } from 'react-native';
++import { createContext, Fragment, useCallback, useContext, useEffect, useMemo, useSyncExternalStore } from 'react';
++import { AppState, Platform, View } from 'react-native';
+ import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+ import Animated, { Easing, Extrapolation, FadeIn, FadeInDown, FadeInUp, FadeOut, Keyframe, interpolate, runOnJS, useAnimatedStyle, useDerivedValue, useReducedMotion, useSharedValue, withDecay, withSpring, withTiming } from 'react-native-reanimated';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
++import { FullWindowOverlay } from 'react-native-screens';
+ import { tv } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
+ import { Portal } from "../../primitives/portal.js";
+@@ -25,6 +26,7 @@ import { AlertTriangleIcon, CheckCircleIcon, InfoIcon, XIcon } from "../../icons
  import { Button } from "../button/index.js";
  import { toast, toastStore } from "./toast-store.js";
  import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
@@ -393,7 +411,7 @@ index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72df
  const SPRING = {
    damping: 20,
    stiffness: 260,
-@@ -307,6 +308,7 @@ const ToastClose = ({
+@@ -307,6 +309,7 @@ const ToastClose = ({
    className,
    ...props
  }) => {
@@ -401,7 +419,7 @@ index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72df
    const {
      hide
    } = useContext(ToastContext);
-@@ -317,7 +319,7 @@ const ToastClose = ({
+@@ -317,7 +320,7 @@ const ToastClose = ({
      children: /*#__PURE__*/_jsx(Button, {
        variant: "ghost",
        size: "icon",
@@ -410,6 +428,42 @@ index 7f3723be6df90d2424a895bc7fec25b7b226dbaa..f57ed11f74875ebf7d42a3e8353b72df
        className: "h-6 w-6 rounded-full",
        onPress: hide,
        children: /*#__PURE__*/_jsx(XIcon, {
+@@ -569,6 +572,10 @@ function ToastStack({
+  * Renders the toast queue. PanelUIProvider mounts this automatically — you
+  * only need it directly if you build your own provider.
+  */
++// iOS presents native modal screens above the React root, so a toast raised
++// from one would sit under it, unseen. FullWindowOverlay lifts the toasts
++// above every presented screen.
++const ToastLayer = Platform.OS === 'ios' ? FullWindowOverlay : Fragment;
+ export function ToastViewport() {
+   const items = useSyncExternalStore(toastStore.subscribe, toastStore.getSnapshot);
+   useEffect(() => {
+@@ -591,14 +598,16 @@ export function ToastViewport() {
+   if (items.length === 0) return null;
+   const top = items.filter(item => item.placement === 'top');
+   const bottom = items.filter(item => item.placement !== 'top');
+-  return /*#__PURE__*/_jsxs(Portal, {
+-    children: [/*#__PURE__*/_jsx(ToastStack, {
+-      items: top,
+-      placement: "top"
+-    }), /*#__PURE__*/_jsx(ToastStack, {
+-      items: bottom,
+-      placement: "bottom"
+-    })]
++  return /*#__PURE__*/_jsx(Portal, {
++    children: /*#__PURE__*/_jsxs(ToastLayer, {
++      children: [/*#__PURE__*/_jsx(ToastStack, {
++        items: top,
++        placement: "top"
++      }), /*#__PURE__*/_jsx(ToastStack, {
++        items: bottom,
++        placement: "bottom"
++      })]
++    })
+   });
+ }
+ 
 diff --git a/lib/module/hooks/use-keyboard-avoidance.js b/lib/module/hooks/use-keyboard-avoidance.js
 index d9eca943397fd3709e4c598b43221a3bfec3756d..8a1f357f7f6e8adbe0dd3adf38757964bb39cfe4 100644
 --- a/lib/module/hooks/use-keyboard-avoidance.js
@@ -1070,10 +1124,34 @@ index 55aba1be4f4bb66a203cfb75ab3644da7bb2280b..afe1ed1c3df935ff798c788d11e7ef80
            accessibilityValue={accessibilityValueForIndex(
              index,
 diff --git a/src/components/toast/index.tsx b/src/components/toast/index.tsx
-index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68bb710e1db 100644
+index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..cdc20c1be234ef1d2117acb231a814c7676a27f4 100644
 --- a/src/components/toast/index.tsx
 +++ b/src/components/toast/index.tsx
-@@ -60,6 +60,7 @@ import {
+@@ -11,6 +11,7 @@
+  */
+ import {
+   createContext,
++  Fragment,
+   useCallback,
+   useContext,
+   useEffect,
+@@ -20,6 +21,7 @@ import {
+ } from 'react';
+ import {
+   AppState,
++  Platform,
+   View,
+   type AppStateStatus,
+   type ViewProps,
+@@ -45,6 +47,7 @@ import Animated, {
+   type SharedValue,
+ } from 'react-native-reanimated';
+ import { useSafeAreaInsets } from 'react-native-safe-area-context';
++import { FullWindowOverlay } from 'react-native-screens';
+ import { tv, type VariantProps } from 'tailwind-variants';
+ import { useCSSVariable } from 'uniwind';
+ import { Portal } from '../../primitives/portal';
+@@ -60,6 +63,7 @@ import {
    type ToastPlacement,
    type ToastVariant,
  } from './toast-store';
@@ -1081,7 +1159,7 @@ index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68b
  
  const SPRING = { damping: 20, stiffness: 260, mass: 0.6 } as const;
  
-@@ -272,6 +273,7 @@ export interface ToastCloseProps extends ViewProps {
+@@ -272,6 +276,7 @@ export interface ToastCloseProps extends ViewProps {
  }
  
  const ToastClose = ({ className, ...props }: ToastCloseProps) => {
@@ -1089,7 +1167,7 @@ index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68b
    const { hide } = useContext(ToastContext);
    const color = useCSSVariable('--color-muted-foreground');
  
-@@ -280,7 +282,7 @@ const ToastClose = ({ className, ...props }: ToastCloseProps) => {
+@@ -280,7 +285,7 @@ const ToastClose = ({ className, ...props }: ToastCloseProps) => {
        <Button
          variant="ghost"
          size="icon"
@@ -1098,6 +1176,33 @@ index 1b1fe41e5b9d0a2e55b1de3773c1dc40b89d825e..8e24f5030f8a7325596d0beb336bb68b
          className="h-6 w-6 rounded-full"
          onPress={hide}
        >
+@@ -590,6 +595,13 @@ function ToastStack({
+   );
+ }
+ 
++/**
++ * iOS presents native modal screens above the React root, so a toast raised
++ * from one would sit under it, unseen. FullWindowOverlay lifts the toasts
++ * above every presented screen.
++ */
++const ToastLayer = Platform.OS === 'ios' ? FullWindowOverlay : Fragment;
++
+ /**
+  * Renders the toast queue. PanelUIProvider mounts this automatically — you
+  * only need it directly if you build your own provider.
+@@ -624,8 +636,10 @@ export function ToastViewport() {
+ 
+   return (
+     <Portal>
+-      <ToastStack items={top} placement="top" />
+-      <ToastStack items={bottom} placement="bottom" />
++      <ToastLayer>
++        <ToastStack items={top} placement="top" />
++        <ToastStack items={bottom} placement="bottom" />
++      </ToastLayer>
+     </Portal>
+   );
+ }
 diff --git a/src/hooks/use-keyboard-avoidance.ts b/src/hooks/use-keyboard-avoidance.ts
 index fa011fed038a2140ed4a6da91eec2355bb0fd6fa..ae0ca81b16a59c83bb3001654a6db5af14bce734 100644
 --- a/src/hooks/use-keyboard-avoidance.ts

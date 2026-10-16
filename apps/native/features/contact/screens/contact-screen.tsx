@@ -10,10 +10,12 @@ import type {
 import { ORPCError } from "@orpc/client";
 import { captureException } from "@sentry/react-native";
 import { useMutation } from "@tanstack/react-query";
-import { Button, Input, Text, Textarea } from "panelui-native";
-import { useState } from "react";
+import { router } from "expo-router";
+import { Button, Input, Text, Textarea, toast } from "panelui-native";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { AccessibilityInfo, View } from "react-native";
+import type { LayoutChangeEvent, ScrollViewInstance } from "react-native";
 
 import { authClient } from "@/shared/lib/auth-client";
 import { orpc } from "@/shared/lib/orpc";
@@ -27,9 +29,20 @@ const invalidFields = (draft: ContactMessageInput): Set<ContactMessageField> =>
       .error?.issues.map(({ path }) => path[0] as ContactMessageField)
   );
 
+/** The fields in the order the form shows them. */
+const FIELDS: readonly ContactMessageField[] = [
+  "name",
+  "email",
+  "subject",
+  "message",
+];
+
 /**
  * Sends the team a Contact Message. Guests may too; a signed-in Believer
- * starts with their name and email filled in.
+ * starts with their name and email filled in. A rejected draft scrolls to its
+ * first wrong field, which may be far above the Send button,
+ * and announces it; a sent one
+ * returns to Settings with a toast.
  */
 export const ContactScreen = () => {
   const { t } = useTranslation("contact");
@@ -42,10 +55,18 @@ export const ContactScreen = () => {
   };
   const [draft, setDraft] = useState(blank);
   const [invalid, setInvalid] = useState(new Set<ContactMessageField>());
+  const scroll = useRef<ScrollViewInstance>(null);
+  // Where each field sits in the form, to scroll to the first wrong one.
+  const offsets = useRef<Partial<Record<ContactMessageField, number>>>({});
   const send = useMutation(
     orpc.contact.send.mutationOptions({
       onSuccess: () => {
-        setDraft(blank);
+        toast.show({
+          variant: "success",
+          label: t("sentTitle"),
+          description: t("sentDescription"),
+        });
+        router.back();
       },
       onError: (error) => {
         if (!(error instanceof ORPCError)) {
@@ -67,10 +88,25 @@ export const ContactScreen = () => {
   const submit = () => {
     const problems = invalidFields(draft);
     setInvalid(problems);
-    if (problems.size === 0) {
+    const first = FIELDS.find((field) => problems.has(field));
+    if (first === undefined) {
       send.mutate(contactMessageSchema.parse(draft));
+      return;
     }
+    // Less the form's gap, so the field does not touch the header.
+    scroll.current?.scrollTo({
+      y: Math.max(0, (offsets.current[first] ?? 0) - 16),
+    });
+    AccessibilityInfo.announceForAccessibility(
+      t(`invalid.${first}`, { ...CONTACT_MESSAGE_LIMITS[first] })
+    );
   };
+
+  const placed =
+    (field: ContactMessageField) =>
+    ({ nativeEvent }: LayoutChangeEvent) => {
+      offsets.current[field] = nativeEvent.layout.y;
+    };
 
   const fieldProps = (field: ContactMessageField) => ({
     label: t(`fields.${field}`),
@@ -87,42 +123,34 @@ export const ContactScreen = () => {
       : {}),
   });
 
-  if (send.isSuccess) {
-    return (
-      <Screen>
-        <View className="gap-2" accessibilityLiveRegion="polite">
-          <Text size="lg" weight="semibold" accessibilityRole="header">
-            {t("sentTitle")}
-          </Text>
-          <Text muted>{t("sentDescription")}</Text>
-        </View>
-        <Button variant="outline" onPress={() => send.reset()}>
-          {t("sendAnother")}
-        </Button>
-      </Screen>
-    );
-  }
-
   const tooMany =
     send.error instanceof ORPCError && send.error.code === "TOO_MANY_REQUESTS";
 
   return (
-    <Screen>
+    <Screen ref={scroll}>
       <Text muted>{t("description")}</Text>
-      <Input
-        {...fieldProps("name")}
-        autoComplete="name"
-        textContentType="name"
-      />
-      <Input
-        {...fieldProps("email")}
-        autoComplete="email"
-        textContentType="emailAddress"
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <Input {...fieldProps("subject")} />
-      <Textarea {...fieldProps("message")} autoGrow rows={6} />
+      <View onLayout={placed("name")}>
+        <Input
+          {...fieldProps("name")}
+          autoComplete="name"
+          textContentType="name"
+        />
+      </View>
+      <View onLayout={placed("email")}>
+        <Input
+          {...fieldProps("email")}
+          autoComplete="email"
+          textContentType="emailAddress"
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+      <View onLayout={placed("subject")}>
+        <Input {...fieldProps("subject")} />
+      </View>
+      <View onLayout={placed("message")}>
+        <Textarea {...fieldProps("message")} autoGrow rows={6} />
+      </View>
       {send.isError ? (
         <Text className="text-destructive" accessibilityLiveRegion="polite">
           {tooMany ? t("tooMany") : t("failed")}
