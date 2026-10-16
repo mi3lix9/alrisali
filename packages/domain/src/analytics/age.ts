@@ -2,6 +2,8 @@
 // range of its users. Ages are counted in whole years from the birth year
 // alone (no birthday), which is close enough for the bands below.
 
+import { writeDigits } from "../shared/digits";
+
 /** The earliest birth year accepted. */
 export const BIRTH_YEAR_MIN = 1900;
 
@@ -32,12 +34,15 @@ export const ageBandOf = (birthYear: number, currentYear: number): AgeBand => {
   return BAND_LIMITS.find(([maxAge]) => age <= maxAge)?.[1] ?? "over-50";
 };
 
-/** Reads typed text as a birth year: `null` when blank or not plausible. */
+/**
+ * Reads typed text, in Western or Arabic-Indic digits, as a birth year:
+ * `null` when blank or not plausible.
+ */
 export const parseBirthYear = (
   text: string,
   currentYear: number
 ): number | null => {
-  const trimmed = text.trim();
+  const trimmed = writeDigits(text.trim(), "latin");
   if (!/^\d{4}$/u.test(trimmed)) {
     return null;
   }

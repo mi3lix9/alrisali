@@ -17,7 +17,7 @@ import type { Temporal } from "temporal-polyfill";
 
 import { useBelieverSettings } from "./believer-settings";
 import { useGlobalHijriAdjustment } from "./content-database";
-import { launchLanguage } from "./preferences";
+import { formatDateTime } from "./numbers";
 
 // Probes this engine's Intl for Umm al-Qura once; Hermes may not honour it,
 // and then every Hijri Date comes from the arithmetic calendar.
@@ -90,12 +90,9 @@ const LONG_DATE: Intl.DateTimeFormatOptions = {
   year: "numeric",
 };
 
-/** Writes a Gregorian day in the app's language: "15 October 2026". */
+/** Writes a Gregorian day in the app's language and digits: "15 October 2026". */
 export const formatGregorianDate = (
   date: Temporal.PlainDate,
   options?: Intl.DateTimeFormatOptions
 ): string =>
-  date.toLocaleString(
-    `${launchLanguage}-u-ca-gregory-nu-latn`,
-    options ?? LONG_DATE
-  );
+  formatDateTime(date, { calendar: "gregory", ...(options ?? LONG_DATE) });

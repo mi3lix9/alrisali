@@ -24,7 +24,7 @@ export const en: Catalog<typeof ar> = {
     latitude: "Latitude",
     longitude: "Longitude",
     invalid:
-      "Latitude must be between -90 and 90, longitude between -180 and 180.",
+      "Latitude must be between -{{latitude}} and {{latitude}}, longitude between -{{longitude}} and {{longitude}}.",
     save: "Save location",
   },
   calculationMethod: {
@@ -66,6 +66,12 @@ export const en: Catalog<typeof ar> = {
     large: "Large",
     larger: "Larger",
     preview: "In the name of Allah, the Most Gracious, the Most Merciful",
+  },
+  digits: {
+    title: "Digits",
+    description: "English always uses Western digits.",
+    "arabic-indic": "Arabic-Indic (١٢٣)",
+    latin: "Western (123)",
   },
   tabs: {
     title: "Tabs",

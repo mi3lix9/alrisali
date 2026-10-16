@@ -4,7 +4,7 @@ export {
   DEFAULT_CALCULATION_METHOD,
 } from "./calculation-method";
 export type { CalculationMethod } from "./calculation-method";
-export { DEFAULT_DIGITS, DIGITS, digitsSchema } from "./digits";
+export { DEFAULT_DIGITS, DIGITS, digitsSchema, writeDigits } from "./digits";
 export type { Digits } from "./digits";
 export {
   habitScheduleSchema,
@@ -125,6 +125,7 @@ export type {
   PrayerTimesSettings,
   TimeFormat,
 } from "./prayer-times";
+export { MAX_KHUSHU_LEVEL } from "./insights-sources";
 export type {
   DhikrSessionSource,
   HabitCompletionSource,

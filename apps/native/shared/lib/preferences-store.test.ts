@@ -18,6 +18,7 @@ const NOTHING = {
   theme: null,
   textSize: null,
   hiddenTabs: null,
+  digits: null,
 };
 
 /** The SecureStore entry, in memory. */
@@ -43,6 +44,7 @@ const fakeDatabase = (initial: Partial<ShellPreferences> = {}) => {
         theme: change.theme ?? row.theme,
         textSize: change.textSize ?? row.textSize,
         hiddenTabs: change.hiddenTabs ? [...change.hiddenTabs] : row.hiddenTabs,
+        digits: change.digits ?? row.digits,
       };
       return Promise.resolve(row);
     },
@@ -109,6 +111,7 @@ describe(createPreferences, () => {
       theme: "system",
       textSize: "default",
       hiddenTabs: [],
+      digits: "arabic-indic",
     });
   });
 
@@ -120,6 +123,7 @@ describe(createPreferences, () => {
         theme: "dark",
         textSize: "larger",
         hiddenTabs: ["library"],
+        digits: "latin",
       },
     });
 
@@ -130,6 +134,7 @@ describe(createPreferences, () => {
       theme: "dark",
       textSize: "larger",
       hiddenTabs: ["library"],
+      digits: "latin",
     };
     expect(store.getState()).toMatchObject(chosen);
     expect(cache.entry()).toStrictEqual(chosen);
@@ -139,7 +144,7 @@ describe(createPreferences, () => {
 
   it("saves what only the cache knows into the database", async () => {
     const { store, database } = setup({
-      cached: { language: "en", theme: "dark" },
+      cached: { language: "en", theme: "dark", digits: "latin" },
       saved: { theme: "light" },
     });
 
@@ -149,12 +154,14 @@ describe(createPreferences, () => {
       language: "en",
       theme: "light",
       textSize: "default",
+      digits: "latin",
     });
     expect(database().row()).toStrictEqual({
       language: "en",
       theme: "light",
       textSize: null,
       hiddenTabs: null,
+      digits: "latin",
     });
   });
 
@@ -166,6 +173,7 @@ describe(createPreferences, () => {
     store.getState().setTheme("dark");
     store.getState().setTextSize("large");
     store.getState().setTabVisible("tasbih", false);
+    store.getState().setDigits("latin");
     // Writes queue behind each other; a hydration runs after them.
     await store.getState().hydrate();
 
@@ -174,6 +182,7 @@ describe(createPreferences, () => {
       theme: "dark",
       textSize: "large",
       hiddenTabs: ["tasbih"],
+      digits: "latin",
     };
     expect(store.getState()).toMatchObject(chosen);
     expect(cache.entry()).toStrictEqual(chosen);

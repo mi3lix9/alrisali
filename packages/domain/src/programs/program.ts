@@ -8,7 +8,8 @@ import {
 import type { HijriDate, HijriWindow } from "../shared/hijri";
 import { salahSchema } from "../shared/salah";
 
-const NAME_MAX_LENGTH = 120;
+/** The longest name a Program or an Act may have, in either language. */
+export const NAME_MAX_LENGTH = 120;
 const TEXT_MAX_LENGTH = 4000;
 const MAX_RAKAHS = 20;
 

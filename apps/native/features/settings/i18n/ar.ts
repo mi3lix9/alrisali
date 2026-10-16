@@ -43,7 +43,8 @@ export const ar = {
     name: "اسم المكان (اختياري)",
     latitude: "خط العرض",
     longitude: "خط الطول",
-    invalid: "خط العرض بين ‎-90 و90، وخط الطول بين ‎-180 و180.",
+    invalid:
+      "خط العرض بين ‎-{{latitude}} و{{latitude}}، وخط الطول بين ‎-{{longitude}} و{{longitude}}.",
     save: "حفظ الموقع",
   },
   calculationMethod: {
@@ -85,6 +86,12 @@ export const ar = {
     large: "كبير",
     larger: "أكبر",
     preview: "بسم الله الرحمن الرحيم",
+  },
+  digits: {
+    title: "الأرقام",
+    description: "تُكتب الأرقام بالأرقام الغربية دائمًا في الواجهة الإنجليزية.",
+    "arabic-indic": "مشرقية (١٢٣)",
+    latin: "غربية (123)",
   },
   tabs: {
     title: "التبويبات",
