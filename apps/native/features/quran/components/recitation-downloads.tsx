@@ -237,6 +237,11 @@ export const RecitationDownloads = () => {
       )
   );
 
+  const removeReciter = (key: string, jobIds: readonly string[]) => {
+    deleteReciterDownloads(key, jobIds);
+    setAdded((now) => now.filter((other) => other !== key));
+  };
+
   const countOf = (reciter: string) => {
     let count = 0;
     for (const key of keys) {
@@ -274,16 +279,19 @@ export const RecitationDownloads = () => {
                         label={t("downloads.delete")}
                         color="destructive"
                         icon={<TrashIcon />}
-                        onPress={() => {
-                          deleteReciterDownloads(reciter.key, jobIds);
-                          setAdded((now) =>
-                            now.filter((key) => key !== reciter.key)
-                          );
-                        }}
+                        onPress={() => removeReciter(reciter.key, jobIds)}
                       />
                     </Swipe.End>
                     <Item
                       testID={`storage-reciter-${reciter.key}`}
+                      accessibilityActions={[
+                        { name: "delete", label: t("downloads.delete") },
+                      ]}
+                      onAccessibilityAction={(event) => {
+                        if (event.nativeEvent.actionName === "delete") {
+                          removeReciter(reciter.key, jobIds);
+                        }
+                      }}
                       onPress={() => setExpanded(open ? null : reciter.key)}
                     >
                       <Item.Content>
@@ -319,7 +327,6 @@ export const RecitationDownloads = () => {
       <ReciterSheet
         open={choosing}
         reciter=""
-        start="1:1"
         onSelect={(key) => {
           if (findReciter(key)) {
             setAdded((now) => (now.includes(key) ? now : [...now, key]));
