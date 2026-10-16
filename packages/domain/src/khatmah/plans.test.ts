@@ -28,7 +28,10 @@ const khatmahOf = (plan: KhatmahPlan): Khatmah => ({
   createdAt: 0,
 });
 
-const index = (key: string) => AYAT.findIndex((ayah) => ayah.key === key);
+const INDEX = new Map<string, number>(
+  AYAT.map((ayah, position) => [ayah.key, position])
+);
+const index = (key: string) => INDEX.get(key) ?? -1;
 
 /** The sessions that break contiguity, numbering or coverage; none when sound. */
 const completenessProblems = (plan: KhatmahPlan, firstAyah = "1:1") => {

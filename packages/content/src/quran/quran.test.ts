@@ -12,6 +12,7 @@ import {
   KFGQPC_NOTICE,
   PAGE_COUNT,
   QURAN_SOURCE,
+  SAJDAH,
   SCHOLAR_REVIEWED,
   SURAH_ALIASES,
   SURAH_COUNT,
@@ -281,5 +282,37 @@ describe("Khatmah by-meaning divisions", () => {
 
   it("marks the unreviewed divisions", () => {
     expect(SCHOLAR_REVIEWED).toStrictEqual({ 7: true, 29: false, 60: false });
+  });
+});
+
+describe("sajdah ayat", () => {
+  it("points every entry at a real ayah, once", () => {
+    const keys = new Set(AYAT.map((ayah) => ayah.key));
+    expect(SAJDAH).toHaveLength(15);
+    for (const { ayah } of SAJDAH) {
+      expect(keys.has(ayah)).toBeTruthy();
+    }
+    expect(new Set(SAJDAH.map(({ ayah }) => ayah)).size).toBe(SAJDAH.length);
+  });
+
+  it("makes the four 'azaa'im obligatory and the rest recommended", () => {
+    const obligatory = SAJDAH.filter(({ kind }) => kind === "obligatory");
+    expect(obligatory.map(({ ayah }) => ayah)).toStrictEqual([
+      "32:15",
+      "41:37",
+      "53:62",
+      "96:19",
+    ]);
+    expect(SAJDAH.length - obligatory.length).toBe(11);
+  });
+
+  it("anchors each sajdah on its ayah's sign of prostration or its wording", () => {
+    // KFGQPC prints ۩ on 15 ayat; 41:38 is the Madinah placement of 41:37's.
+    const signed = AYAT.filter((ayah) => ayah.text.includes("۩")).map(
+      (ayah) => ayah.key
+    );
+    expect(signed).toHaveLength(15);
+    const ours = new Set(SAJDAH.map(({ ayah }) => ayah as string));
+    expect(signed.filter((key) => !ours.has(key))).toStrictEqual(["41:38"]);
   });
 });
