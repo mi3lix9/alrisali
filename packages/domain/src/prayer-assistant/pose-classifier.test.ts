@@ -11,6 +11,7 @@ import type { PoseClassifier, PoseEngine } from "./pose-classifier";
 import { NAMOZ_MOVENET } from "./pose-fixtures";
 import { currentStep, observe, startSalah } from "./rakah-machine";
 import type { AssistantState, Position } from "./rakah-machine";
+import { SALAH_DEFINITIONS } from "./salah-definition";
 
 const recorded = (name: keyof typeof NAMOZ_MOVENET): Pose =>
   decodeMoveNet(NAMOZ_MOVENET[name], "up");
@@ -222,7 +223,9 @@ describe("a recorded Fajr through the rak'ah machine", () => {
         ...hold(SEATED, 140),
       ];
       let classifier = startPoseClassifier(engine, 70);
-      let state: AssistantState = startSalah("fajr", { pace: "normal" });
+      let state: AssistantState = startSalah(SALAH_DEFINITIONS.fajr, {
+        pace: "normal",
+      });
       const visited = new Set<string>();
       for (const [frame, pose] of frames.entries()) {
         const reading = classifyPose(classifier, pose, state.index === 0);

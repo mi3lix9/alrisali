@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { completesAt, currentStep, observe, startSalah } from "./rakah-machine";
 import type { AssistantState } from "./rakah-machine";
+import { SALAH_DEFINITIONS } from "./salah-definition";
 import { countTakbirs, createTakbirDetector, TAKBIR_REPEAT_MS } from "./takbir";
 
 describe(countTakbirs, () => {
@@ -126,7 +127,9 @@ describe(createTakbirDetector, () => {
     const utterances = [takbir, ...rakah, ...rakah];
 
     const detector = createTakbirDetector();
-    let state: AssistantState = startSalah("fajr", { pace: "normal" });
+    let state: AssistantState = startSalah(SALAH_DEFINITIONS.fajr, {
+      pace: "normal",
+    });
     let at = 0;
     for (const utterance of utterances) {
       for (const [index, transcript] of utterance.entries()) {

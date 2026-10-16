@@ -6,9 +6,9 @@ import {
 import type {
   AssistantState,
   PaceChoice,
+  SalahDefinition,
   Sighting,
 } from "@alrisali/domain/prayer-assistant";
-import type { Salah } from "@alrisali/domain/shared";
 import { useCallback, useEffect, useReducer } from "react";
 
 export interface RakahMachine {
@@ -22,15 +22,15 @@ export interface RakahMachine {
 }
 
 /**
- * The rak'ah machine for one Salah, on the monotonic clock. It ticks itself
+ * The rak'ah machine for one prayer, on the monotonic clock. It ticks itself
  * when the final Tashahhud hold is due, so tap mode ends without a sensor.
  */
 export const useRakahMachine = (
-  salah: Salah,
+  definition: SalahDefinition,
   pace: PaceChoice
 ): RakahMachine => {
   const [state, dispatch] = useReducer(observe, undefined, () =>
-    startSalah(salah, pace)
+    startSalah(definition, pace)
   );
 
   const send = useCallback(

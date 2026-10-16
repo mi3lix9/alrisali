@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { completesAt, currentStep, observe, startSalah } from "./rakah-machine";
 import type { AssistantState, Observation, Position } from "./rakah-machine";
+import { SALAH_DEFINITIONS } from "./salah-definition";
 
 const NORMAL = { pace: "normal" } as const;
 
@@ -37,7 +38,9 @@ describe(startSalah, () => {
     ["maghrib", 3],
     ["isha", 4],
   ] as const)("counts %s as %i Rak'ahs", (salah, rakahs) => {
-    const { steps } = tapToFinalTashahhud(startSalah(salah, NORMAL));
+    const { steps } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS[salah], NORMAL)
+    );
     expect(steps.at(-1)).toStrictEqual({
       rakah: rakahs,
       position: "tashahhud",
@@ -47,7 +50,9 @@ describe(startSalah, () => {
   });
 
   it("starts standing in the first Rak'ah", () => {
-    expect(currentStep(startSalah("fajr", NORMAL))).toStrictEqual({
+    expect(
+      currentStep(startSalah(SALAH_DEFINITIONS.fajr, NORMAL))
+    ).toStrictEqual({
       rakah: 1,
       position: "qiyam",
       final: false,
@@ -57,7 +62,9 @@ describe(startSalah, () => {
 
 describe("tapping through a Salah", () => {
   it("walks Fajr through each Position, then the final Tashahhud", () => {
-    const { steps } = tapToFinalTashahhud(startSalah("fajr", NORMAL));
+    const { steps } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL)
+    );
     expect(
       steps.map(({ rakah, position }) => `${rakah}:${position}`)
     ).toStrictEqual([
@@ -78,7 +85,9 @@ describe("tapping through a Salah", () => {
   });
 
   it("sits for the middle Tashahhud after the second Rak'ah of Maghrib", () => {
-    const { steps } = tapToFinalTashahhud(startSalah("maghrib", NORMAL));
+    const { steps } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.maghrib, NORMAL)
+    );
     const tashahhuds = steps.filter((step) => step.position === "tashahhud");
     expect(tashahhuds).toStrictEqual([
       { rakah: 2, position: "tashahhud", final: false },
@@ -93,7 +102,9 @@ describe("tapping through a Salah", () => {
   });
 
   it("has only the middle and final Tashahhud in a four-Rak'ah Salah", () => {
-    const { steps } = tapToFinalTashahhud(startSalah("isha", NORMAL));
+    const { steps } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.isha, NORMAL)
+    );
     expect(
       steps
         .filter((step) => step.position === "tashahhud")
@@ -102,7 +113,7 @@ describe("tapping through a Salah", () => {
   });
 
   it("can step back after a mistaken tap", () => {
-    const state = feed(startSalah("fajr", NORMAL), [
+    const state = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
       { kind: "advance", at: 1000 },
       { kind: "advance", at: 2000 },
       { kind: "back", at: 3000 },
@@ -111,7 +122,10 @@ describe("tapping through a Salah", () => {
   });
 
   it("does not step back before the first Position", () => {
-    const state = observe(startSalah("fajr", NORMAL), { kind: "back", at: 0 });
+    const state = observe(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), {
+      kind: "back",
+      at: 0,
+    });
     expect(currentStep(state)).toStrictEqual({
       rakah: 1,
       position: "qiyam",
@@ -122,7 +136,9 @@ describe("tapping through a Salah", () => {
 
 describe("the final Tashahhud hold", () => {
   it("ends a tapped Salah once the Believer has sat 12 s at Normal", () => {
-    const { state, at } = tapToFinalTashahhud(startSalah("fajr", NORMAL));
+    const { state, at } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL)
+    );
     expect(completesAt(state)).toBe(at + 12_000);
     expect(
       observe(state, { kind: "tick", at: at + 11_999 }).completed
@@ -133,25 +149,33 @@ describe("the final Tashahhud hold", () => {
   });
 
   it("holds 8 s at Fast and 18 s at Slow", () => {
-    const fast = tapToFinalTashahhud(startSalah("fajr", { pace: "fast" }));
-    const slow = tapToFinalTashahhud(startSalah("fajr", { pace: "slow" }));
+    const fast = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, { pace: "fast" })
+    );
+    const slow = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, { pace: "slow" })
+    );
     expect(completesAt(fast.state)).toBe(fast.at + 8000);
     expect(completesAt(slow.state)).toBe(slow.at + 18_000);
   });
 
   it("lets the Believer end it early with a tap", () => {
-    const { state, at } = tapToFinalTashahhud(startSalah("fajr", NORMAL));
+    const { state, at } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL)
+    );
     expect(
       observe(state, { kind: "advance", at: at + 1 }).completed
     ).toBeTruthy();
   });
 
   it("has no hold before the final Tashahhud", () => {
-    expect(completesAt(startSalah("fajr", NORMAL))).toBeNull();
+    expect(completesAt(startSalah(SALAH_DEFINITIONS.fajr, NORMAL))).toBeNull();
   });
 
   it("ignores everything once the Salah is done", () => {
-    const { state, at } = tapToFinalTashahhud(startSalah("fajr", NORMAL));
+    const { state, at } = tapToFinalTashahhud(
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL)
+    );
     const done = observe(state, { kind: "advance", at: at + 1 });
     expect(observe(done, { kind: "back", at: at + 2 })).toBe(done);
   });
@@ -180,7 +204,7 @@ const rakah = (from: number): Observation[] => [
 
 describe("sensed Positions", () => {
   it("counts a Position once it has held 0.8 s at Normal", () => {
-    const start = startSalah("fajr", NORMAL);
+    const start = startSalah(SALAH_DEFINITIONS.fajr, NORMAL);
     expect(currentStep(feed(start, hold("ruku", 0, 700))).position).toBe(
       "qiyam"
     );
@@ -190,8 +214,8 @@ describe("sensed Positions", () => {
   });
 
   it("counts after 0.5 s at Fast and 1.2 s at Slow", () => {
-    const fast = startSalah("fajr", { pace: "fast" });
-    const slow = startSalah("fajr", { pace: "slow" });
+    const fast = startSalah(SALAH_DEFINITIONS.fajr, { pace: "fast" });
+    const slow = startSalah(SALAH_DEFINITIONS.fajr, { pace: "slow" });
     expect(currentStep(feed(fast, hold("ruku", 0, 500))).position).toBe("ruku");
     expect(currentStep(feed(slow, hold("ruku", 0, 1100))).position).toBe(
       "qiyam"
@@ -202,7 +226,7 @@ describe("sensed Positions", () => {
   });
 
   it("restarts the hold when the Position changes", () => {
-    const state = feed(startSalah("fajr", NORMAL), [
+    const state = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
       ...hold("ruku", 0, 500),
       ...hold("qiyam", 600, 700),
       ...hold("ruku", 800, 1500),
@@ -211,7 +235,7 @@ describe("sensed Positions", () => {
   });
 
   it("never moves backwards, and skips nothing", () => {
-    const state = feed(startSalah("fajr", NORMAL), [
+    const state = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
       ...hold("ruku", 0, 1000),
       ...hold("sujud", 1100, 3000),
       ...hold("qiyam", 3100, 5000),
@@ -220,12 +244,15 @@ describe("sensed Positions", () => {
   });
 
   it("ignores frames with no recognised Position", () => {
-    const state = feed(startSalah("fajr", NORMAL), hold(null, 0, 5000));
+    const state = feed(
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL),
+      hold(null, 0, 5000)
+    );
     expect(currentStep(state).position).toBe("qiyam");
   });
 
   it("rises for the next Rak'ah after a shorter hold", () => {
-    const sujud = feed(startSalah("fajr", NORMAL), rakah(0));
+    const sujud = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), rakah(0));
     expect(currentStep(sujud)).toStrictEqual({
       rakah: 1,
       position: "sujud",
@@ -248,7 +275,7 @@ describe("sensed Positions", () => {
   });
 
   it("sits the middle Tashahhud after 3 s at Normal, then rises", () => {
-    const sujud = feed(startSalah("dhuhr", NORMAL), [
+    const sujud = feed(startSalah(SALAH_DEFINITIONS.dhuhr, NORMAL), [
       ...rakah(0),
       ...hold("qiyam", 5100, 6000),
       ...rakah(6100),
@@ -267,7 +294,7 @@ describe("sensed Positions", () => {
   });
 
   it("ends the Salah after sitting the final Tashahhud for 12 s at Normal", () => {
-    const sujud = feed(startSalah("fajr", NORMAL), [
+    const sujud = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
       ...rakah(0),
       ...hold("qiyam", 5100, 6000),
       ...rakah(6100),
@@ -288,7 +315,7 @@ describe("sensed Positions", () => {
   });
 
   it("keeps the final hold through a misread frame, but not a real rise", () => {
-    const sujud = feed(startSalah("fajr", NORMAL), [
+    const sujud = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
       ...rakah(0),
       ...hold("qiyam", 5100, 6000),
       ...rakah(6100),
@@ -311,7 +338,7 @@ describe("sensed Positions", () => {
 
 describe("confirmed Positions (Mat mode)", () => {
   it("jumps to the next sujud: the Believer passed through the rest", () => {
-    const state = observe(startSalah("fajr", NORMAL), {
+    const state = observe(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), {
       kind: "confirmed",
       position: "sujud",
       at: 0,
@@ -325,7 +352,7 @@ describe("confirmed Positions (Mat mode)", () => {
 
   it("never jumps past a Tashahhud", () => {
     const sujuds = feed(
-      startSalah("dhuhr", NORMAL),
+      startSalah(SALAH_DEFINITIONS.dhuhr, NORMAL),
       Array.from({ length: 4 }, (_, index) => ({
         kind: "confirmed",
         position: "sujud",
@@ -357,7 +384,7 @@ describe("confirmed Positions (Mat mode)", () => {
 
   it("times the final Tashahhud from when the sensor saw the Believer sit", () => {
     const lastSujud = feed(
-      startSalah("fajr", NORMAL),
+      startSalah(SALAH_DEFINITIONS.fajr, NORMAL),
       Array.from({ length: 4 }, (_, index) => ({
         kind: "confirmed",
         position: "sujud",
@@ -372,5 +399,44 @@ describe("confirmed Positions (Mat mode)", () => {
     });
     expect(currentStep(seated).final).toBeTruthy();
     expect(completesAt(seated)).toBe(5000 + seated.holds.finalTashahhudMs);
+  });
+});
+
+/** Taps through Fajr at each of the given times. */
+const tapAt = (times: readonly number[]) =>
+  feed(
+    startSalah(SALAH_DEFINITIONS.fajr, NORMAL),
+    times.map((at) => ({ kind: "advance", at }))
+  );
+
+describe("the Haste Warning", () => {
+  it("stays quiet when Positions advance 3 s or more apart", () => {
+    const state = tapAt([1000, 4000, 7000]);
+    expect(currentStep(state).position).toBe("sujud");
+    expect(state.hasty).toBeFalsy();
+  });
+
+  it("warns when a Position advances less than 3 s after the last", () => {
+    expect(tapAt([1000, 3999]).hasty).toBeTruthy();
+  });
+
+  it("clears once the Believer slows down again", () => {
+    expect(tapAt([1000, 2000, 5000]).hasty).toBeFalsy();
+  });
+
+  it("never warns on the first move or on stepping back", () => {
+    expect(tapAt([10]).hasty).toBeFalsy();
+    const corrected = observe(tapAt([1000, 5000]), { kind: "back", at: 5500 });
+    expect(corrected.hasty).toBeFalsy();
+  });
+
+  it("warns for sensed Positions too", () => {
+    const state = feed(startSalah(SALAH_DEFINITIONS.fajr, NORMAL), [
+      ...hold("qiyam", 0, 1000),
+      ...hold("ruku", 1100, 2000),
+      ...hold("itidal", 2100, 3000),
+    ]);
+    expect(currentStep(state).position).toBe("itidal");
+    expect(state.hasty).toBeTruthy();
   });
 });
