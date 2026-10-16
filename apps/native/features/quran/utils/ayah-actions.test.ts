@@ -6,7 +6,6 @@ import type {
 import { describe, expect, it } from "vitest";
 
 import { ayahCopyText, playFromAyah } from "./ayah-actions";
-import { formatNumber } from "./format";
 
 const idle: RecitationPlayback = { status: "idle" };
 
@@ -54,21 +53,19 @@ describe(ayahCopyText, () => {
         text: "ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ",
         key: "2:255",
         surahName: "Al-Baqarah",
-        language: "en",
+        digits: "latin",
       })
     ).toBe("ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ\n(Al-Baqarah 2:255)");
   });
 
-  it("writes the reference in the UI language's digits", () => {
+  it("writes the reference in the interface's digits", () => {
     expect(
       ayahCopyText({
         text: "ٱلْحَمْدُ لِلَّهِ",
         key: "1:2",
         surahName: "الفاتحة",
-        language: "ar",
+        digits: "arabic-indic",
       })
-    ).toBe(
-      `ٱلْحَمْدُ لِلَّهِ\n(الفاتحة ${formatNumber("ar", 1)}:${formatNumber("ar", 2)})`
-    );
+    ).toBe("ٱلْحَمْدُ لِلَّهِ\n(الفاتحة ١:٢)");
   });
 });

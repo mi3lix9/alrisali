@@ -10,9 +10,10 @@ import {
   View,
 } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
 import { Screen } from "@/shared/ui/screen";
 
-import { CounterButton, formatCount } from "../components/counter-button";
+import { CounterButton } from "../components/counter-button";
 import { useOpenTasbih } from "../hooks/use-open-tasbih";
 import type { OpenTasbihNotice } from "../hooks/use-open-tasbih";
 
@@ -114,7 +115,7 @@ export const OpenTasbihScreen = () => {
         <Text muted>
           {tasbih.target === null
             ? t("open.noTarget")
-            : t("open.target", { target: formatCount(tasbih.target) })}
+            : t("open.target", { target: formatNumber(tasbih.target) })}
         </Text>
 
         <CounterButton count={count} target={tasbih.target} onTap={tap} />

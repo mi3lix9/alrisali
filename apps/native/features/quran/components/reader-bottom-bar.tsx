@@ -13,7 +13,9 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
-import { formatNumber, surahName } from "../utils/format";
+import { formatNumber } from "@/shared/lib/numbers";
+
+import { surahName } from "../utils/format";
 
 /** The bar's height above the bottom safe-area inset. */
 export const READER_BOTTOM_BAR_HEIGHT = 64;
@@ -46,7 +48,7 @@ export const ReaderBottomBar = ({
   onJump,
 }: ReaderBottomBarProps) => {
   const { t, i18n } = useTranslation("quran");
-  const format = (number: number) => formatNumber(i18n.language, number);
+
   // The value under the finger while the scrubber is held.
   const [dragged, setDragged] = useState<number | null>(null);
   const { min, max } = scrubberDomain(mode);
@@ -54,11 +56,11 @@ export const ReaderBottomBar = ({
   const label = (step: number) =>
     mode === "page"
       ? t("navigation.scrubPageValue", {
-          page: format(step),
+          page: formatNumber(step),
           name: surahName(i18n.language, pagePosition(step).surah),
         })
       : t("navigation.scrubSurahValue", {
-          number: format(step),
+          number: formatNumber(step),
           name: surahName(i18n.language, step),
         });
 
@@ -94,12 +96,12 @@ export const ReaderBottomBar = ({
           accessibilityLabel={
             returnPage === undefined
               ? t("navigation.noReturn")
-              : t("navigation.returnTo", { page: format(returnPage) })
+              : t("navigation.returnTo", { page: formatNumber(returnPage) })
           }
           startContent={<RotateCcwIcon size={18} />}
           onPress={onReturn}
         >
-          {returnPage === undefined ? "—" : format(returnPage)}
+          {returnPage === undefined ? "—" : formatNumber(returnPage)}
         </Button>
         <Direction dir="rtl" className="flex-1">
           <Slider

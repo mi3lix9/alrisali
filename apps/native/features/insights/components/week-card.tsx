@@ -1,10 +1,11 @@
+import { INSIGHTS_WEEK_DAYS } from "@alrisali/domain/insights";
 import type { InsightsDay } from "@alrisali/domain/insights";
 import { SALAH } from "@alrisali/domain/shared";
 import { Card, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { launchLanguage } from "@/shared/lib/preferences";
+import { formatDateTime } from "@/shared/lib/numbers";
 
 import { formatNumber } from "../utils/format";
 
@@ -17,23 +18,20 @@ export const WeekCard = ({ week }: { week: readonly InsightsDay[] }) => {
   return (
     <Card>
       <Card.Header>
-        <Card.Title>{t("week.title")}</Card.Title>
+        <Card.Title>{t("week.title", { days: INSIGHTS_WEEK_DAYS })}</Card.Title>
         <Card.Description>{t("week.description")}</Card.Description>
       </Card.Header>
       <Card.Content className="flex-row items-end justify-between gap-2">
         {week.map((day) => {
-          const weekday = day.date.toLocaleString(launchLanguage, {
-            weekday: "short",
-          });
+          const weekday = formatDateTime(day.date, { weekday: "short" });
           return (
             <View
               key={day.date.toString()}
               accessible
               accessibilityLabel={t("week.day", {
-                day: day.date.toLocaleString(launchLanguage, {
-                  weekday: "long",
-                }),
+                day: formatDateTime(day.date, { weekday: "long" }),
                 salah: formatNumber(day.salah),
+                possible: SALAH.length,
               })}
               className="flex-1 items-center gap-1"
             >

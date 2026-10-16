@@ -5,7 +5,9 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-import { formatNumber, surahName } from "../utils/format";
+import { localizeDigits } from "@/shared/lib/numbers";
+
+import { surahName } from "../utils/format";
 
 interface PageJumpFormProps {
   initialPage: number;
@@ -14,7 +16,9 @@ interface PageJumpFormProps {
 
 const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
   const { t, i18n } = useTranslation("quran");
-  const [text, setText] = useState(String(initialPage));
+  // Starts in the interface's digits; parsePage reads Western or
+  // Arabic-Indic, whichever the keyboard types.
+  const [text, setText] = useState(localizeDigits(String(initialPage)));
   const page = parsePage(text);
   const position = page ? pagePosition(page) : null;
   const open = () => {
@@ -27,7 +31,7 @@ const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
     <View className="gap-4">
       <Input
         testID="quran-page-jump-input"
-        label={t("navigation.pageNumber")}
+        label={t("navigation.pageNumber", { first: 1, last: PAGE_COUNT })}
         value={text}
         onChangeText={setText}
         keyboardType="number-pad"
@@ -37,14 +41,19 @@ const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
         autoFocus
         onSubmitEditing={open}
         {...(text.trim() && !page
-          ? { errorMessage: t("navigation.pageInvalid") }
+          ? {
+              errorMessage: t("navigation.pageInvalid", {
+                first: 1,
+                last: PAGE_COUNT,
+              }),
+            }
           : {})}
       />
       <Text size="sm" muted accessibilityLiveRegion="polite">
         {position
           ? t("navigation.pagePreview", {
               name: surahName(i18n.language, position.surah),
-              juz: formatNumber(i18n.language, position.juz),
+              juz: position.juz,
             })
           : " "}
       </Text>

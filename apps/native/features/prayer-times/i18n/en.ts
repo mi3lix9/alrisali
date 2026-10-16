@@ -52,8 +52,7 @@ export const en: Catalog<typeof ar> = {
   options: {
     title: "Prayer Times options",
     timeFormat: "Time format",
-    hours12: "12-hour",
-    hours24: "24-hour",
+    hours: "{{hours}}-hour",
     imsakMinutes: "Imsak before Fajr (minutes)",
     shown: "Shown Prayer Times",
     shownDescription:

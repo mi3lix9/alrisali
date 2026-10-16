@@ -1,4 +1,5 @@
 import "../i18n";
+import { MAX_KHUSHU_LEVEL } from "@alrisali/domain/khushu";
 import type { Salah } from "@alrisali/domain/shared";
 import { Button } from "panelui-native";
 import { useTranslation } from "react-i18next";
@@ -30,7 +31,9 @@ export const KhushuButton = ({ date, salah }: KhushuButtonProps) => {
       size="sm"
       onPress={() => open({ date, salah })}
     >
-      {saved ? t("rated", { level: saved.level }) : t("rate")}
+      {saved
+        ? t("rated", { level: saved.level, max: MAX_KHUSHU_LEVEL })
+        : t("rate")}
     </Button>
   );
 };

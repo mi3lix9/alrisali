@@ -9,8 +9,8 @@ import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { Linking } from "react-native";
 
+import { formatDateTime } from "@/shared/lib/numbers";
 import { orpc } from "@/shared/lib/orpc";
-import { usePreferences } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
 import { useAnnouncementsPreference } from "../data/announcements-preference";
@@ -22,7 +22,6 @@ const PERMISSION_QUERY_KEY = ["announcements", "permission"];
 export const AnnouncementsScreen = () => {
   const { t } = useTranslation("announcements");
   const queryClient = useQueryClient();
-  const language = usePreferences((state) => state.language);
   const { enabled, setEnabled } = useAnnouncementsPreference();
   const { data: permission } = useQuery({
     queryKey: PERMISSION_QUERY_KEY,
@@ -34,10 +33,6 @@ export const AnnouncementsScreen = () => {
       input: pushToken ? { pushToken } : skipToken,
     })
   );
-  const sentAt = new Intl.DateTimeFormat(language, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
 
   const allow = async () => {
     await (permission?.canAskAgain
@@ -94,7 +89,10 @@ export const AnnouncementsScreen = () => {
                       <Item.Title>{announcement.title}</Item.Title>
                       <Item.Description>{announcement.body}</Item.Description>
                       <Text muted size="sm">
-                        {sentAt.format(announcement.sentAt)}
+                        {formatDateTime(announcement.sentAt, {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
                       </Text>
                     </Item.Content>
                   </Item>

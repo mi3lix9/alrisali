@@ -16,6 +16,8 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
+import { localizeDigits } from "@/shared/lib/numbers";
+
 import { libraryFileUrl } from "../data/library-assets";
 import { usePositionSaver } from "../hooks/use-position-saver";
 import { formatDuration } from "../utils/format-duration";
@@ -79,6 +81,7 @@ export const AudioPlayer = ({
         min={0}
         max={Math.max(status.duration, 1)}
         value={shown}
+        formatValue={(seconds) => localizeDigits(formatDuration(seconds))}
         disabled={!status.isLoaded}
         onValueChange={setDragging}
         onValueCommit={(value) => {
@@ -88,10 +91,10 @@ export const AudioPlayer = ({
       />
       <View className="flex-row justify-between">
         <Text muted size="sm">
-          {formatDuration(shown)}
+          {localizeDigits(formatDuration(shown))}
         </Text>
         <Text muted size="sm">
-          {formatDuration(status.duration)}
+          {localizeDigits(formatDuration(status.duration))}
         </Text>
       </View>
       <View className="flex-row items-center justify-center gap-6">

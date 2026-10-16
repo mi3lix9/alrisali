@@ -9,9 +9,10 @@ import { Button, Direction, Progress, Spinner, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
 
-import { CounterButton, formatCount } from "../components/counter-button";
+import { CounterButton } from "../components/counter-button";
 import { ExportButton } from "../components/export-button";
 import { TasbihPicker } from "../components/tasbih-picker";
 import { useTasbihAlZahra } from "../hooks/use-tasbih-al-zahra";
@@ -73,8 +74,8 @@ const Counter = ({
         <Progress value={progress.count} maxValue={target} />
         <Text muted size="sm" className="text-center" testID="tasbih-step">
           {t("counter.step", {
-            step: formatCount(progress.step + 1),
-            steps: formatCount(TASBIH_AL_ZAHRA_STEPS.length),
+            step: formatNumber(progress.step + 1),
+            steps: formatNumber(TASBIH_AL_ZAHRA_STEPS.length),
           })}
         </Text>
       </View>

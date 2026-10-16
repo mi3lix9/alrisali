@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
 
+import { localizeDigits } from "@/shared/lib/numbers";
 import { Screen } from "@/shared/ui/screen";
 
 import {
@@ -26,8 +27,9 @@ const firstInvalidField = (path: PropertyKey[]): FormError =>
 const OpenTasbihForm = ({ saved }: { saved: OpenTasbih | null }) => {
   const { t } = useTranslation("tasbih");
   const [name, setName] = useState(saved?.name ?? "");
+  // Shown in the interface's digits; parseTarget reads either.
   const [target, setTarget] = useState(
-    saved?.target ? String(saved.target) : ""
+    saved?.target ? localizeDigits(String(saved.target)) : ""
   );
   const [notes, setNotes] = useState(saved?.notes ?? "");
   const [problem, setProblem] = useState<FormError>(null);

@@ -14,6 +14,7 @@ import { Alert, View } from "react-native";
 import { Temporal } from "temporal-polyfill";
 
 import { events } from "@/shared/lib/events";
+import { localizeDigits } from "@/shared/lib/numbers";
 
 import {
   useKhushuEntries,
@@ -77,7 +78,9 @@ const KhushuForm = ({ target, saved, onDone }: KhushuFormProps) => {
             <Slider
               label={t("level")}
               showValue
-              formatValue={(value) => `${value}/${MAX_KHUSHU_LEVEL}`}
+              formatValue={(value) =>
+                localizeDigits(`${value}/${MAX_KHUSHU_LEVEL}`)
+              }
               min={MIN_KHUSHU_LEVEL}
               max={MAX_KHUSHU_LEVEL}
               step={1}

@@ -7,8 +7,10 @@ import { useTranslation } from "react-i18next";
 import { Pressable, View } from "react-native";
 import type { TextLayoutEvent } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import { QURAN_FONT } from "../hooks/use-quran-font";
-import { formatNumber, hizbLabel } from "../utils/format";
+import { hizbLabel } from "../utils/format";
 
 /** Every Quran Page has room for 15 lines; pages 1 and 2 centre fewer. */
 const LINE_SLOTS = 15;
@@ -246,7 +248,7 @@ const PageView = ({
         className="flex-row items-end justify-between"
       >
         <Text size="xs" muted>
-          {t("page.juz", { juz: formatNumber(i18n.language, position.juz) })}
+          {t("page.juz", { juz: formatNumber(position.juz) })}
         </Text>
         <Text size="xs" muted>
           {i18n.language === "ar" ? surah?.nameAr : surah?.nameEn}
@@ -255,7 +257,7 @@ const PageView = ({
       <View
         className="flex-1 justify-center"
         accessibilityLabel={t("page.label", {
-          page: formatNumber(i18n.language, page),
+          page: formatNumber(page),
         })}
       >
         {fit ? (
@@ -293,10 +295,10 @@ const PageView = ({
         className="flex-row items-center justify-center gap-2"
       >
         <Text size="sm" weight="semibold" muted>
-          {formatNumber(i18n.language, page)}
+          {formatNumber(page)}
         </Text>
         <Text size="xs" muted>
-          {hizbLabel(t, i18n.language, position)}
+          {hizbLabel(t, position)}
         </Text>
       </View>
     </Pressable>

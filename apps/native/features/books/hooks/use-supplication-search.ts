@@ -11,6 +11,7 @@ import { router } from "expo-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
 import type { SearchSection } from "@/shared/ui/search-panel";
 
@@ -66,8 +67,8 @@ export const useSupplicationSearch = (query: string): SearchSection => {
     note = t("search.indexing");
   } else if (result.total > result.matches.length) {
     note = t("search.more", {
-      shown: result.matches.length.toLocaleString(launchLanguage),
-      total: result.total.toLocaleString(launchLanguage),
+      shown: formatNumber(result.matches.length),
+      total: formatNumber(result.total),
     });
   }
 

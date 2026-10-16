@@ -13,6 +13,8 @@ import {
 } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 /**
  * One Prayer Time's Reminder: on or off, minutes before, the tone, silent
  * and the Adhan voice. Silent wins over the voice, the voice over the tone.
@@ -87,6 +89,9 @@ export const RuleCard = ({
         <NumberInput
           label={t("rule.minutesBefore")}
           value={rule.minutesBefore}
+          // A new function each render, so a change of digits re-renders
+          // the field (this card re-renders through useTranslation).
+          formatValue={(minutes) => formatNumber(minutes)}
           min={0}
           max={MAX_MINUTES_BEFORE}
           step={1}

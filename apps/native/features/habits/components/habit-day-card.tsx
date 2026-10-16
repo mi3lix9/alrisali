@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Temporal } from "temporal-polyfill";
 
-import { launchLanguage } from "@/shared/lib/preferences";
+import { formatDateTime } from "@/shared/lib/numbers";
 import { useToday } from "@/shared/lib/today";
 
 import type { HabitData } from "../data/habits";
@@ -56,9 +56,7 @@ export const HabitDayCard = ({ data }: { data: HabitData }) => {
             {t("previousDay")}
           </Button>
           <Text weight="medium" className="flex-1 text-center">
-            {isToday
-              ? t("today")
-              : date.toLocaleString(launchLanguage, DATE_FORMAT)}
+            {isToday ? t("today") : formatDateTime(date, DATE_FORMAT)}
           </Text>
           <Button
             variant="outline"

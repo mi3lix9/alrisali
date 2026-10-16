@@ -6,6 +6,7 @@ import { Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { SectionList, View } from "react-native";
 
+import { formatNumber, useDigits } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
@@ -23,7 +24,7 @@ const SupplicationRow = ({ item }: { item: SupplicationSummary }) => (
     {item.number === undefined ? null : (
       <Item.Media>
         <Text muted size="sm">
-          {item.number.toLocaleString(launchLanguage)}
+          {formatNumber(item.number)}
         </Text>
       </Item.Media>
     )}
@@ -36,6 +37,7 @@ const SupplicationRow = ({ item }: { item: SupplicationSummary }) => (
 /** A Book's contents: its sections and their Supplications. */
 export const BookScreen = () => {
   const { t } = useTranslation("books");
+  const digits = useDigits();
   const { id } = useLocalSearchParams<{ id: string }>();
   const book = getBook(id);
 
@@ -61,6 +63,8 @@ export const BookScreen = () => {
         }))}
         keyExtractor={(item) => item.id}
         renderItem={SupplicationRow}
+        // Rows show numbers: a change of digits redraws them.
+        extraData={digits}
         renderSectionHeader={({ section }) => (
           <View className="bg-background pt-4 pb-2">
             <Text weight="semibold" size="lg">

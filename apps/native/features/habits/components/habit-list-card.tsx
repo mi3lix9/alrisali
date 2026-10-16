@@ -3,17 +3,18 @@ import { Button, Card, Item, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 import { Alert } from "react-native";
 
+import { formatDateTime } from "@/shared/lib/numbers";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useRemoveHabit, useSetHabitArchived } from "../data/habits";
 import { habitName } from "../utils/habit-name";
 
 const minuteOfDayLabel = (minuteOfDay: number): string =>
-  new Intl.DateTimeFormat(launchLanguage, {
+  formatDateTime(minuteOfDay * 60_000, {
     hour: "numeric",
     minute: "2-digit",
     timeZone: "UTC",
-  }).format(minuteOfDay * 60_000);
+  });
 
 const ScheduleLine = ({ habit }: { habit: Habit }) => {
   const { t } = useTranslation("habits");
@@ -25,7 +26,7 @@ const ScheduleLine = ({ habit }: { habit: Habit }) => {
       .join(launchLanguage === "ar" ? "، " : ", ");
   } else if (schedule.kind === "once") {
     repeat = t("schedule.onDate", {
-      date: schedule.date.toLocaleString(launchLanguage, {
+      date: formatDateTime(schedule.date, {
         day: "numeric",
         month: "long",
         year: "numeric",

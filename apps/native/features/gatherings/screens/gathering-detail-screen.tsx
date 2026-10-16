@@ -70,7 +70,7 @@ export const GatheringDetailScreen = () => {
             <Card.Description>{t("detail.when")}</Card.Description>
             <Card.Title>{day.gregorian}</Card.Title>
             <Text muted>{day.hijri}</Text>
-            <Text>{formatTimeRange(gathering, launchLanguage)}</Text>
+            <Text>{formatTimeRange(gathering)}</Text>
           </Card.Header>
           {livestreamUrl ? (
             <Card.Footer>

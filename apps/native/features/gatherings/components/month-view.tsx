@@ -14,6 +14,7 @@ import {
   useFormatHijriDate,
   useHijriCalendar,
 } from "@/shared/lib/hijri-calendar";
+import { formatNumber } from "@/shared/lib/numbers";
 
 import { useFormatDay } from "../hooks/use-format-day";
 import { GatheringList } from "./gathering-list";
@@ -59,7 +60,7 @@ const DayCell = ({
         weight="semibold"
         className={isSelected ? "text-primary-foreground" : ""}
       >
-        {day.date.day}
+        {formatNumber(day.date.day)}
       </Text>
       <View className="h-1.5 flex-row gap-0.5">
         {day.gatherings.slice(0, MAX_DOTS).map((gathering) => (

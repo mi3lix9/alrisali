@@ -18,8 +18,9 @@ import type {
   TextLayoutEvent,
 } from "react-native";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import { QURAN_FONT } from "../hooks/use-quran-font";
-import { formatNumber } from "../utils/format";
 import type { AyahGestures } from "./quran-page-view";
 
 const LINE_HEIGHT = 2;
@@ -237,7 +238,7 @@ export const SurahMode = ({
                 endContent={<ChevronRightIcon size={18} />}
               >
                 {t("surah.next", {
-                  number: formatNumber(i18n.language, next.number),
+                  number: formatNumber(next.number),
                   name: name(next.number),
                 })}
               </Button>

@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import type { Temporal } from "temporal-polyfill";
 
-import { launchLanguage } from "@/shared/lib/preferences";
+import { formatDateTime } from "@/shared/lib/numbers";
 import { useToday } from "@/shared/lib/today";
 
 import { usePrayerLog } from "../hooks/use-prayer-log";
@@ -61,9 +61,7 @@ export const PrayerLogCard = ({ loggedSalahActions }: PrayerLogCardProps) => {
             {t("previousDay")}
           </Button>
           <Text weight="medium" className="flex-1 text-center">
-            {isToday
-              ? t("today")
-              : date.toLocaleString(launchLanguage, DATE_FORMAT)}
+            {isToday ? t("today") : formatDateTime(date, DATE_FORMAT)}
           </Text>
           <Button
             variant="outline"

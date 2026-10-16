@@ -6,7 +6,7 @@ export const en: Catalog<typeof ar> = {
   title: "The Holy Quran",
   library: {
     description:
-      "The Madinah mushaf, Hafs reading, 604 pages, available offline.",
+      "The Madinah mushaf, Hafs reading, {{pages}} pages, available offline.",
     open: "Open the mushaf",
   },
   page: {
@@ -84,13 +84,13 @@ export const en: Catalog<typeof ar> = {
     surahMeta_other: "{{ayat}} ayat · p. {{page}}",
     juzMeta: "{{name}} · p. {{page}}",
     pageJump: "Go to page",
-    pageNumber: "Page number (1–604)",
-    pageInvalid: "Enter a number from 1 to 604",
+    pageNumber: "Page number ({{first}}–{{last}})",
+    pageInvalid: "Enter a number from {{first}} to {{last}}",
     pagePreview: "Surah {{name}} · Juz {{juz}}",
     open: "Open",
     searchPlaceholder: "A Surah name or words from an ayah",
     searchHint:
-      "No need to type diacritics. Type an ayah number such as 2:255 to open it.",
+      "No need to type diacritics. Type an ayah number such as {{surah}}:{{ayah}} to open it.",
     noResults: "No results. Try a Surah name or another word.",
     ayat: "Ayat",
     moreAyat:

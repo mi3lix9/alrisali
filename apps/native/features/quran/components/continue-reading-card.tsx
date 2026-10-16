@@ -6,8 +6,9 @@ import { Button, Card } from "panelui-native";
 import { BookmarkIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import { useQuranLastRead } from "../data/last-read";
-import { formatNumber } from "../utils/format";
 
 /**
  * "Continue reading" for Home and the Library: the surah, ayah and page of
@@ -32,8 +33,8 @@ export const ContinueReadingCard = () => {
           {ayah && surah
             ? t("lastRead.position", {
                 surah: i18n.language === "ar" ? surah.nameAr : surah.nameEn,
-                ayah: formatNumber(i18n.language, ayah.ayah),
-                page: formatNumber(i18n.language, ayah.page),
+                ayah: formatNumber(ayah.ayah),
+                page: formatNumber(ayah.page),
               })
             : t("lastRead.empty")}
         </Card.Description>

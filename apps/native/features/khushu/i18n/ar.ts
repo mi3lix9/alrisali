@@ -26,7 +26,7 @@ export const ar = {
   save: "حفظ",
   remove: "حذف",
   rate: "قيّم الخشوع",
-  rated: "الخشوع {{level}}/10",
+  rated: "الخشوع {{level}}/{{max}}",
   confirmRemove: {
     title: "حذف خشوع صلاة {{salah}}؟",
     message: "سيُحذف تقييم الخشوع والمشتتات لهذه الصلاة.",

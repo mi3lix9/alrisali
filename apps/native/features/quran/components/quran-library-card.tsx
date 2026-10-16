@@ -1,4 +1,5 @@
 import "../i18n";
+import { PAGE_COUNT } from "@alrisali/domain/quran";
 import type { JumpTarget } from "@alrisali/domain/quran";
 import { router } from "expo-router";
 import { Button, Card } from "panelui-native";
@@ -43,7 +44,9 @@ export const QuranLibraryCard = () => {
     <Card>
       <Card.Header>
         <Card.Title>{t("title")}</Card.Title>
-        <Card.Description>{t("library.description")}</Card.Description>
+        <Card.Description>
+          {t("library.description", { pages: PAGE_COUNT })}
+        </Card.Description>
       </Card.Header>
       <Card.Footer className="flex-row flex-wrap gap-2">
         <Button

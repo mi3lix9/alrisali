@@ -1,7 +1,7 @@
 export const ar = {
   title: "القرآن الكريم",
   library: {
-    description: "مصحف المدينة برواية حفص، ٦٠٤ صفحات، متاح دون اتصال.",
+    description: "مصحف المدينة برواية حفص، {{pages}} صفحات، متاح دون اتصال.",
     open: "افتح المصحف",
   },
   page: {
@@ -79,13 +79,13 @@ export const ar = {
     surahMeta_other: "{{ayat}} آية · ص {{page}}",
     juzMeta: "{{name}} · ص {{page}}",
     pageJump: "اذهب إلى صفحة",
-    pageNumber: "رقم الصفحة (١–٦٠٤)",
-    pageInvalid: "اكتب رقمًا بين ١ و٦٠٤",
+    pageNumber: "رقم الصفحة ({{first}}–{{last}})",
+    pageInvalid: "اكتب رقمًا بين {{first}} و{{last}}",
     pagePreview: "سورة {{name}} · الجزء {{juz}}",
     open: "افتح",
     searchPlaceholder: "اسم سورة أو كلمات من آية",
     searchHint:
-      "لا حاجة إلى كتابة التشكيل. اكتب رقم آية مثل ٢:٢٥٥ لفتحها مباشرة.",
+      "لا حاجة إلى كتابة التشكيل. اكتب رقم آية مثل {{surah}}:{{ayah}} لفتحها مباشرة.",
     noResults: "لا نتائج. جرّب اسم سورة أو كلمة أخرى.",
     ayat: "الآيات",
     moreAyat: "تُعرض أول {{shown}} من {{total}} آية؛ زد كلمات البحث لتضييقها.",

@@ -1,11 +1,11 @@
-import { launchLanguage } from "@/shared/lib/preferences";
+import { formatNumber } from "@/shared/lib/numbers";
 
 const DIRECTIONS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"] as const;
 const DEGREES_PER_DIRECTION = 45;
 
-export const wholeNumber = new Intl.NumberFormat(launchLanguage, {
-  maximumFractionDigits: 0,
-});
+/** Degrees or kilometres, rounded to a whole number. */
+export const formatWholeNumber = (value: number): string =>
+  formatNumber(value, { maximumFractionDigits: 0 });
 
 /** The compass sector (of eight) a bearing from north points into. */
 export const bearingSector = (bearing: number) =>

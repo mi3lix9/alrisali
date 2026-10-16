@@ -1,15 +1,12 @@
-import { launchLanguage } from "@/shared/lib/preferences";
+import { formatNumber as formatShared } from "@/shared/lib/numbers";
 
-const numbers = new Intl.NumberFormat(launchLanguage, {
-  maximumFractionDigits: 1,
-});
-const percents = new Intl.NumberFormat(launchLanguage, { style: "percent" });
-
-/** A number in the app language's digits, at most one decimal. */
-export const formatNumber = (value: number): string => numbers.format(value);
+/** A number in the interface's digits, at most one decimal. */
+export const formatNumber = (value: number): string =>
+  formatShared(value, { maximumFractionDigits: 1 });
 
 /** A 0–1 share as a whole percentage. */
-export const formatPercent = (share: number): string => percents.format(share);
+export const formatPercent = (share: number): string =>
+  formatShared(share, { style: "percent" });
 
 /** Whether `key` names one of `labels`: synced data may hold newer keys. */
 export const isLabelled = <Labels extends object>(

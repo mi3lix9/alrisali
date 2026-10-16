@@ -10,13 +10,14 @@ import { PauseIcon, PlayIcon, RotateCwIcon } from "panelui-native/icons";
 import { useTranslation } from "react-i18next";
 import { Temporal } from "temporal-polyfill";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 import { useQuranReaderSettings } from "../data/reader-settings";
 import {
   sendRecitation,
   useRecitationPlayback,
 } from "../data/recitation-player";
 import { QURAN_FONT, useQuranFont } from "../hooks/use-quran-font";
-import { formatNumber } from "../utils/format";
 
 /**
  * Home's Verse of the Day: today's ayah with its recitation, by the reciter
@@ -93,7 +94,7 @@ export const VerseOfTheDayCard = () => {
         <Card.Description>
           {t("verseOfTheDay.reference", {
             surah: i18n.language === "ar" ? surah?.nameAr : surah?.nameEn,
-            ayah: formatNumber(i18n.language, ayah.ayah),
+            ayah: formatNumber(ayah.ayah),
           })}
         </Card.Description>
       </Card.Header>

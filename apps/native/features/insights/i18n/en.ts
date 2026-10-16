@@ -27,7 +27,7 @@ export const en: Catalog<typeof ar> = {
     salah: "Salah logged",
     salahValue: "{{logged}} of {{possible}}",
     khushu: "Average Khushu",
-    khushuValue: "{{value}} / 10",
+    khushuValue: "{{value}} / {{max}}",
     khushuUp: "{{value}} up on last week",
     khushuDown: "{{value}} down on last week",
     khushuSame: "Same as last week",
@@ -36,12 +36,12 @@ export const en: Catalog<typeof ar> = {
     noHabits: "No Habits due",
   },
   week: {
-    title: "Last 7 days",
+    title: "Last {{days}} days",
     description: "Salah logged each day.",
-    day: "{{day}}: {{salah}} of 5 Salah",
+    day: "{{day}}: {{salah}} of {{possible}} Salah",
   },
   heatmap: {
-    title: "Last 12 weeks",
+    title: "Last {{weeks}} weeks",
     description: "Each square is a day: Salah first, then Habits and Dhikr.",
     less: "Less",
     more: "More",
@@ -66,8 +66,8 @@ export const en: Catalog<typeof ar> = {
   },
   moods: {
     title: "Moods",
-    description: "Last 30 days.",
-    empty: "No Mood Check-ins in the last 30 days.",
+    description: "Last {{days}} days.",
+    empty: "No Mood Check-ins in the last {{days}} days.",
     mood: {
       happy: "Happy",
       calm: "Calm",
@@ -79,7 +79,7 @@ export const en: Catalog<typeof ar> = {
   },
   distractions: {
     title: "Distractions",
-    description: "In the Salah you rated, last 30 days.",
+    description: "In the Salah you rated, last {{days}} days.",
     empty: "No Distractions in the Salah you rated.",
     distraction: {
       mindWandering: "Mind wandering",

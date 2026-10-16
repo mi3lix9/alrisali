@@ -4,9 +4,10 @@ import { router } from "expo-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { formatNumber } from "@/shared/lib/numbers";
 import type { SearchSection } from "@/shared/ui/search-panel";
 
-import { formatNumber, surahName } from "../utils/format";
+import { surahName } from "../utils/format";
 
 /** The Surahs whose name or number matches `query`, each opening the reader at it. */
 export const useSurahSearch = (query: string): SearchSection => {
@@ -19,7 +20,7 @@ export const useSurahSearch = (query: string): SearchSection => {
     results: surahs.map(({ number }) => ({
       key: String(number),
       title: surahName(i18n.language, number),
-      description: formatNumber(i18n.language, number),
+      description: formatNumber(number),
       testID: `search-surah-${number}`,
       open: () =>
         router.push({ pathname: "/quran", params: { surah: String(number) } }),

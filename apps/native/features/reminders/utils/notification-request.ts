@@ -8,6 +8,8 @@ import type {
 import type { Language } from "@alrisali/i18n";
 import type { TFunction } from "i18next";
 
+import { formatNumber } from "@/shared/lib/numbers";
+
 /** Where each alert's sound comes from; the files are in assets/sounds. */
 const SOUND_FILES = {
   chime: "chime.wav",
@@ -69,7 +71,7 @@ const minutesPhrase = (
 ): string => {
   const form = new Intl.PluralRules(language).select(count);
   return t(`minutes.${form}`, {
-    count: new Intl.NumberFormat(language).format(count),
+    count: formatNumber(count),
   });
 };
 
