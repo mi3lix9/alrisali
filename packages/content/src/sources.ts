@@ -67,6 +67,15 @@ export const CONTENT_SOURCES = [
       url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },
+  {
+    id: "wmm",
+    name: "World Magnetic Model WMM2025 (NOAA NCEI and BGS)",
+    url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    licence: {
+      name: "Public domain (U.S. Government work)",
+      url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];

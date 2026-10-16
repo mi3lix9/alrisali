@@ -21,6 +21,13 @@ export const en: Catalog<typeof ar> = {
   facing: "You're facing the Qibla",
   turnRight: "Turn right {{degrees}}°",
   turnLeft: "Turn left {{degrees}}°",
+  nearRight: "Nearly there · a little right",
+  nearLeft: "Nearly there · a little left",
+  declination: "Magnetic declination here {{degrees}}° {{direction}} · applied",
+  declinationLabel:
+    "Compass corrected to true north by a magnetic declination of {{degrees}} degrees {{direction}}",
+  declinationEast: "east",
+  declinationWest: "west",
   noLocation: {
     title: "Set your location",
     description:
@@ -32,7 +39,7 @@ export const en: Catalog<typeof ar> = {
     waiting: "Waiting for the compass…",
     permissionTitle: "The compass needs location access",
     permissionDescription:
-      "Your device uses your location to find true north, so the compass points to the Qibla accurately.",
+      "The compass reads your device's heading through location services, so it needs location access to point to the Qibla.",
     allow: "Allow location access",
     blockedDescription:
       "Location access isn't allowed. Allow it in the device's Settings for the compass to work.",
@@ -43,7 +50,5 @@ export const en: Catalog<typeof ar> = {
     calibrateTitle: "The compass is inaccurate",
     calibrateDescription:
       "Move your phone through the air in a figure eight to calibrate it, away from metal and electronics.",
-    magneticNorth:
-      "The compass is using magnetic north for now, so the direction may be a few degrees off.",
   },
 };
