@@ -5,3 +5,5 @@ export type {
   QuranReaderSettingsChange,
   QuranReaderSettingsRepository,
 } from "./reader-settings";
+export { createQuranRibbonsRepository } from "./ribbons";
+export type { QuranRibbonsRepository } from "./ribbons";

@@ -195,4 +195,10 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `qada_logs_date_idx` ON `qada_logs` (`date`);",
     ],
   },
+  {
+    tag: "20261016132923_bookmark_ribbons",
+    statements: [
+      "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
+    ],
+  },
 ];
