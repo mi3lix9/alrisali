@@ -32,7 +32,7 @@ class ProximityModule : Module() {
       val manager = sensorManager
       val proximity = sensor
       if (manager == null || proximity == null || listener != null) {
-        return@Function
+        return@Function null
       }
       val next = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
