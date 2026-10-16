@@ -5,3 +5,5 @@ export type {
   SupplicationSearchOptions,
   SupplicationSearchResult,
 } from "./search";
+export { amalOfMonth } from "./amal";
+export type { AmalDay, MonthAmal } from "./amal";
