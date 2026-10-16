@@ -171,4 +171,10 @@ export const migrations: readonly Migration[] = [
     tag: "20261016002557_shell_digits",
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
+  {
+    tag: "20261016123802_supplication_positions",
+    statements: [
+      "CREATE TABLE `supplication_positions` (\n\t`supplication_id` text PRIMARY KEY,\n\t`section` integer NOT NULL,\n\t`saved_at` text NOT NULL\n);",
+    ],
+  },
 ];
