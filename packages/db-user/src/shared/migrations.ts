@@ -233,4 +233,12 @@ export const migrations: readonly Migration[] = [
       "CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);",
     ],
   },
+  {
+    tag: "20261016141952_prayer_time_rules",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `prayer_adjustments` text;",
+      "ALTER TABLE `believer_settings` ADD `midnight_definition` text;",
+      "ALTER TABLE `believer_settings` ADD `high_latitude_rule` text;",
+    ],
+  },
 ];
