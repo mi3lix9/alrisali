@@ -19,9 +19,8 @@ test(
     await book.tap();
     await screen.getByTestId("books-supplication-sahifa-1").tap();
 
-    // The button follows the Supplication's text.
+    // The button sits in the reader's bottom toolbar, always in reach.
     const read = screen.getByTestId("reading-completion-mark");
-    await screen.scrollUntilVisible(read, { direction: "down" });
     await expect(read).toHaveAccessibleName("قرأته اليوم");
     await read.tap();
     await expect(read).toHaveAccessibleName("قُرئ اليوم");
