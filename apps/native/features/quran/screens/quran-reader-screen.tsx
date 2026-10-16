@@ -1,6 +1,7 @@
 import "../i18n";
 import type { AyahKey } from "@alrisali/content/quran";
 import {
+  chromeTransition,
   findAyah,
   firstPageOfSurah,
   openReader,
@@ -17,14 +18,7 @@ import type {
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Spinner, Text } from "panelui-native";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -33,7 +27,7 @@ import Animated, { FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AyahSheet } from "../components/ayah-sheet";
-import type { AyahActions } from "../components/ayah-sheet";
+import type { AyahActions, AyahSheetMove } from "../components/ayah-sheet";
 import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
@@ -51,7 +45,6 @@ import {
   useQuranReaderSettings,
   useUpdateQuranReaderSettings,
 } from "../data/reader-settings";
-import { ReaderLastReadContext } from "../hooks/reader-last-read";
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
@@ -127,13 +120,6 @@ const Reader = ({
       saveLastRead(state.lastReadAyah);
     }
   }, [state.lastReadAyah, saveLastRead]);
-  const lastReadContext = useMemo(
-    () => ({
-      lastReadAyah: state.lastReadAyah,
-      setLastRead: (ayah: AyahKey) => dispatch({ type: "set-last-read", ayah }),
-    }),
-    [state.lastReadAyah]
-  );
   const [chrome, send] = useReaderChrome();
   // Bumped by every jump, so the page list or surah remounts at the target.
   const [jumpCount, setJumpCount] = useState(0);
@@ -151,6 +137,11 @@ const Reader = ({
     },
     [dismissHint, send]
   );
+  const onPressInAyah = useCallback(
+    (ayah: AyahKey) => send({ type: "press-in", ayah }),
+    [send]
+  );
+  const onPressOut = useCallback(() => send({ type: "press-out" }), [send]);
   const onScrollStart = useCallback(
     () => send({ type: "scroll-start" }),
     [send]
@@ -176,6 +167,27 @@ const Reader = ({
   const openSheet = (kind: "index" | "page-jump" | "search") =>
     send({ type: "open-sheet", sheet: { kind } });
   const closeSheet = () => send({ type: "close-sheet" });
+  /**
+   * The ayah sheet's arrows. The page behind follows when the selection
+   * leaves it, as if the Believer had paged or scrolled there.
+   */
+  const moveSelection = (direction: AyahSheetMove) => {
+    const event = { type: "move-selection", direction } as const;
+    const { sheet } = chromeTransition(chrome, event);
+    send(event);
+    const ayah = sheet?.kind === "ayah" ? findAyah(sheet.ayah) : undefined;
+    if (!ayah) {
+      return;
+    }
+    if (state.mode === "page" && ayah.page !== state.currentPage) {
+      dispatch({ type: "page-shown", page: ayah.page });
+      setJumpCount((count) => count + 1);
+    }
+    if (state.mode === "surah" && ayah.surah !== state.currentSurah) {
+      dispatch({ type: "ayah-shown", ayah: ayah.key });
+      setJumpCount((count) => count + 1);
+    }
+  };
 
   const changeSettings = (change: Partial<QuranReaderSettings>) => {
     send({ type: "interact" });
@@ -196,7 +208,10 @@ const Reader = ({
   const gestures = {
     onTap,
     onLongPressAyah,
+    onPressInAyah,
+    onPressOut,
     selectedAyah,
+    pressingAyah: chrome.pressing,
     lastReadAyah: state.lastReadAyah,
   };
   const lastReadOnScreen =
@@ -279,17 +294,11 @@ const Reader = ({
       <AyahSheet
         ayah={selectedAyah}
         reciter={settings.reciter}
-        // The sheet draws in a portal, so its actions get the context there.
-        actions={
-          ayahActions
-            ? (ayah) => (
-                <ReaderLastReadContext.Provider value={lastReadContext}>
-                  {ayahActions(ayah)}
-                </ReaderLastReadContext.Provider>
-              )
-            : undefined
-        }
-        onClose={() => send({ type: "close-sheet" })}
+        lastReadAyah={state.lastReadAyah}
+        onSetLastRead={(ayah) => dispatch({ type: "set-last-read", ayah })}
+        onMove={moveSelection}
+        actions={ayahActions}
+        onClose={closeSheet}
       />
       <ReaderSettingsSheet
         open={chrome.sheet?.kind === "settings"}

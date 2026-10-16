@@ -42,6 +42,15 @@ export const nextAyah = (key: AyahKey): AyahKey | null => {
   return AYAT[index + 1]?.key ?? null;
 };
 
+/** The ayah before this one, back into the previous surah; null before 1:1. */
+export const previousAyah = (key: AyahKey): AyahKey | null => {
+  const index = ayahIndex.get(key);
+  if (index === undefined) {
+    throw new RangeError(`No ayah ${key}`);
+  }
+  return AYAT[index - 1]?.key ?? null;
+};
+
 /** How long a played file stays on the device. */
 export const RECITATION_CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 

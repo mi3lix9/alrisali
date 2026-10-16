@@ -18,8 +18,9 @@ import {
   saveTasbihAlZahraProgress,
   useSavedTasbihAlZahraProgress,
 } from "../data/tasbih";
-import { playHaptic } from "../utils/haptics";
 import { useSavedCounter } from "./use-saved-counter";
+import { useTasbihFeedback } from "./use-tasbih-feedback";
+
 /** Records the round's Dhikr Session, then tells the other features. */
 const completeRound = async (count: number): Promise<void> => {
   try {
@@ -50,8 +51,8 @@ export interface TasbihAlZahraCounter {
 }
 
 /**
- * Tasbih al-Zahra's counter. A tap updates the count and plays its haptic at
- * once; saving, recording the Dhikr Session and sync all happen afterwards
+ * Tasbih al-Zahra's counter. A tap updates the count and plays its feedback
+ * at once; saving, recording the Dhikr Session and sync all happen afterwards
  * and never hold a tap back.
  */
 export const useTasbihAlZahra = (): TasbihAlZahraCounter => {
@@ -67,16 +68,17 @@ export const useTasbihAlZahra = (): TasbihAlZahraCounter => {
     onDiscard: discard,
   });
   const { current, count } = counter;
+  const feedback = useTasbihFeedback();
 
   const tap = useCallback(() => {
     const outcome = tapTasbihAlZahra(current());
-    playHaptic(outcome.feedback === "round" ? "done" : outcome.feedback);
+    feedback(outcome.feedback === "round" ? "done" : outcome.feedback);
     count(outcome.progress);
     setLastFeedback(outcome.feedback);
     if (outcome.dhikrSessionCount !== null) {
       completeRound(outcome.dhikrSessionCount);
     }
-  }, [current, count]);
+  }, [current, count, feedback]);
 
   const reset = useCallback(() => {
     count(TASBIH_AL_ZAHRA_START);

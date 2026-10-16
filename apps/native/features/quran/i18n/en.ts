@@ -36,10 +36,12 @@ export const en: Catalog<typeof ar> = {
   },
   sheet: {
     title: "{{surah}} · Ayah {{ayah}}",
-    share: "Share",
+    share: "Share text",
     play: "Play from here",
     copy: "Copy",
     copied: "Ayah copied",
+    previous: "Previous ayah",
+    next: "Next ayah",
   },
   lastRead: {
     set: "Set as last read",

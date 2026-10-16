@@ -1,8 +1,8 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "6272b1ab-b017-4406-b986-03d1605ec57d",
-  "prevIds": ["5a86bc5c-9581-4dea-be17-47d5c9804222"],
+  "id": "ad09400b-d308-4cfe-97d3-a1df0d1038c7",
+  "prevIds": ["68e708c8-ca31-4158-85e9-9b898b2fcb0f"],
   "ddl": [
     {
       "name": "companion",
@@ -110,6 +110,10 @@
     },
     {
       "name": "tasbih",
+      "entityType": "tables"
+    },
+    {
+      "name": "tasbih_settings",
       "entityType": "tables"
     },
     {
@@ -1463,6 +1467,26 @@
       "table": "tasbih"
     },
     {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "tasbih_settings"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "feedback_mode",
+      "entityType": "columns",
+      "table": "tasbih_settings"
+    },
+    {
       "columns": ["id"],
       "nameExplicit": false,
       "name": "companion_pk",
@@ -1649,6 +1673,13 @@
       "nameExplicit": false,
       "name": "tasbih_pk",
       "table": "tasbih",
+      "entityType": "pks"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "tasbih_settings_pk",
+      "table": "tasbih_settings",
       "entityType": "pks"
     },
     {

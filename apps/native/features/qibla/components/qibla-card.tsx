@@ -1,5 +1,6 @@
 import {
-  isFacingQibla,
+  magneticDeclination,
+  qiblaAlignment,
   qiblaBearing,
   qiblaDistanceKm,
   qiblaOffset,
@@ -11,6 +12,8 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { joinParts } from "@/shared/lib/i18n";
+import { formatNumber } from "@/shared/lib/numbers";
+import { useToday } from "@/shared/lib/today";
 
 import { useCompass } from "../hooks/use-compass";
 import { bearingSector, formatWholeNumber } from "../utils/format";
@@ -25,17 +28,28 @@ const playFacingHaptic = async (): Promise<void> => {
   }
 };
 
+const GUIDANCE_COLOUR = {
+  facing: "text-success",
+  near: "text-warning",
+  away: "",
+} as const;
+
 /**
- * The Qibla from a location: its bearing and distance, and a live compass
- * that shows, with a haptic, when the device faces it.
+ * The Qibla from a location: its bearing from true north and distance, the
+ * magnetic declination the compass is corrected with, and a live compass that
+ * shows when the device is near the Qibla and, with a haptic, when it faces it.
  */
 export const QiblaCard = ({ location }: { location: Location }) => {
   const { t } = useTranslation("qibla");
-  const { compass, allow } = useCompass();
+  const today = useToday();
+  const declination = magneticDeclination(location, today);
+  const { compass, allow } = useCompass(declination);
   const bearing = qiblaBearing(location);
   const heading = compass.status === "live" ? compass.heading : null;
-  const facing = heading !== null && isFacingQibla(heading, bearing);
+  const alignment = heading === null ? null : qiblaAlignment(heading, bearing);
+  const facing = alignment === "facing";
 
+  // Once on entering the facing state, not on every reading inside it.
   useEffect(() => {
     if (facing) {
       playFacingHaptic();
@@ -47,12 +61,23 @@ export const QiblaCard = ({ location }: { location: Location }) => {
   const distance = t("distance", {
     distance: formatWholeNumber(qiblaDistanceKm(location)),
   });
+  const correction = {
+    degrees: formatNumber(Math.abs(declination), {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }),
+    direction: declination < 0 ? t("declinationWest") : t("declinationEast"),
+  };
 
   let guidance = t("facing");
-  if (heading !== null && !facing) {
+  if (heading !== null && alignment !== "facing") {
     const offset = qiblaOffset(heading, bearing);
     const turn = { degrees: formatWholeNumber(Math.abs(offset)) };
-    guidance = offset > 0 ? t("turnRight", turn) : t("turnLeft", turn);
+    if (alignment === "near") {
+      guidance = offset > 0 ? t("nearRight") : t("nearLeft");
+    } else {
+      guidance = offset > 0 ? t("turnRight", turn) : t("turnLeft", turn);
+    }
   }
 
   return (
@@ -69,19 +94,34 @@ export const QiblaCard = ({ location }: { location: Location }) => {
           </Card.Description>
         </Card.Header>
         <Card.Content className="gap-4">
-          <QiblaDial heading={heading} bearing={bearing} facing={facing} />
-          {compass.status === "live" ? (
+          <QiblaDial
+            heading={heading}
+            bearing={bearing}
+            alignment={alignment}
+          />
+          {compass.status === "live" && alignment ? (
             <Text
               size="lg"
               weight="semibold"
-              className={facing ? "text-success text-center" : "text-center"}
+              className={`text-center ${GUIDANCE_COLOUR[alignment]}`}
               accessibilityLiveRegion="polite"
+              testID="qibla-guidance"
             >
               {guidance}
             </Text>
-          ) : (
+          ) : null}
+          {compass.status === "live" ? null : (
             <CompassStatus compass={compass} allow={allow} />
           )}
+          <Text
+            size="sm"
+            muted
+            className="text-center"
+            accessibilityLabel={t("declinationLabel", correction)}
+            testID="qibla-declination"
+          >
+            {t("declination", correction)}
+          </Text>
         </Card.Content>
       </Card>
       {compass.status === "live" && compass.needsCalibration ? (
@@ -94,11 +134,6 @@ export const QiblaCard = ({ location }: { location: Location }) => {
             </Alert.Description>
           </Alert.Content>
         </Alert>
-      ) : null}
-      {compass.status === "live" && !compass.trueNorth ? (
-        <Text size="sm" muted>
-          {t("compass.magneticNorth")}
-        </Text>
       ) : null}
     </>
   );
