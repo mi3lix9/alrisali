@@ -34,6 +34,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Qibla**: The direction from the Believer's location to the Kaaba.
 
+**Shrine**: A ziyarah target with a direction and distance alongside the Qibla: Najaf, Karbala, Mashhad, Madina, Kadhimiya or Samarra. A Shrine's direction is never the Qibla. _Avoid_: Qibla target, holy site
+
 **Prayer Assistant**: The guided companion that follows the Believer through a Salah and keeps count of Rak'ahs and Positions. _Avoid_: Prayer recognition, pose tracker
 
 **Recognition Mode**: How the Prayer Assistant senses the Believer's Position: Camera, Head Height, Sound (Takbir) or Mat.

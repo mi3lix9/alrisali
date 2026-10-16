@@ -201,4 +201,10 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `prayer_times_settings` ADD `recent_cities` text;",
     ],
   },
+  {
+    tag: "20261016132229_qibla_settings",
+    statements: [
+      "CREATE TABLE `qibla_settings` (\n\t`id` text PRIMARY KEY,\n\t`target` text\n);",
+    ],
+  },
 ];

@@ -80,6 +80,14 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
     ["expo-localization", { supportsRTL: true, forcesRTL: true }],
     "expo-apple-authentication",
     [
+      // The Qibla's bubble level reads the accelerometer.
+      "expo-sensors",
+      {
+        motionPermission:
+          "يقرأ الرسالي حسّاس الحركة لميزان الاستواء في شاشة القبلة. Al-Risali reads the motion sensor for the Qibla screen's bubble level.",
+      },
+    ],
+    [
       "expo-notifications",
       {
         // Reminders are local notifications (ADR-0003); these are the tones

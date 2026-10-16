@@ -12,6 +12,7 @@
     "./quran": "./src/quran/index.ts",
     "./quran/font.ttf": "./src/quran/data/kfgqpc_hafs_v30.ttf",
     "./magnetic-model": "./src/magnetic-model/index.ts",
+    "./qibla-targets": "./src/qibla-targets/index.ts",
     "./time-zones": "./src/time-zones/index.ts"
   },
   "scripts": {
