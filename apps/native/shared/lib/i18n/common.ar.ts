@@ -18,6 +18,8 @@ export const ar = {
     gatherings: "المجالس",
     insights: "إحصاءاتي",
     khatmah: "الختمة",
+    timetable: "الجدول الشهري",
+    imsakiyya: "إمساكية رمضان",
   },
   featureAreas: {
     quran: "القرآن",

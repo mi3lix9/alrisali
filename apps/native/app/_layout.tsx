@@ -61,6 +61,8 @@ const RootStack = () => {
         <Stack.Screen name="qada" />
         <Stack.Screen name="qada-setup" />
         <Stack.Screen name="share-image" />
+        <Stack.Screen name="timetable" />
+        <Stack.Screen name="imsakiyya" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
