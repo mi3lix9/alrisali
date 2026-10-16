@@ -63,6 +63,24 @@ describe("Books content integrity", () => {
     LOAD_ALL_TEXTS_TIMEOUT
   );
 
+  it(
+    "writes Arabic letters, not the Persian ی and ک",
+    async () => {
+      const persian = /[\u06CC\u06A9]/u;
+      const titles = SUPPLICATION_IDS.filter((id) =>
+        persian.test(getSupplication(id)?.title.ar ?? "")
+      );
+      const texts = await Promise.all(
+        SUPPLICATION_IDS.map(loadSupplicationText)
+      );
+      const bodies = SUPPLICATION_IDS.filter((_, index) =>
+        texts[index]?.some((passage) => persian.test(passage.ar))
+      );
+      expect([...titles, ...bodies]).toStrictEqual([]);
+    },
+    LOAD_ALL_TEXTS_TIMEOUT
+  );
+
   it("holds the Sahifa's 54 supplications and its seven weekday supplications", () => {
     const sahifa = getBook("sahifa");
     expect(

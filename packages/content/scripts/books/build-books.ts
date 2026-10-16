@@ -257,8 +257,15 @@ const fetchDuaIndex = async (): Promise<DuaSummary[]> => {
   return jsonValueAt(payload, start + marker.length) as DuaSummary[];
 };
 
+// Some of the source's Arabic was typed on a Persian keyboard: Persian yeh
+// (ی) and keheh (ک) look like the Arabic ي and ك but are other characters,
+// so search misses them. Every occurrence in the source is a plain yeh or kaf.
 const clean = (text: string | null | undefined): string =>
-  (text ?? "").replaceAll(/\s+/gu, " ").trim();
+  (text ?? "")
+    .replaceAll("\u06CC", "\u064A")
+    .replaceAll("\u06A9", "\u0643")
+    .replaceAll(/\s+/gu, " ")
+    .trim();
 
 const duaPassages = (dua: Dua): Passage[] =>
   dua.DuaVerse.toSorted((a, b) => a.number - b.number)
