@@ -1,5 +1,6 @@
-import { AMAL } from "@alrisali/content/books";
-import type { AmalEntry } from "@alrisali/content/books";
+import { AMAL, getSupplication } from "@alrisali/content/books";
+import type { AmalEntry, AmalKind } from "@alrisali/content/books";
+import { z } from "zod";
 
 import type { HijriMonth } from "../shared";
 
@@ -35,3 +36,40 @@ export const amalOfMonth = (
       .map(([day, entries]) => ({ day, entries })),
   };
 };
+
+/** The longest Hijri month; a day is 1 to this, or 0 for the whole month. */
+export const AMAL_LAST_DAY = 30;
+
+/** The kinds of act (the content package's `AMAL_KINDS`; a test keeps them equal). */
+export const AMAL_KIND_NAMES = [
+  "dua",
+  "ziyarah",
+  "prayer",
+  "fast",
+  "tasbih",
+] as const satisfies readonly AmalKind[];
+
+/** What one act of a day is: its kind, when, and the Supplication that holds its text. */
+export const amalActSchema = z.object({
+  kind: z.enum(AMAL_KIND_NAMES),
+  time: z.enum(["night", "day"]).optional(),
+  supplicationId: z
+    .string()
+    .refine((id) => getSupplication(id) !== undefined, "No such Supplication"),
+});
+
+/** Everything one day (or the whole month, day 0) of a Hijri month lists. */
+export const amalDaySchema = z
+  .object({
+    month: z.int().min(1).max(12),
+    day: z.int().min(0).max(AMAL_LAST_DAY),
+    acts: z.array(amalActSchema).max(50),
+  })
+  .refine(
+    ({ acts }) =>
+      new Set(acts.map((act) => `${act.time ?? ""}/${act.supplicationId}`))
+        .size === acts.length,
+    "A Supplication is listed once for the same time of a day"
+  );
+
+export type AmalDayInput = z.infer<typeof amalDaySchema>;

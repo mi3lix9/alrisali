@@ -34,6 +34,7 @@ import { useToday } from "@/shared/lib/today";
 import { Screen } from "@/shared/ui/screen";
 
 import { AmalEntryRow } from "../components/amal-entry-row";
+import { useAmal } from "../data/amal";
 
 const AMAL_TABS = ["specific", "general"] as const;
 type AmalTab = (typeof AMAL_TABS)[number];
@@ -58,8 +59,9 @@ export const AmalScreen = () => {
     () => new Set([today.day])
   );
   const months = useRef<ScrollViewInstance>(null);
+  const amal = useAmal();
 
-  const { wholeMonth, days } = amalOfMonth(month);
+  const { wholeMonth, days } = amalOfMonth(month, amal);
   // The month's next start: this year's if it has not ended, else next year's.
   const year = month >= today.month ? today.year : today.year + 1;
   const length = calendar.monthLength(year, month);
