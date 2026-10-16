@@ -7,6 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./books": "./src/books/index.ts",
+    "./books/fonts/amiri.ttf": "./src/books/fonts/amiri-regular.ttf",
+    "./books/fonts/ibm-plex-sans-arabic.ttf": "./src/books/fonts/ibm-plex-sans-arabic-regular.ttf",
     "./quran": "./src/quran/index.ts",
     "./quran/font.ttf": "./src/quran/data/kfgqpc_hafs_v30.ttf",
     "./magnetic-model": "./src/magnetic-model/index.ts",

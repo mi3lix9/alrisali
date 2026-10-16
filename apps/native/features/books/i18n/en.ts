@@ -12,8 +12,6 @@ export const en: Catalog<typeof ar> = {
   },
   reader: {
     view: {
-      label: "View",
-      read: "Read",
       recite: "Recite-Along",
     },
     language: {
@@ -28,6 +26,46 @@ export const en: Catalog<typeof ar> = {
     },
     loading: "Opening the text…",
     loadError: "The text could not be opened.",
+    section: "Section {{number}}",
+    toolbar: {
+      label: "Reading tools",
+      format: "Format",
+    },
+    format: {
+      title: "Reading format",
+      summary: "{{font}} · {{size}} · {{theme}}",
+      font: {
+        label: "Font",
+        sample: "بسم",
+        amiri: "Amiri",
+        system: "Device font",
+        plex: "Plex",
+      },
+      size: "Size",
+      spacing: {
+        label: "Line spacing",
+        compact: "Compact",
+        normal: "Normal",
+        wide: "Wide",
+      },
+      theme: {
+        label: "Theme",
+        sample: "ع",
+        light: "Light",
+        dark: "Dark",
+        system: "System",
+        sepia: "Sepia",
+      },
+      reset: "Reset",
+      resetDone: "The format is back to its defaults",
+      done: "Done",
+    },
+    resume: {
+      offer: "Continue at section {{section}} of {{total}}",
+      go: "Go there",
+      resumed: "Continued at section {{section}}, where you stopped.",
+      restart: "Start from the beginning",
+    },
   },
   taqibat: "Taqibat",
   amal: {

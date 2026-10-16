@@ -6,10 +6,12 @@ import { ReciteAlong } from "@/features/recite-along";
 const SupplicationRoute = () => (
   <SupplicationReaderScreen
     reciteAlong={ReciteAlong}
-    headerRight={(id) => (
-      <FavoriteButton item={{ kind: "supplication", key: id }} />
+    toolbarActions={(id) => (
+      <>
+        <ReadTodayButton supplicationId={id} />
+        <FavoriteButton item={{ kind: "supplication", key: id }} />
+      </>
     )}
-    footer={(id) => <ReadTodayButton supplicationId={id} />}
   />
 );
 

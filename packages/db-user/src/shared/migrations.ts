@@ -181,4 +181,10 @@ export const migrations: readonly Migration[] = [
     tag: "20261016125410_home_shortcuts",
     statements: ["ALTER TABLE `shell_preferences` ADD `home_shortcuts` text;"],
   },
+  {
+    tag: "20261016125656_supplication_positions",
+    statements: [
+      "CREATE TABLE `supplication_positions` (\n\t`supplication_id` text PRIMARY KEY,\n\t`section` integer NOT NULL,\n\t`saved_at` text NOT NULL\n);",
+    ],
+  },
 ];
