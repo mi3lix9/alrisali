@@ -78,6 +78,35 @@ const expectWholeQuranInOrder = (
   expect(next).toBe(AYAT.length);
 };
 
+const partlyRead = () => {
+  const till = AYAT.findLast((ayah) => ayah.page === 2)?.key ?? "1:1";
+  return afterMark(base, markDoneTill(base, [], till, START));
+};
+
+describe("rescheduling after a partial read", () => {
+  it.each(["extendEnd", "keepEnd"] as const)(
+    "keeps the pages already read when the end is %s",
+    (mode) => {
+      const { khatmah, logs } = partlyRead();
+      const before = khatmahStatus(khatmah, logs, START).pagesRead;
+      const later = START.add({ days: 5 });
+      const after = khatmahStatus(
+        adjusted(khatmah, logs, mode, later),
+        logs,
+        later
+      );
+
+      expect(before).toBe(2);
+      expect(after.pagesRead).toBe(before);
+      const sessions = khatmahSessions(
+        adjusted(khatmah, logs, mode, later),
+        logs
+      );
+      expect(sessions.at(-1)?.to).toBe(AYAT.at(-1)?.key);
+    }
+  );
+});
+
 describe(reschedule, () => {
   const today = START.add({ days: 10 });
   const logs = logsFor(5);
