@@ -7,7 +7,7 @@ import {
 } from "@alrisali/domain/quran";
 import type { JumpTarget, ReaderMode } from "@alrisali/domain/quran";
 import { Button, Direction, Slider, Text } from "panelui-native";
-import { RotateCcwIcon } from "panelui-native/icons";
+import { ListIcon, RotateCcwIcon } from "panelui-native/icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -24,9 +24,12 @@ interface ReaderBottomBarProps {
   mode: ReaderMode;
   /** The current page (Page Mode) or surah (Surah Mode). */
   value: number;
-  returnTo: AyahKey | null;
+  /** Earlier positions, latest first; the chip returns to the first. */
+  returnHistory: AyahKey[];
   insetBottom: number;
   onReturn: () => void;
+  /** Opens the list of every remembered position. */
+  onReturnHistory: () => void;
   onScrubberHold: () => void;
   onScrubberRelease: () => void;
   onJump: (target: JumpTarget) => void;
@@ -40,9 +43,10 @@ interface ReaderBottomBarProps {
 export const ReaderBottomBar = ({
   mode,
   value,
-  returnTo,
+  returnHistory,
   insetBottom,
   onReturn,
+  onReturnHistory,
   onScrubberHold,
   onScrubberRelease,
   onJump,
@@ -52,7 +56,9 @@ export const ReaderBottomBar = ({
   // The value under the finger while the scrubber is held.
   const [dragged, setDragged] = useState<number | null>(null);
   const { min, max } = scrubberDomain(mode);
-  const returnPage = returnTo ? findAyah(returnTo)?.page : undefined;
+  const returnPage = returnHistory[0]
+    ? findAyah(returnHistory[0])?.page
+    : undefined;
   const label = (step: number) =>
     mode === "page"
       ? t("navigation.scrubPageValue", {
@@ -98,10 +104,21 @@ export const ReaderBottomBar = ({
             })}
             startContent={<RotateCcwIcon size={18} />}
             onPress={onReturn}
+            onLongPress={returnHistory.length > 1 ? onReturnHistory : undefined}
           >
             {formatNumber(returnPage)}
           </Button>
         )}
+        {returnHistory.length > 1 ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            testID="quran-return-history"
+            accessibilityLabel={t("navigation.returnHistory")}
+            startContent={<ListIcon size={18} />}
+            onPress={onReturnHistory}
+          />
+        ) : null}
         <Direction dir="rtl" className="flex-1">
           <Slider
             min={min}

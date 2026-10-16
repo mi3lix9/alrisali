@@ -35,6 +35,11 @@ export const ar = {
       title: "ختمة القرآن",
       body: "ورد اليوم: من {{from}} إلى {{to}}.",
     },
+    occasion: {
+      dayOf: "اليوم: {{name}}",
+      eveningBefore: "غدًا: {{name}}",
+      body: "ليلة المناسبة تبدأ من المغرب.",
+    },
     modern: {
       fajr: "بداية جديدة تنتظرك. ابدأ صباحك بلقاء الله.",
       dhuhr: "خذ استراحة قصيرة من يومك، وجدّد صلتك بالله.",
@@ -102,6 +107,26 @@ export const ar = {
     enabled: "تفعيل ساعات الهدوء",
     start: "من",
     end: "إلى",
+  },
+  occasionAlerts: {
+    title: "تنبيهات المناسبات",
+    description: "تنبيه بالمناسبات الدينية في يومها أو في مساء اليوم السابق.",
+    enabled: "تنبيه بالمناسبات",
+    timing: "متى",
+    timings: {
+      "day-of": "في يوم المناسبة",
+      "evening-before": "مساء اليوم السابق (بعد المغرب)",
+    },
+    eveningHint:
+      "يصلك التنبيه في الوقت المختار أو عند المغرب إن كان أبعد، ويلزم تحديد الموقع.",
+    time: "الوقت",
+    types: "الأنواع",
+    typeNames: {
+      celebration: "مناسبة فرح",
+      mourning: "مناسبة حزن",
+      religious: "مناسبة دينية",
+      fasting: "صيام",
+    },
   },
   atTime: {
     off: { title: "إيقاف", description: "لا شيء عند دخول الوقت" },

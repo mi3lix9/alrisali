@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   AYAT,
+  BY_MEANING_DAYS,
+  byMeaningRanges,
   getQuranPage,
   HIZB_QUARTER_COUNT,
   HIZB_QUARTER_STARTS,
@@ -11,6 +13,7 @@ import {
   PAGE_COUNT,
   QURAN_SOURCE,
   SAJDAH,
+  SCHOLAR_REVIEWED,
   SURAH_ALIASES,
   SURAH_COUNT,
   SURAHS,
@@ -219,6 +222,66 @@ describe("Surah aliases", () => {
       entries.filter(({ alias }) => alias.trim() !== alias || !alias)
     ).toStrictEqual([]);
     expect(new Set(spellings).size).toBe(spellings.length);
+  });
+});
+
+const indexOfAyah = (key: string) => AYAT.findIndex((ayah) => ayah.key === key);
+
+describe("Khatmah by-meaning divisions", () => {
+  const surahEnds = new Set(
+    SURAHS.map(
+      (surah) => `${surah.number}:${AYAH_COUNTS[surah.number - 1] ?? 0}`
+    )
+  );
+  const quarterEnds = new Set<string>(
+    HIZB_QUARTER_STARTS.slice(1).map(
+      (key) => AYAT[indexOfAyah(key) - 1]?.key ?? ""
+    )
+  );
+
+  describe.each(BY_MEANING_DAYS)("%i days", (days) => {
+    const ranges = byMeaningRanges(days);
+
+    it("has one range per day", () => {
+      expect(ranges).toHaveLength(days);
+    });
+
+    it("is contiguous and covers all 6236 ayat exactly once", () => {
+      const gaps = ranges.flatMap((range, position) => {
+        const previous = ranges[position - 1];
+        const expectedFrom = previous ? indexOfAyah(previous.to) + 1 : 0;
+        return indexOfAyah(range.from) === expectedFrom &&
+          indexOfAyah(range.to) >= expectedFrom
+          ? []
+          : [range];
+      });
+      expect(gaps).toStrictEqual([]);
+      expect(ranges[0]?.from).toBe("1:1");
+      expect(ranges.at(-1)?.to).toBe("114:6");
+    });
+
+    it("ends every range at a surah end or a hizb quarter end", () => {
+      const strays = ranges.filter(
+        ({ to }) => !(surahEnds.has(to) || quarterEnds.has(to))
+      );
+      expect(strays).toStrictEqual([]);
+    });
+  });
+
+  it("is the seven classical manzil for 7 days, ending at surah ends", () => {
+    expect(byMeaningRanges(7).map((range) => range.to)).toStrictEqual([
+      "4:176",
+      "9:129",
+      "16:128",
+      "25:77",
+      "36:83",
+      "49:18",
+      "114:6",
+    ]);
+  });
+
+  it("marks the unreviewed divisions", () => {
+    expect(SCHOLAR_REVIEWED).toStrictEqual({ 7: true, 29: false, 60: false });
   });
 });
 

@@ -96,6 +96,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Khatmah Log**: The record that a Khatmah Session was completed on a date; the same session on two devices is one record.
 
+**Khatmah Plan**: How a Khatmah is divided: the suggested 30 days, an even split, by meaning (7, 29 or 60 days along the Quran's own divisions), by amount (a number of ayat, pages, hizb quarters, hizb, juz or surahs a session) or by deadline (a Gregorian or Hijri day the last session falls on). Its sessions are daily, every other day or weekly, and a Believer may join at session N, skipping the earlier ones; each choice shows its amount, minutes a session and finish day before it starts.
+
 **Book**: A devotional collection bundled with the app: Mafatih al-Jinan, Sahifa Sajjadiyya, and Nahj al-Balagha.
 
 **Supplication**: A single readable text inside a Book (a dua, ziyarah, munajat or sermon). _Avoid_: Item, section, content
@@ -111,6 +113,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 **Sajdah Ayah**: An ayah at which a prostration is due; the four whose prostration is wajib (32:15, 41:37, 53:62, 96:19) are obligatory, the rest recommended. Its rosette shows a crimson (obligatory) or amber (recommended) marker.
 
 **Spread**: On a tablet or foldable in landscape, two Quran Pages shown side by side as in an open mushaf, the odd page on the right.
+
+**Return History**: The reader's last ten positions before a jump (scrubber, index, search, page jump), latest first; the return chip goes back to the latest, and its list jumps to any of them. Going back forgets that position and the newer ones. _Avoid_: Back stack, breadcrumbs
+
+**Search History**: The Believer's last ten Quran searches, kept in their own database with clear-all. _Avoid_: Recent queries
 
 **Reading Completion**: The Believer's record that they finished reading a Supplication on a given date.
 
@@ -133,6 +139,8 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 **Today's worship**: What Home offers for the day: the weekday's Daily Content dua, the weekday's ziyarah, every-day items and, from Maghrib, tonight's dua (Kumayl on Thursday night). All are Supplication ids Admins map in the content database. _Avoid_: Daily plan
 
 **Night Hijri Date**: The Hijri Date that night content follows: the next day's from Maghrib on. The Hijri Date shown elsewhere stays the civil day's.
+
+**Occasion Alert**: An opt-in notification for an Occasion, on its day or on the evening before (from Maghrib, by the Night Hijri Date), at a chosen time and for the chosen Occasion types. Quiet hours hold it back.
 
 **Verse of the Day**: The Quran verse, with recitation, featured on Home for each weekday.
 

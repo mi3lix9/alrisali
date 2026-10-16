@@ -36,6 +36,7 @@ export {
   quranReaderSettingsSchema,
   READER_MODES,
   readerReducer,
+  RETURN_HISTORY_LIMIT,
   SURAH_FONT_SIZE,
   surahEnd,
 } from "./reader";
@@ -177,3 +178,4 @@ export type {
   QuranicDuaSubject,
   RecitationDuaMoment,
 } from "./quranic-duas";
+export { recordSearch, SEARCH_HISTORY_LIMIT } from "./search-history";

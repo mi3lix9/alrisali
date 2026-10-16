@@ -1,9 +1,11 @@
-import { AYAT, HIZB_QUARTER_STARTS } from "@alrisali/content/quran";
+import { AYAT } from "@alrisali/content/quran";
 import type { AyahKey } from "@alrisali/content/quran";
 import type { Temporal } from "temporal-polyfill";
 import { z } from "zod";
 
 import type { KhatmahReminderPlan } from "../shared";
+import { AMOUNT_LIMITS, AMOUNT_UNITS, baseRanges } from "./plans";
+import type { SessionInterval } from "./plans";
 
 /** An even split runs from this many sessions... */
 export const MIN_EVEN_DAYS = 3;
@@ -12,13 +14,41 @@ export const MAX_EVEN_DAYS = 240;
 /** The suggested plan: a juz (eight hizb quarters) a day. */
 export const SUGGESTED_DAYS = 30;
 
+/** How often a session falls, and the session a Khatmah is joined at. */
+const scheduleFields = {
+  /** Days between sessions; 1 (every day) when absent. */
+  every: z.union([z.literal(1), z.literal(2), z.literal(7)]).optional(),
+  /** Joined at this session of the plan, from 1: earlier ones are skipped. */
+  from: z.int().min(1).optional(),
+};
+
 /** How a Khatmah is divided into Khatmah Sessions. */
 export const khatmahPlanSchema = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("suggested") }),
+  z.object({ kind: z.literal("suggested"), ...scheduleFields }),
   z.object({
     kind: z.literal("even"),
     days: z.int().min(MIN_EVEN_DAYS).max(MAX_EVEN_DAYS),
+    ...scheduleFields,
   }),
+  /** The in-house by-meaning division: 7, 29 or 60 sessions. */
+  z.object({
+    kind: z.literal("meaning"),
+    days: z.union([z.literal(7), z.literal(29), z.literal(60)]),
+    ...scheduleFields,
+  }),
+  /** A fixed amount per session: `count` ayat, pages, quarters, ... */
+  z
+    .object({
+      kind: z.literal("amount"),
+      unit: z.enum(AMOUNT_UNITS),
+      count: z.int().min(1),
+      ...scheduleFields,
+    })
+    .refine(
+      ({ unit, count }) =>
+        count >= AMOUNT_LIMITS[unit].min && count <= AMOUNT_LIMITS[unit].max,
+      { message: "count is outside the unit's limits" }
+    ),
 ]);
 
 export type KhatmahPlan = z.infer<typeof khatmahPlanSchema>;
@@ -37,9 +67,9 @@ export const readKhatmahPlan = (stored: string): KhatmahPlan | null => {
   }
 };
 
-/** How many Khatmah Sessions a plan has, one a day. */
-export const planDays = (plan: KhatmahPlan): number =>
-  plan.kind === "suggested" ? SUGGESTED_DAYS : plan.days;
+/** Days between a plan's sessions: 1, 2 or 7. */
+export const planEvery = (plan: KhatmahPlan): SessionInterval =>
+  plan.every ?? 1;
 
 /** One scheduled portion of a Khatmah: a run of ayat, first to last. */
 export interface KhatmahSession {
@@ -53,30 +83,22 @@ export interface KhatmahSession {
   lastPage: number;
 }
 
-const TOTAL_AYAT = AYAT.length;
+const sessionsCache = new Map<string, readonly KhatmahSession[]>();
 
-/** Index in `AYAT` of the first ayah of each hizb quarter. */
-const QUARTER_STARTS: readonly number[] = HIZB_QUARTER_STARTS.map((key) =>
-  AYAT.findIndex((ayah) => ayah.key === key)
-);
-
-const sessionsCache = new Map<number, readonly KhatmahSession[]>();
-
-/** `days` portions of whole hizb quarters, as even as 240 quarters allow. */
-const evenSessions = (days: number): readonly KhatmahSession[] => {
-  const cached = sessionsCache.get(days);
+/**
+ * A plan's Khatmah Sessions in order. Together they cover all 6236 ayat
+ * exactly once (those of a joined plan, from its first session on), each
+ * ending at a natural break its division chose.
+ */
+export const sessionsFor = (plan: KhatmahPlan): readonly KhatmahSession[] => {
+  const key = JSON.stringify(plan);
+  const cached = sessionsCache.get(key);
   if (cached) {
     return cached;
   }
-  const quarters = QUARTER_STARTS.length;
-  const sessions = Array.from({ length: days }, (_, index) => {
-    const firstQuarter = Math.floor((index * quarters) / days);
-    const lastQuarter = Math.floor(((index + 1) * quarters) / days) - 1;
-    const first = QUARTER_STARTS[firstQuarter] ?? 0;
-    const last =
-      lastQuarter === quarters - 1
-        ? TOTAL_AYAT - 1
-        : (QUARTER_STARTS[lastQuarter + 1] ?? TOTAL_AYAT) - 1;
+  const ranges = baseRanges(plan);
+  const skipped = Math.min((plan.from ?? 1) - 1, ranges.length - 1);
+  const sessions = ranges.slice(skipped).map(({ first, last }, index) => {
     const from = AYAT[first];
     const to = AYAT[last];
     if (!(from && to)) {
@@ -91,16 +113,12 @@ const evenSessions = (days: number): readonly KhatmahSession[] => {
       lastPage: to.page,
     };
   });
-  sessionsCache.set(days, sessions);
+  sessionsCache.set(key, sessions);
   return sessions;
 };
 
-/**
- * A plan's Khatmah Sessions in order. Together they cover all 6236 ayat
- * exactly once, each session ending at a hizb quarter's end.
- */
-export const sessionsFor = (plan: KhatmahPlan): readonly KhatmahSession[] =>
-  evenSessions(planDays(plan));
+/** How many Khatmah Sessions a plan has. */
+export const planDays = (plan: KhatmahPlan): number => sessionsFor(plan).length;
 
 /**
  * The session a portion's last ayah ends, or undefined when `ayah` ends none:
@@ -139,11 +157,37 @@ export interface KhatmahLog {
 export const khatmahLogId = (khatmahId: string, session: number): string =>
   `${khatmahId}:${session}`;
 
-/** The date a session is due. */
+/** The date a session is due: the plan's sessions are `every` days apart. */
 export const sessionDueDate = (
   khatmah: Khatmah,
   session: number
-): Temporal.PlainDate => khatmah.startDate.add({ days: session - 1 });
+): Temporal.PlainDate =>
+  khatmah.startDate.add({ days: (session - 1) * planEvery(khatmah.plan) });
+
+/**
+ * The first day the Believer is next to read: today, or one session interval
+ * on once today's portion is done; never before the start, and for a plan
+ * with gaps between sessions never before the next session is due.
+ */
+const nextReadingDay = (
+  khatmah: Khatmah,
+  completedToday: boolean,
+  today: Temporal.PlainDate,
+  current: KhatmahSession | null
+): Temporal.PlainDate => {
+  const every = planEvery(khatmah.plan);
+  let day = completedToday ? today.add({ days: every }) : today;
+  if (day.until(khatmah.startDate).sign > 0) {
+    day = khatmah.startDate;
+  }
+  if (every > 1 && current) {
+    const due = sessionDueDate(khatmah, current.number);
+    if (day.until(due).sign > 0) {
+      day = due;
+    }
+  }
+  return day;
+};
 
 export type KhatmahState = "on-track" | "ahead" | "behind" | "finished";
 
@@ -223,9 +267,15 @@ export const khatmahStatus = (
   const total = sessions.length;
   const doneSet = doneSessions(khatmah, logs);
   const done = doneSet.size;
+  const every = planEvery(khatmah.plan);
   const daysIn = khatmah.startDate.until(today, { largestUnit: "days" }).days;
-  const dueBeforeToday = clamp(daysIn, 0, total);
-  const dueThroughToday = clamp(daysIn + 1, 0, total);
+  // Sessions fall on days 0, every, 2 * every, ... after the start.
+  const dueBeforeToday = clamp(Math.ceil(daysIn / every), 0, total);
+  const dueThroughToday = clamp(
+    daysIn < 0 ? 0 : Math.floor(daysIn / every) + 1,
+    0,
+    total
+  );
 
   let state: KhatmahState = "on-track";
   let gap = 0;
@@ -246,10 +296,12 @@ export const khatmahStatus = (
       doneSet.has(log.session) &&
       log.date.equals(today)
   );
-  let firstReadingDay = completedToday ? today.add({ days: 1 }) : today;
-  if (firstReadingDay.until(khatmah.startDate).sign > 0) {
-    firstReadingDay = khatmah.startDate;
-  }
+  const firstReadingDay = nextReadingDay(
+    khatmah,
+    completedToday,
+    today,
+    current
+  );
 
   return {
     state,
@@ -263,7 +315,7 @@ export const khatmahStatus = (
     estimatedFinish:
       state === "finished"
         ? null
-        : firstReadingDay.add({ days: total - done - 1 }),
+        : firstReadingDay.add({ days: (total - done - 1) * every }),
   };
 };
 
@@ -337,13 +389,16 @@ export const khatmahReminderPlan = (
     return null;
   }
   const doneSet = doneSessions(khatmah, logs);
-  let firstDate = status.completedToday ? today.add({ days: 1 }) : today;
-  if (firstDate.until(khatmah.startDate).sign > 0) {
-    firstDate = khatmah.startDate;
-  }
+  const firstDate = nextReadingDay(
+    khatmah,
+    status.completedToday,
+    today,
+    status.current
+  );
   return {
     reminderAt: khatmah.reminderAt,
     firstDate,
+    everyDays: planEvery(khatmah.plan),
     portions: sessionsFor(khatmah.plan)
       .filter(({ number }) => !doneSet.has(number))
       .map(({ from, to }) => ({ from, to })),
