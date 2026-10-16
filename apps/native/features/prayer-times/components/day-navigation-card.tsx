@@ -15,6 +15,7 @@ import {
   useFormatHijriDate,
   useHijriCalendar,
 } from "@/shared/lib/hijri-calendar";
+import { launchDirection } from "@/shared/lib/i18n";
 import { launchLanguage } from "@/shared/lib/preferences";
 
 import { useNow } from "../hooks/use-now";
@@ -23,6 +24,12 @@ import { moveShownDay } from "../utils/day-navigation";
 import { formatCountdown } from "../utils/format";
 
 const SECOND_MS = 1000;
+
+// The arrows point the way the text runs: in Arabic, onward is leftward.
+const [PreviousIcon, NextIcon] =
+  launchDirection === "rtl"
+    ? [ChevronRightIcon, ChevronLeftIcon]
+    : [ChevronLeftIcon, ChevronRightIcon];
 
 const toDate = (date: Temporal.PlainDate): Date =>
   new Date(date.year, date.month - 1, date.day);
@@ -101,7 +108,7 @@ export const DayNavigationCard = ({
             accessibilityLabel={t("day.previous")}
             onPress={() => onShow(moveShownDay(shown, today, -1))}
           >
-            <ChevronLeftIcon size={20} />
+            <PreviousIcon size={20} />
           </Button>
           <View className="flex-1 items-center">
             <Card.Title testID="day-hijri">
@@ -118,7 +125,7 @@ export const DayNavigationCard = ({
             accessibilityLabel={t("day.next")}
             onPress={() => onShow(moveShownDay(shown, today, 1))}
           >
-            <ChevronRightIcon size={20} />
+            <NextIcon size={20} />
           </Button>
         </View>
       </Card.Header>
