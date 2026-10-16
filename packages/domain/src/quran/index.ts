@@ -131,3 +131,27 @@ export {
   RIBBON_NAME_MAX,
 } from "./ribbons";
 export type { BookmarkRibbon, RibbonColor } from "./ribbons";
+export {
+  ayatBetween,
+  duaRange,
+  filterQuranicDuas,
+  playDuaEvent,
+  QURANIC_DUA_SPEAKERS,
+  QURANIC_DUA_SUBJECTS,
+  QURANIC_DUAS,
+  quranicDuaFacets,
+  RECITATION_DUA_MOMENTS,
+  RECITATION_DUAS,
+  startDuaQueue,
+  stepDuaQueue,
+} from "./quranic-duas";
+export type {
+  DuaQueue,
+  DuaQueueStep,
+  DuaRange,
+  QuranicDua,
+  QuranicDuaFilter,
+  QuranicDuaSpeaker,
+  QuranicDuaSubject,
+  RecitationDuaMoment,
+} from "./quranic-duas";

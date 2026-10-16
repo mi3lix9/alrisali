@@ -1,9 +1,15 @@
 import "../i18n";
+import "../i18n/duas";
 import { PAGE_COUNT } from "@alrisali/domain/quran";
 import type { JumpTarget } from "@alrisali/domain/quran";
 import { router } from "expo-router";
 import { Button, Card } from "panelui-native";
-import { FileIcon, ListIcon, SearchIcon } from "panelui-native/icons";
+import {
+  FileIcon,
+  HeartIcon,
+  ListIcon,
+  SearchIcon,
+} from "panelui-native/icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -39,6 +45,7 @@ export const QuranLibraryCard = ({
   savedFavorites?: SavedFavorites;
 }) => {
   const { t } = useTranslation("quran");
+  const { t: tDuas } = useTranslation("quranDuas");
   const [sheet, setSheet] = useState<LibrarySheet | null>(null);
   const select = (target: JumpTarget) => {
     setSheet(null);
@@ -82,6 +89,14 @@ export const QuranLibraryCard = ({
           onPress={() => setSheet("search")}
         >
           {t("navigation.search")}
+        </Button>
+        <Button
+          testID="library-quranic-duas"
+          variant="outline"
+          startContent={<HeartIcon size={18} />}
+          onPress={() => router.push("/quranic-duas")}
+        >
+          {tDuas("title")}
         </Button>
       </Card.Footer>
       <QuranIndexSheet

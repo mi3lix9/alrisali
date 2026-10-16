@@ -173,3 +173,11 @@ export const sendRecitation = (event: RecitationEvent) => {
   usePlaybackStore.setState({ playback: next });
   follow(previous, next, event, sendRecitation);
 };
+
+/** Calls `listener` with recitation before and after each change; returns how to stop listening. */
+export const subscribeRecitation = (
+  listener: (previous: RecitationPlayback, next: RecitationPlayback) => void
+): (() => void) =>
+  usePlaybackStore.subscribe((state, previous) =>
+    listener(previous.playback, state.playback)
+  );

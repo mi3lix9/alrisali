@@ -131,3 +131,14 @@ export const getQuranPage = (page: number): QuranPage => {
   const firstAyah = AYAT.find((ayah) => ayah.page === page);
   return { number: page, juz: firstAyah?.juz ?? 1, lines };
 };
+
+export {
+  QURANIC_DUA_ROWS,
+  QURANIC_DUA_SPEAKERS,
+  QURANIC_DUA_SUBJECTS,
+} from "./data/quranic-duas";
+export type {
+  QuranicDuaRow,
+  QuranicDuaSpeaker,
+  QuranicDuaSubject,
+} from "./data/quranic-duas";

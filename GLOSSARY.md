@@ -112,6 +112,10 @@ A Shia-aligned spiritual companion: prayer times and tracking, devotional texts,
 
 **Play To**: Recitation that starts at an ayah and stops at the end of its page, surah or juz, or at a chosen ayah; plain Play goes on to the end of the Quran. It is part of a **Playback Plan**, which also carries repeats, pauses, speed and sleep. _Avoid_: Range play, Queue
 
+**Quranic Dua**: A supplication the Quran reports, kept as a reference to its ayat with who made it (its speaker) and what it asks for (its subject); its words are the bundled Quran text, and the list plays the duas one after another. _Avoid_: Dua (alone, which also means a Supplication in a book)
+
+**Recitation Dua**: An ayah or run of ayat to recite before reciting the Quran, after it, or on completing it, reached from the reader and from a finished **Khatmah**. _Avoid_: Khatm dua
+
 **Recite-Along**: A reading aid that highlights each word of an Arabic text as the Believer recites it, driven by hold, a timed pace, or their voice. _Avoid_: Karaoke, tilawa mode
 
 **In-text counter**: A tap counter marked on a passage of a bundled Supplication that itself says to repeat a phrase; the count lives only while the text is open and is not a Tasbih or Dhikr Session. _Avoid_: Tasbih (for this), inline tasbih

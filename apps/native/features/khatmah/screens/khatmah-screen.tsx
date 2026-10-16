@@ -2,6 +2,7 @@ import "../i18n";
 import { khatmahSessionRows } from "@alrisali/domain/khatmah";
 import { router, Stack, useLocalSearchParams } from "expo-router";
 import { Button, Card, Spinner, Text } from "panelui-native";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Alert, View } from "react-native";
 
@@ -17,7 +18,13 @@ import type { ActiveKhatmah } from "../hooks/use-active-khatmah";
 import { useAyahLabel } from "../utils/use-ayah-label";
 import { useDayLabels } from "../utils/use-day-labels";
 
-const StatusCard = ({ active }: { active: ActiveKhatmah }) => {
+const StatusCard = ({
+  active,
+  completionActions,
+}: {
+  active: ActiveKhatmah;
+  completionActions?: ReactNode;
+}) => {
   const { t } = useTranslation("khatmah");
   const ayahLabel = useAyahLabel();
   const dayLabels = useDayLabels();
@@ -71,6 +78,9 @@ const StatusCard = ({ active }: { active: ActiveKhatmah }) => {
           </Text>
         ) : null}
       </Card.Content>
+      {!current && completionActions ? (
+        <Card.Footer>{completionActions}</Card.Footer>
+      ) : null}
       {current ? (
         <Card.Footer>
           <Button
@@ -91,7 +101,13 @@ const StatusCard = ({ active }: { active: ActiveKhatmah }) => {
   );
 };
 
-const ActiveKhatmahView = ({ active }: { active: ActiveKhatmah }) => {
+const ActiveKhatmahView = ({
+  active,
+  completionActions,
+}: {
+  active: ActiveKhatmah;
+  completionActions?: ReactNode;
+}) => {
   const { t } = useTranslation("khatmah");
   const today = useToday();
   const { mutate: setReminder } = useSetKhatmahReminder();
@@ -114,7 +130,7 @@ const ActiveKhatmahView = ({ active }: { active: ActiveKhatmah }) => {
 
   return (
     <Screen>
-      <StatusCard active={active} />
+      <StatusCard active={active} completionActions={completionActions} />
       <ReminderField
         value={khatmah.reminderAt}
         onChange={(reminderAt) => setReminder({ id: khatmah.id, reminderAt })}
@@ -137,7 +153,12 @@ const ActiveKhatmahView = ({ active }: { active: ActiveKhatmah }) => {
  * finish, the daily reminder, and every session with its date. Without a
  * Khatmah it invites the Believer to start one.
  */
-export const KhatmahScreen = () => {
+export const KhatmahScreen = ({
+  completionActions,
+}: {
+  /** Shown on the status card once every session is done, composed by the route. */
+  completionActions?: ReactNode;
+}) => {
   const { t } = useTranslation("khatmah");
   const { id } = useLocalSearchParams<{ id?: string }>();
   const active = useActiveKhatmah(id);
@@ -148,7 +169,12 @@ export const KhatmahScreen = () => {
     </View>
   );
   if (active) {
-    body = <ActiveKhatmahView active={active} />;
+    body = (
+      <ActiveKhatmahView
+        active={active}
+        completionActions={completionActions}
+      />
+    );
   } else if (active === null) {
     body = (
       <Screen>
