@@ -66,9 +66,9 @@ const assertPublishable = (announcement: Announcement) => {
   }
 };
 
-const list = admin.announcements.list.handler(async ({ context }) => {
+const list = admin.announcements.list.handler(async ({ context, input }) => {
   const announcements = await repository(context);
-  return { announcements: await announcements.list() };
+  return { announcements: await announcements.list(input) };
 });
 
 const get = admin.announcements.get.handler(
@@ -156,6 +156,20 @@ const remove = admin.announcements.remove.handler(
   }
 );
 
+const archive = admin.announcements.archive.handler(
+  async ({ context, input: { id } }) => {
+    const announcements = await repository(context);
+    const archived = await announcements.archive(id, Date.now());
+    if (archived) {
+      return archived;
+    }
+    await existing(announcements, id);
+    throw new ORPCError("CONFLICT", {
+      message: "Only a sent Announcement can be archived; remove a draft",
+    });
+  }
+);
+
 const sendTest = admin.announcements.sendTest.handler(
   async ({ context, input: { id } }) => {
     const services = await deliveryServices(context);
@@ -196,8 +210,13 @@ const inbox = os.announcements.inbox.handler(
     const found = await announcements.findMany(
       received.map(({ announcementId }) => announcementId)
     );
+    // An archived Announcement leaves every inbox, though its deliveries stay.
     const texts = new Map(
-      found.map((announcement) => [announcement.id, announcement.text])
+      found.flatMap((announcement) =>
+        announcement.archivedAt === null
+          ? [[announcement.id, announcement.text] as const]
+          : []
+      )
     );
     return {
       announcements: received.flatMap(
@@ -220,6 +239,7 @@ export const announcementsRouter = {
   publishNow,
   duplicate,
   remove,
+  archive,
   sendTest,
   registerDevice,
   inbox,

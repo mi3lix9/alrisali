@@ -225,18 +225,24 @@ interface Prepared {
 }
 /**
  * An Announcement stored straight in the content database, for procedures
- * that act on one: `{ id }` of a publishable draft, or a scheduled one.
+ * that act on one: `{ id }` of a publishable draft, or a scheduled or sent
+ * one.
  */
 const storedAnnouncement =
-  (scheduled = false) =>
+  (status: "draft" | "scheduled" | "sent" = "draft") =>
   async ({ content }: Prepared): Promise<{ id: string }> => {
     const announcements = createAnnouncementsRepository(await content.db());
+    const now = Date.now();
     const { id } = await announcements.create(
       { text: RAMADAN, audience: "all" },
-      Date.now()
+      now
     );
-    if (scheduled) {
-      await announcements.schedule(id, Date.now() + 60_000, Date.now());
+    if (status === "scheduled") {
+      await announcements.schedule(id, now + 60_000, now);
+    }
+    if (status === "sent") {
+      await announcements.schedule(id, now, now);
+      await announcements.claimDue(now);
     }
     return { id };
   };
@@ -335,11 +341,15 @@ const ACCESS: Record<
   },
   "announcements.unschedule": {
     access: "admin",
-    input: storedAnnouncement(true),
+    input: storedAnnouncement("scheduled"),
   },
   "announcements.publishNow": { access: "admin", input: storedAnnouncement() },
   "announcements.duplicate": { access: "admin", input: storedAnnouncement() },
   "announcements.remove": { access: "admin", input: storedAnnouncement() },
+  "announcements.archive": {
+    access: "admin",
+    input: storedAnnouncement("sent"),
+  },
   "announcements.sendTest": { access: "admin", input: storedAnnouncement() },
   "announcements.registerDevice": {
     access: "anonymous",
@@ -2956,6 +2966,49 @@ describe("Announcements via Expo Push", () => {
     ).resolves.toMatchObject({ status: "draft", text: RAMADAN });
   });
 
+  it("archives a sent Announcement off every inbox and the default list, keeping it on record", async () => {
+    const admin = await signInAsAdmin();
+    await registerDevice(new Headers(), "guest");
+    const { id } = await createAnnouncement(admin);
+    await callAs(admin, "announcements.publishNow", { id });
+
+    const archived = await callAs(admin, "announcements.archive", { id });
+    expect(archived).toMatchObject({
+      id,
+      status: "sent",
+      archivedAt: expect.any(Number),
+    });
+
+    await expect(inboxOf("guest")).resolves.toStrictEqual([]);
+    await expect(callAs(admin, "announcements.list")).resolves.toStrictEqual({
+      announcements: [],
+    });
+    await expect(
+      callAs(admin, "announcements.list", { includeArchived: true })
+    ).resolves.toStrictEqual({ announcements: [archived] });
+    await expect(
+      callAs(admin, "announcements.archive", { id })
+    ).resolves.toStrictEqual(archived);
+  });
+
+  it("archives only a sent Announcement", async () => {
+    const admin = await signInAsAdmin();
+    const draft = await createAnnouncement(admin);
+    const scheduled = await createAnnouncement(admin);
+    await scheduleIn(admin, scheduled.id, 10);
+
+    const conflict = { code: "CONFLICT" };
+    await expect(
+      callAs(admin, "announcements.archive", { id: draft.id })
+    ).rejects.toMatchObject(conflict);
+    await expect(
+      callAs(admin, "announcements.archive", { id: scheduled.id })
+    ).rejects.toMatchObject(conflict);
+    await expect(
+      callAs(admin, "announcements.get", { id: draft.id })
+    ).resolves.toMatchObject({ archivedAt: null });
+  });
+
   it("answers NOT_FOUND for an unknown Announcement", async () => {
     const admin = await signInAsAdmin();
 
@@ -2964,6 +3017,9 @@ describe("Announcements via Expo Push", () => {
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
     await expect(
       callAs(admin, "announcements.remove", { id: "missing" })
+    ).rejects.toMatchObject({ code: "NOT_FOUND" });
+    await expect(
+      callAs(admin, "announcements.archive", { id: "missing" })
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
   });
 

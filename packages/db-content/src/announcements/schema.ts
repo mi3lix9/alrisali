@@ -17,6 +17,8 @@ export const announcement = sqliteTable("announcement", {
   scheduledAt: integer("scheduled_at"),
   /** When it went out; set once, when the scheduler claims it. */
   sentAt: integer("sent_at"),
+  /** When an Admin archived it (sent ones only): off device inboxes and the default list. */
+  archivedAt: integer("archived_at"),
   createdAt: integer("created_at").notNull(),
   updatedAt: integer("updated_at").notNull(),
 });
