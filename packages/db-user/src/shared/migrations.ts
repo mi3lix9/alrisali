@@ -218,4 +218,10 @@ export const migrations: readonly Migration[] = [
       "ALTER TABLE `quran_reader_settings` ADD `keep_awake` integer DEFAULT true NOT NULL;",
     ],
   },
+  {
+    tag: "20261016134056_bookmark_ribbons",
+    statements: [
+      "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
+    ],
+  },
 ];

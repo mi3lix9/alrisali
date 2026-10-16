@@ -1,6 +1,6 @@
 import { HijriCalendarButton } from "@/features/calendar";
-import { FavoriteRow } from "@/features/favorites";
-import { QuranReaderScreen } from "@/features/quran";
+import { AyahFavoritesList, FavoriteRow } from "@/features/favorites";
+import { QuranReaderScreen, RibbonRows } from "@/features/quran";
 import { ShareAyahImageRow } from "@/features/share-image";
 
 // The ayah sheet's slots sit at fixed places in its order (see AyahActions);
@@ -8,8 +8,14 @@ import { ShareAyahImageRow } from "@/features/share-image";
 const QuranRoute = () => (
   <QuranReaderScreen
     topBarActions={<HijriCalendarButton />}
+    savedFavorites={AyahFavoritesList}
     ayahActions={{
-      keep: (ayah) => <FavoriteRow item={{ kind: "ayah", key: ayah }} />,
+      keep: (ayah) => (
+        <>
+          <FavoriteRow item={{ kind: "ayah", key: ayah }} />
+          <RibbonRows ayah={ayah} />
+        </>
+      ),
       share: (ayah) => <ShareAyahImageRow ayah={ayah} />,
     }}
   />

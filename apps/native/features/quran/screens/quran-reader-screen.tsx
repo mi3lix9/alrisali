@@ -43,17 +43,20 @@ import {
 import { ReaderSettingsSheet } from "../components/reader-settings-sheet";
 import { ReaderTopBar } from "../components/reader-top-bar";
 import { RecitationPill } from "../components/recitation-pill";
+import type { SavedFavorites } from "../components/saved-list";
 import { SurahMode } from "../components/surah-mode";
 import { useQuranLastRead, useSetQuranLastRead } from "../data/last-read";
 import {
   useQuranReaderSettings,
   useUpdateQuranReaderSettings,
 } from "../data/reader-settings";
+import { useAyahDecorations } from "../hooks/use-ayah-decorations";
 import { useQuranFont } from "../hooks/use-quran-font";
 import { useReaderChrome } from "../hooks/use-reader-chrome";
 import { useReaderHint } from "../hooks/use-reader-hint";
 import { useReaderKeepAwake } from "../hooks/use-reader-keep-awake";
 import { useRecitingAyah } from "../hooks/use-reciting-ayah";
+import type { AyahDecorations } from "../utils/decorations";
 
 interface ReaderParams {
   /** `surah:ayah` to open at. */
@@ -100,6 +103,10 @@ interface ReaderProps {
   width: number;
   height: number;
   ayahActions?: AyahActions | undefined;
+  /** Decorations other features add to the rosettes, from the route. */
+  decorations?: AyahDecorations | undefined;
+  /** What the index's Saved tab lists besides ribbons, from the route. */
+  savedFavorites?: SavedFavorites | undefined;
   topBarActions?: ReactNode;
 }
 
@@ -110,6 +117,8 @@ const Reader = ({
   width,
   height,
   ayahActions,
+  decorations,
+  savedFavorites,
   topBarActions,
 }: ReaderProps) => {
   const insets = useSafeAreaInsets();
@@ -138,6 +147,7 @@ const Reader = ({
     settings.pagePalette,
     theme === "dark" ? "dark" : "light"
   );
+  const allDecorations = useAyahDecorations(decorations);
   const [chrome, send] = useReaderChrome();
   // Bumped by every jump, so the page list or surah remounts at the target.
   const [jumpCount, setJumpCount] = useState(0);
@@ -249,6 +259,7 @@ const Reader = ({
     selectedAyah: selectedAyah ?? recitingAyah,
     pressingAyah: chrome.pressing,
     lastReadAyah: state.lastReadAyah,
+    decorations: allDecorations,
   };
   const lastReadOnScreen =
     state.lastReadAyah !== null &&
@@ -363,6 +374,7 @@ const Reader = ({
         <QuranIndexSheet
           open={chrome.sheet?.kind === "index"}
           current={{ surah: state.currentSurah, juz: position.juz }}
+          savedFavorites={savedFavorites}
           onSelect={jumpTo}
           onPageJump={() => openSheet("page-jump")}
           onClose={closeSheet}
@@ -386,6 +398,13 @@ const Reader = ({
 interface QuranReaderScreenProps {
   /** Actions other features add to an ayah's sheet, composed by the route. */
   ayahActions?: AyahActions;
+  /**
+   * What other features mark on ayat (a Khatmah Portion's end), merged with
+   * the reader's own marks and drawn on the rosettes.
+   */
+  decorations?: AyahDecorations;
+  /** The Favorites the index's Saved tab lists, composed by the route. */
+  savedFavorites?: SavedFavorites;
   /** Buttons other features add to the top bar, composed by the route. */
   topBarActions?: ReactNode;
 }
@@ -397,6 +416,8 @@ interface QuranReaderScreenProps {
  */
 export const QuranReaderScreen = ({
   ayahActions,
+  decorations,
+  savedFavorites,
   topBarActions,
 }: QuranReaderScreenProps) => {
   const params = useLocalSearchParams<ReaderParams>();
@@ -422,6 +443,8 @@ export const QuranReaderScreen = ({
           width={size.width}
           height={size.height}
           ayahActions={ayahActions}
+          decorations={decorations}
+          savedFavorites={savedFavorites}
           topBarActions={topBarActions}
         />
       ) : (

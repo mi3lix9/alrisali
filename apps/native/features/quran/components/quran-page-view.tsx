@@ -10,6 +10,8 @@ import type { TextLayoutEvent } from "react-native";
 import { formatNumber } from "@/shared/lib/numbers";
 
 import { QURAN_FONT } from "../hooks/use-quran-font";
+import { rosetteColor } from "../utils/decorations";
+import type { AyahDecorations } from "../utils/decorations";
 import { hizbLabel } from "../utils/format";
 import { usePageColors } from "./page-colors";
 
@@ -46,6 +48,8 @@ export interface AyahGestures {
   pressingAyah: AyahKey | null;
   /** The Last-Read Ayah, its rosette drawn in the accent colour. */
   lastReadAyah: AyahKey | null;
+  /** What marks ayat on their rosettes: ribbons, notes, sajdah, khatmah. */
+  decorations?: AyahDecorations | undefined;
 }
 
 interface QuranPageViewProps extends AyahGestures {
@@ -75,12 +79,14 @@ const wordKey = (word: QuranWord): AyahKey => `${word.surah}:${word.ayah}`;
 
 interface WordProps extends Omit<
   AyahGestures,
-  "selectedAyah" | "pressingAyah" | "lastReadAyah"
+  "selectedAyah" | "pressingAyah" | "lastReadAyah" | "decorations"
 > {
   word: QuranWord;
   fontSize: number;
   selected: boolean;
   lastRead: boolean;
+  /** The rosette's decoration colour; only the ayah-end sign takes it. */
+  rosette: string | undefined;
 }
 
 const Word = ({
@@ -88,6 +94,7 @@ const Word = ({
   fontSize,
   selected,
   lastRead,
+  rosette,
   onTap,
   onLongPressAyah,
   onPressInAyah,
@@ -96,6 +103,7 @@ const Word = ({
   const colors = usePageColors();
   return (
     <Text
+      testID={word.isAyahEnd ? `quran-ayah-end-${wordKey(word)}` : undefined}
       onPress={onTap}
       onLongPress={() => onLongPressAyah(wordKey(word))}
       onPressIn={() => onPressInAyah(wordKey(word))}
@@ -108,6 +116,7 @@ const Word = ({
         fontSize,
         lineHeight: fontSize / FONT_TO_SLOT,
         writingDirection: "rtl",
+        ...(rosette && word.isAyahEnd ? { color: rosette } : {}),
       }}
     >
       {word.text}
@@ -134,6 +143,7 @@ const Line = ({
   selectedAyah,
   pressingAyah,
   lastReadAyah,
+  decorations,
 }: LineProps) => {
   const { t } = useTranslation("quran");
   const colors = usePageColors();
@@ -190,6 +200,7 @@ const Line = ({
             selectedAyah === wordKey(word) || pressingAyah === wordKey(word)
           }
           lastRead={lastReadAyah === wordKey(word)}
+          rosette={rosetteColor(decorations?.get(wordKey(word)))}
           onTap={onTap}
           onLongPressAyah={onLongPressAyah}
           onPressInAyah={onPressInAyah}
@@ -219,6 +230,7 @@ const PageView = ({
   selectedAyah,
   pressingAyah,
   lastReadAyah,
+  decorations,
 }: QuranPageViewProps) => {
   const { t, i18n } = useTranslation("quran");
   const colors = usePageColors();
@@ -265,6 +277,7 @@ const PageView = ({
     selectedAyah,
     pressingAyah,
     lastReadAyah,
+    decorations,
   };
 
   return (

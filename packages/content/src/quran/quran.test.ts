@@ -11,6 +11,7 @@ import {
   PAGE_COUNT,
   QURAN_SOURCE,
   SURAH_ALIASES,
+  SURAH_COUNT,
   SURAHS,
 } from ".";
 import type { QuranLine } from ".";
@@ -180,6 +181,22 @@ describe("Quran dataset integrity", () => {
       (ayah) => starts.has(ayah.key) && !ayah.text.startsWith("۞")
     );
     expect(unmarked.filter((ayah) => ayah.ayah !== 1)).toStrictEqual([]);
+  });
+
+  it("gives every surah a unique revelation order, 1 to 114", () => {
+    const orders = SURAHS.map((surah) => surah.revelationOrder);
+    expect(orders.toSorted((a, b) => a - b)).toStrictEqual(
+      Array.from({ length: SURAH_COUNT }, (_, index) => index + 1)
+    );
+    // Al-Alaq was revealed first, An-Nasr last.
+    expect(SURAHS[95]?.revelationOrder).toBe(1);
+    expect(SURAHS[109]?.revelationOrder).toBe(114);
+  });
+
+  it("labels the places of revelation", () => {
+    expect(SURAHS[0]?.revelationPlace).toBe("meccan");
+    expect(SURAHS[1]?.revelationPlace).toBe("medinan");
+    expect(SURAHS[113]?.revelationPlace).toBe("meccan");
   });
 });
 

@@ -19,7 +19,8 @@
     "check-types": "tsc -b",
     "books:build": "bun scripts/books/build-books.ts",
     "quran:build": "bun scripts/quran/build.ts",
-    "quran:build-hizb": "bun scripts/quran/build-hizb.ts"
+    "quran:build-hizb": "bun scripts/quran/build-hizb.ts",
+    "quran:build-revelation": "bun scripts/quran/build-revelation.ts"
   },
   "dependencies": {
     "@photostructure/tz-lookup": "^11.7.0"

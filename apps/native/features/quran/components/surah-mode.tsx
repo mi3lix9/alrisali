@@ -21,6 +21,7 @@ import type {
 import { formatNumber } from "@/shared/lib/numbers";
 
 import { QURAN_FONT } from "../hooks/use-quran-font";
+import { rosetteColor } from "../utils/decorations";
 import { usePageColors } from "./page-colors";
 import type { AyahGestures } from "./quran-page-view";
 
@@ -90,6 +91,7 @@ export const SurahMode = ({
   selectedAyah,
   pressingAyah,
   lastReadAyah,
+  decorations,
   initialAyah,
   followAyah,
   onAyahShown,
@@ -272,7 +274,8 @@ export const SurahMode = ({
                       ? colors.highlight
                       : undefined,
                   color:
-                    lastReadAyah === ayah.key ? colors.accent : colors.text,
+                    rosetteColor(decorations?.get(ayah.key)) ??
+                    (lastReadAyah === ayah.key ? colors.accent : colors.text),
                 }}
               >
                 {`${ayah.text} `}
