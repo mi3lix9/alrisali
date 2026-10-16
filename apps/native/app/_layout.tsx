@@ -14,6 +14,7 @@ import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
+import { ModalCloseButton } from "@/shared/ui/modal-close-button";
 
 initMonitoring();
 // Runs in the background; failures are reported to Sentry.
@@ -40,7 +41,11 @@ const RootStack = () => {
         />
         <Stack.Screen
           name="account"
-          options={{ title: t("account"), presentation: "modal" }}
+          options={{
+            title: t("account"),
+            presentation: "modal",
+            headerRight: () => <ModalCloseButton />,
+          }}
         />
         <Stack.Screen name="calendar" />
         <Stack.Screen name="insights" />
