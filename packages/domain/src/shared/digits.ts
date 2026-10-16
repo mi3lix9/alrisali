@@ -52,3 +52,32 @@ export const writeDigits = (text: string, digits: Digits): string =>
           )
         )
         .replaceAll("٪", "%");
+
+const EXTENDED_ARABIC_INDIC_ZERO = 0x06_f0;
+const TYPED_NUMBER = /^-?\d+(?:\.\d+)?$/u;
+
+/**
+ * Reads a number typed in Western, Arabic-Indic (٠–٩) or Persian (۰–۹)
+ * digits, whichever the keyboard gives: the Arabic decimal separator (٫)
+ * reads as ".", thousands separators (٬ ",") are dropped and a typographic
+ * minus (− ‒) reads as "-". Null when the text is blank or not a plain
+ * decimal number.
+ */
+export const readNumber = (text: string): number | null => {
+  const western = writeDigits(
+    text
+      .trim()
+      .replaceAll(/[۰-۹]/gu, (digit) =>
+        String.fromCodePoint(
+          WESTERN_ZERO +
+            (digit.codePointAt(0) ?? 0) -
+            EXTENDED_ARABIC_INDIC_ZERO
+        )
+      ),
+    "latin"
+  )
+    .replaceAll("٫", ".")
+    .replaceAll(/[٬,]/gu, "")
+    .replaceAll(/[\u2212\u2012]/gu, "-");
+  return TYPED_NUMBER.test(western) ? Number(western) : null;
+};

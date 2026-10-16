@@ -16,7 +16,7 @@ import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateBelieverSettings } from "@/shared/lib/believer-settings";
-import { formatNumber } from "@/shared/lib/numbers";
+import { formatNumber, parseNumber } from "@/shared/lib/numbers";
 
 import { useSetPrayerTimeVisible } from "../data/hidden-prayer-times";
 
@@ -67,6 +67,9 @@ export const OptionsCard = ({
           // A new function each render, so a change of digits re-renders
           // the field (this card re-renders through useTranslation).
           formatValue={(minutes) => formatNumber(minutes)}
+          // The keyboard may type Arabic-Indic digits, which parseFloat
+          // cannot read.
+          parseValue={parseNumber}
           min={0}
           max={MAX_IMSAK_MINUTES}
           step={1}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { writeDigits } from "./digits";
+import { readNumber, writeDigits } from "./digits";
 
 describe(writeDigits, () => {
   it("writes Western digits as Arabic-Indic, with Arabic separators", () => {
@@ -19,5 +19,25 @@ describe(writeDigits, () => {
     expect(writeDigits("Page 3, line 4.", "arabic-indic")).toBe(
       "Page ٣, line ٤."
     );
+  });
+});
+
+describe(readNumber, () => {
+  it("reads Western, Arabic-Indic and Persian digits", () => {
+    expect(readNumber(" 15 ")).toBe(15);
+    expect(readNumber("١٥")).toBe(15);
+    expect(readNumber("۱۵")).toBe(15);
+  });
+
+  it("reads separators and a typographic minus", () => {
+    expect(readNumber("١٬٢٣٤٫٥")).toBe(1234.5);
+    expect(readNumber("1,234.5")).toBe(1234.5);
+    expect(readNumber("−٢٦٫٥")).toBe(-26.5);
+  });
+
+  it("is null for blank or non-numeric text", () => {
+    expect(readNumber("")).toBeNull();
+    expect(readNumber("12a")).toBeNull();
+    expect(readNumber("1.")).toBeNull();
   });
 });

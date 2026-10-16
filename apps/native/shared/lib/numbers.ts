@@ -1,4 +1,4 @@
-import { writeDigits } from "@alrisali/domain/shared";
+import { readNumber, writeDigits } from "@alrisali/domain/shared";
 import type { Digits } from "@alrisali/domain/shared";
 import type { Language } from "@alrisali/i18n";
 
@@ -38,6 +38,14 @@ export const useDigits = (): Digits =>
 /** Text holding Western or Arabic-Indic digits, in the interface's digits. */
 export const localizeDigits = (text: string): string =>
   writeDigits(text, currentDigits());
+
+/**
+ * A number the Believer typed, in either digits (the keyboard may type
+ * Arabic-Indic whatever the setting): NaN when the text is not a number, as
+ * `parseFloat` would give.
+ */
+export const parseNumber = (text: string): number =>
+  readNumber(text) ?? Number.NaN;
 
 const numberFormats = new Map<string, Intl.NumberFormat>();
 

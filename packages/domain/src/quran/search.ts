@@ -2,7 +2,8 @@ import { AYAT, SURAHS } from "@alrisali/content/quran";
 import type { Surah } from "@alrisali/content/quran";
 
 import { normalizeArabic } from "../shared";
-import { findAyah, toWesternDigits } from "./mushaf";
+import { writeDigits } from "../shared/digits";
+import { findAyah } from "./mushaf";
 import type { Ayah } from "./mushaf";
 
 // Search over Surah names and ayah text that does not ask the Believer to type
@@ -94,7 +95,7 @@ const matchingSurahs = (trimmed: string): Surah[] => {
  * only: cheap enough to run on every keystroke.
  */
 export const searchSurahs = (query: string): Surah[] => {
-  const trimmed = toWesternDigits(query.trim());
+  const trimmed = writeDigits(query.trim(), "latin");
   return trimmed ? matchingSurahs(trimmed) : [];
 };
 
@@ -108,7 +109,7 @@ export const searchQuran = (
   query: string,
   { limit = 50 }: QuranSearchOptions = {}
 ): QuranSearchResult => {
-  const trimmed = toWesternDigits(query.trim());
+  const trimmed = writeDigits(query.trim(), "latin");
   if (!trimmed) {
     return NOTHING;
   }

@@ -2,6 +2,7 @@ import {
   locationSchema,
   MAX_LATITUDE,
   MAX_LONGITUDE,
+  readNumber,
 } from "@alrisali/domain/shared";
 import type { Location } from "@alrisali/domain/shared";
 import { Button, Card, Input } from "panelui-native";
@@ -14,13 +15,11 @@ import {
 } from "@/shared/lib/believer-settings";
 import { localizeDigits } from "@/shared/lib/numbers";
 
-import { parseCoordinate } from "../utils/parse-coordinate";
-
 const LocationForm = ({ saved }: { saved: Location | null }) => {
   const { t } = useTranslation("settings");
   const { mutate: update, isPending } = useUpdateBelieverSettings();
   const [name, setName] = useState(saved?.name ?? "");
-  // Shown in the interface's digits; parseCoordinate reads either.
+  // Shown in the interface's digits; readNumber reads either.
   const [latitude, setLatitude] = useState(
     saved ? localizeDigits(String(saved.latitude)) : ""
   );
@@ -31,8 +30,8 @@ const LocationForm = ({ saved }: { saved: Location | null }) => {
 
   const save = () => {
     const location = locationSchema.safeParse({
-      latitude: parseCoordinate(latitude),
-      longitude: parseCoordinate(longitude),
+      latitude: readNumber(latitude),
+      longitude: readNumber(longitude),
       name: name.trim() === "" ? null : name,
     });
     setInvalid(!location.success);

@@ -29,6 +29,34 @@ index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f
      // Caller styles come last so InputGroup can pad the field around its
      // decorators, but never last enough to drop the animated border.
      style],
+diff --git a/lib/module/components/number-input/index.js b/lib/module/components/number-input/index.js
+index 959b20b6e18bd02df05a4476dd3da6667aae2993..923d0245e5c87afe5937fee66f0f0e2b2acdb257 100644
+--- a/lib/module/components/number-input/index.js
++++ b/lib/module/components/number-input/index.js
+@@ -161,6 +161,7 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+   step = 1,
+   onValueChange,
+   formatValue,
++  parseValue = parseFloat,
+   editable = true,
+   variant = 'outline',
+   size = 'md',
+@@ -238,13 +239,13 @@ export const NumberInput = /*#__PURE__*/forwardRef(({
+   const atMin = value <= min;
+   const atMax = value >= max;
+   const handleEndEditing = useCallback(() => {
+-    const parsed = parseFloat(text);
++    const parsed = parseValue(text);
+     // An empty or unreadable field falls back to the last good value rather
+     // than snapping to a surprising 0.
+     commit(Number.isNaN(parsed) ? value : parsed, false);
+     setFocused(false);
+     setText(format(Number.isNaN(parsed) ? value : normalize(parsed, min, max, step)));
+-  }, [text, value, commit, format, min, max, step]);
++  }, [text, value, commit, format, parseValue, min, max, step]);
+   return /*#__PURE__*/_jsxs(View, {
+     className: slots.container({
+       className: containerClassName
 diff --git a/lib/module/components/textarea/index.js b/lib/module/components/textarea/index.js
 index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724c0dc84d7 100644
 --- a/lib/module/components/textarea/index.js
@@ -60,6 +88,23 @@ index b783d113a2da5560427410559969470a3b1b0514..69ffca8a1e0fb993c3681a1c84692724
        placeholderTextColor: typeof placeholderColor === 'string' ? placeholderColor : undefined,
        ...props
      }), footer]
+diff --git a/lib/typescript/src/components/number-input/index.d.ts b/lib/typescript/src/components/number-input/index.d.ts
+index f052a73c11a985bd50dfa8b94a1900c5bb4a9a0a..28d58dafac43c8441c808853fcd8f552c7e6526b 100644
+--- a/lib/typescript/src/components/number-input/index.d.ts
++++ b/lib/typescript/src/components/number-input/index.d.ts
+@@ -143,6 +143,12 @@ export interface NumberInputProps extends Omit<NumberInputVariantProps, 'invalid
+      * rounded to `step`'s precision.
+      */
+     formatValue?: (value: number) => string;
++    /**
++     * Read typed text back as a number — the inverse of `formatValue`, for a
++     * format `parseFloat` cannot read (other digits, units). NaN for text that
++     * is no number. Defaults to `parseFloat`.
++     */
++    parseValue?: (text: string) => number;
+     /** Let the middle field be typed into. When false it is display-only. */
+     editable?: boolean;
+     disabled?: boolean;
 diff --git a/src/components/input/index.tsx b/src/components/input/index.tsx
 index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc5f144f30 100644
 --- a/src/components/input/index.tsx
@@ -91,6 +136,47 @@ index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc
            // Caller styles come last so InputGroup can pad the field around its
            // decorators, but never last enough to drop the animated border.
            style,
+diff --git a/src/components/number-input/index.tsx b/src/components/number-input/index.tsx
+index 5a9dad400e76b139252830fd369ac189916d6309..d559c37ca1c1ceda47285e0187cb366200de079f 100644
+--- a/src/components/number-input/index.tsx
++++ b/src/components/number-input/index.tsx
+@@ -141,6 +141,12 @@ export interface NumberInputProps
+    * rounded to `step`'s precision.
+    */
+   formatValue?: (value: number) => string;
++  /**
++   * Read typed text back as a number — the inverse of `formatValue`, for a
++   * format `parseFloat` cannot read (other digits, units). NaN for text that
++   * is no number. Defaults to `parseFloat`.
++   */
++  parseValue?: (text: string) => number;
+   /** Let the middle field be typed into. When false it is display-only. */
+   editable?: boolean;
+   disabled?: boolean;
+@@ -175,6 +181,7 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+       step = 1,
+       onValueChange,
+       formatValue,
++      parseValue = parseFloat,
+       editable = true,
+       variant = 'outline',
+       size = 'md',
+@@ -271,13 +278,13 @@ export const NumberInput = forwardRef<TextInput, NumberInputProps>(
+     const atMax = value >= max;
+ 
+     const handleEndEditing = useCallback(() => {
+-      const parsed = parseFloat(text);
++      const parsed = parseValue(text);
+       // An empty or unreadable field falls back to the last good value rather
+       // than snapping to a surprising 0.
+       commit(Number.isNaN(parsed) ? value : parsed, false);
+       setFocused(false);
+       setText(format(Number.isNaN(parsed) ? value : normalize(parsed, min, max, step)));
+-    }, [text, value, commit, format, min, max, step]);
++    }, [text, value, commit, format, parseValue, min, max, step]);
+ 
+     return (
+       <View className={slots.container({ className: containerClassName })}>
 diff --git a/src/components/textarea/index.tsx b/src/components/textarea/index.tsx
 index b7155d4baa06f77316963ec5e17e666223116519..0efa2e90c684ddfadd825cec6e6e2bd1d9d1e5ee 100644
 --- a/src/components/textarea/index.tsx
