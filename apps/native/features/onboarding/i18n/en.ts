@@ -32,6 +32,8 @@ export const en: Catalog<typeof ar> = {
     title: "Reminders",
     description:
       "The app reminds you of Prayer Times and Imsak with notifications from your device itself, even offline.",
+    reason:
+      "Next your device asks to allow notifications, so the alerts above can arrive. Skipping the alerts keeps the suggested choices.",
     allow: "Allow notifications",
     allowed: "Notifications are allowed.",
     declined:
