@@ -18,6 +18,7 @@ import type { Temporal } from "temporal-polyfill";
 import { useBelieverSettings } from "./believer-settings";
 import { useGlobalHijriAdjustment } from "./content-database";
 import { formatDateTime } from "./numbers";
+import { useToday } from "./today";
 
 // Probes this engine's Intl for Umm al-Qura once; Hermes may not honour it,
 // and then every Hijri Date comes from the arithmetic calendar.
@@ -25,13 +26,16 @@ const converter = defaultHijriConverter();
 
 /**
  * The Hijri calendar every screen shows dates from, shifted by the Admins'
- * Hijri Adjustment plus the Believer's own.
+ * Hijri Adjustment (their forced date while it lasts, else their offset) plus
+ * the Believer's own. A forced date's expiry takes effect on the next day.
  */
 export const useHijriCalendar = (): HijriCalendar => {
   const { data: settings } = useBelieverSettings();
   const adjustment = effectiveHijriAdjustment({
     admin: useGlobalHijriAdjustment(),
     believer: settings?.hijriAdjustment ?? DEFAULT_HIJRI_ADJUSTMENT,
+    today: useToday(),
+    converter,
   });
   return useMemo(
     () => createHijriCalendar({ adjustment, converter }),
