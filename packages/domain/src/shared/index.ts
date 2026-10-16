@@ -143,3 +143,4 @@ export type {
   TasbihLabel,
 } from "./insights-sources";
 export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
+export type { QadaReminderPlan } from "./qada-reminder";
