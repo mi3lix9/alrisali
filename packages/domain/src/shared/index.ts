@@ -143,3 +143,25 @@ export type {
   TasbihLabel,
 } from "./insights-sources";
 export { matchesSearch, normalizeArabic, normalizeSearchText } from "./search";
+export {
+  FEATURE_AREAS,
+  FEATURES,
+  featuresByArea,
+  visibleFeatures,
+} from "./features";
+export type {
+  Feature,
+  FeatureArea,
+  FeatureEntry,
+  FeatureGroup,
+  FeatureId,
+} from "./features";
+export {
+  arrangedShortcuts,
+  DEFAULT_SHORTCUT_LAYOUT,
+  homeShortcuts,
+  moveShortcut,
+  readShortcutLayout,
+  setShortcutShown,
+} from "./home-shortcuts";
+export type { ArrangedShortcut, ShortcutLayout } from "./home-shortcuts";
