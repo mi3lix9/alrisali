@@ -91,7 +91,9 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => {
     name: APP_NAME,
     slug: "alrisali",
     version: "1.0.0",
-    orientation: "portrait",
+    // Landscape is allowed here and locked away at runtime (shared/lib/
+    // orientation.ts); only the Quran reader turns, on tablets and foldables.
+    orientation: "default",
     icon: "./assets/images/icon.png",
     scheme: "alrisali",
     userInterfaceStyle: "automatic",

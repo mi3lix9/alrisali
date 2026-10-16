@@ -160,3 +160,7 @@ export const byMeaningRanges = (days: ByMeaningDays): readonly AyahRange[] => {
     };
   });
 };
+
+/** The sajdah ayat, obligatory (the four 'azaa'im) or recommended. */
+export { SAJDAH } from "./data/sajdah";
+export type { Sajdah, SajdahKind } from "./data/sajdah";

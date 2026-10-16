@@ -37,25 +37,29 @@ const logs = (sessions: number[], on: Temporal.PlainDate): KhatmahLog[] =>
 const upTo = (count: number): number[] =>
   Array.from({ length: count }, (_, index) => index + 1);
 
-const ayahIndexOf = (key: string): number =>
-  AYAT.findIndex((ayah) => ayah.key === key);
+const AYAH_INDEX = new Map<string, number>(
+  AYAT.map((ayah, position) => [ayah.key, position])
+);
+
+const ayahIndexOf = (key: string): number => AYAH_INDEX.get(key) ?? -1;
 
 describe(sessionsFor, () => {
   it("covers all 6236 ayat exactly once, in order, for every even split from 3 to 240 days", () => {
-    for (let days = MIN_EVEN_DAYS; days <= MAX_EVEN_DAYS; days += 1) {
+    const broken = Array.from(
+      { length: MAX_EVEN_DAYS - MIN_EVEN_DAYS + 1 },
+      (_, offset) => MIN_EVEN_DAYS + offset
+    ).filter((days) => {
       const sessions = sessionsFor({ kind: "even", days });
-      expect(sessions).toHaveLength(days);
-      expect(sessions[0]?.from).toBe("1:1");
-      expect(sessions.at(-1)?.to).toBe("114:6");
       let next = 0;
-      for (const session of sessions) {
-        expect(ayahIndexOf(session.from)).toBe(next);
+      const contiguous = sessions.every((session) => {
         const last = ayahIndexOf(session.to);
-        expect(last).toBeGreaterThanOrEqual(next);
+        const fits = ayahIndexOf(session.from) === next && last >= next;
         next = last + 1;
-      }
-      expect(next).toBe(AYAT.length);
-    }
+        return fits;
+      });
+      return !(contiguous && sessions.length === days && next === AYAT.length);
+    });
+    expect(broken).toStrictEqual([]);
   });
 
   it("makes the suggested plan thirty sessions of one juz each", () => {
