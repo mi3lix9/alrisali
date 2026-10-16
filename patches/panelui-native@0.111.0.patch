@@ -1,6 +1,9 @@
 diff --git a/node_modules/panelui-native/.bun-tag-6d0a1e846a1ae269 b/.bun-tag-6d0a1e846a1ae269
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/panelui-native/.bun-tag-70f5ffb48e371d1 b/.bun-tag-70f5ffb48e371d1
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/node_modules/panelui-native/.bun-tag-c448b08ff4784157 b/.bun-tag-c448b08ff4784157
 new file mode 100644
 index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
@@ -135,6 +138,38 @@ index fc3297892b2cbf255a3599165f7e0c9f019e3a92..f2cfca66d11bad3a40ddd2eea97e9075
        options: years.map(String),
        active: years.indexOf(current.year),
        width: YEAR_LIST_WIDTH,
+diff --git a/lib/module/components/chip/index.js b/lib/module/components/chip/index.js
+index aecf2d3998c24fcdc236bc5f2b13b881747c553d..9476c57fd823182a53d53a0c93d8520d7991a834 100644
+--- a/lib/module/components/chip/index.js
++++ b/lib/module/components/chip/index.js
+@@ -97,13 +97,14 @@ const chipVariants = tv({
+       }
+     },
+     /**
+-     * The filter "on" state — a loud accent surface that wins over the resting
+-     * variant, so any chip can be a filter without picking a second colour.
++     * The filter "on" state — the primary fill, which wins over the resting
++     * variant. The accent surface it used is the resting chip's own fill in
++     * both themes, so "on" showed only as a faint outline.
+      */
+     selected: {
+       true: {
+-        root: 'border-primary/24 bg-accent',
+-        label: 'text-accent-foreground'
++        root: 'border-primary bg-primary',
++        label: 'text-primary-foreground'
+       }
+     },
+     /** Trims the trailing padding so the close target hugs the right edge. */
+@@ -230,7 +231,7 @@ const ChipRoot = /*#__PURE__*/forwardRef(({
+ 
+   // Icons and the ✕ inherit this, so they track the surface they sit on
+   // instead of every caller hardcoding a hex that is wrong in one theme.
+-  const tint = useCSSVariable(isSelected ? '--color-accent-foreground' : TINT_VAR[variant]);
++  const tint = useCSSVariable(isSelected ? '--color-primary-foreground' : TINT_VAR[variant]);
+   const handlePress = useCallback(event => {
+     if (haptics) selectionTick();
+     onPress?.(event);
 diff --git a/lib/module/components/input/index.js b/lib/module/components/input/index.js
 index e36e8f49fa9b71806e9870bd6007a96e970078c3..032a5ffc420f5439cd62f1779042376f1596e8ad 100644
 --- a/lib/module/components/input/index.js
@@ -884,6 +919,38 @@ index 5251db0cdb13a0ea32a74f4237d92ba7098ac0fd..14ff0b16a24f6305350dd808b7092ef0
          options={years.map(String)}
          active={years.indexOf(current.year)}
          width={YEAR_LIST_WIDTH}
+diff --git a/src/components/chip/index.tsx b/src/components/chip/index.tsx
+index c5738c42484c3a474818963fd7ec1b2cceaee76f..781cf89189e700e205dff4b795870b0612944031 100644
+--- a/src/components/chip/index.tsx
++++ b/src/components/chip/index.tsx
+@@ -79,13 +79,14 @@ const chipVariants = tv({
+       xl: { root: 'h-11 gap-2 px-4', label: 'text-base' },
+     },
+     /**
+-     * The filter "on" state — a loud accent surface that wins over the resting
+-     * variant, so any chip can be a filter without picking a second colour.
++     * The filter "on" state — the primary fill, which wins over the resting
++     * variant. The accent surface it used is the resting chip's own fill in
++     * both themes, so "on" showed only as a faint outline.
+      */
+     selected: {
+       true: {
+-        root: 'border-primary/24 bg-accent',
+-        label: 'text-accent-foreground',
++        root: 'border-primary bg-primary',
++        label: 'text-primary-foreground',
+       },
+     },
+     /** Trims the trailing padding so the close target hugs the right edge. */
+@@ -225,7 +226,7 @@ const ChipRoot = forwardRef<View, ChipProps>(
+     // Icons and the ✕ inherit this, so they track the surface they sit on
+     // instead of every caller hardcoding a hex that is wrong in one theme.
+     const tint = useCSSVariable(
+-      isSelected ? '--color-accent-foreground' : TINT_VAR[variant]
++      isSelected ? '--color-primary-foreground' : TINT_VAR[variant]
+     );
+ 
+     const handlePress = useCallback<NonNullable<AnimatedPressableProps['onPress']>>(
 diff --git a/src/components/input/index.tsx b/src/components/input/index.tsx
 index 6464b71f40116be3583259993b483802d6c06e1d..8ec3ef764417b3220703094c6a2707cc5f144f30 100644
 --- a/src/components/input/index.tsx
