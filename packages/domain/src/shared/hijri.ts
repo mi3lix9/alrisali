@@ -58,17 +58,54 @@ export const hijriAdjustmentSchema = z
   .min(-HIJRI_ADJUSTMENT_LIMIT)
   .max(HIJRI_ADJUSTMENT_LIMIT);
 
+/** A Gregorian date, `YYYY-MM-DD`, that exists in the calendar. */
+const isoDateSchema = z.iso.date().refine((date) => {
+  try {
+    Temporal.PlainDate.from(date, { overflow: "reject" });
+    return true;
+  } catch {
+    return false;
+  }
+}, "Not a calendar date");
+
 /**
- * The shift applied to every computed Hijri Date: the Admins' adjustment for
- * everyone plus the Believer's own. Positive moves the Hijri Date ahead.
+ * A forced Hijri Date the Admins publish after a moon-sighting announcement:
+ * the Gregorian day `from` is `date`, and the days after count on from it,
+ * until the Gregorian day `until` (inclusive). Then it expires.
  */
-export const effectiveHijriAdjustment = ({
-  admin,
-  believer,
-}: {
-  admin: number;
-  believer: number;
-}): number => admin + believer;
+export const forcedHijriDateSchema = z
+  .object({
+    date: z.object({
+      year: z.number().int().min(1),
+      month: hijriMonthSchema,
+      day: hijriDaySchema,
+    }),
+    from: isoDateSchema,
+    until: isoDateSchema,
+  })
+  // ISO dates order as text, so this holds even when a field failed above.
+  .refine(({ from, until }) => from <= until, {
+    message: "The expiry is before the forced date starts",
+    path: ["until"],
+  });
+
+export type ForcedHijriDate = z.infer<typeof forcedHijriDateSchema>;
+
+/**
+ * The Admins' Hijri Adjustment: a day offset, or a forced date that replaces
+ * the offset while it lasts.
+ */
+export const adminHijriAdjustmentSchema = z.object({
+  offset: hijriAdjustmentSchema,
+  forced: forcedHijriDateSchema.nullable(),
+});
+
+export type AdminHijriAdjustment = z.infer<typeof adminHijriAdjustmentSchema>;
+
+export const DEFAULT_ADMIN_HIJRI_ADJUSTMENT: AdminHijriAdjustment = {
+  offset: DEFAULT_HIJRI_ADJUSTMENT,
+  forced: null,
+};
 
 /** Turns a Julian Day Number into the computed (unadjusted) Hijri Date. */
 export interface HijriConverter {
@@ -415,4 +452,96 @@ export const isInHijriWindow = (
   const from = dayOfYearKey(start);
   const to = dayOfYearKey(end);
   return from <= to ? at >= from && at <= to : at >= from || at <= to;
+};
+
+/**
+ * The shift that makes the forced date's first day show its Hijri Date under
+ * this converter. Not clamped: an engine on the tabular calendar may need more
+ * than `HIJRI_ADJUSTMENT_LIMIT` days to reach the announced date.
+ */
+const forcedHijriShift = (
+  { date, from }: ForcedHijriDate,
+  converter: HijriConverter
+): number => {
+  // Counting from the 1st never throws for a day 30 the computed month lacks.
+  const computed = createHijriCalendar({ converter })
+    .toGregorian({ ...date, day: 1 })
+    .add({ days: date.day - 1 });
+  return Temporal.PlainDate.from(from).until(computed).days;
+};
+
+/**
+ * The shift applied to every computed Hijri Date today: the Admins' forced
+ * date while it lasts (from its first day through its expiry), otherwise
+ * their offset, plus the Believer's own either way. Positive moves the Hijri
+ * Date ahead.
+ */
+export const effectiveHijriAdjustment = ({
+  admin,
+  believer,
+  today,
+  converter,
+}: {
+  admin: AdminHijriAdjustment;
+  believer: number;
+  today: Temporal.PlainDate;
+  converter: HijriConverter;
+}): number => {
+  const { forced } = admin;
+  const applies =
+    forced !== null &&
+    Temporal.PlainDate.compare(today, forced.from) >= 0 &&
+    Temporal.PlainDate.compare(today, forced.until) <= 0;
+  return (
+    (applies ? forcedHijriShift(forced, converter) : admin.offset) + believer
+  );
+};
+
+/**
+ * Why Admins may not publish a forced date, or null when they may: its day
+ * is missing from the computed month, or it lies further than
+ * `HIJRI_ADJUSTMENT_LIMIT` days from the computed date (likely a typo).
+ */
+export const forcedHijriDateProblem = ({
+  forced,
+  converter,
+}: {
+  forced: ForcedHijriDate;
+  converter: HijriConverter;
+}): "missing-day" | "too-far" | null => {
+  const { year, month, day } = forced.date;
+  if (day > createHijriCalendar({ converter }).monthLength(year, month)) {
+    return "missing-day";
+  }
+  return Math.abs(forcedHijriShift(forced, converter)) > HIJRI_ADJUSTMENT_LIMIT
+    ? "too-far"
+    : null;
+};
+
+/**
+ * Whether `now` is at or after Maghrib, the minute the Hijri day of night
+ * content turns. A null Maghrib (never computed) is never reached.
+ */
+export const isAfterMaghrib = (
+  now: Temporal.ZonedDateTime,
+  maghrib: Temporal.ZonedDateTime | null
+): boolean =>
+  maghrib !== null &&
+  Temporal.Instant.compare(now.toInstant(), maghrib.toInstant()) >= 0;
+
+/**
+ * The Hijri Date night content follows: the civil day's, or the next day's
+ * from Maghrib on, because the Hijri day begins at sunset. The date shown
+ * elsewhere stays `calendar.toHijri` of the civil day; only night content
+ * (tonight's Occasion, night a'mal, night duas) reads this.
+ */
+export const nightHijriDate = (
+  now: Temporal.ZonedDateTime,
+  maghrib: Temporal.ZonedDateTime | null,
+  calendar: HijriCalendar
+): HijriDate => {
+  const civil = now.toPlainDate();
+  return calendar.toHijri(
+    isAfterMaghrib(now, maghrib) ? civil.add({ days: 1 }) : civil
+  );
 };

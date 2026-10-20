@@ -1,0 +1,1 @@
+ALTER TABLE `believer_settings` ADD `custom_angles` text;

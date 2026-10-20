@@ -17,6 +17,8 @@ const EVENTS: XpEvent[] = [
   { kind: "dhikr-session", sessionId: "6f1c0b1e-3a43-4c38-9a9e-6f0c3c2b8a10" },
   { kind: "reading", supplicationId: "sahifa-1", date: "2026-10-16" },
   { kind: "lesson", lessonId: "aqeedah-1" },
+  { kind: "khatmah-session", khatmahId: "khatmah-1", session: 3 },
+  { kind: "khatmah", khatmahId: "khatmah-1" },
 ];
 
 describe("Companion XP awards", () => {
@@ -34,6 +36,8 @@ describe("Companion XP awards", () => {
       "dhikr-session:6f1c0b1e-3a43-4c38-9a9e-6f0c3c2b8a10",
       "reading:sahifa-1:2026-10-16",
       "lesson:aqeedah-1",
+      "khatmah-session:khatmah-1:3",
+      "khatmah:khatmah-1",
     ]);
   });
 

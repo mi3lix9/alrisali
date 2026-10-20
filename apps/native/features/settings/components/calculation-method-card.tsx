@@ -1,6 +1,7 @@
 import "../i18n";
-import { CALCULATION_METHODS } from "@alrisali/domain/shared";
-import { Card, RadioGroup } from "panelui-native";
+import { CALCULATION_METHOD_GROUPS } from "@alrisali/domain/shared";
+import type { CalculationMethod } from "@alrisali/domain/shared";
+import { Card, RadioGroup, Text } from "panelui-native";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -8,6 +9,10 @@ import {
   useUpdateBelieverSettings,
 } from "@/shared/lib/believer-settings";
 
+/**
+ * The Calculation Methods, grouped Shia, Sunni and other. Onboarding reuses
+ * it through its route; Custom's angles are edited in Prayer settings.
+ */
 export const CalculationMethodCard = () => {
   const { t } = useTranslation("settings");
   const { data: settings } = useBelieverSettings();
@@ -22,26 +27,33 @@ export const CalculationMethodCard = () => {
         </Card.Description>
       </Card.Header>
       {settings ? (
-        <Card.Content>
-          <RadioGroup
-            value={settings.calculationMethod}
-            onValueChange={(value) => {
-              const next = CALCULATION_METHODS.find(
-                (candidate) => candidate === value
-              );
-              if (next) {
-                update({ calculationMethod: next });
-              }
-            }}
-          >
-            {CALCULATION_METHODS.map((option) => (
-              <RadioGroup.Item
-                key={option}
-                value={option}
-                label={t(`calculationMethod.${option}`)}
-              />
-            ))}
-          </RadioGroup>
+        <Card.Content className="gap-4">
+          {CALCULATION_METHOD_GROUPS.map(({ group, methods }) => {
+            const chosen = (methods as readonly CalculationMethod[]).find(
+              (method) => method === settings.calculationMethod
+            );
+            return (
+              <RadioGroup
+                key={group}
+                value={chosen ?? ""}
+                onValueChange={(value) => {
+                  const next = methods.find((candidate) => candidate === value);
+                  if (next) {
+                    update({ calculationMethod: next });
+                  }
+                }}
+              >
+                <Text muted>{t(`calculationMethod.groups.${group}`)}</Text>
+                {methods.map((option) => (
+                  <RadioGroup.Item
+                    key={option}
+                    value={option}
+                    label={t(`calculationMethod.${option}`)}
+                  />
+                ))}
+              </RadioGroup>
+            );
+          })}
         </Card.Content>
       ) : null}
     </Card>

@@ -46,3 +46,6 @@ export const useFirstRun = create<FirstRunState>()((set) => {
 /** Whether the first run is over: the shell opens on Home. */
 export const useOnboarded = (): boolean =>
   useFirstRun((state) => state.progress.done);
+
+/** Whether the first run is over, read outside a component. */
+export const isOnboarded = (): boolean => useFirstRun.getState().progress.done;

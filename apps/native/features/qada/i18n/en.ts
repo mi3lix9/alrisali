@@ -1,0 +1,103 @@
+import type { Catalog } from "@alrisali/i18n";
+
+import type { ar } from "./ar";
+
+export const en: Catalog<typeof ar> = {
+  title: "Qada",
+  setupTitle: "Qada plan",
+  salah: {
+    fajr: "Fajr",
+    dhuhr: "Dhuhr",
+    asr: "Asr",
+    maghrib: "Maghrib",
+    isha: "Isha",
+  },
+  fasts: "Fasts",
+  unit: {
+    salah: "Salah",
+    day: "days",
+  },
+  card: {
+    title: "Qada",
+    setUpDescription:
+      "Enter the Salah and fasts you missed, and pick a pace that suits you.",
+    setUp: "Set up a Qada plan",
+    open: "Open Qada",
+    remaining: "{{n}} Salah left",
+    today: "Today's plan: {{done}} of {{total}}",
+    done: "Every Qada is made up. May Allah accept it.",
+  },
+  dashboard: {
+    left: "Left to make up",
+    percentDone: "{{percent}} done",
+    finish: "At {{pace}} Salah a day: done around {{date}}",
+    allDone: "Every Qada Salah is made up. May Allah accept it.",
+    today: "Today's plan: {{done}} of {{total}}",
+    nothingToday: "Nothing in today's plan.",
+    calendar: "Last five weeks",
+    calendarDay: "{{date}}: {{n}}",
+    edit: "Edit plan",
+    reminder: "Qada reminder",
+    reminderOff: "Off",
+    reminderDaily: "Daily at {{time}}",
+    reminderDays: "{{time}} · {{days}}",
+    daySeparator: ", ",
+    prayerLog: "Prayer Log",
+    prayerLogHint:
+      "Made up a Salah? You can log it from the Prayer Log too; it counts once.",
+    fastsLeft: "{{n}} fasts left · plan {{pace}} a week",
+    privacy:
+      "Kept in your database and synced only between your devices. Guests: on this device.",
+    saveError: "Couldn't save the change. Try again.",
+  },
+  item: {
+    salah: "Qada {{name}}",
+    fast: "Qada fast",
+    logged: "Performed · taken off what's left",
+    notYet: "Not yet performed",
+  },
+  setup: {
+    intro:
+      "Estimate a period, then adjust any Salah. You can change it any time.",
+    missedSalah: "Missed Salah",
+    preset: {
+      days10: "{{n}} days",
+      month1: "A month",
+      months6: "{{n}} months",
+      year1: "A year",
+      months18: "A year and a half",
+      years2: "Two years",
+    },
+    presetHint: "A month counts as {{n}} days.",
+    total: "Total",
+    missedFasts: "Missed fasts",
+    fastDays: "Fast days",
+    pace: "Pace",
+    salahPerDay: "Salah a day",
+    fastsPerWeek: "Fasts a week",
+    projection: "At this pace you finish the Salah in {{days}} days.",
+    reminder: "Qada reminder",
+    reminderDescription: "A reminder at the time and on the days you choose.",
+    reminderTime: "Time",
+    reminderDays: "Days",
+    noDays: "Choose at least one day.",
+    increase: "Increase {{name}}",
+    decrease: "Decrease {{name}}",
+    save: "Save plan",
+    failed: "Couldn't save the plan. Try again.",
+  },
+  weekday: {
+    "1": "Monday",
+    "2": "Tuesday",
+    "3": "Wednesday",
+    "4": "Thursday",
+    "5": "Friday",
+    "6": "Saturday",
+    "7": "Sunday",
+  },
+  prayerLog: {
+    qada: "Qada",
+    qadaCount: "Qada ×{{times}}",
+    label: "Qada {{name}}",
+  },
+};

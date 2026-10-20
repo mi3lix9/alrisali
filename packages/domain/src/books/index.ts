@@ -5,3 +5,36 @@ export type {
   SupplicationSearchOptions,
   SupplicationSearchResult,
 } from "./search";
+export { taqibatFor } from "./taqibat";
+export {
+  AMAL_KIND_NAMES,
+  AMAL_LAST_DAY,
+  amalActSchema,
+  amalDaySchema,
+  amalOfMonth,
+} from "./amal";
+export type { AmalDay, AmalDayInput, MonthAmal } from "./amal";
+export {
+  DEFAULT_READER_FORMAT,
+  READER_FONT_SIZE,
+  READER_FONTS,
+  READER_SPACINGS,
+  READER_THEMES,
+  readerLineHeight,
+  readReaderFormat,
+  stepReaderFontSize,
+} from "./reader-format";
+export type {
+  ReaderFont,
+  ReaderFormat,
+  ReaderSpacing,
+  ReaderTheme,
+} from "./reader-format";
+export { resumeSection } from "./position";
+export {
+  AUTO_SCROLL_SPEEDS,
+  DEFAULT_AUTO_SCROLL_SPEED,
+  advanceAutoScroll,
+  stepAutoScrollSpeed,
+} from "./auto-scroll";
+export { counterProgress, tapCounter } from "./counter";

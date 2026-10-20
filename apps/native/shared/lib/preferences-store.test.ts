@@ -19,6 +19,7 @@ const NOTHING = {
   textSize: null,
   hiddenTabs: null,
   digits: null,
+  homeShortcuts: null,
 };
 
 /** The SecureStore entry, in memory. */
@@ -45,6 +46,7 @@ const fakeDatabase = (initial: Partial<ShellPreferences> = {}) => {
         textSize: change.textSize ?? row.textSize,
         hiddenTabs: change.hiddenTabs ? [...change.hiddenTabs] : row.hiddenTabs,
         digits: change.digits ?? row.digits,
+        homeShortcuts: change.homeShortcuts ?? row.homeShortcuts,
       };
       return Promise.resolve(row);
     },
@@ -124,6 +126,7 @@ describe(createPreferences, () => {
         textSize: "larger",
         hiddenTabs: ["library"],
         digits: "latin",
+        homeShortcuts: { order: ["qibla"], hidden: [] },
       },
     });
 
@@ -135,6 +138,7 @@ describe(createPreferences, () => {
       textSize: "larger",
       hiddenTabs: ["library"],
       digits: "latin",
+      homeShortcuts: { order: ["qibla"], hidden: [] },
     };
     expect(store.getState()).toMatchObject(chosen);
     expect(cache.entry()).toStrictEqual(chosen);
@@ -162,6 +166,7 @@ describe(createPreferences, () => {
       textSize: null,
       hiddenTabs: null,
       digits: "latin",
+      homeShortcuts: null,
     });
   });
 
@@ -174,6 +179,7 @@ describe(createPreferences, () => {
     store.getState().setTextSize("large");
     store.getState().setTabVisible("tasbih", false);
     store.getState().setDigits("latin");
+    store.getState().setShortcutShown("lessons", true);
     // Writes queue behind each other; a hydration runs after them.
     await store.getState().hydrate();
 
@@ -183,12 +189,52 @@ describe(createPreferences, () => {
       textSize: "large",
       hiddenTabs: ["tasbih"],
       digits: "latin",
+      homeShortcuts: {
+        order: [
+          "quran",
+          "prayer",
+          "qibla",
+          "prayer-assistant",
+          "library",
+          "lessons",
+          "worship",
+          "programs",
+          "tasbih",
+          "calendar",
+          "gatherings",
+          "insights",
+          "khatmah",
+          "timetable",
+          "imsakiyya",
+        ],
+        hidden: [
+          "library",
+          "worship",
+          "programs",
+          "gatherings",
+          "khatmah",
+          "timetable",
+        ],
+      },
     };
     expect(store.getState()).toMatchObject(chosen);
     expect(cache.entry()).toStrictEqual(chosen);
     expect(database().row()).toStrictEqual(chosen);
     expect(applyTheme).toHaveBeenLastCalledWith("dark");
     expect(applyTextSize).toHaveBeenLastCalledWith("large");
+  });
+
+  it("moves a Home shortcut and keeps it where it was dropped", async () => {
+    const { store, database } = setup();
+
+    store.getState().moveShortcut(8, 0);
+    await store.getState().hydrate();
+
+    expect(store.getState().homeShortcuts.order.slice(0, 2)).toStrictEqual([
+      "tasbih",
+      "quran",
+    ]);
+    expect(database().row().homeShortcuts?.order[0]).toBe("tasbih");
   });
 
   it("keeps a change made while the database is being read", async () => {
@@ -220,8 +266,9 @@ describe(createPreferences, () => {
   });
 
   it("keeps the device's preferences in a fresh Guest database", async () => {
+    const homeShortcuts = { order: ["qibla" as const], hidden: [] };
     const { store, database, swapDatabase } = setup({
-      saved: { language: "en", textSize: "large" },
+      saved: { language: "en", textSize: "large", homeShortcuts },
     });
     await store.getState().hydrate();
 
@@ -232,10 +279,12 @@ describe(createPreferences, () => {
     expect(store.getState()).toMatchObject({
       language: "en",
       textSize: "large",
+      homeShortcuts,
     });
     expect(database().row()).toMatchObject({
       language: "en",
       textSize: "large",
+      homeShortcuts,
     });
   });
 

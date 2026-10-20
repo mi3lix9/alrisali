@@ -129,3 +129,29 @@ describe("Books content integrity", () => {
     );
   });
 });
+
+describe("Supplication reader fonts", () => {
+  const FONTS = [
+    { source: "amiri", file: "amiri-regular.ttf" },
+    {
+      source: "ibm-plex-sans-arabic",
+      file: "ibm-plex-sans-arabic-regular.ttf",
+    },
+  ];
+
+  it("credits each bundled face and ships its Open Font License", () => {
+    const credited = new Set<string>(CONTENT_SOURCES.map(({ id }) => id));
+    for (const { source, file } of FONTS) {
+      expect(credited.has(source)).toBeTruthy();
+      expect(
+        existsSync(path.join(import.meta.dirname, "fonts", file))
+      ).toBeTruthy();
+      const notice = readFileSync(
+        path.join(NOTICES_DIR, `${source}.md`),
+        "utf-8"
+      );
+      expect(notice).toContain("SIL OPEN FONT LICENSE Version 1.1");
+      expect(notice).toContain(file);
+    }
+  });
+});

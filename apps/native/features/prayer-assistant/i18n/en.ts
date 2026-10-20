@@ -30,6 +30,20 @@ export const en: Catalog<typeof ar> = {
     deeper: "Deeper bow",
     shallower: "Shallower bow",
     start: "Start Salah",
+    nafila: "With its nafila",
+    nafilaDescription:
+      "Prayed two Rak'ahs at a time: before Fajr, Dhuhr and Asr, after Maghrib and Isha.",
+    otherPrayers: "Other prayers",
+    customRakahs: "Rak'ahs",
+    rakahs_one: "{{count}} Rak'ah",
+    rakahs_two: "{{count}} Rak'ahs",
+    rakahs_few: "{{count}} Rak'ahs",
+    rakahs_many: "{{count}} Rak'ahs",
+    rakahs_other: "{{count}} Rak'ahs",
+    summaryPrayers_two: "{{rakahs}} in {{count}} prayers",
+    summaryPrayers_few: "{{rakahs}} in {{count}} prayers",
+    summaryPrayers_many: "{{rakahs}} in {{count}} prayers",
+    summaryPrayers_other: "{{rakahs}} in {{count}} prayers",
   },
   pace: {
     slow: "Slow",
@@ -43,6 +57,7 @@ export const en: Catalog<typeof ar> = {
     "head-height": "Head height",
     sound: "Sound (Takbir)",
     mat: "Mat",
+    proximity: "Proximity sensor",
   },
   salah: {
     fajr: "Fajr",
@@ -50,12 +65,34 @@ export const en: Catalog<typeof ar> = {
     asr: "Asr",
     maghrib: "Maghrib",
     isha: "Isha",
+    night: "Night prayer",
+    ayat: "Ayat prayer",
+    ghufayla: "Ghufayla prayer",
+    friday: "Friday prayer",
+    eid: "Eid prayer",
+    ziyarah: "Ziyarah prayer",
+    custom: "Custom prayer",
+  },
+  about: {
+    night: "Eight Rak'ahs, then the Shaf' and the Witr",
+    ayat: "Two Rak'ahs, with five Ruku in each",
+    ghufayla: "Two Rak'ahs between Maghrib and Isha",
+    friday: "Two Rak'ahs after the two sermons",
+    eid: "Two Rak'ahs; the Eid Takbirs and Qunuts aren't counted",
+    ziyarah: "Two Rak'ahs",
+    custom: "Any recommended prayer, two Rak'ahs at a time",
+  },
+  part: {
+    nafila: "Nafila",
+    shaf: "Shaf'",
+    witr: "Witr",
   },
   rakah: {
     first: "First Rak'ah",
     second: "Second Rak'ah",
     third: "Third Rak'ah",
     fourth: "Fourth Rak'ah",
+    numbered: "Rak'ah {{value}}",
   },
   position: {
     qiyam: "Qiyam",
@@ -78,6 +115,10 @@ export const en: Catalog<typeof ar> = {
     stopMessage: "This Salah won't be logged.",
     stopCancel: "Keep going",
     stopConfirm: "Stop",
+    segmentOf: "{{name}} · {{segment}} of {{segments}}",
+    rukuOf: "{{position}} · {{number}} of {{of}}",
+    seated: "Prayed seated",
+    haste: "Slow down: you reached this Position in under {{value}} seconds.",
   },
   sound: {
     checking: "Getting the microphone ready…",
@@ -104,7 +145,10 @@ export const en: Catalog<typeof ar> = {
     openSettings: "Open Settings",
   },
   camera: {
-    asking: "Asking for the camera…",
+    reasonTitle: "Follow your Salah with the camera",
+    reason:
+      "The camera sees your Positions so the assistant can count your Rak'ahs for you. Nothing is recorded or sent anywhere. Or carry on by tap, without it.",
+    allow: "Allow the camera",
     starting: "Getting the camera ready…",
     ready:
       "The camera sees you standing. Begin and it will follow your Positions.",
@@ -131,5 +175,18 @@ export const en: Catalog<typeof ar> = {
     recalibrate: "Recalibrate",
     privacy:
       "Only the ceiling's light is measured, on this device. Nothing is kept.",
+  },
+  proximity: {
+    placing:
+      "Lay the phone on the mat where you prostrate, screen facing up. Starting in {{value}} s.",
+    watching:
+      "Each sujud with your forehead over the top of the phone counts. Tap if one is missed.",
+    near: "Sujud seen.",
+    unsupported: "This device has no proximity sensor.",
+    privacy: "Only the proximity sensor is read, on this device.",
+  },
+  completion: {
+    title: "Salah complete",
+    done: "Done",
   },
 };

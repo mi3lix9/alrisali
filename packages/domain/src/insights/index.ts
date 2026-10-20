@@ -7,6 +7,11 @@ export {
   RECENT_DAYS,
 } from "./insights";
 export type {
+  CompletedKhatmahInsight,
+  KhatmahInsights,
+  KhatmahSessionBar,
+} from "./khatmah";
+export type {
   DistractionBreakdown,
   DistractionShare,
   HabitStreakInsight,

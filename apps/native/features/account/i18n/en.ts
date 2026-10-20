@@ -50,4 +50,26 @@ export const en: Catalog<typeof ar> = {
     failed:
       "Couldn't delete your account. Check your connection and try again.",
   },
+  nudge: {
+    title: "Your records aren't synced yet",
+    message:
+      "You have {{records}} only on this device. Sign in to keep them in your account and on any device.",
+    records_zero: "no records",
+    records_one: "{{count}} record",
+    records_two: "{{count}} records",
+    records_few: "{{count}} records",
+    records_many: "{{count}} records",
+    records_other: "{{count}} records",
+    signIn: "Sign in",
+    dismiss: "Not now",
+  },
+  export: {
+    title: "Export my data",
+    description:
+      "A JSON file with everything you recorded on this device: prayer log, Tasbih, Favorites, habits, settings and more.",
+    button: "Export JSON",
+    failedTitle: "Couldn't export",
+    failed: "The file couldn't be created or shared. Try again.",
+    ok: "OK",
+  },
 };

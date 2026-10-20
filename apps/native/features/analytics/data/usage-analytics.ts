@@ -138,4 +138,8 @@ export const startUsageAnalytics = (): void => {
   events.on("SignedOut", () => {
     trackEvent({ type: "action", name: "sign-out" });
   });
+  // The kind only: never the Believer's backlog or counts.
+  events.on("QadaLogged", ({ kind }) => {
+    trackEvent({ type: "feature_use", name: "qada", data: { kind } });
+  });
 };

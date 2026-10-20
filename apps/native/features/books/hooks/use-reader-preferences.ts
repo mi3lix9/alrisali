@@ -1,3 +1,9 @@
+import {
+  DEFAULT_READER_FORMAT,
+  readReaderFormat,
+  stepReaderFontSize,
+} from "@alrisali/domain/books";
+import type { ReaderFormat } from "@alrisali/domain/books";
 import * as SecureStore from "expo-secure-store";
 import { z } from "zod";
 import { create } from "zustand";
@@ -14,42 +20,39 @@ export const READER_LANGUAGES = ["ar", "en", "both"] as const;
 
 export type ReaderLanguage = (typeof READER_LANGUAGES)[number];
 
-export const FONT_SIZE = { min: 16, max: 40, step: 2 } as const;
-
-interface ReaderPreferences {
+interface ReaderPreferences extends ReaderFormat {
   language: ReaderLanguage;
-  fontSize: number;
 }
 
-const DEFAULTS: ReaderPreferences = { language: "both", fontSize: 24 };
+const DEFAULT_LANGUAGE: ReaderLanguage = "both";
 
-const storedSchema = z
-  .object({
-    language: z.enum(READER_LANGUAGES),
-    fontSize: z.number().int().min(FONT_SIZE.min).max(FONT_SIZE.max),
-  })
-  .partial();
+const languageSchema = z.enum(READER_LANGUAGES);
 
 const readStored = (): ReaderPreferences => {
   const raw = SecureStore.getItem(STORAGE_KEY);
-  if (!raw) {
-    return DEFAULTS;
-  }
+  let stored: unknown = null;
   try {
-    const { data } = storedSchema.safeParse(JSON.parse(raw));
-    return {
-      language: data?.language ?? DEFAULTS.language,
-      fontSize: data?.fontSize ?? DEFAULTS.fontSize,
-    };
+    stored = raw ? JSON.parse(raw) : null;
   } catch {
-    return DEFAULTS;
+    stored = null;
   }
+  const language = languageSchema.safeParse(
+    (stored as { language?: unknown } | null)?.language
+  );
+  return {
+    language: language.success ? language.data : DEFAULT_LANGUAGE,
+    ...readReaderFormat(stored),
+  };
 };
 
 interface ReaderPreferencesState extends ReaderPreferences {
   setLanguage: (language: ReaderLanguage) => void;
+  /** Applies a format choice at once, to the reader and the sample. */
+  setFormat: (change: Partial<ReaderFormat>) => void;
   /** Steps the font size up (+1) or down (-1), within its bounds. */
   stepFontSize: (direction: 1 | -1) => void;
+  /** Returns font, size, spacing and theme to their defaults. */
+  resetFormat: () => void;
 }
 
 export const useReaderPreferences = create<ReaderPreferencesState>()((
@@ -57,20 +60,23 @@ export const useReaderPreferences = create<ReaderPreferencesState>()((
   get
 ) => {
   const persist = (patch: Partial<ReaderPreferences>) => {
-    const { language, fontSize } = { ...get(), ...patch };
-    SecureStore.setItem(STORAGE_KEY, JSON.stringify({ language, fontSize }));
+    const { language, font, fontSize, spacing, theme } = {
+      ...get(),
+      ...patch,
+    };
+    SecureStore.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ language, font, fontSize, spacing, theme })
+    );
     set(patch);
   };
 
   return {
     ...readStored(),
     setLanguage: (language) => persist({ language }),
+    setFormat: (change) => persist(change),
     stepFontSize: (direction) =>
-      persist({
-        fontSize: Math.min(
-          FONT_SIZE.max,
-          Math.max(FONT_SIZE.min, get().fontSize + direction * FONT_SIZE.step)
-        ),
-      }),
+      persist({ fontSize: stepReaderFontSize(get().fontSize, direction) }),
+    resetFormat: () => persist(DEFAULT_READER_FORMAT),
   };
 });

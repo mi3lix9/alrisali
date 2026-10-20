@@ -50,6 +50,14 @@ export const ar = {
       "drink-water": "شرب الماء",
     },
   },
+  khatmah: {
+    title: "الختمات",
+    completed: "الختمات المكتملة: {{n}}",
+    empty: "لا ختمة مكتملة بعد.",
+    entry: "{{date}} · {{days}} يوم",
+    chart: "صفحات كل ورد في ختمتك الأخيرة",
+    bar: "الورد {{session}}: {{pages}} صفحة",
+  },
   tasbih: {
     title: "مجموع التسبيح",
     empty: "لا جلسات ذكر بعد.",

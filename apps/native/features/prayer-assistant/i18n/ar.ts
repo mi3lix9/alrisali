@@ -22,6 +22,20 @@ export const ar = {
     deeper: "انحناء أعمق",
     shallower: "انحناء أخف",
     start: "ابدأ الصلاة",
+    nafila: "مع نافلتها",
+    nafilaDescription:
+      "تُصلّى ركعتين ركعتين: قبل الفجر والظهر والعصر، وبعد المغرب والعشاء.",
+    otherPrayers: "صلوات أخرى",
+    customRakahs: "عدد الركعات",
+    rakahs_one: "ركعة واحدة",
+    rakahs_two: "ركعتان",
+    rakahs_few: "{{count}} ركعات",
+    rakahs_many: "{{count}} ركعة",
+    rakahs_other: "{{count}} ركعة",
+    summaryPrayers_two: "{{rakahs}} في صلاتين",
+    summaryPrayers_few: "{{rakahs}} في {{count}} صلوات",
+    summaryPrayers_many: "{{rakahs}} في {{count}} صلاة",
+    summaryPrayers_other: "{{rakahs}} في {{count}} صلاة",
   },
   pace: {
     slow: "بطيئة",
@@ -35,6 +49,7 @@ export const ar = {
     "head-height": "ارتفاع الرأس",
     sound: "الصوت (التكبير)",
     mat: "السجادة",
+    proximity: "حسّاس القرب",
   },
   salah: {
     fajr: "الفجر",
@@ -42,12 +57,34 @@ export const ar = {
     asr: "العصر",
     maghrib: "المغرب",
     isha: "العشاء",
+    night: "صلاة الليل",
+    ayat: "صلاة الآيات",
+    ghufayla: "صلاة الغفيلة",
+    friday: "صلاة الجمعة",
+    eid: "صلاة العيد",
+    ziyarah: "صلاة الزيارة",
+    custom: "صلاة بعدد مخصّص",
+  },
+  about: {
+    night: "ثماني ركعات، ثم الشفع والوتر",
+    ayat: "ركعتان، في كل ركعة خمسة ركوعات",
+    ghufayla: "ركعتان بين المغرب والعشاء",
+    friday: "ركعتان بعد الخطبتين",
+    eid: "ركعتان؛ لا تُعدّ تكبيرات العيد وقنوتاته",
+    ziyarah: "ركعتان",
+    custom: "أي صلاة مستحبة، ركعتين ركعتين",
+  },
+  part: {
+    nafila: "النافلة",
+    shaf: "الشفع",
+    witr: "الوتر",
   },
   rakah: {
     first: "الركعة الأولى",
     second: "الركعة الثانية",
     third: "الركعة الثالثة",
     fourth: "الركعة الرابعة",
+    numbered: "الركعة {{value}}",
   },
   position: {
     qiyam: "القيام",
@@ -69,6 +106,10 @@ export const ar = {
     stopMessage: "لن تُسجّل هذه الصلاة.",
     stopCancel: "متابعة",
     stopConfirm: "إيقاف",
+    segmentOf: "{{name}} · {{segment}} من {{segments}}",
+    rukuOf: "{{position}} · {{number}} من {{of}}",
+    seated: "تُصلّى جالسًا",
+    haste: "تمهّل: انتقلت إلى هذا الركن في أقل من {{value}} ثوانٍ.",
   },
   sound: {
     checking: "جارٍ تجهيز الميكروفون…",
@@ -92,7 +133,10 @@ export const ar = {
     openSettings: "فتح الإعدادات",
   },
   camera: {
-    asking: "يطلب إذن الكاميرا…",
+    reasonTitle: "تابع صلاتك بالكاميرا",
+    reason:
+      "ترى الكاميرا أركانك ليعدّ المساعد ركعاتك عنك. لا يُسجَّل شيء ولا يُرسل إلى أي مكان. أو تابع باللمس من دونها.",
+    allow: "السماح بالكاميرا",
     starting: "جارٍ تجهيز الكاميرا…",
     ready: "تراك الكاميرا واقفًا. ابدأ الصلاة وستتابع أركانك.",
     watching: "تتابع الكاميرا أركانك. المس الشاشة إن فاتها ركن.",
@@ -115,5 +159,18 @@ export const ar = {
     unreadable: "لا يستطيع هذا الجهاز قراءة ضوء الكاميرا لوضع السجادة.",
     recalibrate: "أعد المعايرة",
     privacy: "يُقاس ضوء السقف فقط على جهازك، ولا يُحفظ شيء.",
+  },
+  proximity: {
+    placing:
+      "ضع الهاتف على السجادة عند موضع سجودك والشاشة إلى الأعلى. يبدأ بعد {{value}} ث.",
+    watching:
+      "تُحتسب كل سجدة تضع فيها جبهتك فوق أعلى الهاتف. المس الشاشة إن فاتتها سجدة.",
+    near: "يرى سجودك.",
+    unsupported: "ليس في هذا الجهاز حسّاس قرب.",
+    privacy: "يُقرأ حسّاس القرب فقط على جهازك.",
+  },
+  completion: {
+    title: "تمّت الصلاة",
+    done: "تم",
   },
 };

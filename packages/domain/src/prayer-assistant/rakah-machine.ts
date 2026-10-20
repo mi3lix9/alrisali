@@ -1,6 +1,6 @@
-import type { Salah } from "../shared";
 import { paceHolds } from "./pace";
 import type { PaceChoice, PaceHolds } from "./pace";
+import type { SalahDefinition, SegmentPart } from "./salah-definition";
 
 /** A posture within a Rak'ah. */
 export const POSITIONS = [
@@ -14,54 +14,56 @@ export const POSITIONS = [
 
 export type Position = (typeof POSITIONS)[number];
 
-/** Rak'ahs in each Salah. */
-export const RAKAH_COUNT = {
-  fajr: 2,
-  dhuhr: 4,
-  asr: 4,
-  maghrib: 3,
-  isha: 4,
-} as const satisfies Record<Salah, number>;
-
-/** The middle Tashahhud follows the second Rak'ah of a longer Salah. */
-const MIDDLE_TASHAHHUD_AFTER = 2;
-
-/** The Positions of one Rak'ah, before any Tashahhud. */
-const RAKAH_POSITIONS = [
-  "qiyam",
-  "ruku",
-  "itidal",
-  "sujud",
-  "jalsa",
-  "sujud",
-] as const satisfies readonly Position[];
+/**
+ * Positions closer together than this earn the Haste Warning: a gentle
+ * nudge to slow down, never a block.
+ */
+export const HASTE_WARNING_MS = 3000;
 
 /** One step the Believer performs: a Position in a Rak'ah. */
 export interface Step {
+  /** The Rak'ah, counted through the whole prayer across its segments. */
   rakah: number;
   position: Position;
   /** The final Tashahhud, whose hold ends the Salah. */
   final: boolean;
 }
 
-/** Every step of a Salah in order, ending with the final Tashahhud. */
-export const salahSteps = (salah: Salah): readonly Step[] => {
-  const total = RAKAH_COUNT[salah];
-  return Array.from({ length: total }, (_, index) => index + 1).flatMap(
-    (rakah): Step[] => {
-      const positions: Step[] = RAKAH_POSITIONS.map((position) => ({
-        rakah,
-        position,
-        final: false,
-      }));
-      if (rakah === total) {
-        return [...positions, { rakah, position: "tashahhud", final: true }];
+/** The Positions of one Rak'ah, before any Tashahhud. */
+const rakahPositions = (rukus: number): readonly Position[] => [
+  "qiyam",
+  ...Array.from({ length: rukus }, (): Position[] => ["ruku", "itidal"]).flat(),
+  "sujud",
+  "jalsa",
+  "sujud",
+];
+
+/**
+ * Every step of a prayer in order. Each segment closes with a Tashahhud; only
+ * the last segment's is final.
+ */
+export const salahSteps = (definition: SalahDefinition): readonly Step[] => {
+  const { segments } = definition;
+  const starts = segments.map((_, index) =>
+    segments.slice(0, index).reduce((sum, segment) => sum + segment.rakahs, 0)
+  );
+  return segments.flatMap((segment, segmentIndex) =>
+    Array.from({ length: segment.rakahs }, (_, index) => index + 1).flatMap(
+      (inSegment): Step[] => {
+        const rakah = (starts[segmentIndex] ?? 0) + inSegment;
+        const positions = rakahPositions(segment.rukuPerRakah).map(
+          (position): Step => ({ rakah, position, final: false })
+        );
+        if (inSegment === segment.rakahs) {
+          const final = segmentIndex === segments.length - 1;
+          return [...positions, { rakah, position: "tashahhud", final }];
+        }
+        if (inSegment === segment.middleTashahhudAfter) {
+          return [...positions, { rakah, position: "tashahhud", final: false }];
+        }
+        return positions;
       }
-      if (rakah === MIDDLE_TASHAHHUD_AFTER) {
-        return [...positions, { rakah, position: "tashahhud", final: false }];
-      }
-      return positions;
-    }
+    )
   );
 };
 
@@ -109,7 +111,7 @@ interface FinalHold {
 }
 
 export interface AssistantState {
-  salah: Salah;
+  definition: SalahDefinition;
   holds: PaceHolds;
   steps: readonly Step[];
   /** The step the Believer is in now. */
@@ -118,25 +120,87 @@ export interface AssistantState {
   completed: boolean;
   sensing: Sensing | null;
   finalHold: FinalHold | null;
+  /** When the Believer last moved to another step, or null before any. */
+  movedAt: number | null;
+  /** The last move forward came under `HASTE_WARNING_MS` after the one before. */
+  hasty: boolean;
 }
 
-/** The Prayer Assistant at the start of a Salah, standing in the first Rak'ah. */
-export const startSalah = (salah: Salah, pace: PaceChoice): AssistantState => ({
-  salah,
+/** The Prayer Assistant at the start of a prayer, standing in its first Rak'ah. */
+export const startSalah = (
+  definition: SalahDefinition,
+  pace: PaceChoice
+): AssistantState => ({
+  definition,
   holds: paceHolds(pace),
-  steps: salahSteps(salah),
+  steps: salahSteps(definition),
   index: 0,
   completed: false,
   sensing: null,
   finalHold: null,
+  movedAt: null,
+  hasty: false,
 });
 
 export const currentStep = (state: AssistantState): Step => {
   const step = state.steps[state.index];
   if (!step) {
-    throw new Error(`No step ${state.index} in ${state.salah}`);
+    throw new Error(`No step ${state.index} in ${state.definition.type}`);
   }
   return step;
+};
+
+/** Where the Believer is within a prayer of several segments, for the screen. */
+export interface StepPlace {
+  step: Step;
+  /** The segment (one prayer to its Tasleem), from 1, and how many there are. */
+  segment: number;
+  segments: number;
+  /** The Rak'ah within that segment, from 1, and how many it has. */
+  rakah: number;
+  rakahs: number;
+  part: SegmentPart | null;
+  seated: boolean;
+  /** Which Ruku of a Rak'ah with several (the Ayat prayer), or null. */
+  ruku: { number: number; of: number } | null;
+}
+
+export const stepPlace = (state: AssistantState): StepPlace => {
+  const step = currentStep(state);
+  const { segments } = state.definition;
+  let before = 0;
+  let segmentIndex = 0;
+  for (const [index, candidate] of segments.entries()) {
+    segmentIndex = index;
+    if (step.rakah <= before + candidate.rakahs) {
+      break;
+    }
+    before += candidate.rakahs;
+  }
+  const segment = segments[segmentIndex];
+  if (!segment) {
+    throw new Error(`No segment for Rak'ah ${step.rakah}`);
+  }
+  const bowing = step.position === "ruku" || step.position === "itidal";
+  const rukusSoFar = state.steps
+    .slice(0, state.index + 1)
+    .filter(
+      (candidate) =>
+        candidate.rakah === step.rakah && candidate.position === "ruku"
+    ).length;
+  return {
+    step,
+    segment: segmentIndex + 1,
+    segments: segments.length,
+    rakah: step.rakah - before,
+    rakahs: segment.rakahs,
+    part: segment.part,
+    seated: segment.seated,
+    ruku:
+      segment.rukuPerRakah > 1 && bowing
+        ? { number: rukusSoFar, of: segment.rukuPerRakah }
+        : null,
+  };
 };
 
 /**
@@ -151,19 +215,31 @@ export const completesAt = (state: AssistantState): number | null =>
 const postureOf = (position: Position): Posture =>
   position === "jalsa" || position === "tashahhud" ? "seated" : position;
 
-/** Moves to a step; arriving at the final Tashahhud starts its hold. */
+/**
+ * Moves to a step; arriving at the final Tashahhud starts its hold. A move
+ * forward soon after the last one is hasty; stepping back never is.
+ */
 const moveTo = (
   state: AssistantState,
   index: number,
   at: number,
   sittingSince: number = at
-): AssistantState => ({
-  ...state,
-  index,
-  finalHold: state.steps[index]?.final
-    ? { since: sittingSince, leftAt: null }
-    : null,
-});
+): AssistantState => {
+  const moved = index !== state.index;
+  return {
+    ...state,
+    index,
+    finalHold: state.steps[index]?.final
+      ? { since: sittingSince, leftAt: null }
+      : null,
+    movedAt: moved ? at : state.movedAt,
+    hasty: moved
+      ? index > state.index &&
+        state.movedAt !== null &&
+        at - state.movedAt < HASTE_WARNING_MS
+      : state.hasty,
+  };
+};
 
 const finishIfHeld = (state: AssistantState, at: number): AssistantState => {
   const end = completesAt(state);

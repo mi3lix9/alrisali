@@ -9,11 +9,23 @@ import {
   locationSchema,
   messageStyleSchema,
   timeFormatSchema,
+  customAnglesSchema,
+  DEFAULT_CUSTOM_ANGLES,
+  DEFAULT_HIGH_LATITUDE_RULE,
+  DEFAULT_MIDNIGHT_DEFINITION,
+  highLatitudeRuleSchema,
+  midnightDefinitionSchema,
+  prayerAdjustmentsSchema,
+  readPrayerAdjustments,
 } from "@alrisali/domain/shared";
 import type {
   CalculationMethod,
+  CustomAngles,
+  HighLatitudeRule,
   Location,
   MessageStyle,
+  MidnightDefinition,
+  PrayerAdjustments,
   TimeFormat,
 } from "@alrisali/domain/shared";
 import { eq } from "drizzle-orm";
@@ -35,6 +47,12 @@ export interface BelieverSettings {
   timeFormat: TimeFormat | null;
   /** Classic (scriptural sources) or Modern (gentle coaching). */
   messageStyle: MessageStyle;
+  /** The angles of the Custom Calculation Method. */
+  customAngles: CustomAngles;
+  /** Minutes added to each Prayer Time, −30…30; a time left out is not moved. */
+  prayerAdjustments: PrayerAdjustments;
+  midnightDefinition: MidnightDefinition;
+  highLatitudeRule: HighLatitudeRule;
 }
 
 /** The settings to change; anything left out keeps its saved value. */
@@ -57,6 +75,10 @@ const changeSchema = z.object({
   imsakMinutes: imsakMinutesSchema.optional(),
   timeFormat: timeFormatSchema.nullable().optional(),
   messageStyle: messageStyleSchema.optional(),
+  customAngles: customAnglesSchema.optional(),
+  prayerAdjustments: prayerAdjustmentsSchema.optional(),
+  midnightDefinition: midnightDefinitionSchema.optional(),
+  highLatitudeRule: highLatitudeRuleSchema.optional(),
 });
 
 type Row = typeof believerSettings.$inferSelect;
@@ -65,6 +87,32 @@ type Row = typeof believerSettings.$inferSelect;
 const known = <T>(schema: z.ZodType<T>, stored: unknown, fallback: T): T => {
   const parsed = schema.safeParse(stored);
   return parsed.success ? parsed.data : fallback;
+};
+
+/** Custom angles stored as JSON, or the defaults if absent or unreadable. */
+const readCustomAngles = (stored: string | null | undefined): CustomAngles => {
+  if (!stored) {
+    return DEFAULT_CUSTOM_ANGLES;
+  }
+  try {
+    return known(customAnglesSchema, JSON.parse(stored), DEFAULT_CUSTOM_ANGLES);
+  } catch {
+    return DEFAULT_CUSTOM_ANGLES;
+  }
+};
+
+/** Prayer adjustments stored as JSON; none if absent or unreadable. */
+const readStoredAdjustments = (
+  stored: string | null | undefined
+): PrayerAdjustments => {
+  if (!stored) {
+    return {};
+  }
+  try {
+    return readPrayerAdjustments(JSON.parse(stored));
+  } catch {
+    return {};
+  }
 };
 
 const toSettings = (row: Row | undefined): BelieverSettings => {
@@ -98,6 +146,18 @@ const toSettings = (row: Row | undefined): BelieverSettings => {
       row?.messageStyle,
       DEFAULT_MESSAGE_STYLE
     ),
+    customAngles: readCustomAngles(row?.customAngles),
+    prayerAdjustments: readStoredAdjustments(row?.prayerAdjustments),
+    midnightDefinition: known(
+      midnightDefinitionSchema,
+      row?.midnightDefinition,
+      DEFAULT_MIDNIGHT_DEFINITION
+    ),
+    highLatitudeRule: known(
+      highLatitudeRuleSchema,
+      row?.highLatitudeRule,
+      DEFAULT_HIGH_LATITUDE_RULE
+    ),
   };
 };
 
@@ -109,6 +169,10 @@ const toColumns = ({
   imsakMinutes,
   timeFormat,
   messageStyle,
+  customAngles,
+  prayerAdjustments,
+  midnightDefinition,
+  highLatitudeRule,
 }: BelieverSettings) => ({
   calculationMethod,
   locationLatitude: location?.latitude ?? null,
@@ -119,6 +183,10 @@ const toColumns = ({
   imsakMinutes,
   timeFormat,
   messageStyle,
+  customAngles: JSON.stringify(customAngles),
+  prayerAdjustments: JSON.stringify(prayerAdjustments),
+  midnightDefinition,
+  highLatitudeRule,
 });
 
 export const createBelieverSettingsRepository = (
@@ -151,6 +219,14 @@ export const createBelieverSettingsRepository = (
           ? current.timeFormat
           : parsed.timeFormat,
       messageStyle: parsed.messageStyle ?? current.messageStyle,
+      customAngles: parsed.customAngles ?? current.customAngles,
+      prayerAdjustments:
+        parsed.prayerAdjustments === undefined
+          ? current.prayerAdjustments
+          : readPrayerAdjustments(parsed.prayerAdjustments),
+      midnightDefinition:
+        parsed.midnightDefinition ?? current.midnightDefinition,
+      highLatitudeRule: parsed.highLatitudeRule ?? current.highLatitudeRule,
     };
     const columns = toColumns(next);
     await db

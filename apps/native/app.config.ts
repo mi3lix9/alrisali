@@ -29,141 +29,320 @@ const googleMapsAndroid = (): { googleMaps?: { apiKey: string } } => {
   return apiKey ? { googleMaps: { apiKey } } : {};
 };
 
-const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
-  ...config,
-  name: APP_NAME,
-  slug: "alrisali",
-  version: "1.0.0",
-  orientation: "portrait",
-  icon: "./assets/images/icon.png",
-  scheme: "alrisali",
-  userInterfaceStyle: "automatic",
-  ios: {
-    supportsTablet: true,
-    bundleIdentifier: APP_ID,
-    usesAppleSignIn: true,
-    infoPlist: {
-      // The Prayer Assistant's Camera, Head Height and Mat modes (VisionCamera
-      // has no config plugin of its own).
-      NSCameraUsageDescription:
-        "يرى الرسالي وضعيتك أثناء الصلاة ليتابع أركانها، أو يقيس ضوء السقف من الهاتف على السجادة ليعدّ سجداتك. المعاينة مخفية فلا ترى نفسك، ولا يُحفظ شيء من الصور. Al-Risali watches your posture during Salah to follow its Positions, or measures the ceiling's light from the phone on your mat to count each sujud; the preview stays hidden so you don't watch yourself, and no image is kept.",
-    },
-  },
+/**
+ * The first path segment of every link the app opens on the web domain
+ * (`LINK_PATH_ROOTS` in the domain's shared module, which app.config.test.ts
+ * keeps equal: the config runs before workspace packages resolve, so it
+ * cannot import it).
+ */
+export const LINK_PATH_ROOTS = [
+  "ayah",
+  "quran",
+  "supplication",
+  "khatmah",
+  "calendar",
+  "qibla",
+  "tasbih",
+  "next-salah",
+  "prayer",
+] as const;
+
+/**
+ * Universal links: the web domain the app opens links of (`https://<domain>/ayah/2:255`).
+ * Without it the build still succeeds and only `alrisali://` links work. The
+ * domain must also serve the association files (`apps/web`, with the Apple
+ * Team ID and the Android signing SHA-256).
+ */
+export const universalLinks = (
+  domain?: string
+): {
+  ios: { associatedDomains?: string[] };
   android: {
-    adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
-      foregroundImage: "./assets/images/android-icon-foreground.png",
-      backgroundImage: "./assets/images/android-icon-background.png",
-      monochromeImage: "./assets/images/android-icon-monochrome.png",
-    },
-    predictiveBackGestureEnabled: false,
-    package: APP_ID,
-    permissions: [
-      // Reminders fire at the Prayer Time itself; without it Android may
-      // deliver them minutes late (features/reminders asks for it).
-      "android.permission.SCHEDULE_EXACT_ALARM",
-      // The Prayer Assistant's Camera, Head Height and Mat modes.
-      "android.permission.CAMERA",
-    ],
-    config: googleMapsAndroid(),
-  },
-  web: {
-    bundler: "metro",
-    output: "static",
-    favicon: "./assets/images/favicon.png",
-  },
-  plugins: [
-    "expo-router",
-    // Arabic-first: every launch is right-to-left natively. An English
-    // launch flips the layout back in JS (shared/lib/app-providers.tsx); a JS
-    // `I18nManager.forceRTL` would be overwritten by this on every launch.
-    ["expo-localization", { supportsRTL: true, forcesRTL: true }],
-    "expo-apple-authentication",
-    [
-      "expo-notifications",
-      {
-        // Reminders are local notifications (ADR-0003); these are the tones
-        // and the Adhan voice they can play (features/reminders).
-        sounds: [
-          "./assets/sounds/chime.wav",
-          "./assets/sounds/bell.wav",
-          "./assets/sounds/adhan.wav",
-        ],
-      },
-    ],
-    [
-      "expo-location",
-      {
-        // Foreground only: Prayer Times and the Qibla need the place, never
-        // a trail of it.
-        locationWhenInUsePermission:
-          "يستخدم الرسالي موقعك لحساب أوقات الصلاة واتجاه القبلة. Al-Risali uses your location to calculate Prayer Times and the Qibla.",
-        isIosBackgroundLocationEnabled: false,
-        isAndroidBackgroundLocationEnabled: false,
-        isAndroidForegroundServiceEnabled: false,
-      },
-    ],
-    [
-      "@react-native-google-signin/google-signin",
-      { iosUrlScheme: googleIosUrlScheme() },
-    ],
-    // Gatherings' venue maps: Apple Maps on iOS, Google Maps on Android. No
-    // location permission: the maps show venues, never the Believer.
-    "expo-maps",
-    // VisionCamera's GPU Resizer needs Android 8 (API 26). It also compiles a
-    // Metal shader on iOS: every Mac that builds needs Xcode's Metal
-    // Toolchain (`xcodebuild -downloadComponent MetalToolchain`).
-    ["expo-build-properties", { android: { minSdkVersion: 26 } }],
-    ["@hot-updater/expo", { channel: OTA_CHANNEL }],
-    [
-      "@sentry/react-native/expo",
-      {
-        organization: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-        // Source maps and debug symbols upload only when a token is present.
-        disableAutoUpload: !process.env.SENTRY_AUTH_TOKEN,
-      },
-    ],
-    [
-      "expo-splash-screen",
-      {
-        image: "./assets/images/splash-icon.png",
-        imageWidth: 200,
-        resizeMode: "contain",
-        backgroundColor: "#ffffff",
-        dark: {
-          backgroundColor: "#000000",
+    intentFilters?: NonNullable<
+      NonNullable<ExpoConfig["android"]>["intentFilters"]
+    >;
+  };
+} => {
+  if (!domain) {
+    return { ios: {}, android: {} };
+  }
+  return {
+    ios: { associatedDomains: [`applinks:${domain}`] },
+    android: {
+      intentFilters: [
+        {
+          action: "VIEW",
+          autoVerify: true,
+          data: LINK_PATH_ROOTS.map((root) => ({
+            scheme: "https",
+            host: domain,
+            pathPrefix: `/${root}`,
+          })),
+          category: ["BROWSABLE", "DEFAULT"],
         },
-      },
-    ],
-    [
-      "expo-speech-recognition",
-      {
-        // Recite-Along by voice and the Prayer Assistant's Sound mode
-        // (Takbir). Listening happens only while the screen is open.
-        microphonePermission:
-          "يستمع الرسالي إلى تلاوتك ليُتابع الكلمات معك، وإلى تكبيرك ليُتابع صلاتك. Al-Risali listens to your recitation to follow the words with you, and to your Takbir to follow your Salah.",
-        speechRecognitionPermission:
-          "يتعرّف الرسالي على كلماتك العربية ليُتابع النص معك ويسمع تكبيرك في الصلاة. Al-Risali recognises your Arabic words to follow the text with you and to hear your Takbir in Salah.",
-        // Lets Android report which locales the on-device service holds.
-        androidSpeechServicePackages: [
-          "com.google.android.as",
-          "com.google.android.googlequicksearchbox",
-        ],
-      },
-    ],
-  ],
-  experiments: {
-    typedRoutes: true,
-    reactCompiler: true,
-  },
-  extra: {
-    ...config.extra,
-    // Links EAS Build and Submit to the Expo project.
-    ...(process.env.EAS_PROJECT_ID
-      ? { eas: { projectId: process.env.EAS_PROJECT_ID } }
-      : {}),
-  },
+      ],
+    },
+  };
+};
+
+/**
+ * The home-screen widgets, by the names `features/widgets/data/names.ts`
+ * registers (app.config.test.ts keeps the two equal). Their layout file is the
+ * one the native builds run to draw them before the app first opens.
+ */
+const WIDGET_LAYOUT = "features/widgets/definitions.ts";
+const ANDROID_CELL_DP = 70;
+const android = (cells: { width: number; height: number }) => ({
+  // A cell is about 70 dp; the launcher snaps the widget to whole cells.
+  minWidth: cells.width * ANDROID_CELL_DP - 30,
+  minHeight: cells.height * ANDROID_CELL_DP - 30,
+  targetCellWidth: cells.width,
+  targetCellHeight: cells.height,
+  // The layout is drawn for one size (the app passes it in the props).
+  resizeMode: "none" as const,
+  initialLayout: WIDGET_LAYOUT,
 });
+export const WIDGETS = [
+  {
+    name: "AlrisaliNextSalah",
+    displayName: "الصلاة القادمة · Next prayer",
+    description:
+      "الصلاة القادمة مع العدّ التنازلي. The next Salah with a countdown.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliTodayTimes",
+    displayName: "أوقات اليوم · Today's times",
+    description: "مواقيت الصلاة لليوم. Today's Prayer Times.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium", "systemLarge"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 3 }),
+  },
+  {
+    name: "AlrisaliHijriDate",
+    displayName: "التاريخ الهجري · Hijri date",
+    description: "تاريخ اليوم بالهجري. Today's Hijri Date.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliVerseOfTheDay",
+    displayName: "آية اليوم · Verse of the Day",
+    description: "آية اليوم. The Verse of the Day.",
+    ios: {
+      supportedFamilies: ["systemMedium", "systemLarge"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 4, height: 2 }),
+  },
+  {
+    name: "AlrisaliKeepReading",
+    displayName: "تابع القراءة · Keep reading",
+    description:
+      "آخر آية قرأتها، وتفتح المصحف عندها. Your Last-Read Ayah; opens the reader there.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 2, height: 2 }),
+  },
+  {
+    name: "AlrisaliKhatmah",
+    displayName: "الختمة · Khatmah",
+    description:
+      "تقدّم ختمتك وورد اليوم. Your Khatmah's progress and today's portion.",
+    ios: {
+      supportedFamilies: ["systemSmall", "systemMedium"],
+      initialLayout: WIDGET_LAYOUT,
+    },
+    android: android({ width: 4, height: 2 }),
+  },
+];
+
+const appConfig = ({ config }: ConfigContext): ExpoConfig => {
+  const links = universalLinks(process.env.EXPO_PUBLIC_LINK_DOMAIN);
+  return {
+    ...config,
+    name: APP_NAME,
+    slug: "alrisali",
+    version: "1.0.0",
+    // Landscape is allowed here and locked away at runtime (shared/lib/
+    // orientation.ts); only the Quran reader turns, on tablets and foldables.
+    orientation: "default",
+    icon: "./assets/images/icon.png",
+    scheme: "alrisali",
+    userInterfaceStyle: "automatic",
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: APP_ID,
+      usesAppleSignIn: true,
+      ...links.ios,
+      infoPlist: {
+        // The Prayer Assistant's Camera, Head Height and Mat modes (VisionCamera
+        // has no config plugin of its own).
+        NSCameraUsageDescription:
+          "يرى الرسالي وضعيتك أثناء الصلاة ليتابع أركانها، أو يقيس ضوء السقف من الهاتف على السجادة ليعدّ سجداتك. المعاينة مخفية فلا ترى نفسك، ولا يُحفظ شيء من الصور. Al-Risali watches your posture during Salah to follow its Positions, or measures the ceiling's light from the phone on your mat to count each sujud; the preview stays hidden so you don't watch yourself, and no image is kept.",
+      },
+    },
+    android: {
+      adaptiveIcon: {
+        backgroundColor: "#E6F4FE",
+        foregroundImage: "./assets/images/android-icon-foreground.png",
+        backgroundImage: "./assets/images/android-icon-background.png",
+        monochromeImage: "./assets/images/android-icon-monochrome.png",
+      },
+      predictiveBackGestureEnabled: false,
+      package: APP_ID,
+      permissions: [
+        // Reminders fire at the Prayer Time itself; without it Android may
+        // deliver them minutes late (features/reminders asks for it).
+        "android.permission.SCHEDULE_EXACT_ALARM",
+        // The Prayer Assistant's Camera, Head Height and Mat modes.
+        "android.permission.CAMERA",
+      ],
+      config: googleMapsAndroid(),
+      ...links.android,
+    },
+    web: {
+      bundler: "metro",
+      output: "static",
+      favicon: "./assets/images/favicon.png",
+    },
+    plugins: [
+      "expo-router",
+      // Long-press shortcuts on the app icon; the app sets them at runtime
+      // (features/links) so their titles follow the language.
+      "expo-quick-actions",
+      // Arabic-first: every launch is right-to-left natively. An English
+      // launch flips the layout back in JS (shared/lib/app-providers.tsx); a JS
+      // `I18nManager.forceRTL` would be overwritten by this on every launch.
+      ["expo-localization", { supportsRTL: true, forcesRTL: true }],
+      "expo-apple-authentication",
+      // Recitation goes on with the screen locked: background audio on iOS, and
+      // the foreground media service behind the lock-screen controls on Android.
+      // No microphone: the app records nothing through expo-audio.
+      [
+        "expo-audio",
+        { microphonePermission: false, recordAudioAndroid: false },
+      ],
+      [
+        // The Qibla's bubble level reads the accelerometer.
+        "expo-sensors",
+        {
+          motionPermission:
+            "يقرأ الرسالي حسّاس الحركة لميزان الاستواء في شاشة القبلة. Al-Risali reads the motion sensor for the Qibla screen's bubble level.",
+        },
+      ],
+      [
+        "expo-notifications",
+        {
+          // Reminders are local notifications (ADR-0003); these are the tones
+          // and the Adhan voice they can play (features/reminders).
+          sounds: [
+            "./assets/sounds/chime.wav",
+            "./assets/sounds/bell.wav",
+            "./assets/sounds/adhan.wav",
+          ],
+        },
+      ],
+      [
+        "expo-location",
+        {
+          // Foreground only: Prayer Times and the Qibla need the place, never
+          // a trail of it.
+          locationWhenInUsePermission:
+            "يستخدم الرسالي موقعك لحساب أوقات الصلاة واتجاه القبلة. Al-Risali uses your location to calculate Prayer Times and the Qibla.",
+          isIosBackgroundLocationEnabled: false,
+          isAndroidBackgroundLocationEnabled: false,
+          isAndroidForegroundServiceEnabled: false,
+        },
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        { iosUrlScheme: googleIosUrlScheme() },
+      ],
+      // Gatherings' venue maps: Apple Maps on iOS, Google Maps on Android. No
+      // location permission: the maps show venues, never the Believer.
+      "expo-maps",
+      // VisionCamera's GPU Resizer needs Android 8 (API 26). It also compiles a
+      // Metal shader on iOS: every Mac that builds needs Xcode's Metal
+      // Toolchain (`xcodebuild -downloadComponent MetalToolchain`).
+      ["expo-build-properties", { android: { minSdkVersion: 26 } }],
+      ["@hot-updater/expo", { channel: OTA_CHANNEL }],
+      // Home-screen widgets (features/widgets). On iOS they need the App Group
+      // `group.<bundle id>` on the app and its widget extension
+      // (`<bundle id>.ExpoWidgetsTarget`): EAS registers both from this config
+      // when it syncs credentials. Android widgets are opt-in in the plugin.
+      [
+        "expo-widgets",
+        {
+          enableAndroid: true,
+          // The App Group the app and its widget extension share: register it
+          // for both bundle ids in the Apple developer portal.
+          groupIdentifier: `group.${APP_ID}`,
+          bundleIdentifier: `${APP_ID}.ExpoWidgetsTarget`,
+          widgets: WIDGETS,
+        },
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          organization: process.env.SENTRY_ORG,
+          project: process.env.SENTRY_PROJECT,
+          // Source maps and debug symbols upload only when a token is present.
+          disableAutoUpload: !process.env.SENTRY_AUTH_TOKEN,
+        },
+      ],
+      [
+        "expo-splash-screen",
+        {
+          image: "./assets/images/splash-icon.png",
+          imageWidth: 200,
+          resizeMode: "contain",
+          backgroundColor: "#ffffff",
+          dark: {
+            backgroundColor: "#000000",
+          },
+        },
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          // Recite-Along by voice and the Prayer Assistant's Sound mode
+          // (Takbir). Listening happens only while the screen is open.
+          microphonePermission:
+            "يستمع الرسالي إلى تلاوتك ليُتابع الكلمات معك، وإلى تكبيرك ليُتابع صلاتك. Al-Risali listens to your recitation to follow the words with you, and to your Takbir to follow your Salah.",
+          speechRecognitionPermission:
+            "يتعرّف الرسالي على كلماتك العربية ليُتابع النص معك ويسمع تكبيرك في الصلاة. Al-Risali recognises your Arabic words to follow the text with you and to hear your Takbir in Salah.",
+          // Lets Android report which locales the on-device service holds.
+          androidSpeechServicePackages: [
+            "com.google.android.as",
+            "com.google.android.googlequicksearchbox",
+          ],
+        },
+      ],
+    ],
+    experiments: {
+      typedRoutes: true,
+      reactCompiler: true,
+    },
+    extra: {
+      ...config.extra,
+      // Links EAS Build and Submit to the Expo project.
+      ...(process.env.EAS_PROJECT_ID
+        ? { eas: { projectId: process.env.EAS_PROJECT_ID } }
+        : {}),
+    },
+  };
+};
 
 export default appConfig;

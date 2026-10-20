@@ -6,6 +6,8 @@ import {
   DEFAULT_QURAN_READER_SETTINGS,
   nextAyah,
   openReader,
+  playbackPlan,
+  previousAyah,
   readerReducer,
   recitationPlayback,
   recitationStart,
@@ -69,6 +71,21 @@ describe(nextAyah, () => {
 
   it("ends after the last ayah of the Quran", () => {
     expect(nextAyah("114:6")).toBeNull();
+  });
+});
+
+describe(previousAyah, () => {
+  it("moves to the previous ayah within a surah", () => {
+    expect(previousAyah("1:7")).toBe("1:6");
+  });
+
+  it("moves back to the previous surah's last ayah from a surah's first", () => {
+    expect(previousAyah("2:1")).toBe("1:7");
+    expect(previousAyah("3:1")).toBe("2:286");
+  });
+
+  it("ends before the first ayah of the Quran", () => {
+    expect(previousAyah("1:1")).toBeNull();
   });
 });
 
@@ -222,7 +239,12 @@ describe(recitationPlayback, () => {
       status: "loading",
       ayah: "1:1",
       reciter: "ar.alafasy",
-      until: null,
+      origin: "reader",
+      plan: playbackPlan("1:1"),
+      ayahPass: 1,
+      rangePass: 1,
+      pauseSeconds: null,
+      sleepAt: null,
     });
     expect(play(loading, { type: "ready" })).toMatchObject({
       status: "playing",
@@ -243,7 +265,13 @@ describe(recitationPlayback, () => {
   it("stops after the last ayah it was asked to play", () => {
     const state = play(
       idle,
-      { type: "play", ayah: "2:255", reciter: "ar.alafasy", until: "2:255" },
+      {
+        type: "play",
+        ayah: "2:255",
+        reciter: "ar.alafasy",
+        to: { kind: "ayah", ayah: "2:255" },
+        settings: { askToContinueAtEnd: false },
+      },
       { type: "ready" },
       { type: "finished" }
     );
@@ -286,11 +314,10 @@ describe(recitationPlayback, () => {
       { type: "play", ayah: "2:1", reciter: "ar.alafasy" },
       { type: "failed" }
     );
-    expect(failed).toStrictEqual({
+    expect(failed).toMatchObject({
       status: "error",
       ayah: "2:1",
       reciter: "ar.alafasy",
-      until: null,
     });
     expect(play(failed, { type: "resume" })).toMatchObject({
       status: "loading",
@@ -308,6 +335,104 @@ describe(recitationPlayback, () => {
         { type: "finished" }
       )
     ).toStrictEqual(idle);
+  });
+
+  it("stops at the end of the page when asked to play to it", () => {
+    // Page 1 holds 1:1 to 1:7.
+    let state = play(idle, {
+      type: "play",
+      ayah: "1:5",
+      reciter: "ar.alafasy",
+      to: { kind: "page" },
+      settings: { askToContinueAtEnd: false },
+    });
+    for (const ayah of ["1:6", "1:7"]) {
+      state = play(state, { type: "ready" }, { type: "finished" });
+      expect(state).toMatchObject({ status: "loading", ayah });
+    }
+    expect(play(state, { type: "ready" }, { type: "finished" })).toStrictEqual(
+      idle
+    );
+  });
+
+  it("stops at the last ayah of the Quran when asked to play to the end of its juz", () => {
+    const state = play(
+      idle,
+      {
+        type: "play",
+        ayah: "114:5",
+        reciter: "ar.alafasy",
+        to: { kind: "juz" },
+      },
+      { type: "ready" },
+      { type: "finished" },
+      { type: "ready" },
+      { type: "finished" }
+    );
+    expect(state).toStrictEqual(idle);
+  });
+
+  it("keeps the plan and its origin when the reciter changes", () => {
+    const state = play(
+      idle,
+      {
+        type: "play",
+        ayah: "2:255",
+        reciter: "ar.alafasy",
+        to: { kind: "surah" },
+        origin: "verse-of-the-day",
+      },
+      { type: "ready" },
+      { type: "reciter", reciter: "everyayah.minshawy-murattal" }
+    );
+    expect(state).toMatchObject({
+      status: "loading",
+      ayah: "2:255",
+      reciter: "everyayah.minshawy-murattal",
+      origin: "verse-of-the-day",
+      plan: playbackPlan(
+        "2:255",
+        { kind: "surah" },
+        {
+          askToContinueAtEnd: false,
+        }
+      ),
+    });
+  });
+
+  it("skips to the next ayah, and ends when skipping past the plan's last", () => {
+    const next = { type: "skip", direction: "next" } as const;
+    const state = play(
+      idle,
+      {
+        type: "play",
+        ayah: "1:6",
+        reciter: "ar.alafasy",
+        to: { kind: "surah" },
+      },
+      { type: "ready" },
+      next
+    );
+    expect(state).toMatchObject({ status: "loading", ayah: "1:7" });
+    expect(play(state, { type: "ready" }, next)).toStrictEqual(idle);
+  });
+
+  it("skips back to the previous ayah, into the previous surah, but not before 1:1", () => {
+    const previous = { type: "skip", direction: "previous" } as const;
+    const state = play(
+      idle,
+      { type: "play", ayah: "2:1", reciter: "ar.alafasy" },
+      { type: "ready" },
+      previous
+    );
+    expect(state).toMatchObject({ status: "loading", ayah: "1:7" });
+    const first = play(
+      idle,
+      { type: "play", ayah: "1:1", reciter: "ar.alafasy" },
+      { type: "ready" },
+      previous
+    );
+    expect(first).toMatchObject({ status: "playing", ayah: "1:1" });
   });
 
   it("starts over at a new ayah with a new reciter", () => {

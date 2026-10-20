@@ -46,6 +46,7 @@ const SOURCES: InsightsSources = {
     },
   ],
   moodCheckIns: [{ mood: "calm", date: date("2026-10-15") }],
+  khatmahs: [],
 };
 
 let directory: TemporaryDirectory;
@@ -81,6 +82,7 @@ describe(createInsightsRepository, () => {
       habitCompletions: reader("habitCompletions"),
       dhikrSessions: reader("dhikrSessions"),
       moodCheckIns: reader("moodCheckIns"),
+      khatmahs: reader("khatmahs"),
     };
 
     await expect(

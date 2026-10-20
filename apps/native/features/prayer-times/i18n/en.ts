@@ -19,8 +19,19 @@ export const en: Catalog<typeof ar> = {
     notReached: "Not today",
     notReachedLabel: "{{name}}: not reached today at this location",
     current: "Now",
+    shareTitle: "Prayer times",
+    shareSeparator: " · ",
     allHidden:
       "Every Prayer Time is hidden. Show the ones you want in Prayer Times options.",
+  },
+  day: {
+    previous: "Previous day",
+    next: "Next day",
+    today: "Today",
+    pick: "Pick a date",
+    hijri: "Hijri date",
+    timetableTitle: "Prayer Times for {{date}}",
+    countdown: "{{name}} in {{countdown}}",
   },
   next: {
     title: "Next Prayer Time",
@@ -49,6 +60,23 @@ export const en: Catalog<typeof ar> = {
     searching: "Searching…",
     noResults: "No city found with that name.",
     searchFailed: "Search failed. Searching needs an internet connection.",
+  },
+  recent: {
+    title: "Recent cities",
+    timeZone: "Time zone: {{timeZone}}",
+  },
+  sanity: {
+    title: "Some times need a look",
+    undefined: "Can't be calculated on this day at this location: {{names}}.",
+    outOfOrder: "Out of order: {{names}}.",
+    fix: "Review Prayer settings",
+  },
+  highLatitude: {
+    title: "Your location is at a high latitude",
+    description:
+      "In summer the sun may not reach the Fajr or Isha angle. Review the high-latitude rule in Prayer settings before you need it.",
+    review: "Review settings",
+    dismiss: "Later",
   },
   options: {
     title: "Prayer Times options",

@@ -1,16 +1,23 @@
 import type {
+  ShellPreferences,
   ShellPreferencesChange,
   ShellPreferencesRepository,
 } from "@alrisali/db-user/shared";
 import {
   DEFAULT_DIGITS,
   DEFAULT_HIDDEN_TABS,
+  DEFAULT_SHORTCUT_LAYOUT,
   DEFAULT_TEXT_SIZE,
   DEFAULT_THEME_PREFERENCE,
+  FEATURES,
+  moveShortcut,
+  setShortcutShown,
   setTabVisible,
 } from "@alrisali/domain/shared";
 import type {
   Digits,
+  FeatureId,
+  ShortcutLayout,
   Tab,
   TextSize,
   ThemePreference,
@@ -19,12 +26,12 @@ import { DEFAULT_LANGUAGE } from "@alrisali/i18n";
 import type { Language } from "@alrisali/i18n";
 import type { StateCreator } from "zustand";
 
-// The shell preferences (language, theme, text size, hidden tabs, digits)
-// belong to the Believer's database, so they follow the Believer to a new
-// phone. The shell needs them before its first frame, and the database opens
-// asynchronously, so the device keeps a startup cache: the store starts from
-// it, then hydrates from the database (the database wins) and writes every
-// change through to both.
+// The shell preferences (language, theme, text size, hidden tabs, digits,
+// Home shortcuts) belong to the Believer's database, so they follow the
+// Believer to a new phone. The shell needs them before its first frame, and
+// the database opens asynchronously, so the device keeps a startup cache: the
+// store starts from it, then hydrates from the database (the database wins)
+// and writes every change through to both.
 
 export interface Preferences {
   language: Language;
@@ -32,6 +39,7 @@ export interface Preferences {
   textSize: TextSize;
   hiddenTabs: readonly Tab[];
   digits: Digits;
+  homeShortcuts: ShortcutLayout<FeatureId>;
 }
 
 /** What the startup cache holds; null where nothing was chosen. */
@@ -61,6 +69,10 @@ export interface PreferencesState extends Preferences {
   setTextSize: (textSize: TextSize) => void;
   setTabVisible: (tab: Tab, visible: boolean) => void;
   setDigits: (digits: Digits) => void;
+  /** Shows or hides a Home shortcut. */
+  setShortcutShown: (id: FeatureId, shown: boolean) => void;
+  /** Moves a Home shortcut, by its place in `arrangedShortcuts`. */
+  moveShortcut: (from: number, to: number) => void;
   /**
    * Reads the Believer's database over the cached preferences, and saves into
    * it what only the cache knows (preferences chosen before this table
@@ -76,6 +88,7 @@ const withDefaults = (chosen: CachedPreferences): Preferences => ({
   textSize: chosen.textSize ?? DEFAULT_TEXT_SIZE,
   hiddenTabs: chosen.hiddenTabs ?? DEFAULT_HIDDEN_TABS,
   digits: chosen.digits ?? DEFAULT_DIGITS,
+  homeShortcuts: chosen.homeShortcuts ?? DEFAULT_SHORTCUT_LAYOUT,
 });
 
 export const createPreferences =
@@ -124,31 +137,16 @@ export const createPreferences =
         const preferences = await repository();
         const saved = await preferences.get();
         const cached = cache.read();
-        const chosen: CachedPreferences = {
-          language: saved.language ?? cached.language,
-          theme: saved.theme ?? cached.theme,
-          textSize: saved.textSize ?? cached.textSize,
-          hiddenTabs: saved.hiddenTabs ?? cached.hiddenTabs,
-          digits: saved.digits ?? cached.digits,
-        };
+        const keys = Object.keys(saved) as (keyof ShellPreferences)[];
+        const chosen = Object.fromEntries(
+          keys.map((key) => [key, saved[key] ?? cached[key] ?? null])
+        ) as CachedPreferences;
         // What only the cache knows goes into the database.
-        const unsaved: ShellPreferencesChange = {
-          ...(saved.language === null && cached.language !== null
-            ? { language: cached.language }
-            : {}),
-          ...(saved.theme === null && cached.theme !== null
-            ? { theme: cached.theme }
-            : {}),
-          ...(saved.textSize === null && cached.textSize !== null
-            ? { textSize: cached.textSize }
-            : {}),
-          ...(saved.hiddenTabs === null && cached.hiddenTabs !== null
-            ? { hiddenTabs: cached.hiddenTabs }
-            : {}),
-          ...(saved.digits === null && cached.digits !== null
-            ? { digits: cached.digits }
-            : {}),
-        };
+        const unsaved = Object.fromEntries(
+          keys
+            .filter((key) => saved[key] === null && cached[key] !== null)
+            .map((key) => [key, cached[key]])
+        ) as ShellPreferencesChange;
         if (Object.keys(unsaved).length > 0) {
           await preferences.update(unsaved);
         }
@@ -186,6 +184,19 @@ export const createPreferences =
       setTabVisible: (tab, visible) =>
         change({ hiddenTabs: setTabVisible(get().hiddenTabs, tab, visible) }),
       setDigits: (digits) => change({ digits }),
+      setShortcutShown: (id, shown) =>
+        change({
+          homeShortcuts: setShortcutShown(
+            FEATURES,
+            get().homeShortcuts,
+            id,
+            shown
+          ),
+        }),
+      moveShortcut: (from, to) =>
+        change({
+          homeShortcuts: moveShortcut(FEATURES, get().homeShortcuts, from, to),
+        }),
       hydrate,
     };
   };

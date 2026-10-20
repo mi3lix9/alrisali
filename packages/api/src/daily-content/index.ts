@@ -1,7 +1,10 @@
 import {
   dailyContentSchema,
+  EVERY_DAY,
   supplicationIdSchema,
   WEEKDAYS,
+  WORSHIP_KINDS,
+  worshipEntrySchema,
 } from "@alrisali/domain/daily-content";
 import { oc } from "@orpc/contract";
 import { z } from "zod";
@@ -14,6 +17,11 @@ const dailyContentMap = z.object({
       supplicationId: z.string().nullable(),
     })
   ),
+});
+
+/** Every ziyarah, night-dua and every-day entry, in a stable order. */
+const worshipMap = z.object({
+  entries: z.array(worshipEntrySchema),
 });
 
 /**
@@ -30,4 +38,24 @@ export const dailyContentContract = {
       })
     )
     .output(dailyContentMap),
+  /**
+   * The rest of today's worship: the Supplications Home shows as a weekday's
+   * ziyarah, a weekday's night dua after Maghrib, or every day.
+   */
+  worshipList: oc.output(worshipMap),
+  /** Replaces one kind on one day; an empty list clears it. */
+  worshipSet: oc
+    .input(
+      z
+        .object({
+          kind: z.enum(WORSHIP_KINDS),
+          day: z.enum([...WEEKDAYS, EVERY_DAY]),
+          supplicationIds: z.array(supplicationIdSchema),
+        })
+        .refine(
+          ({ kind, day }) => (kind === "every-day") === (day === EVERY_DAY),
+          "Every-day entries have no weekday; the others need one"
+        )
+    )
+    .output(worshipMap),
 };

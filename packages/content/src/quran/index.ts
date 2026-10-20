@@ -2,7 +2,11 @@
 // layout, every ayah verbatim, and surah, juz and hizb-quarter metadata. The
 // font ships as `@alrisali/content/quran/font.ttf`; the notice as
 // `KFGQPC_NOTICE`.
+import type { AyahKey } from "./ayah-key";
+import { BY_MEANING_STARTS } from "./data/by-meaning";
+import type { ByMeaningDays } from "./data/by-meaning";
 import { HAFS } from "./data/hafs";
+import { REVELATION } from "./data/revelation";
 import { SURAH_HEADER_PREFIX } from "./dataset";
 
 export const PAGE_COUNT = 604;
@@ -10,8 +14,7 @@ export const SURAH_COUNT = 114;
 /** 60 hizb, each of four quarters (rub' al-hizb); a juz holds two hizb. */
 export const HIZB_QUARTER_COUNT = 240;
 
-/** `surah:ayah`, e.g. `2:255`. */
-export type AyahKey = `${number}:${number}`;
+export type { AyahKey } from "./ayah-key";
 
 /**
  * The first ayah of each hizb quarter, in order (Tanzil Quran Metadata,
@@ -19,10 +22,17 @@ export type AyahKey = `${number}:${number}`;
  */
 export { HIZB_QUARTER_STARTS } from "./data/hizb";
 
+/** Other names and spellings of each Surah (in-house), by Surah number. */
+export { SURAH_ALIASES } from "./data/surah-aliases";
+
 export interface Surah {
   number: number;
   nameAr: string;
   nameEn: string;
+  /** Where the surah was revealed (Tanzil Quran Metadata, CC BY 3.0). */
+  revelationPlace: "meccan" | "medinan";
+  /** 1 for the first surah revealed, 114 for the last (Tanzil's order). */
+  revelationOrder: number;
 }
 
 export interface Ayah {
@@ -64,7 +74,13 @@ export const KFGQPC_NOTICE = HAFS.notice;
 export const QURAN_SOURCE = HAFS.source;
 
 export const SURAHS: readonly Surah[] = HAFS.surahs.map(
-  ([nameAr, nameEn], index) => ({ number: index + 1, nameAr, nameEn })
+  ([nameAr, nameEn], index) => ({
+    number: index + 1,
+    nameAr,
+    nameEn,
+    revelationPlace: REVELATION[index]?.[0] ?? "meccan",
+    revelationOrder: REVELATION[index]?.[1] ?? index + 1,
+  })
 );
 
 export const AYAT: readonly Ayah[] = HAFS.ayat.map(
@@ -117,3 +133,45 @@ export const getQuranPage = (page: number): QuranPage => {
   const firstAyah = AYAT.find((ayah) => ayah.page === page);
   return { number: page, juz: firstAyah?.juz ?? 1, lines };
 };
+
+export { BY_MEANING_DAYS, SCHOLAR_REVIEWED } from "./data/by-meaning";
+export type { ByMeaningDays } from "./data/by-meaning";
+
+/** One session of a by-meaning division: its first and last ayah. */
+export interface AyahRange {
+  from: AyahKey;
+  to: AyahKey;
+}
+
+/**
+ * The by-meaning Khatmah division of 7, 29 or 60 sessions: contiguous
+ * ranges that together cover the whole Quran, each ending at a surah's end
+ * or a hizb quarter's end (data/by-meaning.ts).
+ */
+export const byMeaningRanges = (days: ByMeaningDays): readonly AyahRange[] => {
+  const starts = BY_MEANING_STARTS[days];
+  const last = AYAT.at(-1)?.key ?? "114:6";
+  return starts.map((from, index) => {
+    const next = starts[index + 1];
+    const nextIndex = next ? AYAT.findIndex((ayah) => ayah.key === next) : -1;
+    return {
+      from,
+      to: (nextIndex > 0 ? AYAT[nextIndex - 1]?.key : last) ?? last,
+    };
+  });
+};
+
+/** The sajdah ayat, obligatory (the four 'azaa'im) or recommended. */
+export { SAJDAH } from "./data/sajdah";
+export type { Sajdah, SajdahKind } from "./data/sajdah";
+
+export {
+  QURANIC_DUA_ROWS,
+  QURANIC_DUA_SPEAKERS,
+  QURANIC_DUA_SUBJECTS,
+} from "./data/quranic-duas";
+export type {
+  QuranicDuaRow,
+  QuranicDuaSpeaker,
+  QuranicDuaSubject,
+} from "./data/quranic-duas";

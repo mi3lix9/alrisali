@@ -10,7 +10,10 @@ import type { TextLayoutEvent } from "react-native";
 import { formatNumber } from "@/shared/lib/numbers";
 
 import { QURAN_FONT } from "../hooks/use-quran-font";
+import { rosetteColor } from "../utils/decorations";
+import type { AyahDecorations } from "../utils/decorations";
 import { hizbLabel } from "../utils/format";
+import { usePageColors } from "./page-colors";
 
 /** Every Quran Page has room for 15 lines; pages 1 and 2 centre fewer. */
 const LINE_SLOTS = 15;
@@ -35,10 +38,18 @@ export interface AyahGestures {
   /** A plain tap anywhere on the page, ayat included: toggles the chrome. */
   onTap: () => void;
   onLongPressAyah: (ayah: AyahKey) => void;
-  /** The ayah whose sheet is open, drawn highlighted. */
+  /** A finger came down on an ayah: it lights at once, before a long-press. */
+  onPressInAyah: (ayah: AyahKey) => void;
+  /** The finger lifted or left the ayah. */
+  onPressOut: () => void;
+  /** The ayah whose sheet is open, or being recited, drawn highlighted. */
   selectedAyah: AyahKey | null;
+  /** The ayah under the finger, drawn highlighted like the selected one. */
+  pressingAyah: AyahKey | null;
   /** The Last-Read Ayah, its rosette drawn in the accent colour. */
   lastReadAyah: AyahKey | null;
+  /** What marks ayat on their rosettes: ribbons, notes, sajdah, khatmah. */
+  decorations?: AyahDecorations | undefined;
 }
 
 interface QuranPageViewProps extends AyahGestures {
@@ -68,12 +79,14 @@ const wordKey = (word: QuranWord): AyahKey => `${word.surah}:${word.ayah}`;
 
 interface WordProps extends Omit<
   AyahGestures,
-  "selectedAyah" | "lastReadAyah"
+  "selectedAyah" | "pressingAyah" | "lastReadAyah" | "decorations"
 > {
   word: QuranWord;
   fontSize: number;
   selected: boolean;
   lastRead: boolean;
+  /** The rosette's decoration colour; only the ayah-end sign takes it. */
+  rosette: string | undefined;
 }
 
 const Word = ({
@@ -81,26 +94,35 @@ const Word = ({
   fontSize,
   selected,
   lastRead,
+  rosette,
   onTap,
   onLongPressAyah,
-}: WordProps) => (
-  <Text
-    onPress={onTap}
-    onLongPress={() => onLongPressAyah(wordKey(word))}
-    suppressHighlighting
-    className={`${selected ? "bg-accent" : ""} ${
-      lastRead && word.isAyahEnd ? "text-info" : "text-foreground"
-    }`}
-    style={{
-      fontFamily: QURAN_FONT,
-      fontSize,
-      lineHeight: fontSize / FONT_TO_SLOT,
-      writingDirection: "rtl",
-    }}
-  >
-    {word.text}
-  </Text>
-);
+  onPressInAyah,
+  onPressOut,
+}: WordProps) => {
+  const colors = usePageColors();
+  return (
+    <Text
+      testID={word.isAyahEnd ? `quran-ayah-end-${wordKey(word)}` : undefined}
+      onPress={onTap}
+      onLongPress={() => onLongPressAyah(wordKey(word))}
+      onPressIn={() => onPressInAyah(wordKey(word))}
+      onPressOut={onPressOut}
+      suppressHighlighting
+      style={{
+        backgroundColor: selected ? colors.highlight : undefined,
+        color: lastRead && word.isAyahEnd ? colors.accent : colors.text,
+        fontFamily: QURAN_FONT,
+        fontSize,
+        lineHeight: fontSize / FONT_TO_SLOT,
+        writingDirection: "rtl",
+        ...(rosette && word.isAyahEnd ? { color: rosette } : {}),
+      }}
+    >
+      {word.text}
+    </Text>
+  );
+};
 
 interface LineProps extends AyahGestures {
   line: QuranLine;
@@ -116,20 +138,30 @@ const Line = ({
   stretch,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
+  decorations,
 }: LineProps) => {
   const { t } = useTranslation("quran");
+  const colors = usePageColors();
   if (line.kind !== "ayah") {
     const header = line.kind === "surah-header";
     return (
       <View
-        style={{ height }}
-        className={
+        style={[
+          { height },
           header
-            ? "border-border bg-muted justify-center rounded-md border"
-            : "justify-center"
-        }
+            ? {
+                backgroundColor: colors.plate,
+                borderColor: colors.border,
+                borderWidth: 1,
+              }
+            : null,
+        ]}
+        className={header ? "justify-center rounded-md" : "justify-center"}
         accessibilityRole={header ? "header" : undefined}
         accessibilityLabel={
           header ? t("page.surah", { name: line.text }) : undefined
@@ -138,8 +170,8 @@ const Line = ({
         <Text
           numberOfLines={1}
           adjustsFontSizeToFit
-          className="text-foreground"
           style={{
+            color: colors.text,
             fontFamily: QURAN_FONT,
             fontSize,
             lineHeight: fontSize / FONT_TO_SLOT,
@@ -164,10 +196,15 @@ const Line = ({
           key={index}
           word={word}
           fontSize={fontSize}
-          selected={selectedAyah === wordKey(word)}
+          selected={
+            selectedAyah === wordKey(word) || pressingAyah === wordKey(word)
+          }
           lastRead={lastReadAyah === wordKey(word)}
+          rosette={rosetteColor(decorations?.get(wordKey(word)))}
           onTap={onTap}
           onLongPressAyah={onLongPressAyah}
+          onPressInAyah={onPressInAyah}
+          onPressOut={onPressOut}
         />
       ))}
     </View>
@@ -188,10 +225,15 @@ const PageView = ({
   insetBottom,
   onTap,
   onLongPressAyah,
+  onPressInAyah,
+  onPressOut,
   selectedAyah,
+  pressingAyah,
   lastReadAyah,
+  decorations,
 }: QuranPageViewProps) => {
   const { t, i18n } = useTranslation("quran");
+  const colors = usePageColors();
   const quranPage = useMemo(() => getQuranPage(page), [page]);
   const position = pagePosition(page);
   const surah = SURAHS[position.surah - 1];
@@ -227,7 +269,16 @@ const PageView = ({
     setMeasured({ key: fitKey, fit: next });
   };
 
-  const gestures = { onTap, onLongPressAyah, selectedAyah, lastReadAyah };
+  const gestures = {
+    onTap,
+    onLongPressAyah,
+    onPressInAyah,
+    onPressOut,
+    selectedAyah,
+    pressingAyah,
+    lastReadAyah,
+    decorations,
+  };
 
   return (
     <Pressable
@@ -240,17 +291,18 @@ const PageView = ({
         paddingTop: insetTop,
         paddingBottom: insetBottom,
         paddingHorizontal: SIDE_PADDING,
+        backgroundColor: colors.background,
       }}
-      className="bg-background overflow-hidden dark:bg-black"
+      className="overflow-hidden"
     >
       <View
         style={{ height: BAND_HEIGHT, direction: "rtl" }}
         className="flex-row items-end justify-between"
       >
-        <Text size="xs" muted>
+        <Text size="xs" style={{ color: colors.mutedText }}>
           {t("page.juz", { juz: formatNumber(position.juz) })}
         </Text>
-        <Text size="xs" muted>
+        <Text size="xs" style={{ color: colors.mutedText }}>
           {i18n.language === "ar" ? surah?.nameAr : surah?.nameEn}
         </Text>
       </View>
@@ -294,10 +346,10 @@ const PageView = ({
         style={{ height: BAND_HEIGHT }}
         className="flex-row items-center justify-center gap-2"
       >
-        <Text size="sm" weight="semibold" muted>
+        <Text size="sm" weight="semibold" style={{ color: colors.mutedText }}>
           {formatNumber(page)}
         </Text>
-        <Text size="xs" muted>
+        <Text size="xs" style={{ color: colors.mutedText }}>
           {hizbLabel(t, position)}
         </Text>
       </View>

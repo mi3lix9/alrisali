@@ -1,9 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CHROME_IDLE_MS, chromeTransition, createReaderChrome } from ".";
-import type { ChromeEvent, ChromeState, ReaderChrome } from ".";
+import type { AyahKey, ChromeEvent, ChromeState, ReaderChrome } from ".";
 
-const hidden: ChromeState = { visible: false, sheet: null, scrubbing: false };
+const hidden: ChromeState = {
+  visible: false,
+  sheet: null,
+  scrubbing: false,
+  pressing: null,
+};
 const shown: ChromeState = { ...hidden, visible: true };
 
 describe("reader chrome transitions", () => {
@@ -53,6 +58,94 @@ describe("reader chrome transitions", () => {
     expect(
       chromeTransition(holding, { type: "scrubber-release" })
     ).toStrictEqual(shown);
+  });
+});
+
+describe("pressing an ayah", () => {
+  it("lights the ayah under the finger at once, leaving the chrome alone", () => {
+    expect(
+      chromeTransition(hidden, { type: "press-in", ayah: "2:255" })
+    ).toStrictEqual({ ...hidden, pressing: "2:255" });
+    expect(
+      chromeTransition(shown, { type: "press-in", ayah: "2:255" })
+    ).toStrictEqual({ ...shown, pressing: "2:255" });
+  });
+
+  it("opens the pressed ayah's sheet when the press is held", () => {
+    const pressing = chromeTransition(hidden, {
+      type: "press-in",
+      ayah: "2:255",
+    });
+    const held = chromeTransition(pressing, {
+      type: "long-press",
+      ayah: "2:255",
+    });
+    expect(held).toStrictEqual({
+      ...hidden,
+      sheet: { kind: "ayah", ayah: "2:255" },
+    });
+    expect(chromeTransition(held, { type: "press-out" })).toBe(held);
+  });
+
+  it("still toggles the chrome on a plain tap, and the light goes out", () => {
+    const pressing = chromeTransition(hidden, {
+      type: "press-in",
+      ayah: "2:255",
+    });
+    const released = chromeTransition(pressing, { type: "press-out" });
+    expect(released).toStrictEqual(hidden);
+    expect(chromeTransition(released, { type: "tap" })).toStrictEqual(shown);
+    expect(chromeTransition(pressing, { type: "tap" })).toStrictEqual(shown);
+  });
+
+  it("puts the light out when the finger starts a swipe instead", () => {
+    const pressing = chromeTransition(shown, {
+      type: "press-in",
+      ayah: "2:255",
+    });
+    expect(chromeTransition(pressing, { type: "scroll-start" })).toStrictEqual(
+      hidden
+    );
+  });
+});
+
+const sheetOn = (ayah: AyahKey): ChromeState => ({
+  ...hidden,
+  sheet: { kind: "ayah", ayah },
+});
+const moved = (ayah: AyahKey, direction: "previous" | "next") =>
+  chromeTransition(sheetOn(ayah), { type: "move-selection", direction });
+
+describe("moving the ayah sheet", () => {
+  it("moves the selection to the neighbouring ayah without closing", () => {
+    expect(moved("2:255", "next")).toStrictEqual(sheetOn("2:256"));
+    expect(moved("2:255", "previous")).toStrictEqual(sheetOn("2:254"));
+  });
+
+  it("crosses surah boundaries", () => {
+    expect(moved("1:7", "next")).toStrictEqual(sheetOn("2:1"));
+    expect(moved("2:1", "previous")).toStrictEqual(sheetOn("1:7"));
+  });
+
+  it("stops at the first and last ayah of the Quran", () => {
+    const first = sheetOn("1:1");
+    expect(
+      chromeTransition(first, { type: "move-selection", direction: "previous" })
+    ).toBe(first);
+    const last = sheetOn("114:6");
+    expect(
+      chromeTransition(last, { type: "move-selection", direction: "next" })
+    ).toBe(last);
+  });
+
+  it("does nothing without an ayah sheet open", () => {
+    const settings: ChromeState = { ...shown, sheet: { kind: "settings" } };
+    expect(
+      chromeTransition(settings, { type: "move-selection", direction: "next" })
+    ).toBe(settings);
+    expect(
+      chromeTransition(hidden, { type: "move-selection", direction: "next" })
+    ).toBe(hidden);
   });
 });
 

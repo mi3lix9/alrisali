@@ -68,7 +68,9 @@ export const NextPrayerCard = () => {
 
   const name = t(`names.${next.name}`);
   const time = formatClockTime(next.at, view.timeFormat);
-  const countdown = formatCountdown(next.at.since(now).total("seconds"));
+  const countdown = formatCountdown(
+    next.at.toInstant().since(now).total("seconds")
+  );
 
   return (
     <Card className="bg-primary border-primary">

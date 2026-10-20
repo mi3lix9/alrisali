@@ -1,17 +1,49 @@
 import { HijriCalendarButton } from "@/features/calendar";
-import { FavoriteButton } from "@/features/favorites";
-import { QuranReaderScreen, SetLastReadButton } from "@/features/quran";
+import { AyahFavoritesList, FavoriteRow } from "@/features/favorites";
+import {
+  CompletePortionBanner,
+  MarkDoneTillRow,
+  useKhatmahDecorations,
+} from "@/features/khatmah";
+import { ShareLinkRow } from "@/features/links";
+import { AyahNoteRow, QuranReaderScreen, RibbonRows } from "@/features/quran";
+import { ShareAyahImageRow } from "@/features/share-image";
 
-const QuranRoute = () => (
-  <QuranReaderScreen
-    topBarActions={<HijriCalendarButton />}
-    ayahActions={(ayah) => (
-      <>
-        <SetLastReadButton ayah={ayah} />
-        <FavoriteButton item={{ kind: "ayah", key: ayah }} />
-      </>
-    )}
-  />
-);
+// The ayah sheet's slots sit at fixed places in its order (see AyahActions);
+// within a slot, rows show in the order listed here.
+const QuranRoute = () => {
+  const khatmahPortion = useKhatmahDecorations();
+  return (
+    <QuranReaderScreen
+      topBarActions={<HijriCalendarButton />}
+      savedFavorites={AyahFavoritesList}
+      decorations={khatmahPortion}
+      ayahActions={{
+        banner: (ayah) => (
+          <>
+            <CompletePortionBanner ayah={ayah} />
+            <MarkDoneTillRow ayah={ayah} />
+          </>
+        ),
+        keep: (ayah) => (
+          <>
+            <FavoriteRow item={{ kind: "ayah", key: ayah }} />
+            <RibbonRows ayah={ayah} />
+            <AyahNoteRow ayah={ayah} />
+          </>
+        ),
+        share: (ayah) => (
+          <>
+            <ShareLinkRow
+              testID="ayah-sheet-share-link"
+              link={{ kind: "ayah", ayah }}
+            />
+            <ShareAyahImageRow ayah={ayah} />
+          </>
+        ),
+      }}
+    />
+  );
+};
 
 export default QuranRoute;

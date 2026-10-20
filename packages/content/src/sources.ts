@@ -67,6 +67,42 @@ export const CONTENT_SOURCES = [
       url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },
+  {
+    id: "wmm",
+    name: "World Magnetic Model WMM2025 (NOAA NCEI and BGS)",
+    url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    licence: {
+      name: "Public domain (U.S. Government work)",
+      url: "https://www.ncei.noaa.gov/products/world-magnetic-model",
+    },
+  },
+  {
+    id: "timezone-boundaries",
+    name: "timezone-boundary-builder (Evan Siroky), via @photostructure/tz-lookup",
+    url: "https://github.com/evansiroky/timezone-boundary-builder",
+    licence: {
+      name: "ODbL 1.0, © OpenStreetMap contributors (lookup library: CC0 1.0)",
+      url: "https://opendatacommons.org/licenses/odbl/1-0/",
+    },
+  },
+  {
+    id: "amiri",
+    name: "Amiri, The Amiri Project Authors",
+    url: "https://github.com/aliftype/amiri",
+    licence: {
+      name: "SIL Open Font License 1.1",
+      url: "https://openfontlicense.org",
+    },
+  },
+  {
+    id: "ibm-plex-sans-arabic",
+    name: "IBM Plex Sans Arabic, IBM Corp.",
+    url: "https://github.com/IBM/plex",
+    licence: {
+      name: "SIL Open Font License 1.1",
+      url: "https://openfontlicense.org",
+    },
+  },
 ] as const satisfies readonly ContentSource[];
 
 export type ContentSourceId = (typeof CONTENT_SOURCES)[number]["id"];

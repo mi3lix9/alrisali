@@ -5,12 +5,22 @@ import {
   addHijriMonths,
   createHijriCalendar,
   createUmmAlQuraConverter,
+  DEFAULT_ADMIN_HIJRI_ADJUSTMENT,
+  defaultHijriConverter,
   effectiveHijriAdjustment,
+  forcedHijriDateProblem,
+  forcedHijriDateSchema,
   hijriAdjustmentSchema,
   isInHijriWindow,
+  nightHijriDate,
   tabularHijriConverter,
 } from "./hijri";
-import type { CreateDateTimeFormat, HijriMonth, HijriWindow } from "./hijri";
+import type {
+  CreateDateTimeFormat,
+  ForcedHijriDate,
+  HijriMonth,
+  HijriWindow,
+} from "./hijri";
 
 const day = (iso: string) => Temporal.PlainDate.from(iso);
 
@@ -128,12 +138,184 @@ describe("Hijri conversion", () => {
   });
 });
 
-describe("Hijri Adjustment", () => {
-  it("adds the Believer's adjustment to the Admins'", () => {
-    expect(effectiveHijriAdjustment({ admin: 1, believer: -2 })).toBe(-1);
-    expect(effectiveHijriAdjustment({ admin: -1, believer: 0 })).toBe(-1);
+describe(effectiveHijriAdjustment, () => {
+  const converter = defaultHijriConverter();
+  // A moon sighting puts 1 Jumada al-Akhirah 1448 on 12 November 2026, a day
+  // after Umm al-Qura's 11 November, until the end of that month.
+  const sighting: ForcedHijriDate = {
+    date: { year: 1448, month: 6, day: 1 },
+    from: "2026-11-12",
+    until: "2026-12-10",
+  };
+  const admin = { offset: 1, forced: sighting };
+  const shownOn = (today: string, believer = 0) =>
+    createHijriCalendar({
+      adjustment: effectiveHijriAdjustment({
+        admin,
+        believer,
+        today: day(today),
+        converter,
+      }),
+      converter,
+    }).toHijri(day(today));
+
+  it("adds the Believer's adjustment to the Admins' offset", () => {
+    const today = day("2026-10-16");
+    expect(
+      effectiveHijriAdjustment({
+        admin: { offset: 1, forced: null },
+        believer: -2,
+        today,
+        converter,
+      })
+    ).toBe(-1);
+    expect(
+      effectiveHijriAdjustment({
+        admin: DEFAULT_ADMIN_HIJRI_ADJUSTMENT,
+        believer: 0,
+        today,
+        converter,
+      })
+    ).toBe(0);
   });
 
+  it("shows the forced date on its first day and counts on from it until it expires", () => {
+    expect(shownOn("2026-11-12")).toStrictEqual({
+      year: 1448,
+      month: 6,
+      day: 1,
+    });
+    expect(shownOn("2026-12-10")).toStrictEqual({
+      year: 1448,
+      month: 6,
+      day: 29,
+    });
+  });
+
+  it("falls back to the Admins' offset after the forced date expires", () => {
+    expect(
+      effectiveHijriAdjustment({
+        admin,
+        believer: 0,
+        today: day("2026-12-11"),
+        converter,
+      })
+    ).toBe(1);
+  });
+
+  it("keeps the Admins' offset before the forced date starts", () => {
+    expect(
+      effectiveHijriAdjustment({
+        admin,
+        believer: 0,
+        today: day("2026-11-11"),
+        converter,
+      })
+    ).toBe(1);
+  });
+
+  it("adds the Believer's own adjustment on top of the forced date", () => {
+    expect(shownOn("2026-11-12", 1)).toStrictEqual({
+      year: 1448,
+      month: 6,
+      day: 2,
+    });
+  });
+
+  it("reaches the forced date on an engine without Umm al-Qura", () => {
+    const adjustment = effectiveHijriAdjustment({
+      admin,
+      believer: 0,
+      today: day("2026-11-12"),
+      converter: tabularHijriConverter,
+    });
+
+    expect(
+      createHijriCalendar({
+        adjustment,
+        converter: tabularHijriConverter,
+      }).toHijri(day("2026-11-12"))
+    ).toStrictEqual({ year: 1448, month: 6, day: 1 });
+  });
+});
+
+describe("Forced Hijri Date", () => {
+  it("refuses an expiry before the forced date starts", () => {
+    expect(
+      forcedHijriDateSchema.safeParse({
+        date: { year: 1448, month: 6, day: 1 },
+        from: "2026-11-12",
+        until: "2026-11-11",
+      }).success
+    ).toBeFalsy();
+  });
+
+  it("refuses a Gregorian day that does not exist", () => {
+    expect(
+      forcedHijriDateSchema.safeParse({
+        date: { year: 1448, month: 6, day: 1 },
+        from: "2026-02-30",
+        until: "2026-03-30",
+      }).success
+    ).toBeFalsy();
+  });
+
+  it("accepts a forced date that lasts a single day", () => {
+    expect(
+      forcedHijriDateSchema.safeParse({
+        date: { year: 1448, month: 6, day: 1 },
+        from: "2026-11-12",
+        until: "2026-11-12",
+      }).success
+    ).toBeTruthy();
+  });
+});
+
+describe(forcedHijriDateProblem, () => {
+  const converter = defaultHijriConverter();
+
+  it("accepts a forced date within two days of the computed one", () => {
+    expect(
+      forcedHijriDateProblem({
+        forced: {
+          date: { year: 1448, month: 6, day: 1 },
+          from: "2026-11-13",
+          until: "2026-12-10",
+        },
+        converter,
+      })
+    ).toBeNull();
+  });
+
+  it("refuses a forced date more than two days from the computed one", () => {
+    expect(
+      forcedHijriDateProblem({
+        forced: {
+          date: { year: 1448, month: 6, day: 1 },
+          from: "2026-11-14",
+          until: "2026-12-10",
+        },
+        converter,
+      })
+    ).toBe("too-far");
+  });
+
+  it("refuses a day the computed month does not have", () => {
+    // Umm al-Qura's Dhu al-Hijjah 1446 has 29 days.
+    expect(
+      forcedHijriDateProblem({
+        forced: {
+          date: { year: 1446, month: 12, day: 30 },
+          from: "2025-06-26",
+          until: "2025-06-26",
+        },
+        converter,
+      })
+    ).toBe("missing-day");
+  });
+});
+
+describe("Hijri Adjustment", () => {
   it("lets the Believer shift by at most two days", () => {
     expect(
       [-3, -2, 2, 3, 0.5].map(
@@ -246,5 +428,48 @@ describe("Hijri window", () => {
         [1447, 6, 1],
       ])
     ).toStrictEqual([false, true, true, true, false, false]);
+  });
+});
+
+describe("Night Hijri Date", () => {
+  const calendar = createHijriCalendar({ converter: tabularHijriConverter });
+  const zone = "Asia/Riyadh";
+  const at = (iso: string) => Temporal.ZonedDateTime.from(`${iso}[${zone}]`);
+  const maghrib = at("2026-10-15T17:32:00+03:00");
+
+  it("is the civil day's Hijri Date before Maghrib", () => {
+    expect(
+      nightHijriDate(at("2026-10-15T17:31:00+03:00"), maghrib, calendar)
+    ).toStrictEqual(calendar.toHijri(day("2026-10-15")));
+  });
+
+  it("turns to the next Hijri day exactly at Maghrib", () => {
+    const next = calendar.toHijri(day("2026-10-16"));
+    expect(nightHijriDate(maghrib, maghrib, calendar)).toStrictEqual(next);
+    expect(
+      nightHijriDate(at("2026-10-15T23:59:00+03:00"), maghrib, calendar)
+    ).toStrictEqual(next);
+  });
+
+  it("stays on the civil day when Maghrib is unknown", () => {
+    expect(
+      nightHijriDate(at("2026-10-15T20:00:00+03:00"), null, calendar)
+    ).toStrictEqual(calendar.toHijri(day("2026-10-15")));
+  });
+
+  it("leaves the displayed Hijri Date on the civil day", () => {
+    const late = at("2026-10-15T20:00:00+03:00");
+    expect(calendar.toHijri(late.toPlainDate())).not.toStrictEqual(
+      nightHijriDate(late, maghrib, calendar)
+    );
+  });
+
+  it("carries over a month end", () => {
+    const monthEnd = calendar.toGregorian({ year: 1448, month: 3, day: 29 });
+    const evening = at(`${monthEnd.toString()}T20:00:00+03:00`);
+    const sunset = at(`${monthEnd.toString()}T17:00:00+03:00`);
+    expect(nightHijriDate(evening, sunset, calendar)).toStrictEqual(
+      calendar.toHijri(monthEnd.add({ days: 1 }))
+    );
   });
 });

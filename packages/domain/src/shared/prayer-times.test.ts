@@ -16,6 +16,7 @@ import type {
   PrayerTimeName,
   PrayerTimesSettings,
 } from "./prayer-times";
+import { locationTimeZone } from "./time-zone";
 
 // Known-good times come from api.aladhan.com (an independent implementation),
 // asked for each method's angles and Asr school, Dhuhr tuned +1 minute and no
@@ -46,6 +47,10 @@ const PLACES = {
   reykjavik: {
     coordinates: { latitude: 64.1466, longitude: -21.9426 },
     timeZone: "Atlantic/Reykjavik",
+  },
+  dearborn: {
+    coordinates: { latitude: 42.3223, longitude: -83.1763 },
+    timeZone: "America/Detroit",
   },
 } satisfies Record<string, { coordinates: Coordinates; timeZone: string }>;
 
@@ -115,7 +120,7 @@ const mismatches = (
 };
 
 const at = (dateTime: string, timeZone: string) =>
-  Temporal.PlainDateTime.from(dateTime).toZonedDateTime(timeZone);
+  Temporal.PlainDateTime.from(dateTime).toZonedDateTime(timeZone).toInstant();
 
 describe("prayer times by calculation method", () => {
   it("gives Ja'fari times in Qatif in midsummer", () => {
@@ -324,6 +329,71 @@ describe("time zones and daylight saving", () => {
   });
 });
 
+describe("the location's own time zone", () => {
+  it("resolves each place's IANA time zone from its coordinates", () => {
+    for (const { coordinates, timeZone } of Object.values(PLACES)) {
+      expect(locationTimeZone(coordinates)).toBe(timeZone);
+    }
+  });
+
+  it("gives a city in another time zone its local times across a daylight-saving change", () => {
+    // US summer time starts on 9 March 2025, two weeks before London's.
+    expect(
+      mismatches("dearborn", "2025-03-08", "sunni", {
+        fajr: "05:23",
+        sunrise: "06:56",
+        dhuhr: "12:44",
+        asr: "15:57",
+        sunset: "18:31",
+        isha: "19:59",
+      })
+    ).toStrictEqual([]);
+    expect(
+      mismatches("dearborn", "2025-03-09", "sunni", {
+        fajr: "06:21",
+        sunrise: "07:54",
+        dhuhr: "13:44",
+        asr: "16:58",
+        sunset: "19:33",
+        isha: "21:00",
+      })
+    ).toStrictEqual([]);
+
+    const dearborn = settingsFor("dearborn", "sunni");
+    const zone = locationTimeZone(dearborn.coordinates);
+    for (const [date, offset] of [
+      ["2025-03-08", "-05:00"],
+      ["2025-03-09", "-04:00"],
+    ] as const) {
+      expect(
+        calculatePrayerTimes(Temporal.PlainDate.from(date), zone, dearborn)
+          .dhuhr?.offset
+      ).toBe(offset);
+    }
+  });
+
+  it("counts down on the city's clock, not the device's", () => {
+    // 10:00 in London is 12:00 in Qatif on 21 June 2025.
+    const now = at("2025-06-21T10:00", "Europe/London");
+    const next = nextPrayerTime(now, settingsFor("qatif", "jafari"), []);
+
+    expect(next?.name).toBe("asr");
+    expect(next?.at.timeZoneId).toBe("Asia/Riyadh");
+    expect(next?.at.toPlainDate().toString()).toBe("2025-06-21");
+  });
+
+  it("takes the city's date when it is already tomorrow there", () => {
+    // 22:30 in London is 00:30 on 22 June in Qatif, past last night's Midnight.
+    const now = at("2025-06-21T22:30", "Europe/London");
+    const qatif = settingsFor("qatif", "jafari");
+
+    expect(currentPrayerTime(now, qatif, [])?.name).toBe("midnight");
+    const next = nextPrayerTime(now, qatif, []);
+    expect(next?.name).toBe("imsak");
+    expect(next?.at.toPlainDate().toString()).toBe("2025-06-22");
+  });
+});
+
 describe("high latitudes", () => {
   it("falls back to Sunset for Ja'fari Maghrib when the sun never reaches 4°", () => {
     const times = timesOn("reykjavik", "2025-06-21", "jafari");
@@ -332,22 +402,16 @@ describe("high latitudes", () => {
     expect(local(times.maghrib)).toBe(local(times.sunset));
   });
 
-  it("leaves Fajr, Isha, Imsak and Midnight undefined when the sun never reaches their angle", () => {
-    for (const place of ["reykjavik", "london"] as const) {
-      const { fajr, isha, imsak, midnight, sunrise, dhuhr } = timesOn(
-        place,
-        "2025-06-21",
-        "jafari"
-      );
+  it("defines every Prayer Time for London on 21 June with the default rule", () => {
+    const times = timesOn("london", "2025-06-21", "jafari");
 
-      expect({ fajr, isha, imsak, midnight }).toStrictEqual({
-        fajr: null,
-        isha: null,
-        imsak: null,
-        midnight: null,
-      });
-      expect(sunrise && dhuhr).not.toBeNull();
-    }
+    expect(Object.values(times).every((time) => time !== null)).toBeTruthy();
+  });
+
+  it("defines every Prayer Time for Reykjavik on 21 June with the default rule", () => {
+    const times = timesOn("reykjavik", "2025-06-21", "jafari");
+
+    expect(Object.values(times).every((time) => time !== null)).toBeTruthy();
   });
 });
 

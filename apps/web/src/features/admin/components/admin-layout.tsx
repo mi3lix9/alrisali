@@ -58,6 +58,20 @@ export const AdminLayout = ({
             Daily Content
           </Link>
           <Link
+            to="/admin/worship"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Today&apos;s worship
+          </Link>
+          <Link
+            to="/admin/amal"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            A&apos;mal
+          </Link>
+          <Link
             to="/admin/occasions"
             className={NAV_LINK}
             activeProps={{ className: ACTIVE_LINK }}
@@ -91,6 +105,13 @@ export const AdminLayout = ({
             activeProps={{ className: ACTIVE_LINK }}
           >
             Lessons
+          </Link>
+          <Link
+            to="/admin/adhans"
+            className={NAV_LINK}
+            activeProps={{ className: ACTIVE_LINK }}
+          >
+            Adhans
           </Link>
           <Link
             to="/admin/messages"

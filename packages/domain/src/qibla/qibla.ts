@@ -1,16 +1,26 @@
+import { KAABA_COORDINATES } from "@alrisali/content/qibla-targets";
+
 import { distanceKm } from "../shared/location";
 import type { Location } from "../shared/location";
 
-type Coordinates = Pick<Location, "latitude" | "longitude">;
+export type Coordinates = Pick<Location, "latitude" | "longitude">;
 
 /** Where the Kaaba stands. */
-export const KAABA: Coordinates = { latitude: 21.4225, longitude: 39.8262 };
+export const KAABA: Coordinates = KAABA_COORDINATES;
+
+/** Within this many degrees either side of the Qibla, the device faces it. */
+export const FACING_QIBLA_DEGREES = 5;
+
+/** Within this many degrees either side of the Qibla, the device is near it. */
+export const NEAR_QIBLA_DEGREES = 15;
 
 /**
- * How far either side of the Qibla still counts as facing it, in degrees.
- * Phone compasses are rarely truer than this.
+ * How much of each new compass reading a smoothed heading takes (0–1): lower
+ * is steadier but slower to follow the device.
  */
-export const FACING_QIBLA_TOLERANCE = 8;
+export const HEADING_SMOOTHING = 0.25;
+
+export type QiblaAlignment = "facing" | "near" | "away";
 
 const FULL_TURN = 360;
 const HALF_TURN = 180;
@@ -20,19 +30,29 @@ const normalize = (degrees: number): number =>
   ((degrees % FULL_TURN) + FULL_TURN) % FULL_TURN;
 
 /**
- * The Qibla from a place: the initial great-circle bearing to the Kaaba, in
- * degrees clockwise from true north (0 ≤ bearing < 360).
+ * The initial great-circle bearing from a place to another, in degrees
+ * clockwise from true north (0 ≤ bearing < 360).
  */
-export const qiblaBearing = ({ latitude, longitude }: Coordinates): number => {
+export const bearingTo = (
+  { latitude, longitude }: Coordinates,
+  target: Coordinates
+): number => {
   const from = latitude * RADIANS;
-  const to = KAABA.latitude * RADIANS;
-  const dLongitude = (KAABA.longitude - longitude) * RADIANS;
+  const to = target.latitude * RADIANS;
+  const dLongitude = (target.longitude - longitude) * RADIANS;
   const x = Math.sin(dLongitude) * Math.cos(to);
   const y =
     Math.cos(from) * Math.sin(to) -
     Math.sin(from) * Math.cos(to) * Math.cos(dLongitude);
   return normalize(Math.atan2(x, y) / RADIANS);
 };
+
+/**
+ * The Qibla from a place: the initial great-circle bearing to the Kaaba, in
+ * degrees clockwise from true north (0 ≤ bearing < 360).
+ */
+export const qiblaBearing = (from: Coordinates): number =>
+  bearingTo(from, KAABA);
 
 /** How far the Kaaba is from a place, in kilometres. */
 export const qiblaDistanceKm = (from: Coordinates): number =>
@@ -47,9 +67,36 @@ export const qiblaOffset = (heading: number, bearing: number): number => {
   return offset > HALF_TURN ? offset - FULL_TURN : offset;
 };
 
-/** Whether a heading faces a Qibla bearing within the tolerance. */
-export const isFacingQibla = (
+/** How closely a heading faces a Qibla bearing: facing, near or away. */
+export const qiblaAlignment = (
   heading: number,
-  bearing: number,
-  tolerance: number = FACING_QIBLA_TOLERANCE
-): boolean => Math.abs(qiblaOffset(heading, bearing)) <= tolerance;
+  bearing: number
+): QiblaAlignment => {
+  const off = Math.abs(qiblaOffset(heading, bearing));
+  if (off <= FACING_QIBLA_DEGREES) {
+    return "facing";
+  }
+  return off <= NEAR_QIBLA_DEGREES ? "near" : "away";
+};
+
+/**
+ * A circular low-pass filter on compass readings: moves the previous smoothed
+ * heading part of the way to a new reading, the short way round, so 359° → 1°
+ * passes through north instead of swinging back through south.
+ */
+export const smoothHeading = (
+  previous: number | null,
+  reading: number,
+  weight: number = HEADING_SMOOTHING
+): number =>
+  previous === null
+    ? normalize(reading)
+    : normalize(previous + weight * qiblaOffset(previous, reading));
+
+/**
+ * A magnetic compass heading corrected to true north with the local
+ * declination (east positive), in degrees clockwise from true north
+ * (0 ≤ heading < 360).
+ */
+export const trueHeading = (magnetic: number, declination: number): number =>
+  normalize(magnetic + declination);

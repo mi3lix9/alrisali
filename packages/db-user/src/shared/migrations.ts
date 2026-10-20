@@ -171,4 +171,98 @@ export const migrations: readonly Migration[] = [
     tag: "20261016002557_shell_digits",
     statements: ["ALTER TABLE `shell_preferences` ADD `digits` text;"],
   },
+  {
+    tag: "20261016123449_tasbih_settings",
+    statements: [
+      "CREATE TABLE `tasbih_settings` (\n\t`id` text PRIMARY KEY,\n\t`feedback_mode` text\n);",
+    ],
+  },
+  {
+    tag: "20261016125410_home_shortcuts",
+    statements: ["ALTER TABLE `shell_preferences` ADD `home_shortcuts` text;"],
+  },
+  {
+    tag: "20261016125656_supplication_positions",
+    statements: [
+      "CREATE TABLE `supplication_positions` (\n\t`supplication_id` text PRIMARY KEY,\n\t`section` integer NOT NULL,\n\t`saved_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016125842_qada",
+    statements: [
+      "CREATE TABLE `qada_logs` (\n\t`id` text PRIMARY KEY,\n\t`date` text NOT NULL,\n\t`kind` text NOT NULL,\n\t`salah` text,\n\t`logged_at` integer NOT NULL\n);",
+      "CREATE TABLE `qada_plan` (\n\t`id` text PRIMARY KEY,\n\t`fajr` integer DEFAULT 0 NOT NULL,\n\t`dhuhr` integer DEFAULT 0 NOT NULL,\n\t`asr` integer DEFAULT 0 NOT NULL,\n\t`maghrib` integer DEFAULT 0 NOT NULL,\n\t`isha` integer DEFAULT 0 NOT NULL,\n\t`fasts` integer DEFAULT 0 NOT NULL,\n\t`salah_per_day` integer DEFAULT 5 NOT NULL,\n\t`fasts_per_week` integer DEFAULT 2 NOT NULL,\n\t`reminder_enabled` integer DEFAULT false NOT NULL,\n\t`reminder_at` integer DEFAULT 1260 NOT NULL,\n\t`reminder_weekdays` text DEFAULT '[1,2,3,4,5,6,7]' NOT NULL,\n\t`updated_at` integer NOT NULL\n);",
+      "CREATE INDEX `qada_logs_date_idx` ON `qada_logs` (`date`);",
+    ],
+  },
+  {
+    tag: "20261016132110_recent_cities",
+    statements: [
+      "ALTER TABLE `prayer_times_settings` ADD `recent_cities` text;",
+    ],
+  },
+  {
+    tag: "20261016132229_qibla_settings",
+    statements: [
+      "CREATE TABLE `qibla_settings` (\n\t`id` text PRIMARY KEY,\n\t`target` text\n);",
+    ],
+  },
+  {
+    tag: "20261016132340_custom_angles",
+    statements: ["ALTER TABLE `believer_settings` ADD `custom_angles` text;"],
+  },
+  {
+    tag: "20261016133358_reader-comfort",
+    statements: [
+      "ALTER TABLE `quran_reader_settings` ADD `page_palette` text DEFAULT 'theme' NOT NULL;",
+      "ALTER TABLE `quran_reader_settings` ADD `keep_awake` integer DEFAULT true NOT NULL;",
+    ],
+  },
+  {
+    tag: "20261016134056_bookmark_ribbons",
+    statements: [
+      "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
+    ],
+  },
+  {
+    tag: "20261016134122_khatmah",
+    statements: [
+      "CREATE TABLE `khatmah_logs` (\n\t`id` text PRIMARY KEY,\n\t`khatmah_id` text NOT NULL,\n\t`session` integer NOT NULL,\n\t`date` text NOT NULL,\n\t`completed_at` integer NOT NULL\n);",
+      "CREATE TABLE `khatmahs` (\n\t`id` text PRIMARY KEY,\n\t`plan` text NOT NULL,\n\t`start_date` text NOT NULL,\n\t`reminder_at` integer,\n\t`created_at` integer NOT NULL\n);",
+      "CREATE TABLE `quran_bookmark_ribbons` (\n\t`color` text PRIMARY KEY,\n\t`name` text,\n\t`ayah` text,\n\t`updated_at` text\n);",
+      "CREATE INDEX `khatmah_logs_khatmah_id_idx` ON `khatmah_logs` (`khatmah_id`);",
+    ],
+  },
+  {
+    tag: "20261016141454_occasion-alerts",
+    statements: [
+      "CREATE TABLE `occasion_alert_settings` (\n\t`id` text PRIMARY KEY,\n\t`enabled` integer,\n\t`timing` text,\n\t`time` integer,\n\t`types` text\n);",
+    ],
+  },
+  {
+    tag: "20261016142956_quran-search-history",
+    statements: [
+      "CREATE TABLE `quran_search_history` (\n\t`query` text PRIMARY KEY,\n\t`searched_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016143800_ayah_notes",
+    statements: [
+      "CREATE TABLE `quran_ayah_notes` (\n\t`ayah` text PRIMARY KEY,\n\t`text` text NOT NULL,\n\t`updated_at` text NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016144713_night_dua_alerts",
+    statements: [
+      "CREATE TABLE `night_dua_alerts` (\n\t`id` text PRIMARY KEY,\n\t`kumayl` integer DEFAULT false NOT NULL,\n\t`tawassul` integer DEFAULT false NOT NULL,\n\t`nudba` integer DEFAULT false NOT NULL,\n\t`ziyarah` integer DEFAULT false NOT NULL\n);",
+    ],
+  },
+  {
+    tag: "20261016150111_prayer_time_rules",
+    statements: [
+      "ALTER TABLE `believer_settings` ADD `prayer_adjustments` text;",
+      "ALTER TABLE `believer_settings` ADD `midnight_definition` text;",
+      "ALTER TABLE `believer_settings` ADD `high_latitude_rule` text;",
+    ],
+  },
 ];

@@ -1,20 +1,27 @@
 import "@/shared/lib/polyfills";
 import "@/global.css";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { UsageAnalytics } from "@/features/analytics";
 import { PushDeviceRegistration } from "@/features/announcements";
 import { CompanionAwards } from "@/features/companion";
+import { WorshipMappingPlans } from "@/features/daily-content";
 import { HabitReminderPlans } from "@/features/habits";
+import { KhatmahReminderPlans } from "@/features/khatmah";
 import { KhushuSheet } from "@/features/khushu";
+import { LinkShortcuts } from "@/features/links";
 import { useOnboarded } from "@/features/onboarding";
 import { CompletedSalahLogger } from "@/features/prayer-log";
+import { QadaReminderPlans } from "@/features/qada";
 import { ReminderScheduler } from "@/features/reminders";
 import { AppProviders } from "@/shared/lib/app-providers";
 import { applyOtaUpdate } from "@/shared/lib/hot-updater";
 import { initMonitoring, withMonitoring } from "@/shared/lib/monitoring";
+import { lockPortrait } from "@/shared/lib/orientation";
 import { ModalCloseButton } from "@/shared/ui/modal-close-button";
+import { Widgets } from "@/src/widgets";
 
 initMonitoring();
 // Runs in the background; failures are reported to Sentry.
@@ -26,6 +33,8 @@ export const unstable_settings = {
 
 const RootStack = () => {
   const { t } = useTranslation();
+  // The manifest allows landscape; only the reader takes it up, on wide screens.
+  useEffect(lockPortrait, []);
   const onboarded = useOnboarded();
 
   // Until the first run is over, onboarding is the only screen. A screen
@@ -52,6 +61,16 @@ const RootStack = () => {
         <Stack.Screen name="qibla" />
         <Stack.Screen name="prayer-assistant" />
         <Stack.Screen name="quran" />
+        <Stack.Screen name="quranic-duas" />
+        <Stack.Screen name="recitation-duas" />
+        <Stack.Screen name="date-converter" />
+        <Stack.Screen name="khatmah" />
+        <Stack.Screen name="khatmah-new" />
+        <Stack.Screen name="qada" />
+        <Stack.Screen name="qada-setup" />
+        <Stack.Screen name="share-image" />
+        <Stack.Screen name="timetable" />
+        <Stack.Screen name="imsakiyya" />
         <Stack.Screen name="debug-sentry" />
       </Stack.Protected>
       <Stack.Protected guard={!onboarded}>
@@ -61,19 +80,43 @@ const RootStack = () => {
   );
 };
 
+// Icon shortcuts and the links that wait for the first run to end.
+const Links = () => <LinkShortcuts onboarded={useOnboarded()} />;
+
 // The Khushu sheet is mounted once, above every tab, because a Salah can be
 // ticked from Home or the Prayer tab, or logged when the Prayer Assistant
 // finishes one (which the Prayer Log hears at the root).
 const Layout = () => (
   <AppProviders>
     <HabitReminderPlans>
-      {(habits) => <ReminderScheduler habits={habits} />}
+      {(habits) => (
+        <QadaReminderPlans>
+          {(qada) => (
+            <KhatmahReminderPlans>
+              {(khatmah) => (
+                <WorshipMappingPlans>
+                  {(worship) => (
+                    <ReminderScheduler
+                      habits={habits}
+                      qada={qada}
+                      khatmah={khatmah}
+                      worship={worship}
+                    />
+                  )}
+                </WorshipMappingPlans>
+              )}
+            </KhatmahReminderPlans>
+          )}
+        </QadaReminderPlans>
+      )}
     </HabitReminderPlans>
+    <Widgets />
     <UsageAnalytics />
     <CompanionAwards />
     <PushDeviceRegistration />
     <CompletedSalahLogger />
     <RootStack />
+    <Links />
     <KhushuSheet />
   </AppProviders>
 );

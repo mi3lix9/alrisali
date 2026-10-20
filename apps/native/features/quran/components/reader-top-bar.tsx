@@ -129,6 +129,7 @@ export const ReaderTopBar = ({
         <Button
           variant="ghost"
           size="icon"
+          testID="quran-reader-search"
           accessibilityLabel={t("navigation.search")}
           onPress={onSearch}
         >

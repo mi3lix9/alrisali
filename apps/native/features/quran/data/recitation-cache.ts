@@ -1,9 +1,11 @@
-import { createRecitationCache } from "@alrisali/domain/quran";
+import { createRecitationCache, withDownloads } from "@alrisali/domain/quran";
 import type {
   CachedRecitation,
   RecitationCacheStore,
 } from "@alrisali/domain/quran";
 import { Directory, File, Paths } from "expo-file-system";
+
+import { downloadedRecitations } from "./recitation-downloads";
 
 // Played recitation files in the app's cache directory, one folder per
 // reciter: `recitation/ar.alafasy/002255.mp3`. A file's modification time is
@@ -58,5 +60,11 @@ const fileStore: RecitationCacheStore = {
   },
 };
 
-/** Played recitation, kept on the device for at most 7 days. */
-export const recitationCache = createRecitationCache({ store: fileStore });
+/**
+ * Played recitation, kept on the device for at most 7 days; an ayah the
+ * Believer downloaded plays from its download, which is never pruned.
+ */
+export const recitationCache = withDownloads(
+  createRecitationCache({ store: fileStore }),
+  downloadedRecitations
+);

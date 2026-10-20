@@ -6,6 +6,19 @@ export {
 } from "./mat";
 export type { LumaFrame, MatReading, MatSensor } from "./mat";
 export {
+  defaultThresholds,
+  PROXIMITY_MIN_MS,
+  readProximity,
+  startProximitySensor,
+  thresholdsFromDistance,
+} from "./proximity";
+export type {
+  ProximityReading,
+  ProximitySample,
+  ProximitySensor,
+  ProximityThresholds,
+} from "./proximity";
+export {
   CUSTOM_PACE_LIMITS,
   customPaceSchema,
   PACE_PRESETS,
@@ -25,11 +38,12 @@ export type { PoseClassifier, PoseEngine } from "./pose-classifier";
 export {
   completesAt,
   currentStep,
+  HASTE_WARNING_MS,
   observe,
   POSITIONS,
-  RAKAH_COUNT,
   salahSteps,
   startSalah,
+  stepPlace,
 } from "./rakah-machine";
 export type {
   AssistantState,
@@ -37,7 +51,22 @@ export type {
   Position,
   Sighting,
   Step,
+  StepPlace,
 } from "./rakah-machine";
+export {
+  CUSTOM_RAKAH_LIMITS,
+  customSalah,
+  SALAH_DEFINITIONS,
+  SALAH_TYPES,
+  SEGMENT_PARTS,
+  withNafila,
+} from "./salah-definition";
+export type {
+  Segment,
+  SalahDefinition,
+  SalahType,
+  SegmentPart,
+} from "./salah-definition";
 export {
   BOW_SENSITIVITY_LIMITS,
   bowSensitivitySchema,

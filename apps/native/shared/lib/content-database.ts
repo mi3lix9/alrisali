@@ -7,7 +7,8 @@ import type {
   ReplicaConnection,
   ReplicaConnectOptions,
 } from "@alrisali/db-content/shared";
-import { DEFAULT_HIJRI_ADJUSTMENT } from "@alrisali/domain/shared";
+import { DEFAULT_ADMIN_HIJRI_ADJUSTMENT } from "@alrisali/domain/shared";
+import type { AdminHijriAdjustment } from "@alrisali/domain/shared";
 import { captureException } from "@sentry/react-native";
 import { useQuery } from "@tanstack/react-query";
 import { connect } from "@tursodatabase/sync-react-native";
@@ -140,8 +141,11 @@ export const useContentSync = (): void => {
   }, []);
 };
 
-/** The Admins' Hijri Adjustment from the replica (0 until first pulled). */
-export const useGlobalHijriAdjustment = (): number => {
+/**
+ * The Admins' Hijri Adjustment from the replica: an offset (0 until first
+ * pulled), or a forced date with its expiry.
+ */
+export const useGlobalHijriAdjustment = (): AdminHijriAdjustment => {
   const { data } = useQuery({
     queryKey: [...CONTENT_QUERY_KEY, "hijri-adjustment"],
     queryFn: async () => {
@@ -149,5 +153,5 @@ export const useGlobalHijriAdjustment = (): number => {
       return createGlobalSettingsRepository(replica.db).hijriAdjustment();
     },
   });
-  return data ?? DEFAULT_HIJRI_ADJUSTMENT;
+  return data ?? DEFAULT_ADMIN_HIJRI_ADJUSTMENT;
 };

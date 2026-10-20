@@ -15,7 +15,18 @@ export const ar = {
     notReached: "لا يحين اليوم",
     notReachedLabel: "{{name}}: لا يحين اليوم في هذا الموقع",
     current: "الوقت الحالي",
+    shareTitle: "مواقيت الصلاة",
+    shareSeparator: " · ",
     allHidden: "كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت.",
+  },
+  day: {
+    previous: "اليوم السابق",
+    next: "اليوم التالي",
+    today: "اليوم",
+    pick: "اختر تاريخًا",
+    hijri: "التاريخ الهجري",
+    timetableTitle: "مواقيت {{date}}",
+    countdown: "{{name}} بعد {{countdown}}",
   },
   next: {
     title: "الصلاة القادمة",
@@ -43,6 +54,23 @@ export const ar = {
     searching: "جارٍ البحث…",
     noResults: "لم نجد مدينة بهذا الاسم.",
     searchFailed: "تعذّر البحث. يحتاج البحث إلى اتصال بالإنترنت.",
+  },
+  recent: {
+    title: "المدن الأخيرة",
+    timeZone: "المنطقة الزمنية: {{timeZone}}",
+  },
+  sanity: {
+    title: "تعذّر ضبط بعض الأوقات",
+    undefined: "لا يمكن حساب: {{names}} في هذا اليوم والموقع.",
+    outOfOrder: "ترتيب الأوقات غير سليم: {{names}}.",
+    fix: "مراجعة إعدادات الصلاة",
+  },
+  highLatitude: {
+    title: "موقعك في خط عرض مرتفع",
+    description:
+      "قد لا تبلغ الشمس زاوية الفجر أو العشاء في الصيف. راجع قاعدة العروض العليا في إعدادات الصلاة قبل أن تحتاج إليها.",
+    review: "مراجعة الإعدادات",
+    dismiss: "لاحقًا",
   },
   options: {
     title: "خيارات المواقيت",

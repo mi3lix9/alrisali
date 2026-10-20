@@ -36,6 +36,14 @@ export const believerSettings = sqliteTable("believer_settings", {
   timeFormat: text("time_format"),
   /** "classic" or "modern"; null until chosen, read as Classic. */
   messageStyle: text("message_style"),
+  /** The Custom method's angles, JSON `{fajr, maghrib, isha}`; null until set. */
+  customAngles: text("custom_angles"),
+  /** Minutes added per Prayer Time, JSON `{fajr: 2, …}`; null until set. */
+  prayerAdjustments: text("prayer_adjustments"),
+  /** How Midnight is defined; null until chosen, read as Sunset to Fajr. */
+  midnightDefinition: text("midnight_definition"),
+  /** The Fajr and Isha high-latitude rule; null until chosen, read as angle-based. */
+  highLatitudeRule: text("high_latitude_rule"),
 });
 
 /**
@@ -53,4 +61,9 @@ export const shellPreferences = sqliteTable("shell_preferences", {
   hiddenTabs: text("hidden_tabs"),
   /** "arabic-indic" or "latin": the digits of the Arabic interface. */
   digits: text("digits"),
+  /**
+   * How the Believer arranged the Home shortcuts, a JSON object: the
+   * arranged feature ids in order, and the hidden ones.
+   */
+  homeShortcuts: text("home_shortcuts"),
 });

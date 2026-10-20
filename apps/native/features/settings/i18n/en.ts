@@ -25,6 +25,7 @@ export const en: Catalog<typeof ar> = {
     longitude: "Longitude",
     invalid:
       "Latitude must be between -{{latitude}} and {{latitude}}, longitude between -{{longitude}} and {{longitude}}.",
+    timeZone: "Time zone: {{timeZone}}",
     save: "Save location",
   },
   calculationMethod: {
@@ -34,6 +35,67 @@ export const en: Catalog<typeof ar> = {
     sunni: "Sunni",
     hanafi: "Hanafi",
     ibadi: "Ibadi",
+    leva: "Leva Institute, Qom",
+    tehran: "Tehran Geophysics",
+    ithnaAshari: "Ithna-Ashari",
+    alHadiBahrain: "Al-Hadi, Bahrain",
+    mwl: "Muslim World League",
+    isna: "ISNA (North America)",
+    egypt: "Egyptian General Authority",
+    karachi: "Karachi",
+    ummAlQura: "Umm al-Qura, Makkah",
+    custom: "Custom",
+    groups: { shia: "Shia", sunni: "Sunni", other: "Other" },
+  },
+  prayerSettings: {
+    title: "Prayer settings",
+    description: "How Prayer Times are calculated.",
+    open: "Calculation Method and angles",
+    jafariIsha:
+      "Ja'fari Isha uses 17°. Its authority is still pending confirmation, so it may change.",
+  },
+  customAngles: {
+    title: "Advanced: Custom angles",
+    description: "Used when you choose Custom above.",
+    descriptionActive: "Custom is chosen: these angles set your Prayer Times.",
+    fajr: "Fajr angle, {{min}}–{{max}}°",
+    maghrib: "Maghrib angle, {{min}}–{{max}}° (0 is Sunset)",
+    isha: "Isha angle, {{min}}–{{max}}°",
+    invalid: "Enter angles within the ranges shown.",
+    save: "Save angles",
+  },
+  prayerAdjustments: {
+    title: "Adjust times by minutes",
+    description:
+      "Add or subtract up to 30 minutes on any time. The adjustment is applied once to the time as shown and never changes with daylight saving.",
+    label: "{{name}}, minutes",
+    names: {
+      imsak: "Imsak",
+      fajr: "Fajr",
+      sunrise: "Sunrise",
+      dhuhr: "Dhuhr",
+      asr: "Asr",
+      sunset: "Sunset",
+      maghrib: "Maghrib",
+      isha: "Isha",
+      midnight: "Midnight",
+    },
+  },
+  midnightDefinition: {
+    title: "Midnight definition",
+    description: "The night that is halved to find Midnight.",
+    sunsetToFajr: "Sunset to Fajr",
+    sunsetToSunrise: "Sunset to Sunrise",
+    maghribToFajr: "Maghrib to Fajr",
+    maghribToSunrise: "Maghrib to Sunrise",
+  },
+  highLatitudeRule: {
+    title: "High-latitude rule",
+    description:
+      "Sets Fajr and Isha where the sun does not reach their angle or the night is short, as in summer in northern cities.",
+    angleBased: "Angle-based (default)",
+    oneSeventh: "One-seventh of the night",
+    middleOfNight: "Middle of the night",
   },
   hijriAdjustment: {
     title: "Hijri Adjustment",
@@ -105,9 +167,16 @@ export const en: Catalog<typeof ar> = {
         "The Adhan voice of Prayer Time Reminders: the opening of a Shia Adhan recorded by Saeed Hatamzadeh-Varmazyar, from Wikimedia Commons, under CC BY-SA 4.0, shortened and converted to WAV.",
       tanzil:
         "Where each hizb quarter begins, from Tanzil's Quran metadata, corrected to the quarter signs in the KFGQPC text.",
+      wmm: "The magnetic declination that corrects the Qibla compass to true north, from the World Magnetic Model WMM2025 by NOAA and the British Geological Survey, in the public domain.",
+      "timezone-boundaries":
+        "The time-zone boundaries that put Prayer Times on the chosen place's clock, from timezone-boundary-builder via @photostructure/tz-lookup, built from OpenStreetMap data (© OpenStreetMap contributors) under ODbL 1.0.",
       "panel-ui": "The app's interface components.",
       "open-source":
         "Built on Expo, React Native and other open-source libraries, each under its own licence. Al-Risali's own code is MIT-licensed.",
+      amiri:
+        "The Amiri (Naskh) face of the supplication reader, under the SIL Open Font License 1.1.",
+      "ibm-plex-sans-arabic":
+        "The IBM Plex Sans Arabic face of the supplication reader, under the SIL Open Font License 1.1.",
     },
   },
 };

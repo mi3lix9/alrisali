@@ -63,4 +63,36 @@ export const migrations: readonly Migration[] = [
     tag: "20261016025717_announcement_archive",
     statements: ["ALTER TABLE `announcement` ADD `archived_at` integer;"],
   },
+  {
+    tag: "20261016123821_forced_hijri_date",
+    statements: [
+      "ALTER TABLE `global_settings` ADD `forced_hijri_year` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_month` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_day` integer;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_from` text;",
+      "ALTER TABLE `global_settings` ADD `forced_hijri_until` text;",
+    ],
+  },
+  {
+    tag: "20261016132207_worship_mapping",
+    statements: [
+      "CREATE TABLE `worship_mapping` (\n\t`kind` text NOT NULL,\n\t`day` text NOT NULL,\n\t`supplication_id` text NOT NULL,\n\tCONSTRAINT `worship_mapping_pk` PRIMARY KEY(`kind`, `day`, `supplication_id`)\n);",
+      "INSERT OR IGNORE INTO `daily_content` (`weekday`, `supplication_id`) VALUES ('saturday', 'sahifa-weekday-saturday'), ('sunday', 'sahifa-weekday-sunday'), ('monday', 'sahifa-weekday-monday'), ('tuesday', 'sahifa-weekday-tuesday'), ('wednesday', 'sahifa-weekday-wednesday'), ('thursday', 'sahifa-weekday-thursday'), ('friday', 'sahifa-weekday-friday');",
+      "INSERT OR IGNORE INTO `worship_mapping` (`kind`, `day`, `supplication_id`) VALUES ('night-dua', 'thursday', 'mafatih-dua-kumayl'), ('every-day', 'every', 'mafatih-dua-sabah');",
+    ],
+  },
+  {
+    tag: "20261016150936_adhan_catalogue",
+    statements: [
+      "CREATE TABLE `adhans` (\n\t`id` text PRIMARY KEY,\n\t`name_ar` text NOT NULL,\n\t`name_en` text NOT NULL,\n\t`credit` text DEFAULT '' NOT NULL,\n\t`full_key` text NOT NULL,\n\t`full_seconds` real NOT NULL,\n\t`full_bytes` integer NOT NULL,\n\t`takbir_key` text NOT NULL,\n\t`takbir_seconds` real NOT NULL,\n\t`takbir_bytes` integer NOT NULL,\n\t`position` integer NOT NULL\n);",
+      "CREATE INDEX `adhans_position` ON `adhans` (`position`);",
+    ],
+  },
+  {
+    tag: "20261016154701_amal_entries",
+    statements: [
+      "CREATE TABLE `amal_entries` (\n\t`month` integer NOT NULL,\n\t`day` integer NOT NULL,\n\t`kind` text NOT NULL,\n\t`time` text DEFAULT '' NOT NULL,\n\t`supplication_id` text NOT NULL,\n\tCONSTRAINT `amal_entries_pk` PRIMARY KEY(`month`, `day`, `time`, `supplication_id`)\n);",
+      "INSERT OR IGNORE INTO `amal_entries` (`month`, `day`, `kind`, `time`, `supplication_id`) VALUES (1, 1, 'dua', 'night', 'sahifa-43'), (2, 1, 'dua', 'night', 'sahifa-43'), (3, 1, 'dua', 'night', 'sahifa-43'), (4, 1, 'dua', 'night', 'sahifa-43'), (5, 1, 'dua', 'night', 'sahifa-43'), (6, 1, 'dua', 'night', 'sahifa-43'), (7, 1, 'dua', 'night', 'sahifa-43'), (8, 1, 'dua', 'night', 'sahifa-43'), (9, 1, 'dua', 'night', 'sahifa-43'), (10, 1, 'dua', 'night', 'sahifa-43'), (11, 1, 'dua', 'night', 'sahifa-43'), (12, 1, 'dua', 'night', 'sahifa-43'), (1, 10, 'ziyarah', '', 'mafatih-ziyarat-ashura'), (2, 20, 'ziyarah', '', 'mafatih-ziyarat-arbaeen'), (8, 15, 'dua', 'night', 'mafatih-dua-kumayl'), (9, 0, 'dua', 'night', 'mafatih-dua-iftitah'), (9, 1, 'dua', '', 'sahifa-44'), (10, 1, 'dua', '', 'sahifa-46'), (10, 1, 'dua', '', 'mafatih-dua-nudba'), (12, 9, 'dua', 'day', 'sahifa-47'), (12, 10, 'dua', '', 'sahifa-48'), (12, 10, 'dua', '', 'mafatih-dua-nudba'), (12, 18, 'dua', '', 'mafatih-dua-nudba');",
+    ],
+  },
 ];

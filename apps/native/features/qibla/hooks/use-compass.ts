@@ -1,4 +1,9 @@
 import {
+  needsCompassCalibration,
+  smoothHeading,
+  trueHeading,
+} from "@alrisali/domain/qibla";
+import {
   getForegroundPermissionsAsync,
   requestForegroundPermissionsAsync,
   watchHeadingAsync,
@@ -15,16 +20,12 @@ import { AppState, Linking, Platform } from "react-native";
 const NO_READING_MS = 3000;
 /** Smaller changes than this aren't worth a re-render. */
 const MIN_CHANGE_DEGREES = 0.5;
-/** expo-location's calibration level at or below which to ask for one. */
-const LOW_ACCURACY = 1;
 
 type Permission = "checking" | "granted" | "ask" | "blocked";
 
 export interface HeadingReading {
-  /** Degrees clockwise from north. */
+  /** Degrees clockwise from true north, smoothed. */
   heading: number;
-  /** False while only magnetic north is known. */
-  trueNorth: boolean;
   /** The compass reports poor calibration. */
   needsCalibration: boolean;
 }
@@ -67,22 +68,8 @@ const askPermission = async (
   }
 };
 
-const toReading = ({
-  trueHeading,
-  magHeading,
-  accuracy,
-}: LocationHeadingObject): HeadingReading => ({
-  // iOS reports -1 for true north until it knows where the device is.
-  heading: trueHeading >= 0 ? trueHeading : magHeading,
-  trueNorth: trueHeading >= 0,
-  needsCalibration: accuracy <= LOW_ACCURACY,
-});
-
 const differs = (a: HeadingReading | null, b: HeadingReading): boolean => {
-  if (!a || a.trueNorth !== b.trueNorth) {
-    return true;
-  }
-  if (a.needsCalibration !== b.needsCalibration) {
+  if (!a || a.needsCalibration !== b.needsCalibration) {
     return true;
   }
   const change = Math.abs(a.heading - b.heading);
@@ -90,21 +77,30 @@ const differs = (a: HeadingReading | null, b: HeadingReading): boolean => {
 };
 
 /**
- * Streams the device heading until the returned stop is called. Reports a
+ * Streams the device heading, corrected from magnetic to true north with the
+ * declination and smoothed, until the returned stop is called. Reports a
  * failure when the stream errors or stays silent (no magnetometer).
  */
 const watchCompass = (
+  declination: number,
   onReading: (reading: HeadingReading) => void,
   onFailure: () => void
 ): (() => void) => {
   let subscription: LocationSubscription | undefined;
   let stopped = false;
+  let smoothed: number | null = null;
   let last: HeadingReading | null = null;
   const silence = setTimeout(onFailure, NO_READING_MS);
 
-  const receive = (heading: LocationHeadingObject) => {
+  // The magnetic heading on both platforms: iOS's own true heading waits for a
+  // location fix and Android has none, so both are corrected the same way.
+  const receive = ({ magHeading, accuracy }: LocationHeadingObject) => {
     clearTimeout(silence);
-    const reading = toReading(heading);
+    smoothed = smoothHeading(smoothed, trueHeading(magHeading, declination));
+    const reading = {
+      heading: smoothed,
+      needsCalibration: needsCompassCalibration(accuracy),
+    };
     if (differs(last, reading)) {
       last = reading;
       onReading(reading);
@@ -138,12 +134,15 @@ const watchCompass = (
 const hasCompass = Platform.OS === "ios" || Platform.OS === "android";
 
 /**
- * The device's compass heading while the screen is focused. The heading needs
- * location access (true north comes from the location), which is asked for
- * only when the Believer taps `allow`; access granted in the device's Settings
- * is picked up when the app returns to the foreground.
+ * The device's compass heading from true north while the screen is focused,
+ * corrected with the declination (degrees, east positive) where the Believer
+ * is. The heading stream needs location access, which is asked for only when
+ * the Believer taps `allow`; access granted in the device's Settings is
+ * picked up when the app returns to the foreground.
  */
-export const useCompass = (): { compass: Compass; allow: () => void } => {
+export const useCompass = (
+  declination: number
+): { compass: Compass; allow: () => void } => {
   const [permission, setPermission] = useState<Permission>("checking");
   const [reading, setReading] = useState<HeadingReading | null>(null);
   const [failed, setFailed] = useState(false);
@@ -172,8 +171,8 @@ export const useCompass = (): { compass: Compass; allow: () => void } => {
         return;
       }
       setFailed(false);
-      return watchCompass(setReading, () => setFailed(true));
-    }, [granted])
+      return watchCompass(declination, setReading, () => setFailed(true));
+    }, [granted, declination])
   );
 
   const allow = () => {

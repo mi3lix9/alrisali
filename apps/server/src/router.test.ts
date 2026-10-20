@@ -12,6 +12,7 @@ import { createLibraryAssetsRepository } from "@alrisali/db-content/library-asse
 import { createProgramsRepository } from "@alrisali/db-content/programs";
 import {
   ContentReplicaReadOnlyError,
+  createAdhansRepository,
   createGlobalSettingsRepository,
   createOccasionsRepository,
   globalSettings,
@@ -218,6 +219,30 @@ const RAMADAN = {
   en: { title: "Ramadan Kareem", body: "May God accept your fasting" },
 };
 
+const adhanKey = (cut: "full" | "takbir", n: number, extension: string) =>
+  `adhan-${cut}/00000000-0000-4000-8000-${String(n).padStart(12, "0")}.${extension}`;
+
+/**
+ * A voice as an Admin saves it. A made-up one: no licensed adhan recording
+ * is published by this app.
+ */
+const adhanDraft = (
+  change: Partial<{ name: { ar: string; en: string }; n: number }> = {}
+) => ({
+  name: change.name ?? { ar: "صوت تجريبي", en: "Example voice" },
+  credit: "Example reciter, example licence",
+  full: {
+    key: adhanKey("full", change.n ?? 1, "mp3"),
+    seconds: 180,
+    bytes: 4_000_000,
+  },
+  takbir: {
+    key: adhanKey("takbir", change.n ?? 1, "wav"),
+    seconds: 8,
+    bytes: 200_000,
+  },
+});
+
 /** What a function preparing a procedure's input gets. */
 interface Prepared {
   content: ContentDatabase;
@@ -364,6 +389,10 @@ const ACCESS: Record<
     access: "anonymous",
     input: { pushToken: pushTokenOf("guard") },
   },
+  "adhans.list": { access: "admin" },
+  "adhans.save": { access: "admin", input: adhanDraft() },
+  "adhans.remove": { access: "admin", input: { id: "example-voice" } },
+  "adhans.reorder": { access: "admin", input: { ids: ["example-voice"] } },
   "dailyContent.list": { access: "admin" },
   "dailyContent.set": {
     access: "admin",
@@ -385,7 +414,10 @@ const ACCESS: Record<
     input: { id: "speaker-1" },
   },
   "hijriAdjustment.get": { access: "admin" },
-  "hijriAdjustment.set": { access: "admin", input: { adjustment: 1 } },
+  "hijriAdjustment.set": {
+    access: "admin",
+    input: { offset: 1, forced: null },
+  },
   "lessons.list": { access: "admin" },
   "lessons.get": { access: "admin", input: { id: "tawheed" } },
   "lessons.save": { access: "admin", input: lessonDraft() },
@@ -413,6 +445,20 @@ const ACCESS: Record<
   "programs.save": { access: "admin", input: dailyNawafil },
   "programs.remove": { access: "admin", input: { id: "daily-nawafil" } },
   "programs.reorder": { access: "admin", input: { ids: ["daily-nawafil"] } },
+  "books.amalList": { access: "admin" },
+  "books.amalSet": {
+    access: "admin",
+    input: { month: 9, day: 0, acts: [] },
+  },
+  "dailyContent.worshipList": { access: "admin" },
+  "dailyContent.worshipSet": {
+    access: "admin",
+    input: {
+      kind: "night-dua",
+      day: "thursday",
+      supplicationIds: ["mafatih-dua-kumayl"],
+    },
+  },
 };
 
 const proceduresOf = (
@@ -874,8 +920,17 @@ const openDeviceReplica = async (
   return { access, replica };
 };
 
-const setAdjustment = async (admin: Headers, adjustment: number) => {
-  await callAs(admin, "hijriAdjustment.set", { adjustment });
+const setAdjustment = async (admin: Headers, offset: number) => {
+  await callAs(admin, "hijriAdjustment.set", { offset, forced: null });
+};
+
+const offsetOnly = (offset: number) => ({ offset, forced: null });
+
+// A moon sighting puts 1 Jumada al-Akhirah 1448 a day after Umm al-Qura.
+const sighting = {
+  date: { year: 1448, month: 6, day: 1 },
+  from: "2026-11-12",
+  until: "2026-12-10",
 };
 
 describe("content replica", () => {
@@ -899,10 +954,14 @@ describe("content replica", () => {
     const { replica } = await openDeviceReplica(device, () => online);
     const settings = createGlobalSettingsRepository(replica.db);
 
-    await expect(settings.hijriAdjustment()).resolves.toBe(0);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(0)
+    );
     online = true;
     await replica.sync();
-    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(-1)
+    );
     await replica.close();
   });
 
@@ -915,12 +974,16 @@ describe("content replica", () => {
 
     await setAdjustment(admin, 2);
 
-    await expect(settings.hijriAdjustment()).resolves.toBe(-1);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(-1)
+    );
     await expect(replica.sync()).resolves.toStrictEqual({
       status: "pulled",
       pulledChanges: true,
     });
-    await expect(settings.hijriAdjustment()).resolves.toBe(2);
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(2)
+    );
     await replica.close();
   });
 
@@ -936,7 +999,7 @@ describe("content replica", () => {
     await expect(offline.sync()).resolves.toStrictEqual({ status: "paused" });
     await expect(
       createGlobalSettingsRepository(offline.db).hijriAdjustment()
-    ).resolves.toBe(2);
+    ).resolves.toStrictEqual(offsetOnly(2));
     await offline.close();
   });
 
@@ -949,7 +1012,9 @@ describe("content replica", () => {
     // Drizzle reports the refusal as the cause of its query error.
     const refused = { cause: expect.any(ContentReplicaReadOnlyError) };
     await expect(
-      createGlobalSettingsRepository(replica.db).setHijriAdjustment(-2)
+      createGlobalSettingsRepository(replica.db).setHijriAdjustment(
+        offsetOnly(-2)
+      )
     ).rejects.toMatchObject(refused);
     await expect(replica.db.delete(globalSettings)).rejects.toMatchObject(
       refused
@@ -960,12 +1025,12 @@ describe("content replica", () => {
       "db",
       "sync",
     ]);
-    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual({
-      adjustment: 1,
-    });
+    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual(
+      offsetOnly(1)
+    );
     await expect(
       createGlobalSettingsRepository(replica.db).hijriAdjustment()
-    ).resolves.toBe(1);
+    ).resolves.toStrictEqual(offsetOnly(1));
     await replica.close();
   });
 
@@ -982,8 +1047,61 @@ describe("content replica", () => {
     const admin = await signInAsAdmin();
 
     await expect(
-      callAs(admin, "hijriAdjustment.set", { adjustment: 3 })
+      callAs(admin, "hijriAdjustment.set", { offset: 3, forced: null })
     ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("gives devices the Admins' forced date with its expiry, and clears it", async () => {
+    const admin = await signInAsAdmin();
+    await callAs(admin, "hijriAdjustment.set", { offset: 1, forced: sighting });
+    const { replica } = await openDeviceReplica(device, () => true);
+    const settings = createGlobalSettingsRepository(replica.db);
+    await replica.sync();
+
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual({
+      offset: 1,
+      forced: sighting,
+    });
+
+    await setAdjustment(admin, 1);
+    await replica.sync();
+
+    await expect(settings.hijriAdjustment()).resolves.toStrictEqual(
+      offsetOnly(1)
+    );
+    await replica.close();
+  });
+
+  it("refuses a forced date that expires before it starts, lies too far, or names a missing day", async () => {
+    const admin = await signInAsAdmin();
+    const refused = { code: "BAD_REQUEST" };
+
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: { ...sighting, until: "2026-11-11" },
+      })
+    ).rejects.toMatchObject(refused);
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: { ...sighting, from: "2026-11-20", until: "2026-12-18" },
+      })
+    ).rejects.toMatchObject(refused);
+    // Umm al-Qura's Dhu al-Hijjah 1446 has 29 days.
+    await expect(
+      callAs(admin, "hijriAdjustment.set", {
+        offset: 0,
+        forced: {
+          date: { year: 1446, month: 12, day: 30 },
+          from: "2025-06-26",
+          until: "2025-06-26",
+        },
+      })
+    ).rejects.toMatchObject(refused);
+    await expect(callAs(admin, "hijriAdjustment.get")).resolves.toStrictEqual(
+      offsetOnly(0)
+    );
   });
 });
 
@@ -1005,11 +1123,14 @@ describe("Daily Content", () => {
 
   afterAll(stopLocalCloud);
 
-  it("lists every weekday, empty until Admins choose", async () => {
+  it("lists every weekday with the Sahifa's weekday dua until Admins choose otherwise", async () => {
     const admin = await signInAsAdmin();
 
     await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
-      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+      days: WEEKDAYS.map((weekday) => ({
+        weekday,
+        supplicationId: `sahifa-weekday-${weekday}`,
+      })),
     });
   });
 
@@ -1027,7 +1148,7 @@ describe("Daily Content", () => {
     });
     expect(
       after.days.filter((day) => day.supplicationId !== null)
-    ).toHaveLength(1);
+    ).toHaveLength(WEEKDAYS.length);
   });
 
   it("clears a weekday", async () => {
@@ -1036,8 +1157,11 @@ describe("Daily Content", () => {
 
     await feature(admin, "friday", null);
 
-    await expect(callAs(admin, "dailyContent.list")).resolves.toStrictEqual({
-      days: WEEKDAYS.map((weekday) => ({ weekday, supplicationId: null })),
+    await expect(callAs(admin, "dailyContent.list")).resolves.toMatchObject({
+      days: expect.arrayContaining([
+        { weekday: "friday", supplicationId: null },
+        { weekday: "thursday", supplicationId: "sahifa-weekday-thursday" },
+      ]),
     });
   });
 
@@ -1089,6 +1213,162 @@ describe("Daily Content", () => {
       ).toBeTruthy();
     }
     await offline.close();
+  });
+});
+
+interface WorshipList {
+  entries: { kind: string; day: string; supplicationId: string }[];
+}
+
+describe("Today's worship mapping", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("starts with Kumayl on Thursday night and Dua al-Sabah every day", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "dailyContent.worshipList")
+    ).resolves.toStrictEqual({
+      entries: [
+        {
+          kind: "night-dua",
+          day: "thursday",
+          supplicationId: "mafatih-dua-kumayl",
+        },
+        {
+          kind: "every-day",
+          day: "every",
+          supplicationId: "mafatih-dua-sabah",
+        },
+      ],
+    });
+  });
+
+  it("replaces what a kind lists on a day, and clears it with an empty list", async () => {
+    const admin = await signInAsAdmin();
+    const set = (supplicationIds: string[]) =>
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationIds,
+      }) as Promise<WorshipList>;
+
+    const two = await set([
+      "mafatih-ziyarat-jamia-kabira",
+      "mafatih-ziyarat-aal-yasin",
+    ]);
+    expect(
+      two.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toHaveLength(2);
+    const one = await set(["mafatih-ziyarat-aal-yasin"]);
+    expect(
+      one.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toStrictEqual([
+      {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationId: "mafatih-ziyarat-aal-yasin",
+      },
+    ]);
+    const none = await set([]);
+    expect(
+      none.entries.filter((entry) => entry.kind === "ziyarah")
+    ).toStrictEqual([]);
+  });
+
+  it("refuses an id no Book holds and a kind on the wrong day", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "ziyarah",
+        day: "friday",
+        supplicationIds: ["sahifa-999"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "every-day",
+        day: "friday",
+        supplicationIds: ["sahifa-1"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "dailyContent.worshipSet", {
+        kind: "night-dua",
+        day: "every",
+        supplicationIds: ["sahifa-1"],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+});
+
+interface AmalList {
+  entries: { month: number; day: number; supplicationId: string }[];
+}
+
+const ofDay27 = (list: AmalList) =>
+  list.entries.filter((entry) => entry.month === 9 && entry.day === 27);
+
+describe("The A'mal index managed by Admins", () => {
+  beforeAll(startLocalCloud);
+  beforeEach(async () => {
+    await setUp();
+  });
+
+  afterAll(stopLocalCloud);
+
+  it("starts with the index the app bundles", async () => {
+    const admin = await signInAsAdmin();
+    const { entries } = (await callAs(admin, "books.amalList")) as AmalList;
+
+    expect(entries).toContainEqual({
+      month: 9,
+      day: 0,
+      kind: "dua",
+      time: "night",
+      supplicationId: "mafatih-dua-iftitah",
+    });
+    expect(entries.length).toBeGreaterThan(12);
+  });
+
+  it("replaces what a day lists and clears it with an empty list", async () => {
+    const admin = await signInAsAdmin();
+    const set = (acts: unknown[]) =>
+      callAs(admin, "books.amalSet", {
+        month: 9,
+        day: 27,
+        acts,
+      }) as Promise<AmalList>;
+
+    const two = await set([
+      { kind: "dua", time: "night", supplicationId: "mafatih-dua-kumayl" },
+      { kind: "dua", supplicationId: "sahifa-44" },
+    ]);
+    expect(ofDay27(two)).toHaveLength(2);
+    const none = await set([]);
+    expect(ofDay27(none)).toStrictEqual([]);
+    expect(none.entries.some((entry) => entry.day === 0)).toBeTruthy();
+  });
+
+  it("refuses an id no Book holds and a day out of range", async () => {
+    const admin = await signInAsAdmin();
+
+    await expect(
+      callAs(admin, "books.amalSet", {
+        month: 9,
+        day: 1,
+        acts: [{ kind: "dua", supplicationId: "sahifa-999" }],
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+    await expect(
+      callAs(admin, "books.amalSet", { month: 9, day: 31, acts: [] })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 
@@ -2045,6 +2325,112 @@ describe("Lessons and Slides", () => {
       createLessonsRepository(replica.db).list()
     ).resolves.toStrictEqual([]);
     await replica.close();
+  });
+});
+
+/** A device's view of the adhan catalogue it pulled. */
+const pulledAdhans = async (directory: TemporaryDirectory) => {
+  const { replica } = await openDeviceReplica(directory, () => true);
+  await replica.sync();
+  const adhans = await createAdhansRepository(replica.db).list();
+  await replica.close();
+  return adhans;
+};
+
+describe("Adhan catalogue", () => {
+  let device: TemporaryDirectory;
+
+  beforeAll(async () => {
+    await startLocalCloud();
+  });
+  beforeEach(async () => {
+    await setUp();
+    device = temporaryDirectory();
+  });
+
+  afterEach(() => {
+    device.remove();
+  });
+
+  afterAll(async () => {
+    await stopLocalCloud();
+  });
+
+  it("has no voices until an Admin publishes one", async () => {
+    await expect(
+      callAs(await signInAsAdmin(), "adhans.list")
+    ).resolves.toStrictEqual({ adhans: [] });
+    await expect(pulledAdhans(device)).resolves.toStrictEqual([]);
+  });
+
+  it("lets an Admin create a voice that devices pull without a release", async () => {
+    const admin = await signInAsAdmin();
+
+    const created = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+
+    expect(created).toStrictEqual({ id: expect.any(String), ...adhanDraft() });
+    await expect(pulledAdhans(device)).resolves.toStrictEqual([created]);
+  });
+
+  it("rewrites a voice an Admin edits, keeping its place", async () => {
+    const admin = await signInAsAdmin();
+    const first = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+    await callAs(admin, "adhans.save", adhanDraft({ n: 2 }));
+
+    const edited = await callAs(admin, "adhans.save", {
+      ...adhanDraft(),
+      id: first.id,
+      name: { ar: "معدل", en: "Edited" },
+    });
+
+    const pulled = await pulledAdhans(device);
+    expect(pulled).toHaveLength(2);
+    expect(pulled[0]).toStrictEqual(edited);
+  });
+
+  it("orders and withdraws voices", async () => {
+    const admin = await signInAsAdmin();
+    const one = (await callAs(admin, "adhans.save", adhanDraft())) as {
+      id: string;
+    };
+    const two = (await callAs(admin, "adhans.save", adhanDraft({ n: 2 }))) as {
+      id: string;
+    };
+
+    await callAs(admin, "adhans.reorder", { ids: [two.id, one.id] });
+    const reordered = await pulledAdhans(device);
+    expect(reordered.map(({ id }) => id)).toStrictEqual([two.id, one.id]);
+
+    await callAs(admin, "adhans.remove", { id: two.id });
+    const remaining = await pulledAdhans(device);
+    expect(remaining.map(({ id }) => id)).toStrictEqual([one.id]);
+  });
+
+  it("takes only recordings uploaded as their cut", async () => {
+    const admin = await signInAsAdmin();
+    const draft = adhanDraft();
+
+    await expect(
+      callAs(admin, "adhans.save", {
+        ...draft,
+        full: { ...draft.full, key: adhanKey("takbir", 3, "wav") },
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
+  });
+
+  it("refuses a takbir longer than iOS plays", async () => {
+    const draft = adhanDraft();
+
+    await expect(
+      callAs(await signInAsAdmin(), "adhans.save", {
+        ...draft,
+        takbir: { ...draft.takbir, seconds: 31 },
+      })
+    ).rejects.toMatchObject({ code: "BAD_REQUEST" });
   });
 });
 

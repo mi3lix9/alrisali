@@ -1,4 +1,9 @@
-import { recitationPlayback } from "@alrisali/domain/quran";
+import { SURAHS } from "@alrisali/content/quran";
+import {
+  findAyah,
+  findReciter,
+  recitationPlayback,
+} from "@alrisali/domain/quran";
 import type {
   AyahKey,
   RecitationEvent,
@@ -9,12 +14,16 @@ import type { AudioPlayer } from "expo-audio";
 import { create } from "zustand";
 
 import { recitationCache } from "./recitation-cache";
+import { createRecitationTimers } from "./recitation-timers";
+import type { RecitationTimers } from "./recitation-timers";
 
 // One recitation plays at a time, in the reader or on Home. The domain's
 // `recitationPlayback` decides what plays; this module makes the device's
 // audio follow it: an ayah is played from its file on the device when one
 // under 7 days old is there, otherwise streamed straight from the reciter's
-// source and then kept.
+// source and then kept. Audio goes on in the background and the lock screen
+// shows what is reciting; pausing or resuming there is followed back into
+// `recitationPlayback`.
 
 const usePlaybackStore = create<{ playback: RecitationPlayback }>(() => ({
   playback: { status: "idle" },
@@ -25,26 +34,56 @@ export const useRecitationPlayback = (): RecitationPlayback =>
   usePlaybackStore((state) => state.playback);
 
 let player: AudioPlayer | null = null;
+/** When this module last paused or resumed the player itself. */
+let commandedAt = 0;
+/** How long after its own command a status update is not taken for the lock screen's. */
+const REMOTE_SETTLE_MS = 800;
+/** Within this many seconds of the end, a silent player has finished, not been paused. */
+const END_MARGIN_SECONDS = 0.5;
 /** Bumped on every load and stop, so a slow load never plays over a newer one. */
 let loadId = 0;
 
 type Send = (event: RecitationEvent) => void;
+
+/** The silence after an ayah and the sleep timer, made with the first state. */
+let timers: RecitationTimers | null = null;
 
 const devicePlayer = (send: Send): AudioPlayer => {
   if (player) {
     return player;
   }
   player = createAudioPlayer(null);
-  // Recitation is the point of the screen: play with the ringer off too.
-  void setAudioModeAsync({ playsInSilentMode: true });
+  // Recitation is the point of the screen: play with the ringer off too, and
+  // on with the screen locked or another app in front. The lock screen's
+  // controls need the session to be exclusive.
+  void setAudioModeAsync({
+    playsInSilentMode: true,
+    shouldPlayInBackground: true,
+    interruptionMode: "doNotMix",
+  });
   player.addListener("playbackStatusUpdate", (status) => {
     const { playback } = usePlaybackStore.getState();
     if (status.didJustFinish) {
-      send({ type: "finished" });
+      // The ayah's length sets a pause measured in ayah lengths.
+      send({ type: "finished", durationSeconds: status.duration });
     } else if (status.error) {
       send({ type: "failed" });
     } else if (status.playing && playback.status === "loading") {
       send({ type: "ready" });
+    } else if (Date.now() - commandedAt > REMOTE_SETTLE_MS) {
+      // The lock screen, headphones or a call paused or resumed the player.
+      const finishing =
+        status.duration > 0 &&
+        status.currentTime >= status.duration - END_MARGIN_SECONDS;
+      if (
+        playback.status === "playing" &&
+        status.isLoaded &&
+        !(status.playing || status.isBuffering || finishing)
+      ) {
+        send({ type: "pause" });
+      } else if (playback.status === "paused" && status.playing) {
+        send({ type: "resume" });
+      }
     }
   });
   // Once a session, delete files older than 7 days.
@@ -52,7 +91,30 @@ const devicePlayer = (send: Send): AudioPlayer => {
   return player;
 };
 
-const load = async (reciter: string, ayah: AyahKey, send: Send) => {
+/** Shows the reciting ayah and its reciter on the lock screen. */
+const showOnLockScreen = (
+  audio: AudioPlayer,
+  reciter: string,
+  ayah: AyahKey
+) => {
+  const found = findAyah(ayah);
+  const surah = found ? SURAHS[found.surah - 1] : undefined;
+  audio.setActiveForLockScreen(
+    true,
+    {
+      title: found && surah ? `${surah.nameAr} · ${found.ayah}` : ayah,
+      artist: findReciter(reciter)?.name.ar ?? reciter,
+    },
+    { showSeekBackward: false, showSeekForward: false }
+  );
+};
+
+const load = async (
+  reciter: string,
+  ayah: AyahKey,
+  speed: number,
+  send: Send
+) => {
   loadId += 1;
   const id = loadId;
   const recited = { reciter, ayah };
@@ -63,6 +125,9 @@ const load = async (reciter: string, ayah: AyahKey, send: Send) => {
     }
     const audio = devicePlayer(send);
     audio.replace({ uri });
+    showOnLockScreen(audio, reciter, ayah);
+    audio.shouldCorrectPitch = true;
+    audio.setPlaybackRate(speed);
     if (usePlaybackStore.getState().playback.status !== "paused") {
       audio.play();
     }
@@ -88,21 +153,37 @@ const follow = (
 ) => {
   if (next.status === "idle") {
     loadId += 1;
+    commandedAt = Date.now();
     player?.pause();
+    player?.clearLockScreenControls();
     return;
   }
   const moved = previous.status !== "idle" && previous.ayah !== next.ayah;
   if (
     next.status === "loading" &&
-    (event.type === "play" || moved || previous.status === "error")
+    (event.type === "play" ||
+      event.type === "reciter" ||
+      moved ||
+      previous.status !== "loading")
   ) {
-    void load(next.reciter, next.ayah, send);
+    // Also an ayah repeated, or the silence after one over: same ayah, loaded again.
+    void load(next.reciter, next.ayah, next.plan.speed, send);
   } else if (next.status === "paused") {
+    commandedAt = Date.now();
     player?.pause();
   } else if (next.status === "playing" && previous.status === "paused") {
+    commandedAt = Date.now();
     player?.play();
   }
 };
+
+type RecitationListener = (
+  previous: RecitationPlayback,
+  next: RecitationPlayback,
+  event: RecitationEvent
+) => void;
+
+const listeners = new Set<RecitationListener>();
 
 /** Tells recitation what the Believer (or the audio) did. */
 export const sendRecitation = (event: RecitationEvent) => {
@@ -112,13 +193,20 @@ export const sendRecitation = (event: RecitationEvent) => {
     return;
   }
   usePlaybackStore.setState({ playback: next });
+  timers ??= createRecitationTimers(sendRecitation);
+  timers.follow(next);
   follow(previous, next, event, sendRecitation);
+  // After the device follows, so a listener that starts more recitation is not
+  // undone by the audio still following the change that prompted it.
+  for (const listener of listeners) {
+    listener(previous, next, event);
+  }
 };
 
-/** Ends the reader's recitation (not Home's Verse of the Day) as the reader closes. */
-export const stopReaderRecitation = () => {
-  const { playback } = usePlaybackStore.getState();
-  if (playback.status !== "idle" && playback.until === null) {
-    sendRecitation({ type: "stop" });
-  }
+/** Calls `listener` with recitation before and after each change, and the event that caused it; returns how to stop listening. */
+export const subscribeRecitation = (
+  listener: RecitationListener
+): (() => void) => {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
 };

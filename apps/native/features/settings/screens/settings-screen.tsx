@@ -1,5 +1,6 @@
 import "../i18n";
 import { THEME_PREFERENCES } from "@alrisali/domain/shared";
+import type { Location } from "@alrisali/domain/shared";
 import { LANGUAGES } from "@alrisali/i18n";
 import { reloadAppAsync } from "expo";
 import { Button, Card, RadioGroup } from "panelui-native";
@@ -10,21 +11,32 @@ import { launchLanguage, usePreferences } from "@/shared/lib/preferences";
 import { Screen } from "@/shared/ui/screen";
 
 import { AboutCard } from "../components/about-card";
-import { CalculationMethodCard } from "../components/calculation-method-card";
 import { DigitsCard } from "../components/digits-card";
 import { HijriAdjustmentCard } from "../components/hijri-adjustment-card";
 import { LocationCard } from "../components/location-card";
 import { MessageStyleCard } from "../components/message-style-card";
+import { PrayerSettingsCard } from "../components/prayer-settings-card";
 import { RemindersCard } from "../components/reminders-card";
 import { TabsCard } from "../components/tabs-card";
 import { TextSizeCard } from "../components/text-size-card";
 
 interface SettingsScreenProps {
+  /** Told of each place typed into the Location card, composed by the route. */
+  onLocationChosen?: (location: Location) => void;
+  /** Extra content for the Location card (Recent Cities), composed by the route. */
+  locationExtras?: ReactNode;
   /** Other features' settings cards, composed by the route. */
   featureCards?: ReactNode;
+  /** Shown right after the Reminders card (Alert Health), composed by the route. */
+  reminderExtras?: ReactNode;
 }
 
-export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
+export const SettingsScreen = ({
+  featureCards,
+  reminderExtras,
+  onLocationChosen,
+  locationExtras,
+}: SettingsScreenProps) => {
   const { t } = useTranslation("settings");
   const { language, theme, setLanguage, setTheme } = usePreferences();
 
@@ -88,10 +100,14 @@ export const SettingsScreen = ({ featureCards }: SettingsScreenProps) => {
           </RadioGroup>
         </Card.Content>
       </Card>
-      <LocationCard />
-      <CalculationMethodCard />
+      <LocationCard
+        {...(onLocationChosen ? { onLocationChosen } : {})}
+        {...(locationExtras ? { extras: locationExtras } : {})}
+      />
+      <PrayerSettingsCard />
       <HijriAdjustmentCard />
       <RemindersCard />
+      {reminderExtras}
       <MessageStyleCard />
       <TextSizeCard />
       <DigitsCard />

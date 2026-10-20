@@ -1,10 +1,20 @@
 import { Temporal } from "temporal-polyfill";
 
-import { calculatePrayerTimes } from "../shared";
-import type { MessageStyle, PrayerTimesSettings } from "../shared";
+import {
+  calculatePrayerTimes,
+  createHijriCalendar,
+  isInHijriWindow,
+  locationTimeZone,
+} from "../shared";
+import type {
+  HijriCalendar,
+  HijriWindow,
+  MessageStyle,
+  PrayerTimesSettings,
+} from "../shared";
 import { CLASSIC_SAYINGS } from "./sayings";
 import type { ClassicSaying } from "./sayings";
-import { isInQuietHours, reminderAlert, SALAH } from "./settings";
+import { atTimeAlert, isInQuietHours, reminderAlert, SALAH } from "./settings";
 import type {
   ReminderAlert,
   ReminderRule,
@@ -17,6 +27,22 @@ export const PENDING_REMINDER_LIMIT = 64;
 
 /** How many days ahead the planner looks, from today. */
 export const REMINDER_WINDOW_DAYS = 14;
+
+/**
+ * An alert delivered later than this after its time (the device was off, or
+ * held it back) is dropped rather than shown late.
+ */
+export const STALE_ALERT_MINUTES = 30;
+
+/** Whether an alert delivered at `deliveredAt` is too late to show. */
+export const isStaleAlert = (
+  fireAt: Temporal.Instant,
+  deliveredAt: Temporal.Instant
+): boolean =>
+  Temporal.Instant.compare(
+    deliveredAt,
+    fireAt.add({ minutes: STALE_ALERT_MINUTES })
+  ) > 0;
 
 /** The stretch of time being planned, on the device's clock. */
 export interface ReminderWindow {
@@ -47,17 +73,32 @@ export type ReminderSource<Message> = (
   window: ReminderWindow
 ) => readonly ReminderCandidate<Message>[];
 
+/** Which of a Prayer Time's two alerts: the Reminder before, or At-Time. */
+export type PrayerAlertTiming = "before" | "at-time";
+
 /** What a Prayer Time Reminder says; the app words it in its language. */
 export interface PrayerReminderMessage {
   kind: "prayer-time";
   prayerTime: Salah | "imsak";
-  /** The Prayer Time itself, on the device's clock. */
+  timing: PrayerAlertTiming;
+  /** The Prayer Time itself, on the location's clock. */
   at: Temporal.ZonedDateTime;
+  /** 0 for the At-Time Alert. */
   minutesBefore: number;
   style: MessageStyle;
   /** Classic: the saying it carries (`CLASSIC_SAYINGS`). Modern: null. */
   sayingId: string | null;
 }
+
+/**
+ * A Prayer Time alert's identity: its date, Prayer Time and timing, so no
+ * alert ever replaces another.
+ */
+export const prayerAlertId = (
+  date: Temporal.PlainDate,
+  prayerTime: Salah | "imsak",
+  timing: PrayerAlertTiming
+): string => `prayer:${date.toString()}:${prayerTime}:${timing}`;
 
 export type PlannedReminder<Message = PrayerReminderMessage> =
   ReminderCandidate<Message>;
@@ -71,6 +112,11 @@ export interface PlanRemindersInput<Extra> {
   sources?: readonly ReminderSource<Extra>[];
   days?: number;
   limit?: number;
+  /**
+   * The Believer's Hijri calendar (with the Hijri Adjustment), which tells
+   * Ramadan's days; unadjusted when left out.
+   */
+  hijri?: HijriCalendar;
 }
 
 const sayingsFor = (prayerTime: Salah | "imsak"): readonly ClassicSaying[] =>
@@ -100,13 +146,27 @@ const sayingFor = (
   return sayings[index]?.id ?? null;
 };
 
+/** Ramadan, whose days alone get Imsak's At-Time Alert by default. */
+const RAMADAN: HijriWindow = {
+  start: { month: 9, day: 1 },
+  end: { month: 9, day: 30 },
+};
+
 const prayerReminders = (
   window: ReminderWindow,
   prayerTimes: PrayerTimesSettings,
   settings: ReminderSettings,
-  style: MessageStyle
+  style: MessageStyle,
+  hijri: HijriCalendar
 ): ReminderCandidate<PrayerReminderMessage>[] => {
-  const timeZone = window.now.timeZoneId;
+  // The place's own clock: its dates name the Reminders and its local times
+  // word them, whatever zone the device is in. One date more than the
+  // window, so a place behind the device still reaches the window's end.
+  const timeZone = locationTimeZone(prayerTimes.coordinates);
+  const today = window.now.withTimeZone(timeZone).toPlainDate();
+  const dates = Array.from({ length: window.dates.length + 1 }, (_, offset) =>
+    today.add({ days: offset })
+  );
   const rules: [Salah | "imsak", ReminderRule][] = [
     ["imsak", settings.imsak],
     ...SALAH.map((salah): [Salah, ReminderRule] => [
@@ -114,45 +174,49 @@ const prayerReminders = (
       settings.salah[salah],
     ]),
   ];
-  return window.dates.flatMap((date) => {
+  return dates.flatMap((date) => {
     const times = calculatePrayerTimes(date, timeZone, prayerTimes);
+    const inRamadan = isInHijriWindow(hijri.toHijri(date), RAMADAN);
     return rules.flatMap(([prayerTime, rule]) => {
-      const alert = reminderAlert(rule);
       const prayerAt = times[prayerTime];
-      if (!alert || !prayerAt) {
+      if (!prayerAt) {
         return [];
       }
-      const id =
-        prayerTime === "imsak"
-          ? `imsak:${date.toString()}`
-          : `salah:${prayerTime}:${date.toString()}`;
-      return [
-        {
-          id,
-          fireAt: prayerAt
-            .subtract({ minutes: rule.minutesBefore })
-            .toInstant(),
-          alert,
-          essential: true,
-          message: {
-            kind: "prayer-time",
-            prayerTime,
-            at: prayerAt,
-            minutesBefore: rule.minutesBefore,
-            style,
-            sayingId: style === "classic" ? sayingFor(prayerTime, date) : null,
-          },
-        },
+      const sayingId = style === "classic" ? sayingFor(prayerTime, date) : null;
+      const before = reminderAlert(rule);
+      const atTime =
+        prayerTime === "imsak" && settings.imsak.ramadanOnly && !inRamadan
+          ? null
+          : atTimeAlert(rule);
+      const alerts: (readonly [PrayerAlertTiming, ReminderAlert, number])[] = [
+        ...(before ? [["before", before, rule.minutesBefore] as const] : []),
+        ...(atTime ? [["at-time", atTime, 0] as const] : []),
       ];
+      return alerts.map(([timing, alert, minutesBefore]) => ({
+        id: prayerAlertId(date, prayerTime, timing),
+        fireAt: prayerAt.subtract({ minutes: minutesBefore }).toInstant(),
+        alert,
+        // Quiet hours hold back only a Salah's Reminder before it.
+        essential: timing === "at-time" || prayerTime === "imsak",
+        message: {
+          kind: "prayer-time",
+          prayerTime,
+          timing,
+          at: prayerAt,
+          minutesBefore,
+          style,
+          sayingId,
+        },
+      }));
     });
   });
 };
 
 /**
  * The ordered local notifications for the rolling window from now: each
- * enabled Salah and Imsak, plus whatever the sources add, without what has
- * fired, what falls after the window, or non-essential Reminders in quiet
- * hours; the soonest `limit` of them.
+ * Salah's and Imsak's Reminder before and At-Time Alert, plus whatever the
+ * sources add, without what has fired, what falls after the window, or
+ * non-essential Reminders in quiet hours; the soonest `limit` of them.
  */
 export const planReminders = <Extra = never>({
   now,
@@ -162,6 +226,7 @@ export const planReminders = <Extra = never>({
   sources = [],
   days = REMINDER_WINDOW_DAYS,
   limit = PENDING_REMINDER_LIMIT,
+  hijri = createHijriCalendar(),
 }: PlanRemindersInput<Extra>): PlannedReminder<
   PrayerReminderMessage | Extra
 >[] => {
@@ -175,7 +240,7 @@ export const planReminders = <Extra = never>({
   };
   const candidates: ReminderCandidate<PrayerReminderMessage | Extra>[] = [
     ...(prayerTimes
-      ? prayerReminders(window, prayerTimes, settings, messageStyle)
+      ? prayerReminders(window, prayerTimes, settings, messageStyle, hijri)
       : []),
     ...sources.flatMap((source) => source(window)),
   ];

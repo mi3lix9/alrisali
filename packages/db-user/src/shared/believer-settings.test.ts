@@ -16,6 +16,10 @@ const DEFAULTS = {
   timeFormat: null,
   hijriAdjustment: 0,
   messageStyle: "classic",
+  customAngles: { fajr: 18, maghrib: 4, isha: 14 },
+  prayerAdjustments: {},
+  midnightDefinition: "sunsetToFajr",
+  highLatitudeRule: "angleBased",
 };
 
 let directory: TemporaryDirectory;
@@ -64,6 +68,10 @@ describe(createBelieverSettingsRepository, () => {
       timeFormat: "12h",
       hijriAdjustment: -1,
       messageStyle: "modern",
+      customAngles: { fajr: 15.5, maghrib: 0, isha: 12 },
+      prayerAdjustments: { fajr: -3, isha: 5 },
+      midnightDefinition: "maghribToSunrise",
+      highLatitudeRule: "oneSeventh",
     });
 
     await relaunch();
@@ -78,6 +86,10 @@ describe(createBelieverSettingsRepository, () => {
       timeFormat: "12h",
       hijriAdjustment: -1,
       messageStyle: "modern",
+      customAngles: { fajr: 15.5, maghrib: 0, isha: 12 },
+      prayerAdjustments: { fajr: -3, isha: 5 },
+      midnightDefinition: "maghribToSunrise",
+      highLatitudeRule: "oneSeventh",
     });
   });
 
@@ -172,6 +184,83 @@ describe(createBelieverSettingsRepository, () => {
       "imsakMinutes"
     );
     await expect(settings.get()).resolves.toMatchObject({ imsakMinutes: 10 });
+  });
+
+  it("rejects Custom angles outside their ranges and keeps the saved ones", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    const saved = { fajr: 17, maghrib: 3, isha: 15 };
+    await settings.update({ calculationMethod: "custom", customAngles: saved });
+
+    const outOfRange = [
+      { ...saved, fajr: 9 },
+      { ...saved, fajr: 26 },
+      { ...saved, maghrib: -1 },
+      { ...saved, maghrib: 11 },
+      { ...saved, isha: 9 },
+      { ...saved, isha: 26 },
+    ];
+    await Promise.all(
+      outOfRange.map((angles) =>
+        expect(settings.update({ customAngles: angles })).rejects.toThrow(
+          "customAngles"
+        )
+      )
+    );
+    await expect(settings.get()).resolves.toMatchObject({
+      calculationMethod: "custom",
+      customAngles: saved,
+    });
+  });
+
+  it("rejects an adjustment beyond 30 minutes and keeps the saved ones", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ prayerAdjustments: { maghrib: 2 } });
+
+    await expect(
+      settings.update({ prayerAdjustments: { maghrib: 31 } })
+    ).rejects.toThrow("prayerAdjustments");
+    await expect(
+      settings.update({ prayerAdjustments: { fajr: -30.5 } })
+    ).rejects.toThrow("prayerAdjustments");
+    await expect(settings.get()).resolves.toMatchObject({
+      prayerAdjustments: { maghrib: 2 },
+    });
+  });
+
+  it("clears an adjustment set back to zero", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ prayerAdjustments: { fajr: 4, isha: 2 } });
+
+    await expect(
+      settings.update({ prayerAdjustments: { fajr: 0, isha: 2 } })
+    ).resolves.toMatchObject({ prayerAdjustments: { isha: 2 } });
+  });
+
+  it("reads adjustments, a Midnight definition or a rule it does not know as the defaults", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ calculationMethod: "egypt" });
+    await database.db.run(
+      sql`UPDATE believer_settings SET prayer_adjustments = 'not json', midnight_definition = 'noon', high_latitude_rule = 'sixths'`
+    );
+
+    await expect(settings.get()).resolves.toMatchObject({
+      prayerAdjustments: {},
+      midnightDefinition: "sunsetToFajr",
+      highLatitudeRule: "angleBased",
+    });
+  });
+
+  it("reads unreadable Custom angles as the defaults", async () => {
+    const settings = createBelieverSettingsRepository(database.db);
+    await settings.update({ calculationMethod: "egypt" });
+    await database.db.run(
+      sql`UPDATE believer_settings SET custom_angles = '{"fajr":99}'`
+    );
+    await expect(settings.get()).resolves.toMatchObject(DEFAULTS);
+    await database.db.run(
+      sql`UPDATE believer_settings SET custom_angles = 'not json'`
+    );
+    await expect(settings.get()).resolves.toMatchObject(DEFAULTS);
   });
 
   it("reads values it does not know (written by a newer app) as the defaults", async () => {

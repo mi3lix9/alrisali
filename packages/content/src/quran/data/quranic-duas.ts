@@ -1,0 +1,137 @@
+/**
+ * Supplications the Quran reports (in-house): where each begins and ends and
+ * who made it. A dua is a reference only; its words come from the bundled
+ * Quran text. Written by us from the ayat.
+ */
+
+/** Who makes the supplication, as the ayah reports it. */
+export const QURANIC_DUA_SPEAKERS = [
+  "adam",
+  "nuh",
+  "ibrahim",
+  "ibrahim-and-ismail",
+  "ibrahim-and-companions",
+  "lut",
+  "musa",
+  "people-of-musa",
+  "magicians-of-pharaoh",
+  "shuayb",
+  "yusuf",
+  "ayyub",
+  "yunus",
+  "zakariyya",
+  "wife-of-imran",
+  "sulayman",
+  "queen-of-sheba",
+  "isa",
+  "disciples-of-isa",
+  "wife-of-pharaoh",
+  "soldiers-of-talut",
+  "companions-of-the-cave",
+  "angels",
+  "prophet-muhammad",
+  "believers",
+  "believers-with-the-prophets",
+  "oppressed-believers",
+  "servants-of-the-merciful",
+] as const;
+
+export type QuranicDuaSpeaker = (typeof QURANIC_DUA_SPEAKERS)[number];
+
+/** What the supplication asks for. */
+export const QURANIC_DUA_SUBJECTS = [
+  "forgiveness",
+  "guidance",
+  "steadfastness",
+  "deliverance",
+  "victory",
+  "family",
+  "provision",
+  "gratitude",
+  "knowledge",
+  "ease",
+  "affliction",
+  "acceptance",
+  "afterlife",
+] as const;
+
+export type QuranicDuaSubject = (typeof QURANIC_DUA_SUBJECTS)[number];
+
+export type QuranicDuaRow = readonly [
+  /** `surah:ayah` it begins in. */
+  from: `${number}:${number}`,
+  /** `surah:ayah` it ends in; the same surah as `from`. */
+  to: `${number}:${number}`,
+  speaker: QuranicDuaSpeaker,
+  subject: QuranicDuaSubject,
+];
+
+/** In mushaf order. */
+export const QURANIC_DUA_ROWS: readonly QuranicDuaRow[] = [
+  ["1:6", "1:7", "believers", "guidance"],
+  ["2:126", "2:126", "ibrahim", "provision"],
+  ["2:127", "2:128", "ibrahim-and-ismail", "acceptance"],
+  ["2:129", "2:129", "ibrahim", "guidance"],
+  ["2:201", "2:201", "believers", "afterlife"],
+  ["2:250", "2:250", "soldiers-of-talut", "steadfastness"],
+  ["2:285", "2:286", "believers", "forgiveness"],
+  ["3:8", "3:9", "believers", "guidance"],
+  ["3:16", "3:16", "believers", "forgiveness"],
+  ["3:26", "3:27", "prophet-muhammad", "provision"],
+  ["3:35", "3:36", "wife-of-imran", "acceptance"],
+  ["3:38", "3:38", "zakariyya", "family"],
+  ["3:53", "3:53", "disciples-of-isa", "guidance"],
+  ["3:147", "3:147", "believers-with-the-prophets", "steadfastness"],
+  ["3:191", "3:194", "believers", "afterlife"],
+  ["4:75", "4:75", "oppressed-believers", "deliverance"],
+  ["5:83", "5:83", "believers", "acceptance"],
+  ["5:114", "5:114", "isa", "provision"],
+  ["7:23", "7:23", "adam", "forgiveness"],
+  ["7:89", "7:89", "shuayb", "victory"],
+  ["7:126", "7:126", "magicians-of-pharaoh", "steadfastness"],
+  ["7:151", "7:151", "musa", "forgiveness"],
+  ["7:155", "7:156", "musa", "forgiveness"],
+  ["10:85", "10:86", "people-of-musa", "deliverance"],
+  ["11:47", "11:47", "nuh", "forgiveness"],
+  ["12:33", "12:33", "yusuf", "deliverance"],
+  ["12:101", "12:101", "yusuf", "afterlife"],
+  ["14:35", "14:35", "ibrahim", "guidance"],
+  ["14:37", "14:37", "ibrahim", "provision"],
+  ["14:40", "14:41", "ibrahim", "forgiveness"],
+  ["17:24", "17:24", "believers", "family"],
+  ["17:80", "17:80", "prophet-muhammad", "victory"],
+  ["18:10", "18:10", "companions-of-the-cave", "guidance"],
+  ["19:4", "19:6", "zakariyya", "family"],
+  ["20:25", "20:35", "musa", "ease"],
+  ["20:114", "20:114", "prophet-muhammad", "knowledge"],
+  ["21:83", "21:83", "ayyub", "affliction"],
+  ["21:87", "21:87", "yunus", "affliction"],
+  ["21:89", "21:89", "zakariyya", "family"],
+  ["23:29", "23:29", "nuh", "provision"],
+  ["23:97", "23:98", "prophet-muhammad", "deliverance"],
+  ["23:109", "23:109", "believers", "forgiveness"],
+  ["23:118", "23:118", "prophet-muhammad", "forgiveness"],
+  ["25:65", "25:66", "servants-of-the-merciful", "deliverance"],
+  ["25:74", "25:74", "servants-of-the-merciful", "family"],
+  ["26:83", "26:89", "ibrahim", "afterlife"],
+  ["26:117", "26:118", "nuh", "deliverance"],
+  ["26:169", "26:169", "lut", "deliverance"],
+  ["27:19", "27:19", "sulayman", "gratitude"],
+  ["27:44", "27:44", "queen-of-sheba", "forgiveness"],
+  ["28:16", "28:16", "musa", "forgiveness"],
+  ["28:21", "28:21", "musa", "deliverance"],
+  ["28:24", "28:24", "musa", "provision"],
+  ["29:30", "29:30", "lut", "victory"],
+  ["37:100", "37:100", "ibrahim", "family"],
+  ["38:35", "38:35", "sulayman", "forgiveness"],
+  ["38:41", "38:41", "ayyub", "affliction"],
+  ["40:7", "40:9", "angels", "forgiveness"],
+  ["43:13", "43:14", "believers", "gratitude"],
+  ["46:15", "46:15", "believers", "gratitude"],
+  ["54:10", "54:10", "nuh", "victory"],
+  ["59:10", "59:10", "believers", "forgiveness"],
+  ["60:4", "60:5", "ibrahim-and-companions", "deliverance"],
+  ["66:8", "66:8", "believers", "afterlife"],
+  ["66:11", "66:11", "wife-of-pharaoh", "deliverance"],
+  ["71:28", "71:28", "nuh", "forgiveness"],
+];

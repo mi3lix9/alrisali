@@ -35,6 +35,7 @@ export const QiblaTile = () => {
   const direction = t(`directions.${bearingSector(bearing)}`);
   const distance = t("distance", {
     distance: formatWholeNumber(qiblaDistanceKm(location)),
+    target: t("targets.kaaba"),
   });
 
   return (

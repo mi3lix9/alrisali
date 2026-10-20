@@ -1,4 +1,5 @@
 import { qiblaOffset } from "@alrisali/domain/qibla";
+import type { QiblaAlignment } from "@alrisali/domain/qibla";
 import { Text } from "panelui-native";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
@@ -13,6 +14,12 @@ import Animated, {
 const TURN_MS = 200;
 /** Every 45° but north, which has its letter. */
 const TICKS = [45, 90, 135, 180, 225, 270, 315] as const;
+
+const RING_COLOUR = {
+  facing: "border-success",
+  near: "border-warning",
+  away: "border-border",
+} as const;
 
 /**
  * Something fixed to the dial at a bearing: a full-size layer turned about the
@@ -41,13 +48,14 @@ const AtBearing = ({
 export const QiblaDial = ({
   heading,
   bearing,
-  facing,
+  alignment,
 }: {
   heading: number | null;
   bearing: number;
-  facing: boolean;
+  alignment: QiblaAlignment | null;
 }) => {
   const { t } = useTranslation("qibla");
+  const facing = alignment === "facing";
   // Unwrapped (may pass 360) so 359° → 1° turns 2°, not back round.
   const turned = useSharedValue(heading ?? 0);
 
@@ -71,7 +79,7 @@ export const QiblaDial = ({
     >
       <Animated.View
         className={`bg-card absolute inset-0 rounded-full border-4 ${
-          facing ? "border-success" : "border-border"
+          RING_COLOUR[alignment ?? "away"]
         }`}
         style={cardStyle}
       >

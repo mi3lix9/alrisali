@@ -27,6 +27,18 @@ const SECTIONS = [
     description: "Choose the Supplication Home features on each weekday.",
   },
   {
+    to: "/admin/worship",
+    title: "Today's worship",
+    description:
+      "Map each weekday's ziyarah, the night duas and the every-day items to Supplications.",
+  },
+  {
+    to: "/admin/amal",
+    title: "A'mal",
+    description:
+      "Choose the duas, ziyarat, prayers and fasts each Hijri day or month lists in the Books tab.",
+  },
+  {
     to: "/admin/occasions",
     title: "Occasions",
     description:
@@ -55,6 +67,12 @@ const SECTIONS = [
     title: "Lessons",
     description:
       "Create, order and publish Lessons by category, with their captioned image Slides.",
+  },
+  {
+    to: "/admin/adhans",
+    title: "Adhans",
+    description:
+      "Publish adhan voices with their full and takbir recordings, and order them for Believers to download.",
   },
   {
     to: "/admin/messages",

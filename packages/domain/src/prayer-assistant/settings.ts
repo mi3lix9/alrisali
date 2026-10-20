@@ -20,7 +20,8 @@ export const bowSensitivitySchema = z
 /**
  * How the Prayer Assistant senses the Believer's Position. Tap needs no
  * sensor; Camera and Head Height read the camera, Sound hears each Takbir and
- * Mat watches the camera covered in sujud.
+ * Mat watches the camera covered in sujud and Proximity feels the
+ * forehead cover the proximity sensor.
  */
 export const RECOGNITION_MODES = [
   "tap",
@@ -28,6 +29,7 @@ export const RECOGNITION_MODES = [
   "head-height",
   "sound",
   "mat",
+  "proximity",
 ] as const;
 
 export type RecognitionMode = (typeof RECOGNITION_MODES)[number];

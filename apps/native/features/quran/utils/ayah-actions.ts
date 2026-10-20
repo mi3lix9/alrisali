@@ -1,15 +1,29 @@
-import type { AyahKey, RecitationEvent } from "@alrisali/domain/quran";
+import type {
+  AyahKey,
+  PlaybackSettings,
+  PlayTo,
+  RecitationEvent,
+} from "@alrisali/domain/quran";
 import { writeDigits } from "@alrisali/domain/shared";
 import type { Digits } from "@alrisali/domain/shared";
 
 /**
  * The ayah sheet's Play: recitation starts at the long-pressed ayah and goes
- * on through the Quran, replacing whatever was playing.
+ * on through the Quran, replacing whatever was playing. Play To gives the end
+ * it stops at.
  */
 export const playFromAyah = (
   ayah: AyahKey,
-  reciter: string
-): RecitationEvent => ({ type: "play", ayah, reciter });
+  reciter: string,
+  to?: PlayTo,
+  settings?: PlaybackSettings
+): RecitationEvent => ({
+  type: "play",
+  ayah,
+  reciter,
+  ...(to ? { to } : {}),
+  ...(settings ? { settings } : {}),
+});
 
 interface AyahCopy {
   text: string;

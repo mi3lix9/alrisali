@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as Char123LocaleChar125RouteRouteImport } from './routes/{-$locale}/route'
+import { Route as DotwellKnownAppleAppSiteAssociationRouteImport } from './routes/[.]well-known/apple-app-site-association'
+import { Route as DotwellKnownAssetlinksDotjsonRouteImport } from './routes/[.]well-known/assetlinks[.]json'
 import { Route as AdminAuthedRouteRouteImport } from './routes/admin/_authed/route'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as DebugSentryRouteImport } from './routes/debug.sentry'
@@ -18,6 +20,8 @@ import { Route as Char123LocaleChar125ContactRouteImport } from './routes/{-$loc
 import { Route as Char123LocaleChar125PrivacyRouteImport } from './routes/{-$locale}/privacy'
 import { Route as Char123LocaleChar125TermsRouteImport } from './routes/{-$locale}/terms'
 import { Route as AdminAuthedIndexRouteImport } from './routes/admin/_authed/index'
+import { Route as AdminAuthedAdhansRouteImport } from './routes/admin/_authed/adhans'
+import { Route as AdminAuthedAmalRouteImport } from './routes/admin/_authed/amal'
 import { Route as AdminAuthedAnalyticsRouteImport } from './routes/admin/_authed/analytics'
 import { Route as AdminAuthedDailyContentRouteImport } from './routes/admin/_authed/daily-content'
 import { Route as AdminAuthedGatheringsRouteImport } from './routes/admin/_authed/gatherings'
@@ -25,6 +29,7 @@ import { Route as AdminAuthedHijriAdjustmentRouteImport } from './routes/admin/_
 import { Route as AdminAuthedLibraryRouteImport } from './routes/admin/_authed/library'
 import { Route as AdminAuthedMessagesRouteImport } from './routes/admin/_authed/messages'
 import { Route as AdminAuthedOccasionsRouteImport } from './routes/admin/_authed/occasions'
+import { Route as AdminAuthedWorshipRouteImport } from './routes/admin/_authed/worship'
 import { Route as AdminAuthedAnnouncementsIndexRouteImport } from './routes/admin/_authed/announcements/index'
 import { Route as AdminAuthedAnnouncementsIdRouteImport } from './routes/admin/_authed/announcements/$id'
 import { Route as AdminAuthedLessonsIndexRouteImport } from './routes/admin/_authed/lessons/index'
@@ -36,6 +41,18 @@ const Char123LocaleChar125RouteRoute =
   Char123LocaleChar125RouteRouteImport.update({
     id: '/{-$locale}',
     path: '/{-$locale}',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownAppleAppSiteAssociationRoute =
+  DotwellKnownAppleAppSiteAssociationRouteImport.update({
+    id: '/.well-known/apple-app-site-association',
+    path: '/.well-known/apple-app-site-association',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotwellKnownAssetlinksDotjsonRoute =
+  DotwellKnownAssetlinksDotjsonRouteImport.update({
+    id: '/.well-known/assetlinks.json',
+    path: '/.well-known/assetlinks.json',
     getParentRoute: () => rootRouteImport,
   } as any)
 const AdminAuthedRouteRoute = AdminAuthedRouteRouteImport.update({
@@ -82,6 +99,16 @@ const AdminAuthedIndexRoute = AdminAuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
+const AdminAuthedAdhansRoute = AdminAuthedAdhansRouteImport.update({
+  id: '/adhans',
+  path: '/adhans',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
+const AdminAuthedAmalRoute = AdminAuthedAmalRouteImport.update({
+  id: '/amal',
+  path: '/amal',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
 const AdminAuthedAnalyticsRoute = AdminAuthedAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -116,6 +143,11 @@ const AdminAuthedMessagesRoute = AdminAuthedMessagesRouteImport.update({
 const AdminAuthedOccasionsRoute = AdminAuthedOccasionsRouteImport.update({
   id: '/occasions',
   path: '/occasions',
+  getParentRoute: () => AdminAuthedRouteRoute,
+} as any)
+const AdminAuthedWorshipRoute = AdminAuthedWorshipRouteImport.update({
+  id: '/worship',
+  path: '/worship',
   getParentRoute: () => AdminAuthedRouteRoute,
 } as any)
 const AdminAuthedAnnouncementsIndexRoute =
@@ -155,12 +187,16 @@ const AdminAuthedProgramsIdRoute = AdminAuthedProgramsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/admin': typeof AdminAuthedRouteRouteWithChildren
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/amal': typeof AdminAuthedAmalRoute
   '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
@@ -168,6 +204,7 @@ export interface FileRoutesByFullPath {
   '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/worship': typeof AdminAuthedWorshipRoute
   '/admin/': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -177,12 +214,16 @@ export interface FileRoutesByFullPath {
   '/admin/programs/': typeof AdminAuthedProgramsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
+  '/admin/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/amal': typeof AdminAuthedAmalRoute
   '/admin/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/gatherings': typeof AdminAuthedGatheringsRoute
@@ -190,6 +231,7 @@ export interface FileRoutesByTo {
   '/admin/library': typeof AdminAuthedLibraryRoute
   '/admin/messages': typeof AdminAuthedMessagesRoute
   '/admin/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/worship': typeof AdminAuthedWorshipRoute
   '/admin': typeof AdminAuthedIndexRoute
   '/admin/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -202,12 +244,16 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/{-$locale}': typeof Char123LocaleChar125RouteRouteWithChildren
   '/admin/_authed': typeof AdminAuthedRouteRouteWithChildren
+  '/.well-known/apple-app-site-association': typeof DotwellKnownAppleAppSiteAssociationRoute
+  '/.well-known/assetlinks.json': typeof DotwellKnownAssetlinksDotjsonRoute
   '/admin/login': typeof AdminLoginRoute
   '/debug/sentry': typeof DebugSentryRoute
   '/{-$locale}/contact': typeof Char123LocaleChar125ContactRoute
   '/{-$locale}/privacy': typeof Char123LocaleChar125PrivacyRoute
   '/{-$locale}/terms': typeof Char123LocaleChar125TermsRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
+  '/admin/_authed/adhans': typeof AdminAuthedAdhansRoute
+  '/admin/_authed/amal': typeof AdminAuthedAmalRoute
   '/admin/_authed/analytics': typeof AdminAuthedAnalyticsRoute
   '/admin/_authed/daily-content': typeof AdminAuthedDailyContentRoute
   '/admin/_authed/gatherings': typeof AdminAuthedGatheringsRoute
@@ -215,6 +261,7 @@ export interface FileRoutesById {
   '/admin/_authed/library': typeof AdminAuthedLibraryRoute
   '/admin/_authed/messages': typeof AdminAuthedMessagesRoute
   '/admin/_authed/occasions': typeof AdminAuthedOccasionsRoute
+  '/admin/_authed/worship': typeof AdminAuthedWorshipRoute
   '/admin/_authed/': typeof AdminAuthedIndexRoute
   '/admin/_authed/announcements/$id': typeof AdminAuthedAnnouncementsIdRoute
   '/admin/_authed/lessons/$id': typeof AdminAuthedLessonsIdRoute
@@ -228,12 +275,16 @@ export interface FileRouteTypes {
   fullPaths:
     | '/{-$locale}'
     | '/admin'
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/adhans'
+    | '/admin/amal'
     | '/admin/analytics'
     | '/admin/daily-content'
     | '/admin/gatherings'
@@ -241,6 +292,7 @@ export interface FileRouteTypes {
     | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
+    | '/admin/worship'
     | '/admin/'
     | '/admin/announcements/$id'
     | '/admin/lessons/$id'
@@ -250,12 +302,16 @@ export interface FileRouteTypes {
     | '/admin/programs/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}'
+    | '/admin/adhans'
+    | '/admin/amal'
     | '/admin/analytics'
     | '/admin/daily-content'
     | '/admin/gatherings'
@@ -263,6 +319,7 @@ export interface FileRouteTypes {
     | '/admin/library'
     | '/admin/messages'
     | '/admin/occasions'
+    | '/admin/worship'
     | '/admin'
     | '/admin/announcements/$id'
     | '/admin/lessons/$id'
@@ -274,12 +331,16 @@ export interface FileRouteTypes {
     | '__root__'
     | '/{-$locale}'
     | '/admin/_authed'
+    | '/.well-known/apple-app-site-association'
+    | '/.well-known/assetlinks.json'
     | '/admin/login'
     | '/debug/sentry'
     | '/{-$locale}/contact'
     | '/{-$locale}/privacy'
     | '/{-$locale}/terms'
     | '/{-$locale}/'
+    | '/admin/_authed/adhans'
+    | '/admin/_authed/amal'
     | '/admin/_authed/analytics'
     | '/admin/_authed/daily-content'
     | '/admin/_authed/gatherings'
@@ -287,6 +348,7 @@ export interface FileRouteTypes {
     | '/admin/_authed/library'
     | '/admin/_authed/messages'
     | '/admin/_authed/occasions'
+    | '/admin/_authed/worship'
     | '/admin/_authed/'
     | '/admin/_authed/announcements/$id'
     | '/admin/_authed/lessons/$id'
@@ -299,6 +361,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   Char123LocaleChar125RouteRoute: typeof Char123LocaleChar125RouteRouteWithChildren
   AdminAuthedRouteRoute: typeof AdminAuthedRouteRouteWithChildren
+  DotwellKnownAppleAppSiteAssociationRoute: typeof DotwellKnownAppleAppSiteAssociationRoute
+  DotwellKnownAssetlinksDotjsonRoute: typeof DotwellKnownAssetlinksDotjsonRoute
   AdminLoginRoute: typeof AdminLoginRoute
   DebugSentryRoute: typeof DebugSentryRoute
 }
@@ -310,6 +374,20 @@ declare module '@tanstack/react-router' {
       path: '/{-$locale}'
       fullPath: '/{-$locale}'
       preLoaderRoute: typeof Char123LocaleChar125RouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/apple-app-site-association': {
+      id: '/.well-known/apple-app-site-association'
+      path: '/.well-known/apple-app-site-association'
+      fullPath: '/.well-known/apple-app-site-association'
+      preLoaderRoute: typeof DotwellKnownAppleAppSiteAssociationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.well-known/assetlinks.json': {
+      id: '/.well-known/assetlinks.json'
+      path: '/.well-known/assetlinks.json'
+      fullPath: '/.well-known/assetlinks.json'
+      preLoaderRoute: typeof DotwellKnownAssetlinksDotjsonRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/_authed': {
@@ -368,6 +446,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthedIndexRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
+    '/admin/_authed/adhans': {
+      id: '/admin/_authed/adhans'
+      path: '/adhans'
+      fullPath: '/admin/adhans'
+      preLoaderRoute: typeof AdminAuthedAdhansRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/amal': {
+      id: '/admin/_authed/amal'
+      path: '/amal'
+      fullPath: '/admin/amal'
+      preLoaderRoute: typeof AdminAuthedAmalRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
     '/admin/_authed/analytics': {
       id: '/admin/_authed/analytics'
       path: '/analytics'
@@ -415,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/occasions'
       fullPath: '/admin/occasions'
       preLoaderRoute: typeof AdminAuthedOccasionsRouteImport
+      parentRoute: typeof AdminAuthedRouteRoute
+    }
+    '/admin/_authed/worship': {
+      id: '/admin/_authed/worship'
+      path: '/worship'
+      fullPath: '/admin/worship'
+      preLoaderRoute: typeof AdminAuthedWorshipRouteImport
       parentRoute: typeof AdminAuthedRouteRoute
     }
     '/admin/_authed/announcements/': {
@@ -483,6 +582,8 @@ const Char123LocaleChar125RouteRouteWithChildren =
   )
 
 interface AdminAuthedRouteRouteChildren {
+  AdminAuthedAdhansRoute: typeof AdminAuthedAdhansRoute
+  AdminAuthedAmalRoute: typeof AdminAuthedAmalRoute
   AdminAuthedAnalyticsRoute: typeof AdminAuthedAnalyticsRoute
   AdminAuthedDailyContentRoute: typeof AdminAuthedDailyContentRoute
   AdminAuthedGatheringsRoute: typeof AdminAuthedGatheringsRoute
@@ -490,6 +591,7 @@ interface AdminAuthedRouteRouteChildren {
   AdminAuthedLibraryRoute: typeof AdminAuthedLibraryRoute
   AdminAuthedMessagesRoute: typeof AdminAuthedMessagesRoute
   AdminAuthedOccasionsRoute: typeof AdminAuthedOccasionsRoute
+  AdminAuthedWorshipRoute: typeof AdminAuthedWorshipRoute
   AdminAuthedIndexRoute: typeof AdminAuthedIndexRoute
   AdminAuthedAnnouncementsIdRoute: typeof AdminAuthedAnnouncementsIdRoute
   AdminAuthedLessonsIdRoute: typeof AdminAuthedLessonsIdRoute
@@ -500,6 +602,8 @@ interface AdminAuthedRouteRouteChildren {
 }
 
 const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
+  AdminAuthedAdhansRoute: AdminAuthedAdhansRoute,
+  AdminAuthedAmalRoute: AdminAuthedAmalRoute,
   AdminAuthedAnalyticsRoute: AdminAuthedAnalyticsRoute,
   AdminAuthedDailyContentRoute: AdminAuthedDailyContentRoute,
   AdminAuthedGatheringsRoute: AdminAuthedGatheringsRoute,
@@ -507,6 +611,7 @@ const AdminAuthedRouteRouteChildren: AdminAuthedRouteRouteChildren = {
   AdminAuthedLibraryRoute: AdminAuthedLibraryRoute,
   AdminAuthedMessagesRoute: AdminAuthedMessagesRoute,
   AdminAuthedOccasionsRoute: AdminAuthedOccasionsRoute,
+  AdminAuthedWorshipRoute: AdminAuthedWorshipRoute,
   AdminAuthedIndexRoute: AdminAuthedIndexRoute,
   AdminAuthedAnnouncementsIdRoute: AdminAuthedAnnouncementsIdRoute,
   AdminAuthedLessonsIdRoute: AdminAuthedLessonsIdRoute,
@@ -522,6 +627,9 @@ const AdminAuthedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   Char123LocaleChar125RouteRoute: Char123LocaleChar125RouteRouteWithChildren,
   AdminAuthedRouteRoute: AdminAuthedRouteRouteWithChildren,
+  DotwellKnownAppleAppSiteAssociationRoute:
+    DotwellKnownAppleAppSiteAssociationRoute,
+  DotwellKnownAssetlinksDotjsonRoute: DotwellKnownAssetlinksDotjsonRoute,
   AdminLoginRoute: AdminLoginRoute,
   DebugSentryRoute: DebugSentryRoute,
 }

@@ -4,12 +4,31 @@ import type { ar } from "./common.ar";
 
 export const en: Catalog<typeof ar> = {
   appName: "Al-Risali",
-  tabs: {
+  features: {
     home: "Home",
+    quran: "Quran",
     prayer: "Prayer",
+    qibla: "Qibla",
+    "prayer-assistant": "Prayer Assistant",
     library: "Library",
+    lessons: "Lessons",
     worship: "Worship",
+    programs: "Programs",
     tasbih: "Tasbih",
+    calendar: "Calendar",
+    gatherings: "Gatherings",
+    insights: "Insights",
+    khatmah: "Khatmah",
+    timetable: "Monthly timetable",
+    imsakiyya: "Ramadan Imsakiyya",
+  },
+  featureAreas: {
+    quran: "Quran",
+    prayer: "Prayer",
+    worship: "Worship",
+    library: "Library",
+    seasonal: "Seasonal",
+    more: "More",
   },
   settings: "Settings",
   account: "Account",
@@ -60,5 +79,11 @@ export const en: Catalog<typeof ar> = {
       dhuAlQadah: "Dhu al-Qa'dah",
       dhuAlHijjah: "Dhu al-Hijjah",
     },
+  },
+  fileSize: {
+    bytes: "{{value}} B",
+    kb: "{{value}} KB",
+    mb: "{{value}} MB",
+    gb: "{{value}} GB",
   },
 };

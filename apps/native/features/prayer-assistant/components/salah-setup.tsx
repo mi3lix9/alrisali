@@ -2,12 +2,12 @@ import {
   BOW_SENSITIVITY_LIMITS,
   CUSTOM_PACE_LIMITS,
   PACES,
-  RAKAH_COUNT,
   RECOGNITION_MODES,
 } from "@alrisali/domain/prayer-assistant";
-import type { PrayerAssistantSettings } from "@alrisali/domain/prayer-assistant";
-import { SALAH } from "@alrisali/domain/shared";
-import type { Salah } from "@alrisali/domain/shared";
+import type {
+  PrayerAssistantSettings,
+  SalahDefinition,
+} from "@alrisali/domain/prayer-assistant";
 import { Button, Card, RadioGroup, Slider, Text } from "panelui-native";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,13 +15,16 @@ import { View } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
 
+import { hasProximitySensor } from "../data/proximity-module";
+import { SalahPicker } from "./salah-picker";
+
 const HOLD_STEP_MS = 100;
 const MS_PER_SECOND = 1000;
 
 interface SalahSetupProps {
   settings: PrayerAssistantSettings;
   onChange: (change: Partial<PrayerAssistantSettings>) => void;
-  onStart: (salah: Salah) => void;
+  onStart: (definition: SalahDefinition) => void;
 }
 
 /**
@@ -34,36 +37,17 @@ export const SalahSetup = ({
   onStart,
 }: SalahSetupProps) => {
   const { t } = useTranslation("prayer-assistant");
-  const [salah, setSalah] = useState<Salah | null>(null);
+  const [definition, setDefinition] = useState<SalahDefinition | null>(null);
+  // Proximity needs the device's sensor; the other modes need nothing here.
+  const offeredModes = RECOGNITION_MODES.filter(
+    (mode) => mode !== "proximity" || hasProximitySensor()
+  );
   const seconds = (ms: number) =>
     t("setup.seconds", { value: ms / MS_PER_SECOND });
 
   return (
     <>
-      <Card>
-        <Card.Header>
-          <Card.Title>{t("setup.salah")}</Card.Title>
-        </Card.Header>
-        <Card.Content>
-          <RadioGroup
-            value={salah ?? ""}
-            onValueChange={(value) =>
-              setSalah(SALAH.find((candidate) => candidate === value) ?? null)
-            }
-          >
-            {SALAH.map((option) => (
-              <RadioGroup.Item
-                key={option}
-                value={option}
-                label={t("setup.salahRakahs", {
-                  name: t(`salah.${option}`),
-                  count: RAKAH_COUNT[option],
-                })}
-              />
-            ))}
-          </RadioGroup>
-        </Card.Content>
-      </Card>
+      <SalahPicker onChange={setDefinition} />
       <Card>
         <Card.Header>
           <Card.Title>{t("setup.recognitionMode")}</Card.Title>
@@ -83,7 +67,7 @@ export const SalahSetup = ({
               }
             }}
           >
-            {RECOGNITION_MODES.map((option) => (
+            {offeredModes.map((option) => (
               <RadioGroup.Item
                 key={option}
                 value={option}
@@ -176,10 +160,10 @@ export const SalahSetup = ({
       </Card>
       <Button
         size="lg"
-        disabled={salah === null}
+        disabled={definition === null}
         onPress={() => {
-          if (salah) {
-            onStart(salah);
+          if (definition) {
+            onStart(definition);
           }
         }}
       >
