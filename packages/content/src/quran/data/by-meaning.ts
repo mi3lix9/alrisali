@@ -1,5 +1,5 @@
-// In-house Khatmah "by meaning" divisions of the Quran (written for Alrisali,
-// not copied from any app or book). Each division lists the first ayah of
+// In-house Khatmah "by meaning" divisions of the Quran, written for Alrisali.
+// Each division lists the first ayah of
 // every session; a session runs to the ayah before the next one starts, and
 // the last runs to 114:6.
 //

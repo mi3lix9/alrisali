@@ -1,7 +1,7 @@
 /**
  * Supplications the Quran reports (in-house): where each begins and ends and
  * who made it. A dua is a reference only; its words come from the bundled
- * Quran text. Written by us from the ayat, not from another app's list.
+ * Quran text. Written by us from the ayat.
  */
 
 /** Who makes the supplication, as the ayah reports it. */
