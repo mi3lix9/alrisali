@@ -109,7 +109,9 @@ export const ensureChannels = (): Promise<void> => {
         setNotificationChannelAsync(id, {
           name: id,
           importance: AndroidImportance.HIGH,
-          sound,
+          // Without a sound the channel plays the system's notification
+          // sound; "default" would be looked up as a bundled file and fail.
+          ...(sound === "default" ? {} : { sound }),
           enableVibrate: sound !== null,
         })
       )
@@ -172,14 +174,22 @@ const applyReminders = async (
   await ensureChannels();
   await dismissStaleDelivered();
   const pending = await getAllScheduledNotificationsAsync();
+  // The scheduler is the app's only local-notification scheduler, so a pending
+  // notification without its marker is stale (an older version's, or
+  // malformed) and would keep firing an alert the plan no longer holds.
+  const unmarked: string[] = [];
   const scheduled = pending.flatMap(({ identifier, content }) => {
     const data = readReminderData(content.data);
-    return data === null
-      ? []
-      : [{ id: identifier, fingerprint: data.fingerprint }];
+    if (data === null) {
+      unmarked.push(identifier);
+      return [];
+    }
+    return [{ id: identifier, fingerprint: data.fingerprint }];
   });
   const { cancel, schedule } = diffSchedule(scheduled, requests);
-  await Promise.all(cancel.map((id) => cancelScheduledNotificationAsync(id)));
+  await Promise.all(
+    [...unmarked, ...cancel].map((id) => cancelScheduledNotificationAsync(id))
+  );
   await Promise.all(
     schedule.map(
       ({
