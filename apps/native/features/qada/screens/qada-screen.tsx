@@ -18,6 +18,7 @@ import { Temporal } from "temporal-polyfill";
 
 import { formatDateTime, formatNumber } from "@/shared/lib/numbers";
 import { useToday } from "@/shared/lib/today";
+import { HeaderButton } from "@/shared/ui/header-button";
 import { Screen } from "@/shared/ui/screen";
 
 import { QadaCalendar } from "../components/qada-calendar";
@@ -231,11 +232,12 @@ export const QadaScreen = () => {
   return (
     <>
       <Stack.Screen options={{ title: t("title") }} />
-      <Stack.Toolbar placement="right">
-        <Stack.Toolbar.Button onPress={() => router.push("/qada-setup")}>
-          {t("dashboard.edit")}
-        </Stack.Toolbar.Button>
-      </Stack.Toolbar>
+      <HeaderButton
+        placement="right"
+        label={t("dashboard.edit")}
+        symbol="pencil"
+        onPress={() => router.push("/qada-setup")}
+      />
       {data?.plan ? (
         <Dashboard data={data} plan={data.plan} />
       ) : (
