@@ -10,10 +10,15 @@ export const ar = {
     isha: "العشاء",
     midnight: "منتصف الليل",
   },
+  header: {
+    settings: "الموقع والمواقيت: {{place}}",
+  },
+  settings: {
+    title: "الموقع والخيارات",
+  },
   timetable: {
     title: "مواقيت اليوم",
     notReached: "لا يحين اليوم",
-    notReachedLabel: "{{name}}: لا يحين اليوم في هذا الموقع",
     current: "الوقت الحالي",
     allHidden: "كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت.",
   },

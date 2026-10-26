@@ -14,10 +14,15 @@ export const en: Catalog<typeof ar> = {
     isha: "Isha",
     midnight: "Midnight",
   },
+  header: {
+    settings: "Location and Prayer Times options: {{place}}",
+  },
+  settings: {
+    title: "Location and options",
+  },
   timetable: {
     title: "Today's Prayer Times",
     notReached: "Not today",
-    notReachedLabel: "{{name}}: not reached today at this location",
     current: "Now",
     allHidden:
       "Every Prayer Time is hidden. Show the ones you want in Prayer Times options.",
