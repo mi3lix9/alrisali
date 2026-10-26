@@ -1,0 +1,957 @@
+<!-- PROTOTYPE — throwaway. Three structurally different redesigns of the per-prayer Reminder sheet and the Prayer Reminders settings screen (?variant=A|B|C, ?lang=ar|en, ?theme=dark|light). Every variant replaces the enabled/muted/voice switches with one alert type: Off · Silent · Tone · Adhan, mapped back onto the same ReminderRule fields. -->
+<!doctype html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<link rel="icon" href="data:," />
+<title>Reminder sheet — redesign prototype</title>
+<style>
+/* Tokens: panelui-native theme.css light/dark + apps/native/global.css overrides (same as prayer.html). */
+:root, [data-theme="light"] {
+  --background:#ffffff; --foreground:#262626; --card:#ffffff;
+  --surface:#f7f7f7; --surface-2:#f1f1f1; --surface-3:#eaeaea;
+  --inset:rgba(0,0,0,.035);
+  --primary:#262626; --primary-fg:#fafafa;
+  --secondary:rgba(0,0,0,.06); --muted:rgba(0,0,0,.06); --muted-fg:#686868;
+  --border:rgba(0,0,0,.08); --input:rgba(0,0,0,.1); --ring:#a3a3a3;
+  --destructive:#dc2626; --destructive-solid-fg:#ffffff;
+  --success:#10b981; --success-fg:#047857; --success-soft:rgba(16,185,129,.1);
+  --warning:#f59e0b; --warning-fg:#b45309; --warning-soft:rgba(245,158,11,.1);
+  --info:#3b82f6; --info-fg:#1d4ed8; --info-soft:rgba(59,130,246,.1);
+  --overlay:#ffffff; --skeleton:rgba(0,0,0,.1);
+  --radius-md:8px; --radius-lg:10px; --radius-xl:14px; --radius-2xl:16px; --radius-3xl:24px;
+  --page:#e9e8e4; --frame:#1b1b1b; --scrim:rgba(0,0,0,.32);
+  --wash:color-mix(in srgb, var(--foreground) 5%, transparent);
+  --wash-2:color-mix(in srgb, var(--foreground) 9%, transparent);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+[data-theme="dark"] {
+  --background:#141414; --foreground:#f5f5f5; --card:#191919;
+  --surface:#1c1c1c; --surface-2:#222222; --surface-3:#282828;
+  --inset:rgba(0,0,0,.22);
+  --primary:#f5f5f5; --primary-fg:#262626;
+  --secondary:rgba(255,255,255,.08); --muted:rgba(255,255,255,.08); --muted-fg:#a1a1a1;
+  --border:rgba(255,255,255,.06); --input:rgba(255,255,255,.24); --ring:#737373;
+  --destructive:#e5484d; --destructive-solid-fg:#ffffff;
+  --success:#10b981; --success-fg:#34d399; --success-soft:rgba(16,185,129,.16);
+  --warning:#f59e0b; --warning-fg:#fbbf24; --warning-soft:rgba(245,158,11,.16);
+  --info:#3b82f6; --info-fg:#60a5fa; --info-soft:rgba(59,130,246,.16);
+  --overlay:#232323; --skeleton:rgba(255,255,255,.1);
+  --page:#0b0b0b; --frame:#2a2a2a; --scrim:rgba(0,0,0,.55);
+  --wash:color-mix(in srgb, var(--foreground) 6%, transparent);
+  --wash-2:color-mix(in srgb, var(--foreground) 11%, transparent);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; }
+body {
+  background:var(--page); color:var(--foreground);
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Arabic", "Segoe UI", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:flex-start; justify-content:center; gap:28px;
+  padding:28px 24px 110px; min-height:100vh;
+}
+button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; text-align:inherit; }
+input { font:inherit; color:inherit; }
+.num { font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+.muted { color:var(--muted-fg); }
+.small { font-size:13px; }
+.grow { flex:1; min-width:0; }
+[dir="rtl"] .flipx { transform:scaleX(-1); }
+
+/* ── Phone ───────────────────────────────────────────── */
+.phone {
+  width:390px; height:844px; flex:none; position:relative; overflow:hidden;
+  border-radius:52px; background:var(--background);
+  box-shadow:0 0 0 11px var(--frame), 0 0 0 12px rgba(0,0,0,.25), 0 40px 80px -20px rgba(0,0,0,.35);
+  display:flex; flex-direction:column;
+}
+.statusbar { height:50px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:6px 34px 0; font-weight:600; font-size:15px; direction:ltr; }
+.statusbar .island { width:120px; height:34px; border-radius:20px; background:#000; }
+.statusbar .icons { display:flex; gap:6px; align-items:center; }
+.scroll { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:104px; }
+.scroll::-webkit-scrollbar { display:none; }
+.navbar { display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 16px; }
+.toolbtn { width:36px; height:36px; border-radius:18px; display:grid; place-items:center; background:var(--secondary); }
+.largetitle { padding:0 20px 2px; font-size:34px; font-weight:700; letter-spacing:-.01em; line-height:1.15; }
+[dir="rtl"] .largetitle { letter-spacing:0; }
+.subline { padding:2px 20px 0; color:var(--muted-fg); font-size:15px; }
+.section { padding:0 16px; margin-top:20px; }
+.sec-title { font-size:13px; font-weight:600; color:var(--muted-fg); padding:0 4px 8px; display:flex; justify-content:space-between; align-items:center; gap:8px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-2xl); }
+[data-theme="light"] .card { box-shadow:0 1px 2px rgba(0,0,0,.03); }
+.row { display:flex; align-items:center; gap:12px; min-height:48px; padding:0 16px; }
+.row + .row { border-top:1px solid var(--border); }
+.btn { height:40px; padding:0 16px; border-radius:var(--radius-xl); font-weight:600; font-size:15px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+.btn-primary { background:var(--primary); color:var(--primary-fg); }
+.btn-secondary { background:var(--secondary); }
+.btn-sm { height:32px; padding:0 12px; font-size:13px; border-radius:var(--radius-lg); }
+.btn-block { width:100%; }
+.badge { font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--secondary); white-space:nowrap; }
+.chip { height:34px; padding:0 13px; border-radius:999px; border:1px solid var(--input); font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; transition:background .2s var(--ease), color .2s var(--ease); }
+.chip.on { background:var(--primary); color:var(--primary-fg); border-color:var(--primary); font-weight:600; }
+.iconbtn { width:32px; height:32px; border-radius:16px; display:grid; place-items:center; background:var(--secondary); flex:none; }
+.linkbtn { color:var(--info-fg); font-weight:500; font-size:15px; display:inline-flex; align-items:center; gap:4px; height:40px; }
+[data-theme="dark"] .linkbtn { color:var(--info-fg); }
+
+.switch { width:51px; height:31px; border-radius:16px; background:var(--muted); position:relative; flex:none; transition:background .25s var(--ease); }
+[data-theme="light"] .switch { background:#e5e5e5; }
+.switch::after { content:""; position:absolute; top:2px; inset-inline-start:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.2); transition:inset-inline-start .25s var(--ease); }
+.switch[aria-checked="true"] { background:var(--success); }
+.switch[aria-checked="true"]::after { inset-inline-start:22px; }
+.switch:disabled { opacity:.4; cursor:default; }
+
+.stepper { display:inline-flex; align-items:center; border:1px solid var(--input); border-radius:var(--radius-lg); overflow:hidden; flex:none; }
+.stepper button { width:40px; height:36px; font-size:18px; }
+.stepper button:disabled { opacity:.3; cursor:default; }
+.stepper input { width:52px; height:36px; text-align:center; border:0; background:transparent; border-inline:1px solid var(--input); font-weight:600; }
+
+.seg { display:flex; background:var(--secondary); border-radius:var(--radius-lg); padding:2px; }
+.seg button { flex:1; min-height:34px; border-radius:8px; font-size:13px; font-weight:500; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:4px 6px; line-height:1.25; }
+.seg button[aria-checked="true"] { background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.12); font-weight:600; }
+[data-theme="dark"] .seg button[aria-checked="true"] { background:#3a3a3a; }
+.seg button .sub { font-size:11px; font-weight:400; color:var(--muted-fg); }
+
+/* Radio dot */
+.radio { width:22px; height:22px; border-radius:50%; border:1.5px solid var(--input); flex:none; transition:border-width .2s var(--ease), border-color .2s; }
+[aria-checked="true"] > .radio, .radio.on { border:6.5px solid var(--foreground); }
+.check { width:22px; height:22px; display:grid; place-items:center; flex:none; color:var(--foreground); opacity:0; }
+[aria-checked="true"] > .check { opacity:1; }
+
+/* Preview play button with progress ring */
+.play { width:38px; height:38px; border-radius:50%; flex:none; display:grid; place-items:center; position:relative; background:var(--wash-2); color:var(--foreground); --p:0; transition:background .2s; }
+.play:hover { background:color-mix(in srgb, var(--foreground) 15%, transparent); }
+.play.on { background:var(--primary); color:var(--primary-fg); }
+.play.on::before { content:""; position:absolute; inset:-4px; border-radius:50%;
+  background:conic-gradient(var(--foreground) calc(var(--p) * 360deg), var(--wash-2) 0);
+  -webkit-mask:radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px));
+          mask:radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 2px)); }
+.eq { display:inline-flex; gap:2px; align-items:flex-end; height:12px; }
+.eq i { width:2.5px; background:currentColor; border-radius:1px; animation:eq .9s ease-in-out infinite; }
+.eq i:nth-child(2) { animation-delay:-.3s; } .eq i:nth-child(3) { animation-delay:-.6s; }
+@keyframes eq { 0%,100% { height:3px } 50% { height:12px } }
+
+/* Bell (Prayer tab rows) */
+.bell { width:32px; height:32px; border-radius:16px; display:grid; place-items:center; color:var(--muted-fg); flex:none; position:relative; }
+.bell.on { color:var(--foreground); }
+.bell .dot { position:absolute; top:6px; inset-inline-end:6px; width:7px; height:7px; border-radius:50%; box-shadow:0 0 0 2px var(--card); }
+.bell .dot.voice { background:var(--success); }
+.bell .dot.muted { background:var(--muted-fg); }
+
+/* Prayer tab (approved 'Next up', variant A of prayer.html) — context behind the sheet */
+.a-hero { margin:16px 16px 0; padding:22px 22px 18px; border-radius:28px; background:var(--primary); color:var(--primary-fg); position:relative; overflow:hidden; }
+.a-hero .lbl { font-size:13px; opacity:.7; }
+.a-hero .name { font-size:40px; font-weight:700; line-height:1.15; margin-top:2px; }
+.a-hero .at { font-size:15px; opacity:.8; }
+.a-hero .cd { font-size:56px; font-weight:300; letter-spacing:-.02em; line-height:1; margin:18px 0 14px; direction:ltr; text-align:start; }
+[dir="rtl"] .a-hero .cd { text-align:right; }
+.a-hero .track { height:4px; border-radius:2px; background:color-mix(in srgb, var(--primary-fg) 18%, transparent); overflow:hidden; }
+.a-hero .fill { height:100%; background:var(--primary-fg); border-radius:2px; }
+.a-hero .hero-bell { position:absolute; top:18px; inset-inline-end:18px; width:40px; height:40px; border-radius:20px; display:grid; place-items:center; background:color-mix(in srgb, var(--primary-fg) 12%, transparent); color:var(--primary-fg); }
+.a-loc { display:inline-flex; align-items:center; gap:4px; height:28px; padding:0 10px; border-radius:14px; background:var(--secondary); font-size:13px; font-weight:500; margin-top:6px; }
+.a-tt .row { min-height:46px; }
+.a-tt .row.past .nm, .a-tt .row.past .tm { color:var(--muted-fg); }
+.a-tt .row.now { background:var(--inset); }
+.a-tt .row.now .nm { font-weight:700; }
+.a-tt .tm { font-weight:600; }
+.a-tt .nm { font-size:16px; }
+.a-tt .minor .nm, .a-tt .minor .tm { font-size:14px; font-weight:500; color:var(--muted-fg); }
+.tabbar { position:absolute; inset-inline:0; bottom:0; height:86px; display:flex; justify-content:space-around; padding:8px 8px 0; border-top:1px solid var(--border);
+  background:color-mix(in srgb, var(--background) 82%, transparent); backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); z-index:5; }
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:500; color:var(--muted-fg); }
+.tab.active { color:var(--foreground); }
+.homebar { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; border-radius:3px; background:var(--foreground); opacity:.85; z-index:30; }
+
+/* Sheet */
+.scrim { position:absolute; inset:0; background:var(--scrim); z-index:20; animation:fade .25s ease-out; }
+.sheet { position:absolute; inset-inline:0; bottom:0; z-index:21; background:var(--overlay); border-radius:var(--radius-3xl) var(--radius-3xl) 0 0; max-height:90%; display:flex; flex-direction:column; animation:rise .4s var(--ease); }
+.sheet .grab { width:36px; height:5px; border-radius:3px; background:var(--muted-fg); opacity:.4; margin:8px auto 2px; flex:none; }
+.sheet-head { display:flex; align-items:center; gap:12px; padding:6px 20px 12px; flex:none; }
+.sheet-head h2 { margin:0; font-size:22px; line-height:1.2; }
+.sheet-head .sub { font-size:13px; color:var(--muted-fg); margin-top:2px; }
+.sheet-body { overflow-y:auto; padding:0 20px 16px; scrollbar-width:none; }
+.sheet-body::-webkit-scrollbar { display:none; }
+.sheet-foot { flex:none; padding:10px 20px 30px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.label { font-size:13px; font-weight:600; color:var(--muted-fg); margin:20px 2px 8px; display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
+.hint { font-size:13px; color:var(--muted-fg); line-height:1.5; margin:8px 2px 0; }
+.group { background:var(--wash); border-radius:var(--radius-xl); overflow:hidden; }
+.lrow { display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 14px; width:100%; text-align:start; }
+.lrow + .lrow, .group-h + .lrow { border-top:1px solid var(--border); }
+.lrow .t { font-weight:500; font-size:15px; }
+.lrow .d { font-size:12.5px; color:var(--muted-fg); margin-top:1px; }
+[aria-checked="true"] .t { font-weight:600; }
+.lrow:disabled, .lrow[aria-disabled="true"] { opacity:.4; cursor:default; }
+.toast { position:absolute; z-index:40; top:58px; left:50%; transform:translateX(-50%); background:var(--primary); color:var(--primary-fg); padding:10px 16px; border-radius:999px; font-size:13px; font-weight:500; white-space:nowrap; animation:drop .3s var(--ease); }
+@keyframes fade { from { opacity:0 } }
+@keyframes rise { from { transform:translateY(100%) } }
+@keyframes drop { from { opacity:0; transform:translate(-50%,-8px) } }
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+
+/* Live summary sentence (shared) */
+.summary { display:flex; gap:12px; align-items:center; padding:12px 14px; border-radius:var(--radius-xl); background:var(--wash); font-size:15px; font-weight:500; line-height:1.45; }
+.summary .ic { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--primary); color:var(--primary-fg); flex:none; }
+.summary.off .ic { background:var(--wash-2); color:var(--muted-fg); }
+.summary.off { color:var(--muted-fg); }
+
+/* ── Variant A · Alert type ──────────────────────────── */
+.a-types { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.a-types button { height:72px; border-radius:var(--radius-xl); background:var(--wash); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; font-size:13px; font-weight:500; border:1.5px solid transparent; transition:background .2s var(--ease), color .2s var(--ease); }
+.a-types button[aria-checked="true"] { background:var(--primary); color:var(--primary-fg); font-weight:600; }
+.a-ctx { animation:ctx .3s var(--ease); }
+@keyframes ctx { from { opacity:0; transform:translateY(6px) } }
+.a-preview { width:100%; display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:var(--radius-xl); border:1px solid var(--input); margin-top:12px; text-align:start; }
+.a-preview .play { pointer-events:none; }
+.a-preview .bar { height:3px; border-radius:2px; background:var(--wash-2); margin-top:6px; overflow:hidden; }
+.a-preview .bar i { display:block; height:100%; width:calc(var(--p, 0) * 100%); background:var(--foreground); }
+.a-timing { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.minitypes { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; background:var(--wash); border-radius:var(--radius-lg); padding:3px; margin-top:10px; }
+.minitypes button { height:32px; border-radius:8px; font-size:12.5px; font-weight:500; display:flex; align-items:center; justify-content:center; gap:5px; }
+.minitypes button[aria-checked="true"] { background:var(--primary); color:var(--primary-fg); font-weight:600; }
+
+/* ── Variant B · One list ────────────────────────────── */
+.b-master { display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:var(--radius-xl); background:var(--wash); }
+.b-master .t { font-weight:600; font-size:17px; }
+.b-master .d { font-size:13.5px; color:var(--muted-fg); margin-top:2px; line-height:1.45; }
+.b-master.on .d { color:var(--foreground); }
+.b-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.group-h { font-size:12px; font-weight:600; color:var(--muted-fg); padding:14px 14px 4px; display:flex; align-items:center; gap:6px; border-top:1px solid var(--border); }
+.group-h + .lrow { border-top:0; }
+.b-list .lrow { min-height:58px; }
+.b-list .dur { font-size:12px; color:var(--muted-fg); white-space:nowrap; }
+.b-off { padding:28px 8px; text-align:center; color:var(--muted-fg); font-size:14px; line-height:1.6; }
+
+/* ── Variant C · Summary drill-in ────────────────────── */
+.c-hero { display:flex; gap:14px; align-items:flex-start; padding:18px 16px; border-radius:var(--radius-2xl); background:var(--primary); color:var(--primary-fg); }
+.c-hero.off { background:var(--wash); color:var(--muted-fg); }
+.c-hero .k { font-size:12px; opacity:.7; font-weight:500; }
+.c-hero .s1 { font-size:20px; font-weight:700; line-height:1.3; margin-top:4px; }
+.c-hero .s2 { font-size:15px; opacity:.75; margin-top:2px; }
+.c-hero .play { background:color-mix(in srgb, var(--primary-fg) 14%, transparent); color:var(--primary-fg); }
+.c-hero .play.on { background:var(--primary-fg); color:var(--primary); }
+.c-hero .play.on::before { background:conic-gradient(var(--primary-fg) calc(var(--p) * 360deg), color-mix(in srgb, var(--primary-fg) 20%, transparent) 0); }
+.c-rows .lrow { min-height:54px; }
+.c-rows .v { color:var(--muted-fg); font-size:15px; max-width:56%; text-align:end; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.c-page { animation:slide .32s var(--ease); }
+[dir="rtl"] .c-page { animation-name:slideRtl; }
+@keyframes slide { from { opacity:0; transform:translateX(28px) } }
+@keyframes slideRtl { from { opacity:0; transform:translateX(-28px) } }
+.c-big { text-align:center; padding:10px 0 4px; }
+.c-big b { font-size:64px; font-weight:300; line-height:1; letter-spacing:-.02em; display:block; }
+.c-big span { font-size:15px; color:var(--muted-fg); }
+input[type="range"] { width:100%; accent-color:var(--foreground); margin:16px 0 4px; }
+.c-ticks { display:flex; justify-content:space-between; font-size:11px; color:var(--muted-fg); padding:0 2px; }
+.ticon { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--wash-2); flex:none; }
+.ticon.on { background:var(--primary); color:var(--primary-fg); }
+
+/* Settings screen */
+.banner { padding:14px 16px; display:flex; flex-direction:column; gap:12px; }
+.srow { padding:12px 16px; }
+.srow + .srow { border-top:1px solid var(--border); }
+.timein { height:36px; border-radius:var(--radius-lg); border:1px solid var(--input); background:transparent; padding:0 10px; color-scheme:light dark; }
+.timein:disabled { opacity:.4; }
+
+/* ── Prototype chrome (outside the design) ───────────── */
+.side { width:320px; flex:none; font:13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color:#e8e8e8; direction:ltr; text-align:left; }
+.side details { background:#121212; border:1px solid #333; border-radius:12px; padding:10px 14px; }
+.side details + details { margin-top:10px; }
+.side summary { cursor:pointer; font-weight:700; color:#d9f99d; }
+.side h4 { margin:12px 0 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#9ca3af; }
+.side p { margin:4px 0; color:#cbd5e1; }
+.side ul { margin:0; padding-left:16px; }
+.side li { margin:2px 0; }
+.side .kv { display:grid; grid-template-columns:76px 1fr; gap:2px 8px; }
+.side .kv span:nth-child(odd) { color:#9ca3af; }
+.side .sim { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; align-items:center; }
+.side .sim button { border:1px solid #444; border-radius:6px; padding:3px 8px; color:#e8e8e8; font:inherit; font-size:12px; }
+.side .sim button.on { background:#d9f99d; color:#111; border-color:#d9f99d; }
+.side table { border-collapse:collapse; width:100%; font-size:11.5px; }
+.side td { border-top:1px solid #2a2a2a; padding:4px 4px; vertical-align:top; }
+.side td:first-child { color:#9ca3af; white-space:nowrap; }
+.side td.ar { direction:rtl; text-align:right; font-family:"Noto Sans Arabic", sans-serif; }
+.switcher { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; display:flex; align-items:center; gap:4px; padding:6px; border-radius:999px; background:#0a0a0a; color:#fafafa; border:2px solid #d9f99d; box-shadow:0 10px 30px rgba(0,0,0,.35); font:600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; direction:ltr; white-space:nowrap; }
+.switcher button { color:#fafafa; height:34px; min-width:34px; padding:0 10px; border-radius:999px; }
+.switcher button:hover { background:#262626; }
+.switcher .lbl { padding:0 10px; min-width:170px; text-align:center; }
+.switcher .div { width:1px; height:20px; background:#333; margin:0 4px; }
+
+/* Phone-width: the screen goes full-bleed, the switcher takes a top strip, the state panel follows below. */
+@media (max-width: 760px) {
+  body { display:block; padding:0 0 32px; }
+  .phone { width:100%; height:100vh; height:100dvh; border-radius:0; box-shadow:none; padding-top:54px; }
+  .statusbar, .homebar { display:none; }
+  .tabbar { height:68px; }
+  .sheet-foot { padding-bottom:18px; }
+  .side { display:block; width:auto; margin:16px 12px 0; }
+  .switcher { top:8px; bottom:auto; padding:4px; font-size:12px; }
+  .switcher button { height:30px; min-width:30px; padding:0 8px; }
+  .switcher .lbl { min-width:0; padding:0 6px; }
+}
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<aside class="side" id="side"></aside>
+<nav class="switcher" id="switcher" aria-label="Prototype variant switcher">
+  <button id="sw-prev" aria-label="Previous variant">‹</button>
+  <span class="lbl" id="sw-label"></span>
+  <button id="sw-next" aria-label="Next variant">›</button>
+  <span class="div"></span>
+  <button id="sw-theme"></button>
+  <button id="sw-lang"></button>
+</nav>
+<script>
+"use strict";
+// ── Strings: verbatim from features/reminders/i18n/{ar,en}.ts, features/settings/i18n (reminders.*),
+// shared/lib/i18n/common.* and the Prayer tab catalog. Keys under `p` are PROPOSED: no catalog entry yet.
+const I18N = {
+  ar: {
+    tabs: { home:"الرئيسية", prayer:"الصلاة", library:"المكتبة", worship:"العبادات", tasbih:"التسبيح" },
+    separator: "، ",
+    controls: { close:"إغلاق", decrease:"إنقاص {{label}}", increase:"زيادة {{label}}" },
+    names: { imsak:"الإمساك", fajr:"الفجر", sunrise:"الشروق", dhuhr:"الظهر", asr:"العصر", maghrib:"المغرب", isha:"العشاء", midnight:"منتصف الليل" },
+    timetable: { title:"مواقيت اليوم", current:"الوقت الحالي" },
+    next: { title:"الصلاة القادمة", at:"عند {{time}}" },
+    qibla: "القبلة",
+    settingsReminders: { title:"تنبيهات الصلاة", description:"التنبيه قبل كل صلاة وعند الإمساك، وساعات الهدوء." },
+    minutes: { zero:"{{count}} دقيقة", one:"دقيقة واحدة", two:"دقيقتين", few:"{{count}} دقائق", many:"{{count}} دقيقة", other:"{{count}} دقيقة" },
+    screen: {
+      intro:"تصلك التنبيهات من جهازك نفسه، ولو دون اتصال، وفق مواقيت موقعك والمنطقة الزمنية لجهازك.",
+      noLocation:"حدّد موقعك في الإعدادات لتصلك تنبيهات الصلاة.",
+      denied:"الإشعارات غير مسموح بها لهذا التطبيق، فلن تصلك التنبيهات. اسمح بها من إعدادات الجهاز.",
+      openSettings:"فتح إعدادات الجهاز", allow:"السماح بالإشعارات",
+      exactAlarms:"قد يؤخّر أندرويد التنبيهات دقائق ما لم تسمح للتطبيق بضبط المنبّهات في وقتها.",
+      allowExactAlarms:"السماح بالتنبيه في الوقت تمامًا",
+      salahTitle:"تنبيهات الصلاة", imsakTitle:"تنبيه الإمساك", imsakDescription:"يصلك عند وقت الإمساك، فلا يفوتك بدء الصيام.",
+    },
+    bell: { label:"{{name}}: {{state}}", settings:"إعدادات التنبيه", off:"التنبيه متوقف", on:"التنبيه مفعّل", muted:"التنبيه صامت", voice:"التنبيه بصوت الأذان" },
+    rule: {
+      enabled:"التنبيه", minutesBefore:"قبل الوقت بـ (دقائق)", sound:"الصوت", muted:"صامت", mutedHint:"يظهر التنبيه دون صوت.",
+      voice:"صوت الأذان", voiceHint:"يُسمع الأذان بدل النغمة.", adhan:"الأذان", adhanOption:"{{muezzin}}: {{form}}",
+      adhanForms: { takbeer:"التكبير فقط", full:"الأذان كاملاً" },
+      muezzins: { hatamzadeh:"سعيد حاتم‌زاده ورمزيار", sobhdel:"حسين صبحدل" },
+      adhanIosHint:"على الآيفون يقتصر الصوت على التكبير حتى لو اخترت الأذان كاملاً، لأن iOS يحدّ صوت الإشعار بثلاثين ثانية.",
+      sounds: { default:"صوت النظام", chime:"رنين", bell:"جرس" },
+    },
+    quietHours: { title:"ساعات الهدوء", description:"لا تصلك فيها التنبيهات غير الأساسية. تنبيهات الصلاة والإمساك تصلك دائمًا.", enabled:"تفعيل ساعات الهدوء", start:"من", end:"إلى" },
+    p: {
+      alertType:"نوع التنبيه",
+      types: { off:"متوقف", silent:"صامت", tone:"نغمة", adhan:"أذان" },
+      offHint:"لن يصلك تنبيه لهذا الوقت.",
+      toneHint:"نغمة قصيرة مع الإشعار.",
+      timing:"التوقيت", onTime:"عند الوقت", custom:"مخصّص", customValue:"مخصّص: {{minutes}}",
+      muezzin:"المؤذن", tones:"النغمات", adhanGroup:"الأذان · {{muezzin}}",
+      previewLabel:"استمع إلى {{sound}}", stopLabel:"إيقاف {{sound}}",
+      allReminders:"كل التنبيهات", back:"رجوع",
+      summary: {
+        off:"لن يصلك تنبيه {{name}}.", silent:"إشعار صامت", tone:"نغمة {{sound}}", toneDefault:"صوت النظام",
+        adhanFull:"أذان {{muezzin}} كاملاً", adhanTakbeer:"تكبير الأذان بصوت {{muezzin}}",
+        before:"قبل {{name}} بـ {{minutes}}", at:"عند دخول وقت {{name}}", line:"{{sound}} {{timing}}",
+      },
+      willHear:"سيصلك", beforeShort:"قبل بـ {{minutes}}",
+    },
+    proto: { opens:"يفتح {{route}}" },
+  },
+  en: {
+    tabs: { home:"Home", prayer:"Prayer", library:"Library", worship:"Worship", tasbih:"Tasbih" },
+    separator: " · ",
+    controls: { close:"Close", decrease:"Decrease {{label}}", increase:"Increase {{label}}" },
+    names: { imsak:"Imsak", fajr:"Fajr", sunrise:"Sunrise", dhuhr:"Dhuhr", asr:"Asr", maghrib:"Maghrib", isha:"Isha", midnight:"Midnight" },
+    timetable: { title:"Today's Prayer Times", current:"Now" },
+    next: { title:"Next Prayer Time", at:"at {{time}}" },
+    qibla: "Qibla",
+    settingsReminders: { title:"Prayer Reminders", description:"A Reminder before each Salah and at Imsak, and quiet hours." },
+    minutes: { zero:"{{count}} minutes", one:"1 minute", two:"{{count}} minutes", few:"{{count}} minutes", many:"{{count}} minutes", other:"{{count}} minutes" },
+    screen: {
+      intro:"Reminders come from your device itself, even offline, on your location's Prayer Times and your device's time zone.",
+      noLocation:"Set your location in Settings to get Salah Reminders.",
+      denied:"Notifications are off for this app, so no Reminders can arrive. Allow them in the device's settings.",
+      openSettings:"Open device settings", allow:"Allow notifications",
+      exactAlarms:"Android may deliver Reminders minutes late unless the app may set alarms on time.",
+      allowExactAlarms:"Allow on-time alarms",
+      salahTitle:"Salah Reminders", imsakTitle:"Imsak Reminder", imsakDescription:"Arrives at Imsak, so you don't miss the start of the fast.",
+    },
+    bell: { label:"{{name}}: {{state}}", settings:"Reminder settings", off:"Reminder off", on:"Reminder on", muted:"Reminder silent", voice:"Reminder with the Adhan voice" },
+    rule: {
+      enabled:"Remind me", minutesBefore:"Minutes before", sound:"Sound", muted:"Silent", mutedHint:"Shows the Reminder without a sound.",
+      voice:"Adhan voice", voiceHint:"Plays the Adhan instead of the tone.", adhan:"Adhan", adhanOption:"{{muezzin}}: {{form}}",
+      adhanForms: { takbeer:"Takbeer only", full:"Full Adhan" },
+      muezzins: { hatamzadeh:"Saeed Hatamzadeh-Varmazyar", sobhdel:"Hussein Sobhdel" },
+      adhanIosHint:"On iPhone only the takbeer plays, even if you choose the full Adhan: iOS limits a notification sound to thirty seconds.",
+      sounds: { default:"System sound", chime:"Chime", bell:"Bell" },
+    },
+    quietHours: { title:"Quiet hours", description:"Non-essential Reminders are held back. Salah and Imsak Reminders always arrive.", enabled:"Use quiet hours", start:"From", end:"To" },
+    p: {
+      alertType:"Alert",
+      types: { off:"Off", silent:"Silent", tone:"Tone", adhan:"Adhan" },
+      offHint:"No Reminder for this time.",
+      toneHint:"A short tone with the notification.",
+      timing:"Timing", onTime:"On time", custom:"Custom", customValue:"Custom: {{minutes}}",
+      muezzin:"Muezzin", tones:"Tones", adhanGroup:"Adhan · {{muezzin}}",
+      previewLabel:"Preview {{sound}}", stopLabel:"Stop {{sound}}",
+      allReminders:"All Reminders", back:"Back",
+      summary: {
+        off:"No Reminder for {{name}}.", silent:"Silent notification", tone:"{{sound}}", toneDefault:"System sound",
+        adhanFull:"{{muezzin}}'s full Adhan", adhanTakbeer:"{{muezzin}}'s takbeer",
+        before:"{{minutes}} before {{name}}", at:"when {{name}} begins", line:"{{sound}} {{timing}}",
+      },
+      willHear:"You'll get", beforeShort:"{{minutes}} before",
+    },
+    proto: { opens:"Opens {{route}}" },
+  },
+};
+const PROPOSED_KEYS = [
+  "p.alertType","p.types.off","p.types.silent","p.types.tone","p.types.adhan","p.offHint","p.toneHint",
+  "p.timing","p.onTime","p.custom","p.customValue","p.muezzin","p.tones","p.adhanGroup",
+  "p.previewLabel","p.stopLabel","p.allReminders","p.back","p.willHear","p.beforeShort",
+  "p.summary.off","p.summary.silent","p.summary.tone","p.summary.toneDefault","p.summary.adhanFull","p.summary.adhanTakbeer",
+  "p.summary.before","p.summary.at","p.summary.line",
+];
+
+// ── Mock domain (packages/domain/src/reminders/{settings,adhan}.ts) ──
+const SALAH = ["fajr","dhuhr","asr","maghrib","isha"];
+const REMINDABLE = ["imsak", ...SALAH];
+const REMINDER_SOUNDS = ["default","chime","bell"];
+const MUEZZINS = ["hatamzadeh","sobhdel"];
+const ADHAN_FORMS = ["takbeer","full"];
+const MAX_MINUTES_BEFORE = 60;
+const PRESETS = [0, 5, 10, 15, 30];
+const adhanOf = (id) => { const [muezzin, form] = id.split("-"); return { id, muezzin, form }; };
+// Najaf, Ja'fari method, minutes after local midnight (as prayer.html); Imsak 10 min before Fajr.
+const BASE = { imsak:4*60+35, fajr:4*60+45, sunrise:6*60+5, dhuhr:11*60+49, asr:15*60+3, maghrib:17*60+46, isha:18*60+47, midnight:23*60+15 };
+const TIMETABLE = ["imsak","fajr","sunrise","dhuhr","asr","maghrib","isha","midnight"];
+const START_SEC = 14*3600 + 21*60 + 30, t0 = Date.now();
+
+const SOUNDS = {
+  default:{ src:null, dur:0.7 },
+  chime:{ src:"sounds/chime.wav", dur:2.2 },
+  bell:{ src:"sounds/bell.wav", dur:3.0 },
+  "hatamzadeh-takbeer":{ src:"sounds/adhan.wav", dur:28.8 },
+  "hatamzadeh-full":{ src:"sounds/adhan_hatamzadeh_full.ogg", dur:167.8 },
+  "sobhdel-takbeer":{ src:"sounds/adhan_sobhdel_takbeer.wav", dur:28.5 },
+  "sobhdel-full":{ src:"sounds/adhan_sobhdel_full.ogg", dur:355.2 },
+};
+
+const params = new URLSearchParams(location.search);
+const VARIANTS = [
+  { key:"A", name:"Alert type",
+    why:"Closest to today's sheet, minus the switch soup. One four-way control states the precedence outright (you cannot be Silent and Adhan at once); only the options that type needs appear below it. Adhan splits into muezzin × length with one big preview, so the 4 recordings read as 2 choices." },
+  { key:"B", name:"One list",
+    why:"Treats every sound as one decision: Silent, the 3 tones and the 4 recordings sit in a single radio list grouped by muezzin, each with its own play button, like Android's ringtone picker. Off is the master switch above it; timing becomes one-tap chips. Fastest to scan and to audition everything." },
+  { key:"C", name:"Summary drill-in",
+    why:"The sheet opens as a readable sentence plus three rows (Alert, Sound, Timing) that drill into sub-pages inside the sheet. Minimal at a glance for people who rarely change it; each sub-page has room for proper previews and a slider. Settings screen becomes a list of sentences." },
+];
+const S = {
+  variant: VARIANTS.some((v) => v.key === params.get("variant")) ? params.get("variant") : "A",
+  theme: params.get("theme") === "light" ? "light" : "dark",
+  lang: params.get("lang") === "en" ? "en" : "ar",
+  view: params.get("view") === "settings" ? "settings" : "prayer",   // prayer | settings
+  sheet: { name: "dhuhr", page: "root" },                            // C pages: root | alert | sound | timing
+  bCustom: false,
+  platform: "android",        // android | ios (iOS shows the 30 s note)
+  access: "granted",          // granted | denied | late (exact alarms off)
+  hasLocation: true,
+  rules: {
+    imsak:   { enabled:false, minutesBefore:0,  sound:"default", muted:false, voice:false, adhan:"hatamzadeh-takbeer" },
+    fajr:    { enabled:true,  minutesBefore:10, sound:"default", muted:false, voice:true,  adhan:"hatamzadeh-takbeer" },
+    dhuhr:   { enabled:true,  minutesBefore:5,  sound:"chime",   muted:false, voice:true,  adhan:"sobhdel-full" },
+    asr:     { enabled:false, minutesBefore:5,  sound:"default", muted:false, voice:false, adhan:"hatamzadeh-takbeer" },
+    maghrib: { enabled:true,  minutesBefore:0,  sound:"chime",   muted:false, voice:false, adhan:"hatamzadeh-full" },
+    // The screenshot's confusing case: silent and Adhan voice both on. Precedence says Silent.
+    isha:    { enabled:true,  minutesBefore:5,  sound:"default", muted:true,  voice:true,  adhan:"sobhdel-takbeer" },
+  },
+  quietHours: { enabled:false, start:23*60, end:5*60 },
+  toast: null,
+};
+
+// ── i18n helpers ──
+const L = () => I18N[S.lang];
+const get = (key, lang) => key.split(".").reduce((o, k) => (o == null ? o : o[k]), I18N[lang || S.lang]);
+const digits = (s) => S.lang === "ar" ? String(s).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]) : String(s);
+function t(key, vars) {
+  let s = get(key);
+  if (s == null) { console.warn("missing string", key); return key; }
+  if (vars) s = s.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] != null ? vars[k] : "");
+  return s;
+}
+const minutes = (n) => { const cat = new Intl.PluralRules(S.lang).select(n); return t(`minutes.${get(`minutes.${cat}`) != null ? cat : "other"}`, { count: digits(n) }); };
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
+const nm = (n) => t(`names.${n}`);
+const title = (n) => n === "imsak" ? t("screen.imsakTitle") : nm(n);
+function fmtTime(min) {
+  const h = Math.floor(min / 60) % 24, m = String(min % 60).padStart(2, "0"), h12 = h % 12 || 12;
+  return digits(`${h12}:${m}`) + "\u00a0" + (S.lang === "ar" ? (h < 12 ? "ص" : "م") : (h < 12 ? "AM" : "PM"));
+}
+const fmtDur = (s) => digits(`${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`);
+const fmtCountdown = (sec) => { sec = Math.max(0, Math.floor(sec)); return digits(`${Math.floor(sec / 3600)}:${String(Math.floor(sec % 3600 / 60)).padStart(2, "0")}:${String(sec % 60).padStart(2, "0")}`); };
+const nowSec = () => (START_SEC + Math.floor((Date.now() - t0) / 1000)) % 86400;
+const pad2 = (n) => String(n).padStart(2, "0");
+const hhmm = (min) => `${pad2(Math.floor(min / 60))}:${pad2(min % 60)}`;
+
+// ── Rule ↔ alert type (precedence: disabled > muted > voice > tone) ──
+const typeOf = (r) => !r.enabled ? "off" : r.muted ? "silent" : r.voice ? "adhan" : "tone";
+function setType(r, type) {
+  if (type === "off") { r.enabled = false; return; }
+  r.enabled = true;
+  r.muted = type === "silent";
+  if (type === "tone") r.voice = false;
+  if (type === "adhan") r.voice = true;
+}
+const soundIdOf = (r) => { const ty = typeOf(r); return ty === "tone" ? r.sound : ty === "adhan" ? r.adhan : null; };
+const soundName = (id) => REMINDER_SOUNDS.includes(id) ? t(`rule.sounds.${id}`)
+  : t("rule.adhanOption", { muezzin: t(`rule.muezzins.${adhanOf(id).muezzin}`), form: t(`rule.adhanForms.${adhanOf(id).form}`) });
+function soundPhrase(r) {
+  const ty = typeOf(r);
+  if (ty === "silent") return t("p.summary.silent");
+  if (ty === "tone") return r.sound === "default" ? t("p.summary.toneDefault") : t("p.summary.tone", { sound: t(`rule.sounds.${r.sound}`) });
+  const a = adhanOf(r.adhan);
+  return t(a.form === "full" ? "p.summary.adhanFull" : "p.summary.adhanTakbeer", { muezzin: t(`rule.muezzins.${a.muezzin}`) });
+}
+const timingPhrase = (n, r) => r.minutesBefore === 0 ? t("p.summary.at", { name: nm(n) }) : t("p.summary.before", { name: nm(n), minutes: minutes(r.minutesBefore) });
+const summary = (n, r) => !r.enabled ? t("p.summary.off", { name: nm(n) }) : t("p.summary.line", { sound: soundPhrase(r), timing: timingPhrase(n, r) });
+const timingShort = (r) => r.minutesBefore === 0 ? t("p.onTime") : t("p.beforeShort", { minutes: minutes(r.minutesBefore) });
+
+// ── Icons ──
+const I = {
+  house:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  books:'<path d="M4 4h4v16H4zM10 4h4v16h-4zM16.5 4.5l3.5-.8 3 15.5-3.5.8z"/>',
+  sparkles:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  dotted:'<circle cx="12" cy="12" r="8.5" stroke-dasharray="1.5 3.2"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M12 5.5 14.6 13h-5.2z" fill="currentColor"/><path d="M12 18.5 9.4 13h5.2z" opacity=".35" fill="currentColor"/>',
+  bell:'<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+  bellOff:'<path d="M6 16V11a6 6 0 0 1 9.6-4.8M18 11v5l1.5 2H8"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/><path d="M4 4l16 16"/>',
+  silent:'<path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>',
+  note:'<path d="M9 18V6.5l10-2.5v11.5"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="15.5" r="2.5"/>',
+  adhan:'<path d="M12 2.5v2"/><path d="M9.5 8a2.5 3 0 0 1 5 0z"/><path d="M9 8h6l-.6 2.5H9.6z"/><path d="M10 10.5h4V21h-4zM7 21h10"/><path d="M10 14.5h4"/>',
+  check:'<path d="M5 12.5 10 17.5 19 7.5"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  chevBack:'<path d="M15 5l-7 7 7 7"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  play:'<path d="M8 5.5v13l10.5-6.5z" fill="currentColor" stroke="none"/>',
+  stop:'<rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" stroke="none"/>',
+  moon:'<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+};
+const TYPE_ICON = { off:"bellOff", silent:"silent", tone:"note", adhan:"adhan" };
+const TYPES = ["off","silent","tone","adhan"];
+const icon = (name, size = 20, sw = 1.8, cls = "") => `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[name]}</svg>`;
+// In RTL the play triangle still points right (media convention).
+const playIcon = (on, size = 16) => icon(on ? "stop" : "play", size);
+
+// ── Audio preview: one sound at a time ──
+const audio = { id:null, el:null, start:0, raf:0, ctx:null };
+function stopAudio(silent) {
+  if (audio.el) { audio.el.onended = null; audio.el.onerror = null; audio.el.pause(); audio.el.removeAttribute("src"); audio.el.load(); }
+  audio.el = null; audio.id = null; cancelAnimationFrame(audio.raf);
+  if (!silent) render();
+}
+function synthSystemSound() {
+  // "System sound" has no file in the app: the device plays its own default. A short two-note stand-in.
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  audio.ctx = audio.ctx || new AC();
+  const ctx = audio.ctx, now = ctx.currentTime;
+  [[880, 0], [1318.5, .16]].forEach(([f, at]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    g.gain.setValueAtTime(0, now + at); g.gain.linearRampToValueAtTime(.22, now + at + .02); g.gain.exponentialRampToValueAtTime(.0001, now + at + .5);
+    o.connect(g).connect(ctx.destination); o.start(now + at); o.stop(now + at + .55);
+  });
+}
+function playSound(id) {
+  if (audio.id === id) { stopAudio(); return; }
+  stopAudio(true);
+  audio.id = id; audio.start = performance.now();
+  if (id === "default") {
+    synthSystemSound();
+    setTimeout(() => { if (audio.id === "default") stopAudio(); }, SOUNDS.default.dur * 1000);
+  } else {
+    const el = new Audio(SOUNDS[id].src);
+    audio.el = el;
+    el.onended = () => stopAudio();
+    el.onerror = () => { if (audio.el === el) { stopAudio(); toast("⚠ " + SOUNDS[id].src); } };
+    el.play().catch((err) => { if (audio.el === el && err.name !== "AbortError") { console.warn("preview blocked:", err.name); stopAudio(); } });
+  }
+  render();
+  const loop = () => {
+    if (!audio.id) return;
+    const total = audio.el && isFinite(audio.el.duration) ? audio.el.duration : SOUNDS[audio.id].dur;
+    const cur = audio.el ? audio.el.currentTime : (performance.now() - audio.start) / 1000;
+    const p = Math.min(1, cur / total);
+    phone.querySelectorAll(`[data-prog="${audio.id}"]`).forEach((el) => el.style.setProperty("--p", p));
+    phone.querySelectorAll(`[data-elapsed="${audio.id}"]`).forEach((el) => { el.textContent = `${fmtDur(cur)} / ${fmtDur(total)}`; });
+    audio.raf = requestAnimationFrame(loop);
+  };
+  audio.raf = requestAnimationFrame(loop);
+}
+const playing = (id) => audio.id === id;
+const playBtn = (id, cls = "") => {
+  const on = playing(id), name = soundName(id);
+  return `<button class="play ${on ? "on" : ""} ${cls}" data-act="play" data-id="${id}" data-prog="${id}" aria-pressed="${on}" aria-label="${esc(t(on ? "p.stopLabel" : "p.previewLabel", { sound: name }))}">${playIcon(on)}</button>`;
+};
+const durLabel = (id) => `<span class="dur num" data-elapsed="${id}">${playing(id) ? "…" : fmtDur(SOUNDS[id].dur)}</span>`;
+const iosHint = () => S.platform === "ios" ? `<p class="hint">${esc(t("rule.adhanIosHint"))}</p>` : "";
+
+// ── Prayer tab background (prayer.html variant A, trimmed to hero + timetable) ──
+function bellBtn(n, cls = "bell") {
+  const r = S.rules[n], ty = typeOf(r);
+  const state = ty === "off" ? "off" : ty === "silent" ? "muted" : ty === "adhan" ? "voice" : "on";
+  return `<button class="${cls} ${r.enabled ? "on" : ""}" data-act="open" data-name="${n}" aria-label="${esc(t("bell.label", { name: nm(n), state: t(`bell.${state}`) }))}">${icon(r.enabled ? "bell" : "bellOff", cls === "bell" ? 19 : 20)}${state === "voice" || state === "muted" ? `<span class="dot ${state}"></span>` : ""}</button>`;
+}
+function renderPrayer() {
+  const now = nowSec();
+  const list = TIMETABLE;
+  let next = list.find((n) => BASE[n] * 60 > now) || list[0];
+  const current = [...list].reverse().find((n) => BASE[n] * 60 <= now);
+  const left = (BASE[next] * 60 - now + 86400) % 86400, span = (BASE[next] - BASE[current]) * 60;
+  const rows = list.map((n) => {
+    const cur = n === current, past = BASE[n] * 60 <= now && !cur, minor = !SALAH.includes(n);
+    return `<div class="row ${past ? "past" : ""} ${cur ? "now" : ""} ${minor ? "minor" : ""}"><div class="grow nm">${esc(nm(n))}</div>${cur ? `<span class="badge">${esc(t("timetable.current"))}</span>` : ""}<div class="tm num">${fmtTime(BASE[n])}</div>${REMINDABLE.includes(n) ? bellBtn(n) : `<span class="bell"></span>`}</div>`;
+  }).join("");
+  const date = new Intl.DateTimeFormat(S.lang === "ar" ? "ar-u-nu-arab" : "en-GB", { weekday:"long", day:"numeric", month:"long" }).format(new Date(2026, 9, 15));
+  return `<div class="navbar" style="justify-content:flex-end"><button class="toolbtn" data-act="toast" data-msg="/qibla" aria-label="${esc(t("qibla"))}">${icon("compass", 21, 1.7)}</button></div>
+    <div class="largetitle">${esc(t("tabs.prayer"))}</div>
+    <div class="subline">${esc(date)}</div>
+    <div style="padding:0 20px"><span class="a-loc">${icon("pin", 13, 2)}${S.lang === "ar" ? "النجف" : "Najaf"}${icon("sliders", 13, 2)}</span></div>
+    <section class="a-hero">${REMINDABLE.includes(next) ? bellBtn(next, "hero-bell") : ""}
+      <div class="lbl">${esc(t("next.title"))}</div><div class="name">${esc(nm(next))}</div>
+      <div class="at num">${esc(t("next.at", { time: fmtTime(BASE[next]) }))}</div>
+      <div class="cd num" data-live="cd">${fmtCountdown(left)}</div>
+      <div class="track"><div class="fill" style="width:${Math.min(100, (1 - left / span) * 100)}%"></div></div>
+    </section>
+    <div class="section"><div class="sec-title"><span>${esc(t("timetable.title"))}</span><button class="small" style="color:var(--info-fg);font-weight:500" data-act="view" data-v="settings">${esc(t("p.allReminders"))}</button></div>
+      <div class="card a-tt" style="overflow:hidden">${rows}</div></div>`;
+}
+const statusBar = () => `<div class="statusbar"><span class="num">9:41</span><span class="island"></span><span class="icons"><svg width="18" height="11" viewBox="0 0 18 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="21" height="11" rx="3.5" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor" stroke="none"/></svg></span></div>`;
+function tabBar() {
+  const tabs = [["home","house"],["prayer","clock"],["library","books"],["worship","sparkles"],["tasbih","dotted"]];
+  return `<nav class="tabbar" role="tablist">${tabs.map(([k, ic]) => `<button class="tab ${k === "prayer" ? "active" : ""}" role="tab" aria-selected="${k === "prayer"}" data-act="toast" data-msg="${esc(t(`tabs.${k}`))}">${icon(ic, 25, k === "prayer" ? 2.1 : 1.7)}<span>${esc(t(`tabs.${k}`))}</span></button>`).join("")}</nav>`;
+}
+
+// ── Shared sheet pieces ──
+function sheetHead(n, lead = "", heading = null, sub = null) {
+  return `<div class="sheet-head">${lead}<div class="grow"><h2>${esc(heading ?? title(n))}</h2><div class="sub num">${esc(sub ?? (n === "imsak" ? t("screen.imsakDescription") : fmtTime(BASE[n])))}</div></div>
+    <button class="iconbtn" data-act="close" aria-label="${esc(t("controls.close"))}">${icon("x", 16, 2.2)}</button></div>`;
+}
+const allLink = () => `<button class="linkbtn" data-act="view" data-v="settings">${esc(t("p.allReminders"))}${icon("chev", 15, 2.2, "flipx")}</button>`;
+function summaryStrip(n, r) {
+  const ty = typeOf(r);
+  return `<div class="summary ${ty === "off" ? "off" : ""}" role="status" aria-live="polite"><span class="ic">${icon(TYPE_ICON[ty], 17, 2)}</span><span class="grow">${esc(summary(n, r))}</span></div>`;
+}
+function stepper(r) {
+  const v = r.minutesBefore, lbl = t("rule.minutesBefore");
+  return `<div class="stepper"><button data-act="min" data-d="-1" ${v <= 0 ? "disabled" : ""} aria-label="${esc(t("controls.decrease", { label: lbl }))}">−</button><input class="num" inputmode="numeric" value="${digits(v)}" data-input="min" aria-label="${esc(lbl)}"/><button data-act="min" data-d="1" ${v >= MAX_MINUTES_BEFORE ? "disabled" : ""} aria-label="${esc(t("controls.increase", { label: lbl }))}">+</button></div>`;
+}
+
+// ── Variant A · Alert type: four-way segmented control, contextual options, inline previews ──
+function sheetA(n, r) {
+  const ty = typeOf(r);
+  let ctx = "";
+  if (ty === "off") ctx = `<p class="hint">${esc(t("p.offHint"))}</p>`;
+  if (ty === "silent") ctx = `<p class="hint">${esc(t("rule.mutedHint"))}</p>`;
+  if (ty === "tone") ctx = `<p class="hint" style="margin-bottom:12px">${esc(t("p.toneHint"))}</p>
+    <div class="group" role="radiogroup" aria-label="${esc(t("rule.sound"))}">${REMINDER_SOUNDS.map((k) => `<div class="lrow" style="padding-inline-end:10px">
+      <button class="grow" style="display:flex;align-items:center;gap:12px;min-height:40px" role="radio" aria-checked="${r.sound === k}" data-act="tone" data-k="${k}"><span class="radio"></span><span class="t">${esc(t(`rule.sounds.${k}`))}</span></button>
+      ${playBtn(k)}</div>`).join("")}</div>`;
+  if (ty === "adhan") {
+    const a = adhanOf(r.adhan);
+    ctx = `<p class="hint">${esc(t("rule.voiceHint"))}</p>
+      <div class="label">${esc(t("p.muezzin"))}</div>
+      <div class="group" role="radiogroup" aria-label="${esc(t("p.muezzin"))}">${MUEZZINS.map((m) => `<button class="lrow" role="radio" aria-checked="${a.muezzin === m}" data-act="muezzin" data-m="${m}"><span class="radio"></span><span class="grow t">${esc(t(`rule.muezzins.${m}`))}</span></button>`).join("")}</div>
+      <div class="seg" role="radiogroup" aria-label="${esc(t("rule.adhan"))}" style="margin-top:10px">${ADHAN_FORMS.map((f) => `<button role="radio" aria-checked="${a.form === f}" data-act="form" data-f="${f}"><span>${esc(t(`rule.adhanForms.${f}`))}</span><span class="sub num">${fmtDur(SOUNDS[`${a.muezzin}-${f}`].dur)}</span></button>`).join("")}</div>
+      <button class="a-preview" data-act="play" data-id="${r.adhan}" aria-pressed="${playing(r.adhan)}" aria-label="${esc(t(playing(r.adhan) ? "p.stopLabel" : "p.previewLabel", { sound: soundName(r.adhan) }))}">
+        <span class="play ${playing(r.adhan) ? "on" : ""}" data-prog="${r.adhan}">${playIcon(playing(r.adhan))}</span>
+        <span class="grow"><span style="display:flex;justify-content:space-between;gap:8px"><span style="font-weight:600;font-size:14px">${esc(soundName(r.adhan))}</span>${durLabel(r.adhan)}</span>
+        <span class="bar" style="display:block" data-prog="${r.adhan}"><i></i></span></span></button>
+      ${iosHint()}`;
+  }
+  const body = `${summaryStrip(n, r)}
+    <div class="label">${esc(t("p.alertType"))}</div>
+    <div class="a-types" role="radiogroup" aria-label="${esc(t("p.alertType"))}">${TYPES.map((k) => `<button role="radio" aria-checked="${ty === k}" data-act="type" data-t="${k}">${icon(TYPE_ICON[k], 22, 1.8)}<span>${esc(t(`p.types.${k}`))}</span></button>`).join("")}</div>
+    <div class="a-ctx" data-ctx="${ty}">${ctx}</div>
+    ${ty !== "off" ? `<div class="label" style="margin-top:24px">${esc(t("p.timing"))}</div>
+      <div class="a-timing"><span style="font-weight:500">${esc(t("rule.minutesBefore"))}</span>${stepper(r)}</div>` : ""}`;
+  return `<div class="grab"></div>${sheetHead(n)}<div class="sheet-body">${body}</div><div class="sheet-foot">${allLink()}</div>`;
+}
+
+// ── Variant B · One list: master switch, timing chips, every sound in one radio list ──
+function sheetB(n, r) {
+  const ty = typeOf(r), custom = S.bCustom || !PRESETS.includes(r.minutesBefore);
+  const sel = (kind, id) => (kind === "silent" && ty === "silent") || (kind === "tone" && ty === "tone" && r.sound === id) || (kind === "adhan" && ty === "adhan" && r.adhan === id);
+  const row = (kind, id, label, desc, extra = "") => `<div class="lrow" style="padding-inline-end:10px">
+    <button class="grow" style="display:flex;align-items:center;gap:12px;min-height:42px;text-align:start" role="radio" aria-checked="${sel(kind, id)}" data-act="pick" data-kind="${kind}" data-id="${id}" aria-label="${esc(kind === "adhan" ? soundName(id) : label)}"><span class="radio ${sel(kind, id) ? "on" : ""}"></span><span class="grow"><span class="t" style="display:block">${esc(label)}</span>${desc ? `<span class="d" style="display:block">${desc}</span>` : ""}</span></button>${extra}</div>`;
+  const list = `<div class="group b-list" role="radiogroup" aria-label="${esc(t("rule.sound"))}">
+    ${row("silent", "silent", t("rule.muted"), esc(t("rule.mutedHint")))}
+    <div class="group-h">${icon("note", 13, 2)}${esc(t("p.tones"))}</div>
+    ${REMINDER_SOUNDS.map((k) => row("tone", k, t(`rule.sounds.${k}`), "", playBtn(k))).join("")}
+    ${MUEZZINS.map((m) => `<div class="group-h">${icon("adhan", 13, 2)}${esc(t("p.adhanGroup", { muezzin: t(`rule.muezzins.${m}`) }))}</div>
+      ${ADHAN_FORMS.map((f) => { const id = `${m}-${f}`; return row("adhan", id, t(`rule.adhanForms.${f}`), durLabel(id), playBtn(id)); }).join("")}`).join("")}
+  </div>${iosHint()}`;
+  const chips = `<div class="b-chips" role="radiogroup" aria-label="${esc(t("p.timing"))}">${PRESETS.map((v) => `<button class="chip ${!custom && r.minutesBefore === v ? "on" : ""}" role="radio" aria-checked="${!custom && r.minutesBefore === v}" data-act="preset" data-v="${v}">${esc(v === 0 ? t("p.onTime") : minutes(v))}</button>`).join("")}
+    <button class="chip ${custom ? "on" : ""}" role="radio" aria-checked="${custom}" data-act="custom">${esc(custom && !PRESETS.includes(r.minutesBefore) ? t("p.customValue", { minutes: minutes(r.minutesBefore) }) : t("p.custom"))}</button></div>
+    ${custom ? `<div class="a-timing" style="margin-top:12px"><span style="font-weight:500">${esc(t("rule.minutesBefore"))}</span>${stepper(r)}</div>` : ""}`;
+  const body = `<div class="b-master ${r.enabled ? "on" : ""}"><div class="grow"><div class="t">${esc(t("rule.enabled"))}</div><div class="d" role="status" aria-live="polite">${esc(summary(n, r))}</div></div>
+      <button class="switch" role="switch" aria-checked="${r.enabled}" data-act="master" aria-label="${esc(title(n) + ": " + t("rule.enabled"))}"></button></div>
+    ${r.enabled ? `<div class="label">${esc(t("p.timing"))}</div>${chips}<div class="label">${esc(t("rule.sound"))}</div>${list}`
+      : `<div class="b-off">${icon("bellOff", 28, 1.5)}<div style="margin-top:8px">${esc(t("p.offHint"))}</div></div>`}`;
+  return `<div class="grab"></div>${sheetHead(n)}<div class="sheet-body">${body}</div><div class="sheet-foot">${allLink()}</div>`;
+}
+
+// ── Variant C · Summary drill-in: a sentence + three rows, sub-pages inside the sheet ──
+function sheetC(n, r) {
+  const ty = typeOf(r), page = S.sheet.page, id = soundIdOf(r);
+  const back = `<button class="iconbtn" data-act="page" data-p="root" aria-label="${esc(t("p.back"))}">${icon("chevBack", 16, 2.2, "flipx")}</button>`;
+  if (page === "root") {
+    const split = r.enabled ? [soundPhrase(r), timingPhrase(n, r)] : [summary(n, r), ""];
+    const soundValue = ty === "tone" ? t(`rule.sounds.${r.sound}`) : ty === "adhan" ? t(`rule.muezzins.${adhanOf(r.adhan).muezzin}`) + t("separator") + t(`rule.adhanForms.${adhanOf(r.adhan).form}`) : "—";
+    const rowC = (p, label, value, disabled) => `<button class="lrow" data-act="page" data-p="${p}" ${disabled ? "disabled" : ""}><span class="grow t">${esc(label)}</span><span class="v">${esc(value)}</span>${icon("chev", 16, 2, "flipx")}</button>`;
+    const body = `<div class="c-hero ${r.enabled ? "" : "off"}" role="status" aria-live="polite">
+        <div class="grow"><div class="k">${esc(r.enabled ? t("p.willHear") : t("bell.off"))}</div><div class="s1">${esc(split[0])}</div>${split[1] ? `<div class="s2">${esc(split[1])}</div>` : ""}</div>
+        ${id ? playBtn(id) : `<span class="ticon" style="background:transparent">${icon(TYPE_ICON[ty], 22, 1.8)}</span>`}</div>
+      <div class="group c-rows" style="margin-top:16px">
+        ${rowC("alert", t("p.alertType"), t(`p.types.${ty}`), false)}
+        ${rowC("sound", t("rule.sound"), soundValue, ty === "off" || ty === "silent")}
+        ${rowC("timing", t("p.timing"), timingShort(r), ty === "off")}
+      </div>${ty === "adhan" ? iosHint() : ""}`;
+    return `<div class="grab"></div>${sheetHead(n)}<div class="sheet-body"><div class="c-page" data-page="root">${body}</div></div><div class="sheet-foot">${allLink()}</div>`;
+  }
+  let heading = "", body = "";
+  if (page === "alert") {
+    heading = t("p.alertType");
+    const hints = { off:t("p.offHint"), silent:t("rule.mutedHint"), tone:t("p.toneHint"), adhan:t("rule.voiceHint") };
+    body = `<div class="group" role="radiogroup" aria-label="${esc(heading)}">${TYPES.map((k) => `<button class="lrow" role="radio" aria-checked="${ty === k}" data-act="type" data-t="${k}"><span class="ticon ${ty === k ? "on" : ""}">${icon(TYPE_ICON[k], 17, 2)}</span><span class="grow"><span class="t" style="display:block">${esc(t(`p.types.${k}`))}</span><span class="d" style="display:block">${esc(hints[k])}</span></span><span class="check">${icon("check", 18, 2.4)}</span></button>`).join("")}</div>
+      ${ty === "tone" || ty === "adhan" ? `<button class="btn btn-secondary btn-block" style="margin-top:14px" data-act="page" data-p="sound">${esc(t("rule.sound"))}${t("separator")}${esc(soundName(id))}</button>` : ""}`;
+  } else if (page === "sound") {
+    heading = ty === "adhan" ? t("rule.adhan") : t("rule.sound");
+    const choice = (kind, sid, label, desc) => { const on = (kind === "tone" ? r.sound : r.adhan) === sid; return `<div class="lrow" style="padding-inline-end:10px"><button class="grow" style="display:flex;align-items:center;gap:12px;min-height:42px;text-align:start" role="radio" aria-checked="${on}" aria-label="${esc(soundName(sid))}" data-act="${kind}" data-k="${sid}"><span class="check">${icon("check", 18, 2.4)}</span><span class="grow"><span class="t" style="display:block">${esc(label)}</span>${desc ? `<span class="d" style="display:block">${desc}</span>` : ""}</span></button>${playBtn(sid)}</div>`; };
+    body = ty === "tone"
+      ? `<div class="group" role="radiogroup" aria-label="${esc(heading)}">${REMINDER_SOUNDS.map((k) => choice("tone", k, t(`rule.sounds.${k}`), "")).join("")}</div><p class="hint">${esc(t("p.toneHint"))}</p>`
+      : `${MUEZZINS.map((m) => `<div class="label">${esc(t(`rule.muezzins.${m}`))}</div><div class="group" role="radiogroup" aria-label="${esc(t(`rule.muezzins.${m}`))}">${ADHAN_FORMS.map((f) => choice("adhanPick", `${m}-${f}`, t(`rule.adhanForms.${f}`), durLabel(`${m}-${f}`))).join("")}</div>`).join("")}${iosHint()}`;
+  } else if (page === "timing") {
+    heading = t("p.timing");
+    body = `<div class="c-big"><b class="num">${digits(r.minutesBefore)}</b><span>${esc(r.minutesBefore === 0 ? t("p.summary.at", { name: nm(n) }) : t("p.summary.before", { name: nm(n), minutes: minutes(r.minutesBefore) }))}</span></div>
+      <input type="range" min="0" max="${MAX_MINUTES_BEFORE}" step="1" value="${r.minutesBefore}" data-input="range" aria-label="${esc(t("rule.minutesBefore"))}" aria-valuetext="${esc(timingShort(r))}"/>
+      <div class="c-ticks num"><span>${digits(0)}</span><span>${digits(15)}</span><span>${digits(30)}</span><span>${digits(45)}</span><span>${digits(60)}</span></div>
+      <div class="b-chips" style="margin-top:18px;justify-content:center">${PRESETS.map((v) => `<button class="chip ${r.minutesBefore === v ? "on" : ""}" data-act="preset" data-v="${v}" aria-pressed="${r.minutesBefore === v}">${esc(v === 0 ? t("p.onTime") : minutes(v))}</button>`).join("")}</div>`;
+  }
+  return `<div class="grab"></div>${sheetHead(n, back, heading, title(n))}<div class="sheet-body"><div class="c-page" data-page="${page}">${body}</div></div><div class="sheet-foot"><span class="small muted grow" role="status" aria-live="polite">${esc(summary(n, r))}</span></div>`;
+}
+
+function sheetHtml() {
+  if (!S.sheet) return "";
+  const n = S.sheet.name, r = S.rules[n];
+  const inner = S.variant === "A" ? sheetA(n, r) : S.variant === "B" ? sheetB(n, r) : sheetC(n, r);
+  return `<div class="scrim" data-act="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title(n) + t("separator") + t("bell.settings"))}">${inner}</div>`;
+}
+
+// ── Settings → Prayer Reminders screen, in each variant's idiom ──
+function settingsRow(n) {
+  const r = S.rules[n], ty = typeOf(r), head = `<span style="font-weight:600;font-size:16px">${esc(title(n))}</span>`;
+  const time = `<span class="muted small num">${n === "imsak" ? "" : fmtTime(BASE[n])}</span>`;
+  if (S.variant === "A") return `<div class="srow">
+      <button style="display:flex;width:100%;align-items:center;gap:8px;text-align:start" data-act="open" data-name="${n}"><span class="grow">${head} ${time}<span class="small muted" style="display:block;margin-top:2px">${esc(summary(n, r))}</span></span>${icon("chev", 16, 2, "flipx")}</button>
+      <div class="minitypes" role="radiogroup" aria-label="${esc(title(n) + ": " + t("p.alertType"))}">${TYPES.map((k) => `<button role="radio" aria-checked="${ty === k}" data-act="rowtype" data-name="${n}" data-t="${k}">${icon(TYPE_ICON[k], 14, 2)}${esc(t(`p.types.${k}`))}</button>`).join("")}</div></div>`;
+  if (S.variant === "B") return `<div class="srow" style="display:flex;align-items:center;gap:12px">
+      <button class="grow" style="text-align:start" data-act="open" data-name="${n}">${head} ${time}<span class="small ${r.enabled ? "" : "muted"}" style="display:block;margin-top:2px">${esc(summary(n, r))}</span></button>
+      <button class="switch" role="switch" aria-checked="${r.enabled}" data-act="rowmaster" data-name="${n}" aria-label="${esc(title(n) + ": " + t("rule.enabled"))}"></button></div>`;
+  return `<button class="srow" style="display:flex;align-items:center;gap:12px;width:100%;text-align:start" data-act="open" data-name="${n}">
+      <span class="ticon ${r.enabled ? "on" : ""}">${icon(TYPE_ICON[ty], 17, 2)}</span>
+      <span class="grow">${head} ${time}<span class="small muted" style="display:block;margin-top:2px">${esc(summary(n, r))}</span></span>${icon("chev", 16, 2, "flipx")}</button>`;
+}
+function renderSettings() {
+  const q = S.quietHours;
+  const banner = S.access === "denied"
+    ? `<div class="section"><div class="card banner"><div>${esc(t("screen.denied"))}</div><button class="btn btn-primary" data-act="toast" data-msg="${esc(t("screen.allow"))}">${esc(t("screen.allow"))}</button></div></div>`
+    : S.access === "late" ? `<div class="section"><div class="card banner"><div>${esc(t("screen.exactAlarms"))}</div><button class="btn btn-primary" data-act="allowExact">${esc(t("screen.allowExactAlarms"))}</button></div></div>` : "";
+  return `<div class="navbar"><button class="iconbtn" data-act="view" data-v="prayer" aria-label="${esc(t("p.back"))}">${icon("chevBack", 18, 2.2, "flipx")}</button><span></span></div>
+    <div class="largetitle">${esc(t("settingsReminders.title"))}</div>
+    <div class="section" style="margin-top:8px"><div class="muted" style="font-size:15px;line-height:1.5;padding:0 4px">${esc(t("screen.intro"))}</div></div>
+    ${banner}
+    ${S.hasLocation ? "" : `<div class="section"><div class="muted" style="padding:0 4px">${esc(t("screen.noLocation"))}</div></div>`}
+    <div class="section"><div class="sec-title"><span>${esc(t("screen.salahTitle"))}</span></div><div class="card" style="overflow:hidden">${SALAH.map(settingsRow).join("")}</div></div>
+    <div class="section"><div class="sec-title"><span>${esc(t("screen.imsakTitle"))}</span></div><div class="card" style="overflow:hidden">${settingsRow("imsak")}</div>
+      <div class="muted small" style="padding:8px 4px 0">${esc(t("screen.imsakDescription"))}</div></div>
+    <div class="section"><div class="sec-title"><span>${esc(t("quietHours.title"))}</span></div>
+      <div class="card" style="overflow:hidden">
+        <div class="row" style="min-height:56px">${icon("moon", 18)}<div class="grow" style="font-weight:500">${esc(t("quietHours.enabled"))}</div><button class="switch" role="switch" aria-checked="${q.enabled}" data-act="qh" aria-label="${esc(t("quietHours.enabled"))}"></button></div>
+        ${["start","end"].map((edge) => `<div class="row"><label class="grow" for="qh-${edge}">${esc(t(`quietHours.${edge}`))}</label><input id="qh-${edge}" class="timein num" type="time" value="${hhmm(q[edge])}" data-input="qh" data-edge="${edge}" ${q.enabled ? "" : "disabled"}/></div>`).join("")}
+      </div><div class="muted small" style="padding:8px 4px 0">${esc(t("quietHours.description"))}</div></div>`;
+}
+
+// ── Side state panel ──
+function renderSide() {
+  const v = VARIANTS.find((x) => x.key === S.variant);
+  const rules = REMINDABLE.map((n) => {
+    const r = S.rules[n];
+    return `<span>${n}</span><span>${typeOf(r)} · {enabled:${r.enabled}, muted:${r.muted}, voice:${r.voice}, sound:${r.sound}, adhan:${r.adhan}, minutesBefore:${r.minutesBefore}}</span>`;
+  }).join("");
+  const n = S.sheet ? S.sheet.name : null;
+  const prop = PROPOSED_KEYS.map((k) => {
+    const fmt = (lang) => esc(get(k, lang));
+    return `<tr><td>${k.replace(/^p\./, "")}</td><td class="ar">${fmt("ar")}</td><td>${fmt("en")}</td></tr>`;
+  }).join("");
+  document.getElementById("side").innerHTML = `<details open><summary>Variant ${S.variant} · ${v.name}</summary>
+    <p>${esc(v.why)}</p>
+    <h4>Carries everything today's RuleCard does</h4><ul>
+      <li>enabled → Off (${S.variant === "B" ? "master switch" : "alert type"})</li>
+      <li>muted → Silent · voice → Adhan · otherwise Tone (precedence made visible)</li>
+      <li>minutesBefore 0..60 (${S.variant === "A" ? "stepper" : S.variant === "B" ? "chips + custom stepper" : "slider + chips"})</li>
+      <li>sound: System / Chime / Bell, each previewable</li>
+      <li>adhan: 2 muezzins × takbeer/full, each previewable (full stoppable)</li>
+      <li>iOS 30 s note (toggle platform below) · Imsak description</li>
+      <li>Settings screen: intro, notification-denied / exact-alarm banners, no-location note, 5 Salah + Imsak, quiet hours</li>
+      <li>Live one-line summary of what will happen</li></ul>
+    <h4>State</h4><div class="kv">
+      <span>view</span><span>${S.view}${S.sheet ? ` + sheet(${S.sheet.name}${S.variant === "C" ? "/" + S.sheet.page : ""})` : ""}</span>
+      <span>playing</span><span>${audio.id || "—"}</span>
+      ${n ? `<span>summary</span><span>${esc(summary(n, S.rules[n]))}</span>` : ""}
+      ${rules}
+      <span>quiet</span><span>${S.quietHours.enabled} ${hhmm(S.quietHours.start)}–${hhmm(S.quietHours.end)}</span>
+    </div>
+    <h4>Simulate</h4>
+    <div class="sim">open: ${REMINDABLE.map((x) => `<button data-sim="open" data-v="${x}" class="${n === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <div class="sim">view: ${["prayer","settings"].map((x) => `<button data-sim="view" data-v="${x}" class="${S.view === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <div class="sim">platform: ${["android","ios"].map((x) => `<button data-sim="platform" data-v="${x}" class="${S.platform === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <div class="sim">notifications: ${["granted","denied","late"].map((x) => `<button data-sim="access" data-v="${x}" class="${S.access === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <div class="sim"><button data-sim="loc" class="${S.hasLocation ? "" : "on"}">no location</button></div>
+  </details>
+  <details><summary>Proposed strings (${PROPOSED_KEYS.length}, key p.*)</summary>
+    <p>Everything else is verbatim from the reminders/settings catalogs.</p>
+    <table>${prop}</table></details>`;
+}
+
+// ── Render ──
+const phone = document.getElementById("phone");
+function render() {
+  document.documentElement.dataset.theme = S.theme;
+  document.documentElement.lang = S.lang;
+  phone.dir = S.lang === "ar" ? "rtl" : "ltr";
+  phone.lang = S.lang;
+  const prev = phone.querySelector(".scroll"), top = prev ? prev.scrollTop : 0;
+  const sbPrev = phone.querySelector(".sheet-body"), sbTop = sbPrev ? sbPrev.scrollTop : 0;
+  const pageKey = S.sheet ? `${S.sheet.name}/${S.sheet.page}` : "";
+  const keep = pageKey && pageKey === render.lastPage;
+  const body = S.view === "settings" ? renderSettings() : renderPrayer();
+  phone.innerHTML = `${statusBar()}<div class="scroll">${body}</div>${S.view === "prayer" ? tabBar() : ""}<div class="homebar"></div>${sheetHtml()}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
+  const sc = phone.querySelector(".scroll"); if (sc && S.view === render.lastView) sc.scrollTop = top;
+  const sb = phone.querySelector(".sheet-body"); if (sb && keep) sb.scrollTop = sbTop;
+  // Only animate the sheet and sub-pages on entry, not on every state change.
+  if (keep) phone.querySelectorAll(".sheet, .scrim, .c-page, .a-ctx").forEach((el) => { if (!el.matches(".a-ctx") || el.dataset.ctx === render.lastCtx) el.style.animation = "none"; });
+  const ctxEl = phone.querySelector(".a-ctx"); render.lastCtx = ctxEl ? ctxEl.dataset.ctx : null;
+  render.lastPage = pageKey; render.lastView = S.view;
+  const v = VARIANTS.find((x) => x.key === S.variant);
+  document.getElementById("sw-label").textContent = `${v.key} · ${v.name}`;
+  document.getElementById("sw-theme").textContent = S.theme === "dark" ? "☀ light" : "☾ dark";
+  document.getElementById("sw-lang").textContent = S.lang === "ar" ? "EN" : "عربي";
+  renderSide();
+}
+function syncUrl() {
+  const p = new URLSearchParams(location.search);
+  p.set("variant", S.variant); p.set("lang", S.lang); p.set("theme", S.theme);
+  history.replaceState(null, "", `${location.pathname}?${p}`);
+}
+function toast(msg) { S.toast = msg; render(); clearTimeout(toast.h); toast.h = setTimeout(() => { S.toast = null; render(); }, 1800); }
+setInterval(() => {
+  const el = phone.querySelector('[data-live="cd"]');
+  if (!el) return;
+  const now = nowSec(), next = TIMETABLE.find((n) => BASE[n] * 60 > now) || TIMETABLE[0];
+  el.textContent = fmtCountdown((BASE[next] * 60 - now + 86400) % 86400);
+}, 1000);
+
+// ── Actions ──
+const rule = () => S.rules[S.sheet.name];
+const setMinutes = (r, v) => { r.minutesBefore = Math.max(0, Math.min(MAX_MINUTES_BEFORE, v)); };
+phone.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const d = el.dataset;
+  switch (d.act) {
+    case "open": S.sheet = { name:d.name, page:"root" }; S.bCustom = false; render(); break;
+    case "close": stopAudio(true); S.sheet = null; render(); break;
+    case "view": stopAudio(true); S.sheet = null; S.view = d.v; render(); break;
+    case "toast": toast(t("proto.opens", { route: d.msg })); break;
+    case "play": playSound(d.id); break;
+    case "type": setType(rule(), d.t); render(); break;
+    case "tone": rule().sound = d.k; render(); break;
+    case "adhanPick": rule().adhan = d.k; render(); break;
+    case "muezzin": rule().adhan = `${d.m}-${adhanOf(rule().adhan).form}`; render(); break;
+    case "form": rule().adhan = `${adhanOf(rule().adhan).muezzin}-${d.f}`; render(); break;
+    case "pick": {
+      const r = rule();
+      if (d.kind === "silent") setType(r, "silent");
+      if (d.kind === "tone") { setType(r, "tone"); r.sound = d.id; }
+      if (d.kind === "adhan") { setType(r, "adhan"); r.adhan = d.id; }
+      render(); break;
+    }
+    case "master": rule().enabled = !rule().enabled; render(); break;
+    case "min": setMinutes(rule(), rule().minutesBefore + Number(d.d)); render(); break;
+    case "preset": setMinutes(rule(), Number(d.v)); S.bCustom = false; render(); break;
+    case "custom": S.bCustom = true; render(); break;
+    case "page": stopAudio(true); S.sheet.page = d.p; render(); break;
+    case "rowtype": setType(S.rules[d.name], d.t); render(); break;
+    case "rowmaster": S.rules[d.name].enabled = !S.rules[d.name].enabled; render(); break;
+    case "qh": S.quietHours.enabled = !S.quietHours.enabled; render(); break;
+    case "allowExact": S.access = "granted"; render(); break;
+  }
+});
+phone.addEventListener("input", (e) => {
+  if (e.target.dataset.input === "range") {
+    setMinutes(rule(), Number(e.target.value));
+    const big = phone.querySelector(".c-big");
+    big.querySelector("b").textContent = digits(rule().minutesBefore);
+    big.querySelector("span").textContent = rule().minutesBefore === 0 ? t("p.summary.at", { name: nm(S.sheet.name) }) : t("p.summary.before", { name: nm(S.sheet.name), minutes: minutes(rule().minutesBefore) });
+    phone.querySelector(".sheet-foot span").textContent = summary(S.sheet.name, rule());
+    phone.querySelectorAll('[data-act="preset"]').forEach((c) => { const on = Number(c.dataset.v) === rule().minutesBefore; c.classList.toggle("on", on); c.setAttribute("aria-pressed", on); });
+    renderSide();
+  }
+});
+phone.addEventListener("change", (e) => {
+  const k = e.target.dataset.input;
+  if (k === "min") {
+    const v = parseInt(e.target.value.replace(/[٠-٩]/g, (c) => "٠١٢٣٤٥٦٧٨٩".indexOf(c)), 10);
+    if (Number.isInteger(v)) setMinutes(rule(), v);
+    render();
+  }
+  if (k === "range") render();
+  if (k === "qh" && e.target.value) { const [h, m] = e.target.value.split(":").map(Number); S.quietHours[e.target.dataset.edge] = h * 60 + m; renderSide(); }
+});
+phone.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && S.sheet) { stopAudio(true); S.sheet = null; render(); }
+  if (e.key === "Enter" && e.target.dataset.input === "min") e.target.blur();
+});
+document.getElementById("side").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-sim]"); if (!b) return;
+  const k = b.dataset.sim, v = b.dataset.v;
+  if (k === "open") { S.sheet = { name:v, page:"root" }; S.bCustom = false; }
+  if (k === "view") { stopAudio(true); S.view = v; S.sheet = null; }
+  if (k === "platform") S.platform = v;
+  if (k === "access") S.access = v;
+  if (k === "loc") S.hasLocation = !S.hasLocation;
+  render();
+});
+
+// ── Switcher ──
+function cycle(step) {
+  const i = VARIANTS.findIndex((x) => x.key === S.variant);
+  S.variant = VARIANTS[(i + step + VARIANTS.length) % VARIANTS.length].key;
+  if (S.sheet) S.sheet.page = "root";
+  stopAudio(true); syncUrl(); render();
+}
+document.getElementById("sw-prev").onclick = () => cycle(-1);
+document.getElementById("sw-next").onclick = () => cycle(1);
+document.getElementById("sw-theme").onclick = () => { S.theme = S.theme === "dark" ? "light" : "dark"; syncUrl(); render(); };
+document.getElementById("sw-lang").onclick = () => { S.lang = S.lang === "ar" ? "en" : "ar"; syncUrl(); render(); };
+document.addEventListener("keydown", (e) => {
+  const a = document.activeElement;
+  if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;
+  if (e.key === "ArrowLeft") cycle(-1);
+  if (e.key === "ArrowRight") cycle(1);
+});
+
+syncUrl();
+render();
+</script>
+</body>
+</html>

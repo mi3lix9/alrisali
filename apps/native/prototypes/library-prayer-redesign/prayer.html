@@ -1,0 +1,1037 @@
+<!-- PROTOTYPE — throwaway. Three structurally different Prayer tab layouts (?variant=A|B|C, ?lang=ar|en, ?theme=light|dark) carrying every current card: timetable, next countdown, assistant, log + Khushu, reminders, location, options. -->
+<!doctype html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Prayer tab — redesign prototype</title>
+<style>
+/* Tokens: panelui-native theme.css light/dark + apps/native/global.css overrides. */
+:root, [data-theme="light"] {
+  --background:#ffffff; --foreground:#262626; --card:#ffffff;
+  --surface:#f7f7f7; --surface-2:#f1f1f1; --surface-3:#eaeaea;
+  --inset:rgba(0,0,0,.035);
+  --primary:#262626; --primary-fg:#fafafa;
+  --secondary:rgba(0,0,0,.06); --muted:rgba(0,0,0,.06); --muted-fg:#686868;
+  --border:rgba(0,0,0,.08); --input:rgba(0,0,0,.1); --ring:#a3a3a3;
+  --destructive:#dc2626; --destructive-solid-fg:#ffffff;
+  --success:#10b981; --success-fg:#047857; --success-soft:rgba(16,185,129,.1);
+  --warning:#f59e0b; --warning-fg:#b45309; --warning-soft:rgba(245,158,11,.1);
+  --info:#3b82f6; --info-fg:#1d4ed8; --info-soft:rgba(59,130,246,.1);
+  --overlay:#ffffff; --skeleton:rgba(0,0,0,.1);
+  --radius-md:8px; --radius-lg:10px; --radius-xl:14px; --radius-2xl:16px; --radius-3xl:24px;
+  --page:#e9e8e4; --frame:#1b1b1b; --scrim:rgba(0,0,0,.32);
+}
+[data-theme="dark"] {
+  --background:#141414; --foreground:#f5f5f5; --card:#191919;
+  --surface:#1c1c1c; --surface-2:#222222; --surface-3:#282828;
+  --inset:rgba(0,0,0,.22);
+  --primary:#f5f5f5; --primary-fg:#262626;
+  --secondary:rgba(255,255,255,.08); --muted:rgba(255,255,255,.08); --muted-fg:#a1a1a1;
+  --border:rgba(255,255,255,.06); --input:rgba(255,255,255,.24); --ring:#737373;
+  --destructive:#e5484d; --destructive-solid-fg:#ffffff;
+  --success:#10b981; --success-fg:#34d399; --success-soft:rgba(16,185,129,.16);
+  --warning:#f59e0b; --warning-fg:#fbbf24; --warning-soft:rgba(245,158,11,.16);
+  --info:#3b82f6; --info-fg:#60a5fa; --info-soft:rgba(59,130,246,.16);
+  --overlay:#232323; --skeleton:rgba(255,255,255,.1);
+  --page:#0b0b0b; --frame:#2a2a2a; --scrim:rgba(0,0,0,.55);
+}
+* { box-sizing:border-box; }
+html,body { margin:0; height:100%; }
+body {
+  background:var(--page); color:var(--foreground);
+  font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Arabic", "Segoe UI", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", sans-serif;
+  -webkit-font-smoothing:antialiased;
+  display:flex; align-items:flex-start; justify-content:center; gap:28px;
+  padding:28px 24px 110px;
+}
+button { font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer; }
+input { font:inherit; color:inherit; }
+.num { font-variant-numeric:tabular-nums; font-feature-settings:"tnum"; }
+:focus-visible { outline:2px solid var(--ring); outline-offset:2px; }
+
+/* ── Phone ───────────────────────────────────────────── */
+.phone {
+  width:390px; height:844px; flex:none; position:relative; overflow:hidden;
+  border-radius:52px; background:var(--background);
+  box-shadow:0 0 0 11px var(--frame), 0 0 0 12px rgba(0,0,0,.25), 0 40px 80px -20px rgba(0,0,0,.35);
+  display:flex; flex-direction:column;
+}
+.statusbar { height:50px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:6px 34px 0; font-weight:600; font-size:15px; direction:ltr; }
+.statusbar .island { width:120px; height:34px; border-radius:20px; background:#000; }
+.statusbar .icons { display:flex; gap:6px; align-items:center; }
+.scroll { flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:104px; }
+.scroll::-webkit-scrollbar { display:none; }
+
+.navbar { display:flex; align-items:center; justify-content:flex-end; height:44px; padding:0 16px; }
+.toolbtn { width:36px; height:36px; border-radius:18px; display:grid; place-items:center; background:var(--secondary); }
+.largetitle { padding:0 20px 2px; font-size:34px; font-weight:700; letter-spacing:-.01em; line-height:1.15; }
+[dir="rtl"] .largetitle { letter-spacing:0; }
+.subline { padding:2px 20px 0; color:var(--muted-fg); font-size:15px; display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; }
+.dotsep::before { content:"·"; margin-inline-end:8px; }
+
+.section { padding:0 16px; margin-top:20px; }
+.sec-title { font-size:13px; font-weight:600; color:var(--muted-fg); padding:0 4px 8px; display:flex; justify-content:space-between; align-items:center; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-2xl); }
+[data-theme="light"] .card { box-shadow:0 1px 2px rgba(0,0,0,.03); }
+.muted { color:var(--muted-fg); }
+.small { font-size:13px; }
+.row { display:flex; align-items:center; gap:12px; min-height:48px; padding:0 16px; }
+.row + .row { border-top:1px solid var(--border); }
+.grow { flex:1; min-width:0; }
+
+/* Buttons (panelui-like) */
+.btn { height:40px; padding:0 16px; border-radius:var(--radius-xl); font-weight:600; font-size:15px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+.btn-primary { background:var(--primary); color:var(--primary-fg); }
+.btn-secondary { background:var(--secondary); }
+.btn-outline { border:1px solid var(--input); }
+.btn-sm { height:32px; padding:0 12px; font-size:13px; border-radius:var(--radius-lg); }
+.btn-block { width:100%; }
+.btn[disabled] { opacity:.4; cursor:default; }
+.badge { font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--secondary); white-space:nowrap; }
+.chip { height:32px; padding:0 12px; border-radius:999px; border:1px solid var(--input); font-size:13px; font-weight:500; display:inline-flex; align-items:center; gap:6px; }
+.chip.on { background:var(--primary); color:var(--primary-fg); border-color:var(--primary); }
+
+/* Switch */
+.switch { width:51px; height:31px; border-radius:16px; background:var(--muted); position:relative; flex:none; transition:background .25s cubic-bezier(.16,1,.3,1); }
+[data-theme="light"] .switch { background:#e5e5e5; }
+.switch::after { content:""; position:absolute; top:2px; inset-inline-start:2px; width:27px; height:27px; border-radius:50%; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.2); transition:inset-inline-start .25s cubic-bezier(.16,1,.3,1); }
+.switch[aria-checked="true"] { background:var(--success); }
+.switch[aria-checked="true"]::after { inset-inline-start:22px; }
+
+/* Segmented */
+.seg { display:flex; background:var(--secondary); border-radius:var(--radius-lg); padding:2px; }
+.seg button { flex:1; height:30px; border-radius:8px; font-size:13px; font-weight:500; }
+.seg button[aria-checked="true"] { background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,.12); font-weight:600; }
+[data-theme="dark"] .seg button[aria-checked="true"] { background:#3a3a3a; }
+
+/* Stepper */
+.stepper { display:inline-flex; align-items:center; border:1px solid var(--input); border-radius:var(--radius-lg); overflow:hidden; }
+.stepper button { width:34px; height:32px; font-size:18px; }
+.stepper input { width:44px; height:32px; text-align:center; border:0; background:transparent; border-inline:1px solid var(--input); }
+
+/* Tick (Salah logged) */
+.tick { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--input); display:grid; place-items:center; flex:none; transition:background .2s, border-color .2s; }
+.tick svg { opacity:0; }
+.tick[aria-checked="true"] { background:var(--primary); border-color:var(--primary); color:var(--primary-fg); }
+.tick[aria-checked="true"] svg { opacity:1; }
+.tick:disabled { opacity:.3; cursor:default; }
+
+/* Bell */
+.bell { width:32px; height:32px; border-radius:16px; display:grid; place-items:center; color:var(--muted-fg); flex:none; position:relative; }
+.bell.on { color:var(--foreground); }
+.bell.voice::after { content:""; position:absolute; top:6px; inset-inline-end:6px; width:6px; height:6px; border-radius:50%; background:var(--success); box-shadow:0 0 0 2px var(--card); }
+
+/* Input */
+.field label { display:block; font-size:13px; font-weight:500; margin-bottom:6px; }
+.input { width:100%; height:42px; border-radius:var(--radius-xl); border:1px solid var(--input); background:transparent; padding:0 12px; }
+.input::placeholder { color:var(--muted-fg); }
+.err { color:var(--destructive); font-size:13px; margin-top:6px; }
+
+/* Tab bar (native UITabBar look) */
+.tabbar { position:absolute; inset-inline:0; bottom:0; height:86px; display:flex; justify-content:space-around; padding:8px 8px 0; border-top:1px solid var(--border);
+  background:color-mix(in srgb, var(--background) 82%, transparent); backdrop-filter:saturate(1.6) blur(20px); -webkit-backdrop-filter:saturate(1.6) blur(20px); z-index:5; }
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:500; color:var(--muted-fg); }
+.tab.active { color:var(--foreground); }
+.homebar { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; border-radius:3px; background:var(--foreground); opacity:.85; z-index:6; }
+
+/* Sheets */
+.scrim { position:absolute; inset:0; background:var(--scrim); z-index:20; animation:fade .25s ease-out; }
+.sheet { position:absolute; inset-inline:0; bottom:0; z-index:21; background:var(--overlay); border-radius:var(--radius-3xl) var(--radius-3xl) 0 0; max-height:88%; display:flex; flex-direction:column; animation:rise .38s cubic-bezier(.16,1,.3,1); }
+.sheet .grab { width:36px; height:5px; border-radius:3px; background:var(--muted-fg); opacity:.4; margin:8px auto 4px; flex:none; }
+.sheet .sheet-head { display:flex; align-items:center; justify-content:space-between; padding:6px 20px 10px; gap:12px; }
+.sheet .sheet-head h2 { margin:0; font-size:20px; }
+.sheet .sheet-body { overflow-y:auto; padding:0 20px 34px; }
+.alert { position:absolute; z-index:22; left:50%; top:50%; transform:translate(-50%,-50%); width:270px; border-radius:14px; background:var(--overlay); text-align:center; overflow:hidden; animation:pop .25s cubic-bezier(.16,1,.3,1); }
+.alert h3 { margin:18px 16px 4px; font-size:17px; }
+.alert p { margin:0 16px 16px; font-size:13px; }
+.alert .acts { display:flex; border-top:1px solid var(--border); }
+.alert .acts button { flex:1; height:44px; font-size:17px; color:var(--info); }
+.alert .acts button + button { border-inline-start:1px solid var(--border); }
+.alert .acts .danger { color:var(--destructive); font-weight:600; }
+.toast { position:absolute; z-index:30; top:58px; left:50%; transform:translateX(-50%); background:var(--primary); color:var(--primary-fg); padding:10px 16px; border-radius:999px; font-size:13px; font-weight:500; white-space:nowrap; animation:drop .3s cubic-bezier(.16,1,.3,1); }
+@keyframes fade { from { opacity:0 } }
+@keyframes rise { from { transform:translateY(100%) } }
+@keyframes pop { from { opacity:0; transform:translate(-50%,-50%) scale(1.08) } }
+@keyframes drop { from { opacity:0; transform:translate(-50%,-8px) } }
+@keyframes spin { to { transform:rotate(360deg) } }
+.spinner { width:14px; height:14px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:spin .8s linear infinite; }
+@media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+
+/* ── Variant A · Next up ─────────────────────────────── */
+.a-hero { margin:16px 16px 0; padding:22px 22px 18px; border-radius:28px; background:var(--primary); color:var(--primary-fg); position:relative; overflow:hidden; }
+.a-hero .lbl { font-size:13px; opacity:.7; }
+.a-hero .name { font-size:40px; font-weight:700; line-height:1.15; margin-top:2px; }
+.a-hero .at { font-size:15px; opacity:.8; }
+.a-hero .cd { font-size:56px; font-weight:300; letter-spacing:-.02em; line-height:1; margin:18px 0 14px; direction:ltr; text-align:start; }
+[dir="rtl"] .a-hero .cd { text-align:right; }
+.a-hero .track { height:4px; border-radius:2px; background:color-mix(in srgb, var(--primary-fg) 18%, transparent); overflow:hidden; }
+.a-hero .fill { height:100%; background:var(--primary-fg); border-radius:2px; }
+.a-hero .ends { display:flex; justify-content:space-between; font-size:12px; opacity:.7; margin-top:6px; }
+.a-hero .hero-bell { position:absolute; z-index:1; top:18px; inset-inline-end:18px; width:40px; height:40px; border-radius:20px; display:grid; place-items:center; background:color-mix(in srgb, var(--primary-fg) 12%, transparent); color:var(--primary-fg); }
+.a-loc { display:inline-flex; align-items:center; gap:4px; height:28px; padding:0 10px; border-radius:14px; background:var(--secondary); font-size:13px; font-weight:500; color:var(--foreground); }
+.a-tt .row { min-height:46px; }
+.a-tt .row.past .nm, .a-tt .row.past .tm { color:var(--muted-fg); }
+.a-tt .row.now { background:var(--inset); }
+.a-tt .row.now .nm { font-weight:700; }
+.a-tt .tm { font-weight:600; }
+.a-tt .nm { font-size:16px; }
+.a-tt .minor .nm, .a-tt .minor .tm { font-size:14px; font-weight:500; color:var(--muted-fg); }
+.a-log { display:flex; justify-content:space-between; padding:14px 12px 10px; }
+.a-log .s { display:flex; flex-direction:column; align-items:center; gap:6px; width:62px; }
+.a-log .s .tick { width:44px; height:44px; }
+.a-log .s .tick svg { width:20px; height:20px; }
+.a-log .s span { font-size:13px; font-weight:500; }
+.a-log .s .kh { font-size:11px; color:var(--muted-fg); height:22px; padding:0 6px; border-radius:11px; border:1px solid var(--input); display:inline-flex; align-items:center; }
+.a-log .s .kh.rated { background:var(--secondary); border-color:transparent; color:var(--foreground); }
+.a-log .s .kh.empty { visibility:hidden; }
+.daynav { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px 0; }
+.daynav .d { font-weight:600; font-size:15px; text-align:center; flex:1; }
+.iconbtn { width:32px; height:32px; border-radius:16px; display:grid; place-items:center; background:var(--secondary); }
+.iconbtn[disabled] { opacity:.3; cursor:default; }
+[dir="rtl"] .flipx { transform:scaleX(-1); }
+.streak { display:flex; align-items:center; gap:10px; padding:12px 16px 14px; border-top:1px solid var(--border); }
+.streak b { font-size:20px; }
+.assist { display:flex; align-items:center; gap:14px; padding:16px; }
+.assist .glyph { width:44px; height:44px; border-radius:14px; background:var(--secondary); display:grid; place-items:center; flex:none; }
+
+/* ── Variant B · Sun path ────────────────────────────── */
+.b-top { padding:4px 20px 0; display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+.b-next .k { font-size:13px; color:var(--muted-fg); }
+.b-next .v { font-size:28px; font-weight:700; line-height:1.2; }
+.b-next .cd { font-size:28px; font-weight:300; direction:ltr; display:inline-block; }
+.b-arc { margin:12px 0 0; position:relative; }
+.b-arc svg { display:block; width:100%; height:auto; overflow:visible; }
+.b-arc .pt { cursor:pointer; }
+.b-rail { display:flex; gap:8px; overflow-x:auto; padding:12px 16px 4px; scrollbar-width:none; }
+.b-rail::-webkit-scrollbar { display:none; }
+.b-rail button { flex:none; min-width:74px; padding:8px 10px; border-radius:14px; border:1px solid var(--border); background:var(--card); text-align:start; }
+.b-rail button .n { font-size:12px; color:var(--muted-fg); display:flex; gap:4px; align-items:center; }
+.b-rail button .t { font-size:15px; font-weight:600; }
+.b-rail button.sel { background:var(--primary); color:var(--primary-fg); border-color:var(--primary); }
+.b-rail button.sel .n { color:inherit; opacity:.75; }
+.b-rail button.past:not(.sel) .t { color:var(--muted-fg); }
+.b-detail { margin:12px 16px 0; padding:18px; }
+.b-detail .h { display:flex; align-items:baseline; justify-content:space-between; gap:12px; }
+.b-detail .h .nm { font-size:24px; font-weight:700; }
+.b-detail .h .tm { font-size:24px; font-weight:300; }
+.b-detail .facts { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.b-detail .group { margin-top:14px; border-radius:var(--radius-xl); background:var(--inset); }
+.b-detail .group .row { min-height:52px; padding:0 14px; }
+.b-detail .group .row + .row { border-top:1px solid var(--border); }
+.b-day { display:flex; justify-content:space-between; padding:14px 16px; gap:4px; }
+.b-day .s { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:12px; font-weight:500; }
+.b-day .bead { width:100%; height:6px; border-radius:3px; background:var(--muted); }
+.b-day .bead.on { background:var(--foreground); }
+.acc summary { list-style:none; cursor:pointer; }
+.acc summary::-webkit-details-marker { display:none; }
+.acc[open] .chev { transform:rotate(90deg); }
+[dir="rtl"] .acc .chev { transform:scaleX(-1); }
+[dir="rtl"] .acc[open] .chev { transform:rotate(90deg); }
+.acc .inner { padding:4px 16px 16px; border-top:1px solid var(--border); }
+
+/* ── Variant C · Ledger ──────────────────────────────── */
+.c-strip { margin:12px 16px 0; display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:var(--radius-2xl); background:var(--surface-2); }
+.c-strip .cd { font-size:22px; font-weight:600; direction:ltr; }
+.c-strip .lbl { font-size:12px; color:var(--muted-fg); }
+.c-table { width:100%; border-collapse:collapse; }
+.c-table th { font-size:11px; font-weight:600; color:var(--muted-fg); text-align:start; padding:10px 6px 6px; text-transform:none; }
+.c-table td { padding:0 6px; height:46px; border-top:1px solid var(--border); font-size:15px; }
+.c-table td:first-child, .c-table th:first-child { padding-inline-start:14px; }
+.c-table td:last-child, .c-table th:last-child { padding-inline-end:12px; text-align:end; }
+.c-table tr.now td { background:var(--inset); }
+.c-table tr.now td:first-child { box-shadow:inset 3px 0 0 var(--foreground); }
+[dir="rtl"] .c-table tr.now td:first-child { box-shadow:inset -3px 0 0 var(--foreground); }
+.c-table tr.past td.tm, .c-table tr.past td.nm { color:var(--muted-fg); }
+.c-table tr.minor td { font-size:13px; color:var(--muted-fg); height:38px; }
+.c-table td.tm { font-weight:600; }
+.c-table td.nm .badge { display:block; width:max-content; font-size:10px; padding:0 6px; margin-top:1px; }
+.c-table tr.now td.nm { line-height:1.2; }
+.c-table .ctr { text-align:center; width:40px; }
+.kh-chip { font-size:12px; height:26px; padding:0 8px; border-radius:13px; border:1px solid var(--input); display:inline-flex; align-items:center; white-space:nowrap; }
+.kh-chip.rated { background:var(--secondary); border-color:transparent; font-weight:600; }
+.c-week { padding:4px 10px 10px; }
+.c-week .grid { display:grid; grid-template-columns:56px repeat(7, 1fr); align-items:center; row-gap:6px; }
+.c-week .dh { display:flex; flex-direction:column; align-items:center; font-size:11px; color:var(--muted-fg); gap:2px; padding:6px 0; border-radius:10px; }
+.c-week .dh b { font-size:15px; color:var(--foreground); font-weight:600; }
+.c-week .dh.sel { background:var(--primary); color:var(--primary-fg); }
+.c-week .dh.sel b { color:var(--primary-fg); }
+.c-week .sn { font-size:12px; font-weight:500; padding-inline-start:6px; }
+.c-week .cell { display:grid; place-items:center; }
+.c-week .cell .tick { width:24px; height:24px; }
+.c-week .cell .tick svg { width:13px; height:13px; }
+.c-week .cell .tick.future { border-style:dashed; }
+.c-week .sum { font-size:11px; color:var(--muted-fg); text-align:center; }
+.c-stats { display:flex; border-top:1px solid var(--border); }
+.c-stats > div { flex:1; padding:12px 16px; }
+.c-stats > div + div { border-inline-start:1px solid var(--border); }
+.c-stats b { display:block; font-size:20px; }
+
+/* ── Prototype chrome (outside the design) ───────────── */
+.side { width:300px; flex:none; font:13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace; color:#e8e8e8; direction:ltr; text-align:left; }
+.side details { background:#121212; border:1px solid #333; border-radius:12px; padding:10px 14px; }
+.side summary { cursor:pointer; font-weight:700; color:#d9f99d; }
+.side h4 { margin:12px 0 4px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#9ca3af; }
+.side ul { margin:0; padding-left:16px; }
+.side li { margin:2px 0; }
+.side .kv { display:grid; grid-template-columns:110px 1fr; gap:2px 8px; }
+.side .kv span:nth-child(odd) { color:#9ca3af; }
+.side .sim { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+.side .sim button { border:1px solid #444; border-radius:6px; padding:3px 8px; color:#e8e8e8; font:inherit; font-size:12px; }
+.side .sim button.on { background:#d9f99d; color:#111; border-color:#d9f99d; }
+.switcher { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:100; display:flex; align-items:center; gap:4px; padding:6px; border-radius:999px; background:#0a0a0a; color:#fafafa; border:2px solid #d9f99d; box-shadow:0 10px 30px rgba(0,0,0,.35); font:600 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace; direction:ltr; }
+.switcher button { color:#fafafa; height:34px; min-width:34px; padding:0 10px; border-radius:999px; }
+.switcher button:hover { background:#262626; }
+.switcher .lbl { padding:0 10px; min-width:150px; text-align:center; }
+.switcher .div { width:1px; height:20px; background:#333; margin:0 4px; }
+@media (max-width: 760px) { .side { display:none; } }
+</style>
+</head>
+<body>
+<div class="phone" id="phone"></div>
+<aside class="side" id="side"></aside>
+<nav class="switcher" id="switcher" aria-label="Prototype variant switcher">
+  <button id="sw-prev" aria-label="Previous variant">‹</button>
+  <span class="lbl" id="sw-label"></span>
+  <button id="sw-next" aria-label="Next variant">›</button>
+  <span class="div"></span>
+  <button id="sw-theme"></button>
+  <button id="sw-lang"></button>
+</nav>
+<script>
+"use strict";
+// ── Strings: verbatim from features/*/i18n/{ar,en}.ts and shared/lib/i18n/common.*.ts.
+// Keys under `proto` are prototype-only copy that has no catalog entry yet.
+const I18N = {
+  ar: {
+    tabs: { home:"الرئيسية", prayer:"الصلاة", library:"المكتبة", worship:"العبادات", tasbih:"التسبيح" },
+    separator: "، ",
+    qibla: { title:"القبلة" },
+    names: { imsak:"الإمساك", fajr:"الفجر", sunrise:"الشروق", dhuhr:"الظهر", asr:"العصر", sunset:"الغروب", maghrib:"المغرب", isha:"العشاء", midnight:"منتصف الليل" },
+    timetable: { title:"مواقيت اليوم", notReached:"لا يحين اليوم", current:"الوقت الحالي", allHidden:"كل المواقيت مخفية. أظهر ما تريد من خيارات المواقيت." },
+    next: { title:"الصلاة القادمة", remaining:"بعد {{countdown}}", at:"عند {{time}}", accessibility:"{{name}} عند {{time}}، بعد {{countdown}}", none:"لا توجد مواقيت ظاهرة." },
+    location: { title:"الموقع", unnamed:"موقع بلا اسم", coordinates:"{{latitude}}، {{longitude}}", notSet:"لم تحدّد موقعك بعد.", following:"يتحدّث تلقائيًا عند السفر.", chosen:"اخترته بنفسك، فلا يتغيّر عند السفر.", useDevice:"استخدم موقعي الحالي", locating:"جارٍ تحديد الموقع…", denied:"لم يُسمح بالوصول إلى الموقع. اسمح به من إعدادات الجهاز، أو ابحث عن مدينتك.", unavailable:"تعذّر تحديد موقعك. حاول مجددًا أو ابحث عن مدينتك.", search:"ابحث عن مدينة", searchButton:"بحث", searching:"جارٍ البحث…", noResults:"لم نجد مدينة بهذا الاسم.", searchFailed:"تعذّر البحث. يحتاج البحث إلى اتصال بالإنترنت." },
+    options: { title:"خيارات المواقيت", timeFormat:"صيغة الوقت", hours:"{{hours}} ساعة", imsakMinutes:"الإمساك قبل الفجر بـ (دقائق)", shown:"المواقيت الظاهرة", shownDescription:"تُخفى المواقيت المطفأة من الجدول والعدّ التنازلي." },
+    log: { title:"سجل الصلاة", description:"علّم كل صلاة أدّيتها.", today:"اليوم", previousDay:"اليوم السابق", nextDay:"اليوم التالي",
+      streak: { label:"سلسلة الصلاة", days_zero:"لا أيام", days_one:"يوم واحد", days_two:"يومان", days_few:"{{count}} أيام", days_many:"{{count}} يومًا", days_other:"{{count}} يوم", hint:"أكمل الصلوات الخمس اليوم لتستمر سلسلتك.", today:"اليوم {{performed}} من {{total}}" },
+      untick: { title:"إلغاء تسجيل صلاة {{name}}؟", message:"ستُزال صلاة {{name}} من سجل هذا اليوم.", cancel:"إبقاء", confirm:"إلغاء التسجيل" },
+      saveError:"تعذّر حفظ التغيير. حاول مرة أخرى." },
+    assistant: { title:"مساعد الصلاة", description:"يتابعك خلال الصلاة ويحفظ عدد الركعات والأركان عنك.", start:"ابدأ", startSalah:"ابدأ الصلاة",
+      salahRakahs_two:"{{name}} · ركعتان", salahRakahs_few:"{{name}} · {{count}} ركعات", salahRakahs_other:"{{name}} · {{count}} ركعة" },
+    khushu: { title:"خشوع صلاة {{salah}}", description:"كيف كان خشوعك؟ واختر ما شتّتك.", level:"الخشوع", distracted:"مشتّت", focused:"خاشع", distractions:"المشتتات", customDistraction:"مشتّت آخر", customDistractionPlaceholder:"اكتب ما شتّتك…",
+      distraction: { mindWandering:"شرود الذهن", phoneNotifications:"إشعارات الهاتف", childrenNoise:"الأطفال/الضوضاء", workRelated:"أفكار العمل", fatigue:"التعب/النعاس", laziness:"الكسل", environmental:"مشتتات بيئية" },
+      save:"حفظ", remove:"حذف", rate:"قيّم الخشوع", rated:"الخشوع {{level}}/{{max}}",
+      confirmRemove: { title:"حذف خشوع صلاة {{salah}}؟", message:"سيُحذف تقييم الخشوع والمشتتات لهذه الصلاة.", cancel:"إبقاء", confirm:"حذف" } },
+    reminders: { salahTitle:"تنبيهات الصلاة", imsakTitle:"تنبيه الإمساك", imsakDescription:"يصلك عند وقت الإمساك، فلا يفوتك بدء الصيام.",
+      enabled:"التنبيه", minutesBefore:"قبل الوقت بـ (دقائق)", sound:"الصوت", muted:"صامت", mutedHint:"يظهر التنبيه دون صوت.", voice:"صوت الأذان", voiceHint:"يُسمع الأذان بدل النغمة.",
+      sounds: { default:"صوت النظام", chime:"رنين", bell:"جرس" },
+      minutes: { zero:"{{count}} دقيقة", one:"دقيقة واحدة", two:"دقيقتين", few:"{{count}} دقائق", many:"{{count}} دقيقة", other:"{{count}} دقيقة" },
+      salahBefore:"صلاة {{name}} بعد {{minutes}}" },
+    proto: { ago:"مضت", jafari:"الجعفري", week:"هذا الأسبوع", prayed:"أُدّيت", time:"الوقت", reminder:"تنبيه", log:"سجل", settings:"الإعدادات", done:"تم", close:"إغلاق", logged:"{{n}}/٥", opens:"يفتح {{route}}", rest:"بقية اليوم", qiblaShort:"القبلة" },
+  },
+  en: {
+    tabs: { home:"Home", prayer:"Prayer", library:"Library", worship:"Worship", tasbih:"Tasbih" },
+    separator: " · ",
+    qibla: { title:"Qibla" },
+    names: { imsak:"Imsak", fajr:"Fajr", sunrise:"Sunrise", dhuhr:"Dhuhr", asr:"Asr", sunset:"Sunset", maghrib:"Maghrib", isha:"Isha", midnight:"Midnight" },
+    timetable: { title:"Today's Prayer Times", notReached:"Not today", current:"Now", allHidden:"Every Prayer Time is hidden. Show the ones you want in Prayer Times options." },
+    next: { title:"Next Prayer Time", remaining:"in {{countdown}}", at:"at {{time}}", accessibility:"{{name}} at {{time}}, in {{countdown}}", none:"No Prayer Times are shown." },
+    location: { title:"Location", unnamed:"Unnamed place", coordinates:"{{latitude}}, {{longitude}}", notSet:"You haven't set your location yet.", following:"Updates on its own when you travel.", chosen:"Chosen by you, so it stays put when you travel.", useDevice:"Use my current location", locating:"Finding your location…", denied:"Location access isn't allowed. Allow it in the device's Settings, or search for your city.", unavailable:"Couldn't find your location. Try again or search for your city.", search:"Search for a city", searchButton:"Search", searching:"Searching…", noResults:"No city found with that name.", searchFailed:"Search failed. Searching needs an internet connection." },
+    options: { title:"Prayer Times options", timeFormat:"Time format", hours:"{{hours}}-hour", imsakMinutes:"Imsak before Fajr (minutes)", shown:"Shown Prayer Times", shownDescription:"Turned-off Prayer Times are hidden from the timetable and the countdown." },
+    log: { title:"Prayer Log", description:"Tick each Salah you performed.", today:"Today", previousDay:"Previous day", nextDay:"Next day",
+      streak: { label:"Prayer Streak", days_zero:"No days yet", days_one:"{{count}} day", days_two:"{{count}} days", days_few:"{{count}} days", days_many:"{{count}} days", days_other:"{{count}} days", hint:"Log all five Salah today to keep your streak going.", today:"Today {{performed}} of {{total}}" },
+      untick: { title:"Un-tick {{name}}?", message:"{{name}} will be removed from this day's Prayer Log.", cancel:"Keep", confirm:"Un-tick" },
+      saveError:"Your change could not be saved. Try again." },
+    assistant: { title:"Prayer Assistant", description:"Follows you through a Salah and keeps count of your Rak'ahs and Positions.", start:"Start", startSalah:"Start Salah",
+      salahRakahs_two:"{{name}} · {{count}} Rak'ahs", salahRakahs_few:"{{name}} · {{count}} Rak'ahs", salahRakahs_other:"{{name}} · {{count}} Rak'ahs" },
+    khushu: { title:"Khushu in {{salah}}", description:"How present were you? Pick what distracted you.", level:"Khushu", distracted:"Distracted", focused:"Full Khushu", distractions:"Distractions", customDistraction:"Another distraction", customDistractionPlaceholder:"Type what distracted you…",
+      distraction: { mindWandering:"Mind wandering", phoneNotifications:"Phone notifications", childrenNoise:"Children/noise", workRelated:"Work-related thoughts", fatigue:"Fatigue/sleepiness", laziness:"Laziness", environmental:"Environmental distractions" },
+      save:"Save", remove:"Remove", rate:"Rate Khushu", rated:"Khushu {{level}}/{{max}}",
+      confirmRemove: { title:"Remove Khushu for {{salah}}?", message:"This Salah's Khushu rating and Distractions will be removed.", cancel:"Keep", confirm:"Remove" } },
+    reminders: { salahTitle:"Salah Reminders", imsakTitle:"Imsak Reminder", imsakDescription:"Arrives at Imsak, so you don't miss the start of the fast.",
+      enabled:"Remind me", minutesBefore:"Minutes before", sound:"Sound", muted:"Silent", mutedHint:"Shows the Reminder without a sound.", voice:"Adhan voice", voiceHint:"Plays the Adhan instead of the tone.",
+      sounds: { default:"System sound", chime:"Chime", bell:"Bell" },
+      minutes: { zero:"{{count}} minutes", one:"{{count}} minute", two:"{{count}} minutes", few:"{{count}} minutes", many:"{{count}} minutes", other:"{{count}} minutes" },
+      salahBefore:"{{name}} in {{minutes}}" },
+    proto: { ago:"ago", jafari:"Ja'fari", week:"This week", prayed:"Prayed", time:"Time", reminder:"Alert", log:"Log", settings:"Settings", done:"Done", close:"Close", logged:"{{n}}/5", opens:"Opens {{route}}", rest:"Rest of today", qiblaShort:"Qibla" },
+  },
+};
+
+// ── Mock domain ──
+const PRAYER_TIMES = ["imsak","fajr","sunrise","dhuhr","asr","sunset","maghrib","isha","midnight"];
+const SALAH = ["fajr","dhuhr","asr","maghrib","isha"];
+const RAKAHS = { fajr:2, dhuhr:4, asr:4, maghrib:3, isha:4 };
+const REMINDABLE = ["imsak", ...SALAH];
+const MAX_KHUSHU = 10, MAX_IMSAK = 60;
+// Najaf, Ja'fari method, Thu 15 Oct 2026, minutes after local midnight.
+const BASE = { fajr:4*60+45, sunrise:6*60+5, dhuhr:11*60+49, asr:15*60+3, sunset:17*60+31, maghrib:17*60+46, isha:18*60+47, midnight:23*60+15 };
+const TODAY = new Date(2026, 9, 15, 12);
+const START_SEC = 14*3600 + 21*60 + 30;
+const t0 = Date.now();
+const DISTRACTIONS = ["mindWandering","phoneNotifications","childrenNoise","workRelated","fatigue","laziness","environmental"];
+const CITIES = [
+  { ar:"النجف، العراق", en:"Najaf, Iraq", lat:32.0259, lon:44.3462 },
+  { ar:"كربلاء، العراق", en:"Karbala, Iraq", lat:32.6160, lon:44.0249 },
+  { ar:"الكاظمية، بغداد", en:"Kadhimiya, Baghdad", lat:33.3800, lon:44.3400 },
+  { ar:"سامراء، العراق", en:"Samarra, Iraq", lat:34.1983, lon:43.8742 },
+  { ar:"قم، إيران", en:"Qom, Iran", lat:34.6401, lon:50.8764 },
+  { ar:"مشهد، إيران", en:"Mashhad, Iran", lat:36.2605, lon:59.6168 },
+  { ar:"الكويت", en:"Kuwait City", lat:29.3759, lon:47.9774 },
+  { ar:"المنامة، البحرين", en:"Manama, Bahrain", lat:26.2285, lon:50.5860 },
+  { ar:"القطيف، السعودية", en:"Qatif, Saudi Arabia", lat:26.5196, lon:50.0115 },
+  { ar:"بيروت، لبنان", en:"Beirut, Lebanon", lat:33.8938, lon:35.5018 },
+];
+
+// Prayer Log: day offset (0 = today) → Set of performed Salah.
+const logs = {};
+logs[0] = new Set(["fajr","dhuhr"]);
+for (let d = -1; d >= -12; d--) logs[d] = new Set(SALAH);
+logs[-13] = new Set(["fajr","dhuhr","maghrib","isha"]);
+for (let d = -14; d >= -40; d--) logs[d] = new Set(SALAH.filter((_, i) => (d * 7 + i * 3) % 5 !== 0));
+
+const params = new URLSearchParams(location.search);
+const VARIANTS = [
+  { key:"A", name:"Next up" },
+  { key:"B", name:"Sun path" },
+  { key:"C", name:"Ledger" },
+];
+const S = {
+  variant: VARIANTS.some(v => v.key === params.get("variant")) ? params.get("variant") : "A",
+  theme: params.get("theme") === "dark" ? "dark" : "light",
+  lang: params.get("lang") === "en" ? "en" : "ar",
+  offsetSec: 0,
+  hidden: new Set(["sunset"]),
+  timeFormat: "12h",
+  imsakMinutes: 10,
+  loc: { cityIndex:0, follows:true },
+  locate: "idle",          // idle | locating | denied | unavailable
+  simLocate: "granted",    // granted | denied | unavailable
+  simSaveFail: false,
+  simSearchFail: false,
+  search: { query:"", status:"idle" }, // idle | searching | done | failed
+  logDay: 0,
+  weekEnd: 0,               // C: last day shown in the week grid
+  saveFailed: false,
+  khushu: { "0:fajr": { level:7, distractions:new Set(["phoneNotifications"]), custom:"" }, "-1:isha": { level:5, distractions:new Set(["fatigue"]), custom:"" } },
+  reminders: {
+    imsak:   { enabled:false, minutesBefore:0,  muted:false, voice:false, sound:"default" },
+    fajr:    { enabled:true,  minutesBefore:10, muted:false, voice:true,  sound:"default" },
+    dhuhr:   { enabled:true,  minutesBefore:5,  muted:false, voice:false, sound:"chime" },
+    asr:     { enabled:false, minutesBefore:5,  muted:false, voice:false, sound:"default" },
+    maghrib: { enabled:true,  minutesBefore:0,  muted:false, voice:true,  sound:"default" },
+    isha:    { enabled:false, minutesBefore:5,  muted:true,  voice:false, sound:"default" },
+  },
+  bSelected: null,           // B: selected Prayer Time on the arc
+  sheet: null,               // { type, ... }
+  alert: null,               // { kind, ... }
+  toast: null,
+};
+
+// ── i18n helpers ──
+const L = () => I18N[S.lang];
+const get = (key) => key.split(".").reduce((o, k) => (o == null ? o : o[k]), L());
+const digits = (s) => S.lang === "ar" ? String(s).replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]) : String(s);
+function t(key, vars) {
+  let s = get(key);
+  if (s == null) { console.warn("missing string", key); return key; }
+  if (vars) s = s.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] != null ? vars[k] : "");
+  return s;
+}
+const plural = (key, count, extra) => {
+  const cat = new Intl.PluralRules(S.lang).select(count);
+  const node = get(key);
+  const form = typeof node === "object" ? (node[cat] != null ? cat : "other") : null;
+  const k = form ? `${key}.${form}` : (get(`${key}_${cat}`) != null ? `${key}_${cat}` : `${key}_other`);
+  return t(k, { count: digits(count), ...(extra || {}) });
+};
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
+const nm = (name) => t(`names.${name}`);
+
+// ── Time ──
+const times = () => ({ imsak: BASE.fajr - S.imsakMinutes, ...BASE });
+const shown = () => PRAYER_TIMES.filter((n) => !S.hidden.has(n));
+const nowSec = () => (((START_SEC + Math.floor((Date.now() - t0) / 1000) + S.offsetSec) % 86400) + 86400) % 86400;
+function fmtTime(min) {
+  const h = Math.floor(min / 60) % 24, m = String(min % 60).padStart(2, "0");
+  if (S.timeFormat === "24h") return digits(`${String(h).padStart(2, "0")}:${m}`);
+  const h12 = h % 12 || 12;
+  const ap = S.lang === "ar" ? (h < 12 ? "ص" : "م") : (h < 12 ? "AM" : "PM");
+  return digits(`${h12}:${m}`) + "\u00a0" + ap;
+}
+function fmtCountdown(sec) {
+  sec = Math.max(0, Math.floor(sec));
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+  return digits(`${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+}
+function nextAndCurrent() {
+  const tm = times(), now = nowSec(), list = shown();
+  if (!list.length) return { next:null, current:null };
+  let next = null, current = null;
+  for (const n of list) {
+    const s = tm[n] * 60;
+    if (s > now && !next) next = { name:n, at:s, min:tm[n] };
+    if (s <= now) current = { name:n, at:s, min:tm[n], today:true };
+  }
+  if (!next) next = { name:list[0], at:tm[list[0]] * 60 + 86400, min:tm[list[0]], tomorrow:true };
+  if (!current) { const last = list[list.length - 1]; current = { name:last, at:tm[last] * 60 - 86400, min:tm[last], today:false }; }
+  return { next, current, now, left: next.at - now, span: next.at - current.at };
+}
+const isPast = (name) => times()[name] * 60 <= nowSec();
+const dayDate = (off) => { const d = new Date(TODAY); d.setDate(d.getDate() + off); return d; };
+const loc = () => S.lang === "ar" ? "ar-u-nu-arab" : "en-GB";
+const fmtDate = (d, opts) => new Intl.DateTimeFormat(loc(), opts).format(d);
+const hijri = (d) => new Intl.DateTimeFormat(S.lang === "ar" ? "ar-u-ca-islamic-umalqura-nu-arab" : "en-u-ca-islamic-umalqura", { day:"numeric", month:"long", year:"numeric" }).format(d);
+const performed = (day) => logs[day] || (logs[day] = new Set());
+function streak() {
+  const todayComplete = performed(0).size === 5;
+  let days = 0, d = todayComplete ? 0 : -1;
+  while (performed(d).size === 5) { days++; d--; }
+  return { days, todayComplete };
+}
+const city = () => CITIES[S.loc.cityIndex];
+const coords = (c) => t("location.coordinates", { latitude: digits(c.lat.toFixed(4)), longitude: digits(c.lon.toFixed(4)) });
+
+// ── Icons (SF Symbol / Material look-alikes) ──
+const I = {
+  house:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  books:'<path d="M4 4h4v16H4zM10 4h4v16h-4zM16.5 4.5l3.5-.8 3 15.5-3.5.8z"/>',
+  sparkles:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  dotted:'<circle cx="12" cy="12" r="8.5" stroke-dasharray="1.5 3.2"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M12 5.5 14.6 13h-5.2z" fill="currentColor"/><path d="M12 18.5 9.4 13h5.2z" opacity=".35" fill="currentColor"/>',
+  bell:'<path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>',
+  bellOff:'<path d="M6 16V11a6 6 0 0 1 9.6-4.8M18 11v5l1.5 2H8"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/><path d="M4 4l16 16"/>',
+  check:'<path d="M5 12.5 10 17.5 19 7.5"/>',
+  chev:'<path d="M9 5l7 7-7 7"/>',
+  chevBack:'<path d="M15 5l-7 7 7 7"/>',
+  pin:'<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  arrowLoc:'<path d="M20 4 3.5 11l7.2 2.3L13 20.5z"/>',
+  search:'<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
+  sliders:'<path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/>',
+  figure:'<circle cx="12" cy="4.5" r="2"/><path d="M12 7.5v6M8 10.5h8M12 13.5l-3 7M12 13.5l3 7"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+};
+const icon = (name, size = 20, sw = 1.8, cls = "") => `<svg class="${cls}" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[name]}</svg>`;
+
+// ── Shared pieces ──
+function bellBtn(name, extraCls = "") {
+  if (!REMINDABLE.includes(name)) return `<span class="bell" aria-hidden="true"></span>`;
+  const r = S.reminders[name];
+  const label = `${name === "imsak" ? t("reminders.imsakTitle") : nm(name)}: ${t("reminders.enabled")} — ${r.enabled ? (r.voice ? t("reminders.voice") : "✓") : "✗"}`;
+  return `<button class="bell ${r.enabled ? "on" : ""} ${r.enabled && r.voice ? "voice" : ""} ${extraCls}" data-act="reminder" data-name="${name}" aria-label="${esc(label)}">${icon(r.enabled ? "bell" : "bellOff", 19)}</button>`;
+}
+function khushuLabel(day, salah) {
+  const k = S.khushu[`${day}:${salah}`];
+  return k ? t("khushu.rated", { level: digits(k.level), max: digits(MAX_KHUSHU) }) : t("khushu.rate");
+}
+const tickBtn = (day, salah, cls = "") => {
+  const on = performed(day).has(salah);
+  return `<button class="tick ${cls}" role="checkbox" aria-checked="${on}" aria-label="${esc(t(`names.${salah}`))}" data-act="tick" data-day="${day}" data-salah="${salah}">${icon("check", 15, 2.6)}</button>`;
+};
+function dayNav() {
+  const isToday = S.logDay === 0;
+  const label = isToday ? t("log.today") : fmtDate(dayDate(S.logDay), { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+  return `<div class="daynav">
+    <button class="iconbtn" data-act="day" data-d="-1" aria-label="${esc(t("log.previousDay"))}">${icon("chevBack", 16, 2.2, "flipx")}</button>
+    <div class="d">${esc(label)}</div>
+    <button class="iconbtn" data-act="day" data-d="1" aria-label="${esc(t("log.nextDay"))}" ${isToday ? "disabled" : ""}>${icon("chev", 16, 2.2, "flipx")}</button>
+  </div>`;
+}
+function streakBlock() {
+  const s = streak();
+  return `<div class="streak" role="group" aria-label="${esc(t("log.streak.label") + ": " + plural("log.streak.days", s.days))}">
+    <div class="grow"><div class="muted small">${esc(t("log.streak.label"))}</div><b>${esc(plural("log.streak.days", s.days))}</b>
+    ${s.todayComplete ? "" : `<div class="muted small" style="margin-top:2px">${esc(t("log.streak.hint"))}</div>`}</div>
+  </div>`;
+}
+const saveErr = () => S.saveFailed ? `<div class="err" role="alert" style="padding:0 16px 10px">${esc(t("log.saveError"))}</div>` : "";
+const assistantRakahs = (salah) => plural("assistant.salahRakahs", RAKAHS[salah], { name: nm(salah) });
+
+function locationBody() {
+  const c = city();
+  const desc = S.loc.follows ? t("location.following") : t("location.chosen");
+  const q = S.search.query.trim();
+  return `<div class="field-group" style="display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <div class="glyph" style="width:40px;height:40px;border-radius:12px;background:var(--secondary);display:grid;place-items:center;flex:none">${icon(S.loc.follows ? "arrowLoc" : "pin", 18)}</div>
+      <div class="grow"><div style="font-weight:600;font-size:16px">${esc(c[S.lang])}</div>
+      <div class="muted small">${esc(coords(c) + t("separator") + desc)}</div></div>
+    </div>
+    <button class="btn btn-outline btn-block" data-act="locate" ${S.locate === "locating" ? "disabled" : ""}>${S.locate === "locating" ? `<span class="spinner"></span>${esc(t("location.locating"))}` : `${icon("arrowLoc", 16)}${esc(t("location.useDevice"))}`}</button>
+    ${S.locate === "denied" || S.locate === "unavailable" ? `<div class="muted small" role="status">${esc(t(`location.${S.locate}`))}</div>` : ""}
+    <div class="field"><label for="loc-q">${esc(t("location.search"))}</label>
+      <div style="display:flex;gap:8px"><input id="loc-q" class="input" type="search" autocomplete="off" value="${esc(S.search.query)}" data-input="search" />
+      <button class="btn btn-secondary" data-act="search" id="loc-btn" ${q === "" || S.search.status === "searching" ? "disabled" : ""}>${S.search.status === "searching" ? `<span class="spinner"></span>` : esc(t("location.searchButton"))}</button></div>
+    </div>
+    <div id="loc-results">${locationResults()}</div>
+  </div>`;
+}
+function locationResults() {
+  const q = S.search.query.trim().toLowerCase();
+  if (S.search.status === "searching") return `<div class="muted small">${esc(t("location.searching"))}</div>`;
+  if (S.search.status === "failed") return `<div class="err">${esc(t("location.searchFailed"))}</div>`;
+  if (!q) return "";
+  const res = CITIES.map((c, i) => ({ c, i })).filter(({ c }) => c.ar.includes(S.search.query.trim()) || c.en.toLowerCase().includes(q));
+  if (!res.length) return `<div class="err">${esc(t("location.noResults"))}</div>`;
+  return `<div class="card" style="overflow:hidden">${res.map(({ c, i }) => `<button class="row" style="width:100%;text-align:start" data-act="choose" data-i="${i}"><div class="grow"><div style="font-weight:500">${esc(c[S.lang])}</div><div class="muted small">${esc(coords(c))}</div></div></button>`).join("")}</div>`;
+}
+function optionsBody(compact) {
+  const v = S.imsakMinutes;
+  return `<div style="display:flex;flex-direction:column;gap:14px">
+    <div><div style="font-weight:500;margin-bottom:8px">${esc(t("options.timeFormat"))}</div>
+      <div class="seg" role="radiogroup" aria-label="${esc(t("options.timeFormat"))}">
+        ${["12h","24h"].map((f) => `<button role="radio" aria-checked="${S.timeFormat === f}" data-act="fmt" data-f="${f}">${esc(t("options.hours", { hours: digits(f === "12h" ? 12 : 24) }))}</button>`).join("")}
+      </div></div>
+    <div style="display:flex;align-items:center;gap:12px;justify-content:space-between">
+      <label for="imsak-in" style="font-weight:500">${esc(t("options.imsakMinutes"))}</label>
+      <div class="stepper"><button data-act="imsak" data-d="-1" aria-label="−" ${v <= 0 ? "disabled" : ""}>−</button><input id="imsak-in" class="num" inputmode="numeric" value="${digits(v)}" data-input="imsak" /><button data-act="imsak" data-d="1" aria-label="+" ${v >= MAX_IMSAK ? "disabled" : ""}>+</button></div>
+    </div>
+    <div><div style="font-weight:500">${esc(t("options.shown"))}</div><div class="muted small" style="margin:2px 0 8px">${esc(t("options.shownDescription"))}</div>
+      <div class="card" style="overflow:hidden;${compact ? "background:transparent" : ""}">${PRAYER_TIMES.map((n) => `<div class="row" style="min-height:44px"><div class="grow">${esc(nm(n))}</div><button class="switch" role="switch" aria-checked="${!S.hidden.has(n)}" aria-label="${esc(nm(n))}" data-act="hide" data-name="${n}"></button></div>`).join("")}</div>
+    </div>
+  </div>`;
+}
+function timetableEmpty() {
+  return `<div class="card" style="padding:16px"><div class="muted">${esc(t("timetable.allHidden"))}</div></div>`;
+}
+const statusBar = () => `<div class="statusbar"><span class="num">9:41</span><span class="island"></span><span class="icons"><svg width="18" height="11" viewBox="0 0 18 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg><svg width="25" height="12" viewBox="0 0 25 12" fill="none" stroke="currentColor"><rect x=".5" y=".5" width="21" height="11" rx="3.5" opacity=".4"/><rect x="2" y="2" width="16" height="8" rx="2" fill="currentColor" stroke="none"/></svg></span></div>`;
+function tabBar() {
+  const tabs = [["home","house"],["prayer","clock"],["library","books"],["worship","sparkles"],["tasbih","dotted"]];
+  return `<nav class="tabbar" role="tablist">${tabs.map(([k, ic]) => `<button class="tab ${k === "prayer" ? "active" : ""}" role="tab" aria-selected="${k === "prayer"}" data-act="tab" data-tab="${k}">${icon(ic, 25, k === "prayer" ? 2.1 : 1.7)}<span>${esc(t(`tabs.${k}`))}</span></button>`).join("")}</nav><div class="homebar"></div>`;
+}
+function header(extra = "") {
+  return `<div class="navbar"><button class="toolbtn" data-act="qibla" aria-label="${esc(t("qibla.title"))}">${icon("compass", 21, 1.7)}</button></div>
+  <div class="largetitle">${esc(t("tabs.prayer"))}</div>
+  <div class="subline"><span>${esc(hijri(TODAY))}</span><span class="dotsep">${esc(fmtDate(TODAY, { weekday:"long", day:"numeric", month:"long" }))}</span>${extra}</div>`;
+}
+
+// ── Variant A · Next up: one decisive hero, a quiet list, the day's five ticks. Settings live in a sheet. ──
+function renderA() {
+  const nc = nextAndCurrent(), tm = times(), list = shown();
+  const c = city();
+  let hero = "";
+  if (!nc.next) hero = `<div class="a-hero"><div class="lbl">${esc(t("next.title"))}</div><div style="margin-top:8px">${esc(t("next.none"))}</div></div>`;
+  else {
+    const pct = Math.min(100, Math.max(0, (1 - nc.left / nc.span) * 100));
+    const time = fmtTime(nc.next.min), cd = fmtCountdown(nc.left);
+    hero = `<section class="a-hero" aria-label="${esc(t("next.accessibility", { name: nm(nc.next.name), time, countdown: cd }))}">
+      ${REMINDABLE.includes(nc.next.name) ? `<button class="hero-bell" data-act="reminder" data-name="${nc.next.name}" aria-label="${esc(t("reminders.enabled"))}">${icon(S.reminders[nc.next.name].enabled ? "bell" : "bellOff", 20)}</button>` : ""}
+      <div class="lbl">${esc(t("next.title"))}</div>
+      <div class="name">${esc(nm(nc.next.name))}</div>
+      <div class="at num">${esc(t("next.at", { time }))}</div>
+      <div class="cd num" data-live="cd">${cd}</div>
+      <div class="track"><div class="fill" data-live="fill" style="width:${pct}%"></div></div>
+      <div class="ends num"><span>${esc(nm(nc.current.name))} ${fmtTime(nc.current.min)}</span><span>${esc(nm(nc.next.name))}</span></div>
+    </section>`;
+  }
+  const major = new Set(SALAH);
+  const rows = list.map((n) => {
+    const cur = nc.current && nc.current.today && nc.current.name === n;
+    return `<div class="row ${isPast(n) && !cur ? "past" : ""} ${cur ? "now" : ""} ${major.has(n) ? "" : "minor"}">
+      <div class="grow nm">${esc(nm(n))}</div>
+      ${cur ? `<span class="badge">${esc(t("timetable.current"))}</span>` : ""}
+      <div class="tm num">${fmtTime(tm[n])}</div>
+      ${bellBtn(n)}
+    </div>`;
+  }).join("");
+  const day = S.logDay;
+  const logRow = SALAH.map((s) => {
+    const on = performed(day).has(s);
+    const rated = !!S.khushu[`${day}:${s}`];
+    return `<div class="s">${tickBtn(day, s)}<span>${esc(nm(s))}</span>
+      <button class="kh ${on ? (rated ? "rated" : "") : "empty"}" data-act="khushu" data-day="${day}" data-salah="${s}" ${on ? `aria-label="${esc(khushuLabel(day, s))}"` : "tabindex=-1 aria-hidden=true"}>${on ? (rated ? digits(S.khushu[`${day}:${s}`].level) + "/" + digits(MAX_KHUSHU) : esc(t("khushu.level"))) : "·"}</button></div>`;
+  }).join("");
+  return `${header(`<button class="a-loc" data-act="settings" style="margin-top:6px">${icon("pin", 13, 2)}${esc(c[S.lang].split(/[،,]/)[0])}${icon("sliders", 13, 2)}</button>`)}
+    ${hero}
+    <div class="section"><div class="sec-title"><span>${esc(t("timetable.title"))}</span><button class="small" style="color:var(--info);font-weight:500" data-act="settings">${esc(t("options.title"))}</button></div>
+      ${list.length ? `<div class="card a-tt" style="overflow:hidden">${rows}</div>` : timetableEmpty()}</div>
+    <div class="section"><div class="sec-title"><span>${esc(t("log.title"))}</span><span class="num">${esc(t("log.streak.today", { performed: digits(performed(day).size), total: digits(5) }))}</span></div>
+      <div class="card">${dayNav()}<div class="a-log">${logRow}</div>${saveErr()}${day !== 0 ? `<div style="padding:0 16px 12px"><button class="btn btn-secondary btn-block btn-sm" data-act="today">${esc(t("log.today"))}</button></div>` : ""}${streakBlock()}</div>
+      <div class="muted small" style="padding:8px 4px 0">${esc(t("log.description"))}</div></div>
+    <div class="section"><div class="card assist"><div class="glyph">${icon("figure", 22)}</div><div class="grow"><div style="font-weight:600">${esc(t("assistant.title"))}</div><div class="muted small">${esc(t("assistant.description"))}</div></div><button class="btn btn-primary btn-sm" data-act="assistant">${esc(t("assistant.start"))}</button></div></div>`;
+}
+
+// ── Variant B · Sun path: the day drawn as the sun's arc; pick any time to act on it. ──
+function arcGeom() {
+  const W = 358, H = 196, horizon = 128, top = 26, dip = 40;
+  const tm = times(), x0 = 3.5 * 60, x1 = 24.25 * 60;
+  const rtl = S.lang === "ar";
+  const X = (m) => { const f = (m - x0) / (x1 - x0); return 12 + (rtl ? 1 - f : f) * (W - 24); };
+  const Y = (m) => {
+    if (m >= tm.sunrise && m <= tm.sunset) return horizon - (horizon - top) * Math.sin(Math.PI * (m - tm.sunrise) / (tm.sunset - tm.sunrise));
+    const night = 1440 - (tm.sunset - tm.sunrise);
+    const k = m > tm.sunset ? m - tm.sunset : m + 1440 - tm.sunset;
+    return horizon + dip * Math.sin(Math.PI * k / night);
+  };
+  return { W, H, horizon, X, Y, x0, x1 };
+}
+function renderB() {
+  const nc = nextAndCurrent(), tm = times(), list = shown(), g = arcGeom();
+  const sel = S.bSelected && list.includes(S.bSelected) ? S.bSelected : (nc.next ? nc.next.name : null);
+  const nowMin = nowSec() / 60;
+  let path = "", pastPath = "";
+  for (let m = g.x0; m <= g.x1; m += 6) {
+    const seg = `${m === g.x0 ? "M" : "L"}${g.X(m).toFixed(1)},${g.Y(m).toFixed(1)} `;
+    path += seg;
+    if (m <= nowMin) pastPath += seg;
+  }
+  const sunX = g.X(Math.min(Math.max(nowMin, g.x0), g.x1)), sunY = g.Y(Math.min(Math.max(nowMin, g.x0), g.x1));
+  const dots = list.map((n) => {
+    const x = g.X(tm[n]), y = g.Y(tm[n]), s = n === sel, past = isPast(n);
+    return `<g class="pt" data-act="bsel" data-name="${n}" role="button" aria-label="${esc(nm(n) + " " + fmtTime(tm[n]))}">
+      <circle cx="${x}" cy="${y}" r="14" fill="transparent"/>
+      <circle cx="${x}" cy="${y}" r="${s ? 6 : 4}" fill="${s ? "var(--foreground)" : past ? "var(--foreground)" : "var(--card)"}" stroke="var(--foreground)" stroke-width="1.6"/>
+    </g>`;
+  }).join("");
+  const svg = `<svg viewBox="0 0 ${g.W} ${g.H}" role="img" aria-label="${esc(t("timetable.title"))}">
+    <defs><radialGradient id="sunglow"><stop offset="0" stop-color="var(--warning)" stop-opacity=".45"/><stop offset="1" stop-color="var(--warning)" stop-opacity="0"/></radialGradient>
+    <clipPath id="below"><rect x="0" y="${g.horizon}" width="${g.W}" height="${g.H}"/></clipPath></defs>
+    <rect x="0" y="${g.horizon}" width="${g.W}" height="${g.H - g.horizon}" fill="var(--inset)"/>
+    <line x1="0" x2="${g.W}" y1="${g.horizon}" y2="${g.horizon}" stroke="var(--border)" stroke-width="1.5"/>
+    <path d="${path}" fill="none" stroke="var(--muted-fg)" stroke-opacity=".45" stroke-width="1.5" stroke-dasharray="2 5" stroke-linecap="round"/>
+    <path d="${pastPath}" fill="none" stroke="var(--foreground)" stroke-width="2.2" stroke-linecap="round"/>
+    <circle cx="${sunX}" cy="${sunY}" r="22" fill="url(#sunglow)" pointer-events="none"/>
+    ${dots}
+    <circle cx="${sunX}" cy="${sunY}" r="7.5" fill="${sunY > g.horizon ? "var(--muted-fg)" : "var(--warning)"}" stroke="var(--card)" stroke-width="2.5" pointer-events="none"/>
+    ${sel ? (() => { const x = g.X(tm[sel]), y = g.Y(tm[sel]), below = y > g.horizon - 20; const near = Math.abs(sunX - x) < 40 && Math.abs(sunY - y) < 40; const ly = below ? y + 24 : y - (near ? 30 : 16); return `<text x="${x}" y="${ly}" text-anchor="middle" font-size="12.5" font-weight="700" fill="var(--foreground)" stroke="var(--background)" stroke-width="4" paint-order="stroke" pointer-events="none">${esc(nm(sel))}</text>`; })() : ""}
+  </svg>`;
+  const rail = list.map((n) => `<button class="${n === sel ? "sel" : ""} ${isPast(n) ? "past" : ""}" data-act="bsel" data-name="${n}" aria-pressed="${n === sel}">
+      <div class="n">${esc(nm(n))}${nc.current && nc.current.today && nc.current.name === n ? " •" : ""}</div><div class="t num">${fmtTime(tm[n])}</div></button>`).join("");
+  let detail = "";
+  if (sel) {
+    const isSalah = SALAH.includes(sel), cur = nc.current && nc.current.today && nc.current.name === sel;
+    const delta = tm[sel] * 60 - nowSec();
+    const rel = delta > 0 ? t("next.remaining", { countdown: fmtCountdown(delta) }) : `${fmtCountdown(-delta)} ${t("proto.ago")}`;
+    const r = S.reminders[sel];
+    const key = `0:${sel}`;
+    detail = `<section class="card b-detail" aria-live="polite">
+      <div class="h"><div class="nm">${esc(nm(sel))}</div><div class="tm num">${fmtTime(tm[sel])}</div></div>
+      <div class="facts">${cur ? `<span class="badge">${esc(t("timetable.current"))}</span>` : ""}<span class="badge num" data-live="rel" data-at="${tm[sel] * 60}">${esc(rel)}</span></div>
+      ${REMINDABLE.includes(sel) ? `<div class="group">
+        <div class="row"><div class="grow"><div style="font-weight:500">${esc(t("reminders.enabled"))}</div><div class="muted small">${r.enabled ? esc(plural("reminders.minutes", r.minutesBefore) + t("separator") + (r.voice ? t("reminders.voice") : t(`reminders.sounds.${r.sound}`))) : ""}</div></div><button class="switch" role="switch" aria-checked="${r.enabled}" data-act="remToggle" data-name="${sel}" aria-label="${esc(nm(sel) + ": " + t("reminders.enabled"))}"></button></div>
+        ${r.enabled ? `<div class="row"><div class="grow"><div style="font-weight:500">${esc(t("reminders.voice"))}</div><div class="muted small">${esc(t("reminders.voiceHint"))}</div></div><button class="switch" role="switch" aria-checked="${r.voice}" data-act="remVoice" data-name="${sel}" aria-label="${esc(nm(sel) + ": " + t("reminders.voice"))}"></button></div>
+        <button class="row" style="width:100%;text-align:start" data-act="reminder" data-name="${sel}"><div class="grow muted">${esc(t("reminders.sound"))}${t("separator")}${esc(t("reminders.minutesBefore"))}</div>${icon("chev", 16, 2, "flipx")}</button>` : ""}
+      </div>` : ""}
+      ${isSalah ? `<div class="group">
+        <div class="row"><div class="grow" style="font-weight:500">${esc(t("log.title") + t("separator") + t("log.today"))}</div>${performed(0).has(sel) ? `<button class="btn btn-sm ${S.khushu[key] ? "btn-secondary" : "btn-outline"}" data-act="khushu" data-day="0" data-salah="${sel}">${esc(khushuLabel(0, sel))}</button>` : ""}${tickBtn(0, sel)}</div>
+        <div class="row"><div class="grow"><div style="font-weight:500">${esc(t("assistant.title"))}</div><div class="muted small">${esc(assistantRakahs(sel))}</div></div><button class="btn btn-primary btn-sm" data-act="assistant" data-salah="${sel}">${esc(t("assistant.startSalah"))}</button></div>
+      </div>` : ""}
+    </section>`;
+  }
+  const day = S.logDay;
+  const beads = SALAH.map((s) => `<button class="s" data-act="tick" data-day="${day}" data-salah="${s}" role="checkbox" aria-checked="${performed(day).has(s)}"><span class="bead ${performed(day).has(s) ? "on" : ""}"></span>${esc(nm(s))}${performed(day).has(s) && S.khushu[`${day}:${s}`] ? `<span class="muted num" style="font-size:11px">${digits(S.khushu[`${day}:${s}`].level)}/${digits(MAX_KHUSHU)}</span>` : `<span style="font-size:11px">&nbsp;</span>`}</button>`).join("");
+  const c = city();
+  const nextBlock = nc.next ? `<div class="b-next"><div class="k">${esc(t("next.title"))}</div><div class="v">${esc(nm(nc.next.name))} <span class="muted num" style="font-weight:400;font-size:17px">${esc(t("next.at", { time: fmtTime(nc.next.min) }))}</span></div></div><div class="cd num" style="font-size:28px;font-weight:300;direction:ltr" data-live="cd">${fmtCountdown(nc.left)}</div>` : `<div class="muted">${esc(t("next.none"))}</div>`;
+  return `<div class="navbar" style="justify-content:space-between"><button class="a-loc" data-act="acc" data-id="b-loc">${icon("pin", 13, 2)}${esc(c[S.lang].split(/[،,]/)[0])}</button><button class="toolbtn" data-act="qibla" aria-label="${esc(t("qibla.title"))}">${icon("compass", 21, 1.7)}</button></div>
+    <div class="subline" style="padding-top:0">${esc(hijri(TODAY))}<span class="dotsep">${esc(fmtDate(TODAY, { weekday:"long", day:"numeric", month:"long" }))}</span></div>
+    <div class="b-top">${nextBlock}</div>
+    ${list.length ? `<div class="b-arc">${svg}</div><div class="b-rail" role="group" aria-label="${esc(t("timetable.title"))}">${rail}</div>` : `<div class="section">${timetableEmpty()}</div>`}
+    ${detail}
+    <div class="section"><div class="sec-title"><span>${esc(t("log.title"))}</span><span class="num">${esc(t("log.streak.today", { performed: digits(performed(day).size), total: digits(5) }))}</span></div>
+      <div class="card">${dayNav()}<div class="b-day">${beads}</div>${saveErr()}${day !== 0 ? `<div style="padding:0 16px 12px"><button class="btn btn-secondary btn-block btn-sm" data-act="today">${esc(t("log.today"))}</button></div>` : ""}${streakBlock()}</div>
+      <div class="muted small" style="padding:8px 4px 0">${esc(t("log.description"))}</div></div>
+    <div class="section"><div class="card" style="overflow:hidden">
+      <details class="acc" id="b-loc" ${S.openAcc === "b-loc" ? "open" : ""}><summary class="row" data-acc="b-loc"><div class="grow"><div style="font-weight:500">${esc(t("location.title"))}</div><div class="muted small">${esc(c[S.lang])}</div></div>${icon("chev", 16, 2, "chev")}</summary><div class="inner" style="padding-top:14px">${locationBody()}</div></details>
+      <details class="acc" id="b-opt" ${S.openAcc === "b-opt" ? "open" : ""} style="border-top:1px solid var(--border)"><summary class="row" data-acc="b-opt"><div class="grow"><div style="font-weight:500">${esc(t("options.title"))}</div><div class="muted small num">${esc(t("options.hours", { hours: digits(S.timeFormat === "12h" ? 12 : 24) }) + t("separator") + t("names.imsak") + " " + digits(S.imsakMinutes))}</div></div>${icon("chev", 16, 2, "chev")}</summary><div class="inner" style="padding-top:14px">${optionsBody(true)}</div></details>
+    </div></div>`;
+}
+
+// ── Variant C · Ledger: everything at once, tabular; the week of logs is the primary surface. ──
+function renderC() {
+  const nc = nextAndCurrent(), tm = times(), list = shown(), c = city();
+  const day = S.logDay;
+  const strip = nc.next ? `<div class="c-strip" aria-label="${esc(t("next.accessibility", { name: nm(nc.next.name), time: fmtTime(nc.next.min), countdown: fmtCountdown(nc.left) }))}">
+      <div class="grow"><div class="lbl">${esc(t("next.title"))}</div><div style="font-weight:700;font-size:17px">${esc(nm(nc.next.name))} <span class="muted num" style="font-weight:500;font-size:14px">${esc(t("next.at", { time: fmtTime(nc.next.min) }))}</span></div></div>
+      <div class="cd num" data-live="cd">${fmtCountdown(nc.left)}</div></div>` : `<div class="c-strip"><div class="muted">${esc(t("next.none"))}</div></div>`;
+  const dayLabel = day === 0 ? t("log.today") : fmtDate(dayDate(day), { weekday:"short", day:"numeric" });
+  const rows = list.map((n) => {
+    const cur = nc.current && nc.current.today && nc.current.name === n, isS = SALAH.includes(n);
+    const on = isS && performed(day).has(n);
+    return `<tr class="${cur ? "now" : ""} ${isPast(n) && !cur ? "past" : ""} ${isS || n === "imsak" ? "" : "minor"}">
+      <td class="nm">${esc(nm(n))}${cur ? `<span class="badge">${esc(t("timetable.current"))}</span>` : ""}</td>
+      <td class="tm num">${fmtTime(tm[n])}</td>
+      <td class="ctr">${REMINDABLE.includes(n) ? bellBtn(n) : ""}</td>
+      <td class="ctr">${isS ? tickBtn(day, n) : ""}</td>
+      <td>${on ? `<button class="kh-chip ${S.khushu[`${day}:${n}`] ? "rated" : ""}" data-act="khushu" data-day="${day}" data-salah="${n}" aria-label="${esc(khushuLabel(day, n))}">${S.khushu[`${day}:${n}`] ? digits(S.khushu[`${day}:${n}`].level) + "/" + digits(MAX_KHUSHU) : esc(t("khushu.rate"))}</button>` : ""}</td>
+    </tr>`;
+  }).join("");
+  const days = []; for (let d = S.weekEnd - 6; d <= S.weekEnd; d++) days.push(d);
+  const grid = `<div class="grid" role="grid">
+    <div></div>${days.map((d) => `<button class="dh ${d === day ? "sel" : ""}" data-act="pickday" data-d="${d}" ${d > 0 ? "disabled style=opacity:.35" : ""} aria-label="${esc(fmtDate(dayDate(d), { weekday:"long", day:"numeric", month:"long" }))}"><span>${esc(fmtDate(dayDate(d), { weekday:"narrow" }))}</span><b class="num">${esc(fmtDate(dayDate(d), { day:"numeric" }))}</b></button>`).join("")}
+    ${SALAH.map((s) => `<div class="sn">${esc(nm(s))}</div>${days.map((d) => `<div class="cell">${d > 0 ? `<span class="tick future" style="opacity:.3"></span>` : tickBtn(d, s)}</div>`).join("")}`).join("")}
+    <div></div>${days.map((d) => `<div class="sum num">${d > 0 ? "" : esc(t("proto.logged", { n: digits(performed(d).size) }))}</div>`).join("")}
+  </div>`;
+  const s = streak();
+  const weekTotal = days.filter((d) => d <= 0).reduce((a, d) => a + performed(d).size, 0);
+  return `${header(`<button class="a-loc" data-act="jump" data-to="c-loc" style="margin-top:6px">${icon("pin", 13, 2)}${esc(c[S.lang].split(/[،,]/)[0])}</button>`)}
+    ${strip}
+    <div class="section"><div class="sec-title"><span>${esc(t("timetable.title"))}</span><span>${esc(t("proto.jafari"))}</span></div>
+      ${list.length ? `<div class="card" style="overflow:hidden"><table class="c-table"><thead><tr><th></th><th>${esc(t("proto.time"))}</th><th class="ctr">${icon("bell", 14)}</th><th class="ctr" title="${esc(dayLabel)}">${esc(dayLabel)}</th><th style="text-align:end">${esc(t("khushu.level"))}</th></tr></thead><tbody>${rows}</tbody></table>${saveErr()}</div>` : timetableEmpty()}
+    </div>
+    <div class="section"><div class="sec-title"><span>${esc(t("log.title"))}</span><span style="display:flex;gap:6px">
+        <button class="iconbtn" data-act="week" data-d="-7" aria-label="${esc(t("log.previousDay"))}">${icon("chevBack", 15, 2.2, "flipx")}</button>
+        <button class="iconbtn" data-act="week" data-d="7" aria-label="${esc(t("log.nextDay"))}" ${S.weekEnd >= 0 ? "disabled" : ""}>${icon("chev", 15, 2.2, "flipx")}</button></span></div>
+      <div class="card"><div class="c-week">${grid}</div>
+        <div class="c-stats"><div><span class="muted small">${esc(t("log.streak.label"))}</span><b>${esc(plural("log.streak.days", s.days))}</b></div><div><span class="muted small">${esc(t("proto.week"))}</span><b class="num">${digits(weekTotal)}/${digits(days.filter((d) => d <= 0).length * 5)}</b></div></div>
+        ${s.todayComplete ? "" : `<div class="muted small" style="padding:0 16px 12px">${esc(t("log.streak.hint"))}</div>`}
+        ${day !== 0 || S.weekEnd !== 0 ? `<div style="padding:0 16px 14px"><button class="btn btn-secondary btn-block btn-sm" data-act="today">${esc(t("log.today"))}</button></div>` : ""}
+      </div><div class="muted small" style="padding:8px 4px 0">${esc(t("log.description"))}</div></div>
+    <div class="section"><button class="card row" style="width:100%;text-align:start;min-height:60px" data-act="assistant"><div class="grow"><div style="font-weight:600">${esc(t("assistant.title"))}</div><div class="muted small">${esc(t("assistant.description"))}</div></div><span class="btn btn-primary btn-sm">${esc(t("assistant.start"))}</span></button></div>
+    <div class="section" id="c-loc"><div class="sec-title"><span>${esc(t("location.title"))}</span></div><div class="card" style="padding:16px">${locationBody()}</div></div>
+    <div class="section"><div class="sec-title"><span>${esc(t("options.title"))}</span></div><div class="card" style="padding:16px">${optionsBody(true)}</div></div>
+    <div class="section"><div class="sec-title"><span>${esc(t("reminders.salahTitle"))}</span></div><div class="card" style="overflow:hidden">${REMINDABLE.map((n) => { const r = S.reminders[n]; return `<button class="row" style="width:100%;text-align:start" data-act="reminder" data-name="${n}"><div class="grow"><div>${esc(n === "imsak" ? t("reminders.imsakTitle") : nm(n))}</div><div class="muted small">${r.enabled ? esc(plural("reminders.minutes", r.minutesBefore) + t("separator") + (r.muted ? t("reminders.muted") : r.voice ? t("reminders.voice") : t(`reminders.sounds.${r.sound}`))) : "—"}</div></div>${icon(r.enabled ? "bell" : "bellOff", 18)}</button>`; }).join("")}</div></div>`;
+}
+
+// ── Sheets & alerts ──
+function sheetHtml() {
+  if (!S.sheet) return "";
+  let title = "", body = "";
+  if (S.sheet.type === "settings") {
+    title = t("proto.settings");
+    body = `<div class="sec-title" style="padding:6px 0 8px">${esc(t("location.title"))}</div>${locationBody()}<div class="sec-title" style="padding:22px 0 8px">${esc(t("options.title"))}</div>${optionsBody(false)}`;
+  } else if (S.sheet.type === "reminder") {
+    const n = S.sheet.name, r = S.reminders[n];
+    title = n === "imsak" ? t("reminders.imsakTitle") : nm(n);
+    const sw = (key, label, hint, val) => `<div class="row" style="padding:0 14px"><div class="grow"><div style="font-weight:500">${esc(label)}</div>${hint ? `<div class="muted small">${esc(hint)}</div>` : ""}</div><button class="switch" role="switch" aria-checked="${val}" data-act="remSet" data-k="${key}" aria-label="${esc(label)}"></button></div>`;
+    body = `${n === "imsak" ? `<p class="muted small" style="margin:0 0 12px">${esc(t("reminders.imsakDescription"))}</p>` : ""}
+      <div class="card" style="overflow:hidden">${sw("enabled", t("reminders.enabled"), "", r.enabled)}${r.enabled ? sw("muted", t("reminders.muted"), t("reminders.mutedHint"), r.muted) + sw("voice", t("reminders.voice"), t("reminders.voiceHint"), r.voice) : ""}</div>
+      ${r.enabled ? `<div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px"><span style="font-weight:500">${esc(t("reminders.minutesBefore"))}</span><div class="stepper"><button data-act="remMin" data-d="-5">−</button><input class="num" readonly value="${digits(r.minutesBefore)}" aria-label="${esc(t("reminders.minutesBefore"))}"/><button data-act="remMin" data-d="5">+</button></div></div>
+      ${r.muted || r.voice ? "" : `<div style="font-weight:500;margin:16px 0 8px">${esc(t("reminders.sound"))}</div><div class="seg" role="radiogroup">${["default","chime","bell"].map((k) => `<button role="radio" aria-checked="${r.sound === k}" data-act="remSound" data-k="${k}">${esc(t(`reminders.sounds.${k}`))}</button>`).join("")}</div>`}
+      <p class="muted small" style="margin:16px 0 0;display:flex;gap:6px;align-items:center">${icon("bell", 14)}${esc(n === "imsak" ? t("reminders.imsakTitle") : t("reminders.salahBefore", { name: nm(n), minutes: plural("reminders.minutes", r.minutesBefore) }))}</p>` : ""}`;
+  } else if (S.sheet.type === "khushu") {
+    const { day, salah } = S.sheet, d = S.sheet.draft;
+    title = t("khushu.title", { salah: nm(salah) });
+    body = `<p class="muted" style="margin:0 0 16px">${esc(t("khushu.description"))}</p>
+      <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-weight:500">${esc(t("khushu.level"))}</span><b class="num" style="font-size:22px">${digits(d.level)}/${digits(MAX_KHUSHU)}</b></div>
+      <input type="range" min="1" max="${MAX_KHUSHU}" value="${d.level}" data-input="klevel" style="width:100%;accent-color:var(--foreground);margin:10px 0 2px" aria-label="${esc(t("khushu.level"))}"/>
+      <div class="muted small" style="display:flex;justify-content:space-between"><span>${esc(t("khushu.distracted"))}</span><span>${esc(t("khushu.focused"))}</span></div>
+      <div style="font-weight:500;margin:18px 0 8px">${esc(t("khushu.distractions"))}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${DISTRACTIONS.map((k) => `<button class="chip ${d.distractions.has(k) ? "on" : ""}" aria-pressed="${d.distractions.has(k)}" data-act="kdist" data-k="${k}">${esc(t(`khushu.distraction.${k}`))}</button>`).join("")}</div>
+      <div class="field" style="margin-top:14px"><label for="kcustom">${esc(t("khushu.customDistraction"))}</label><input id="kcustom" class="input" placeholder="${esc(t("khushu.customDistractionPlaceholder"))}" value="${esc(d.custom)}" data-input="kcustom"/></div>
+      <div style="display:flex;gap:10px;margin-top:20px">${S.khushu[`${day}:${salah}`] ? `<button class="btn btn-outline" style="color:var(--destructive)" data-act="kremove">${esc(t("khushu.remove"))}</button>` : ""}<button class="btn btn-primary" style="flex:1" data-act="ksave">${esc(t("khushu.save"))}</button></div>`;
+  }
+  return `<div class="scrim" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}"><div class="grab"></div>
+    <div class="sheet-head"><h2>${esc(title)}</h2><button class="iconbtn" data-act="closeSheet" aria-label="${esc(t("proto.close"))}">${icon("x", 16, 2.2)}</button></div>
+    <div class="sheet-body">${body}</div></div>`;
+}
+function alertHtml() {
+  if (!S.alert) return "";
+  const a = S.alert;
+  const [title, msg, cancel, confirm] = a.kind === "untick"
+    ? [t("log.untick.title", { name: nm(a.salah) }), t("log.untick.message", { name: nm(a.salah) }), t("log.untick.cancel"), t("log.untick.confirm")]
+    : [t("khushu.confirmRemove.title", { salah: nm(a.salah) }), t("khushu.confirmRemove.message"), t("khushu.confirmRemove.cancel"), t("khushu.confirmRemove.confirm")];
+  return `<div class="scrim" style="z-index:21" data-act="alertCancel"></div><div class="alert" role="alertdialog" aria-label="${esc(title)}"><h3>${esc(title)}</h3><p class="muted">${esc(msg)}</p><div class="acts"><button data-act="alertCancel">${esc(cancel)}</button><button class="danger" data-act="alertConfirm">${esc(confirm)}</button></div></div>`;
+}
+
+// ── Side state panel ──
+function renderSide() {
+  const nc = nextAndCurrent();
+  const inv = {
+    A: ["Header: Qibla toolbar button, Hijri + Gregorian date, location chip → settings sheet",
+        "Next Prayer Time hero: name, time, live countdown, progress since previous, bell",
+        "Timetable: all shown times, 'Now' badge, past dimmed, per-row reminder bell",
+        "Prayer Log: day nav (no future), 5 ticks, Khushu chip per logged Salah, untick confirm, save error, Today, streak + hint",
+        "Prayer Assistant row → /prayer-assistant",
+        "Settings sheet: Location (GPS, denied/unavailable, city search + results) + Options (12/24h, Imsak minutes, shown switches)",
+        "Reminder sheet: enabled, silent, Adhan voice, minutes before, sound"],
+    B: ["Header: location chip (opens Location accordion), Qibla button, dates",
+        "Next Prayer Time + live countdown above a sun-path arc; live sun position",
+        "Arc dots + chip rail = the timetable (shown times only, 'Now' marked)",
+        "Selected time card: time, relative countdown, reminder switches (enabled/Adhan voice, more → sheet), today's tick + Khushu, Assistant preset to that Salah",
+        "Prayer Log: day nav, five beads, Khushu levels, streak, save error",
+        "Accordions: Location (GPS + search) and Prayer Times options"],
+    C: ["Header: Qibla button, dates, location chip → jumps to Location section",
+        "Next strip with live countdown",
+        "Ledger table: time · bell · tick for selected day · Khushu chip",
+        "Week grid 7×5 ticks (tap toggles, untick confirms, future locked), day header selects table day, week nav, streak + week total",
+        "Assistant row, inline Location, inline Options, Reminders list (each → sheet)"],
+  }[S.variant];
+  const r = Object.entries(S.reminders).map(([k, v]) => `${k}:${v.enabled ? (v.voice ? "adhan" : v.muted ? "silent" : v.sound) + "-" + v.minutesBefore + "m" : "off"}`).join(" ");
+  const nowS = nowSec();
+  document.getElementById("side").innerHTML = `<details open><summary>State · variant ${S.variant} (${VARIANTS.find((v) => v.key === S.variant).name})</summary>
+    <h4>Shown in this variant</h4><ul>${inv.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+    <h4>Current state</h4><div class="kv">
+      <span>clock</span><span id="side-clock">${String(Math.floor(nowS / 3600)).padStart(2, "0")}:${String(Math.floor(nowS / 60) % 60).padStart(2, "0")}:${String(nowS % 60).padStart(2, "0")}</span>
+      <span>next</span><span>${nc.next ? nc.next.name + (nc.next.tomorrow ? " (tomorrow)" : "") : "none"}</span>
+      <span>current</span><span>${nc.current ? nc.current.name + (nc.current.today ? "" : " (yesterday)") : "none"}</span>
+      <span>hidden</span><span>${[...S.hidden].join(", ") || "—"}</span>
+      <span>timeFormat</span><span>${S.timeFormat}</span>
+      <span>imsakMinutes</span><span>${S.imsakMinutes}</span>
+      <span>location</span><span>${city().en} · ${S.loc.follows ? "follows device" : "chosen"}</span>
+      <span>locate</span><span>${S.locate}</span>
+      <span>search</span><span>"${esc(S.search.query)}" · ${S.search.status}</span>
+      <span>log day</span><span>${S.logDay} · [${[...performed(S.logDay)].join(", ")}]</span>
+      <span>streak</span><span>${streak().days}d · today ${performed(0).size}/5</span>
+      <span>khushu</span><span>${Object.entries(S.khushu).map(([k, v]) => `${k}=${v.level}`).join(" ")}</span>
+      <span>reminders</span><span>${r}</span>
+      <span>sheet/alert</span><span>${S.sheet ? S.sheet.type : "—"} / ${S.alert ? S.alert.kind : "—"}</span>
+    </div>
+    <h4>Simulate</h4>
+    <div class="sim"><button data-sim="clock" data-d="-3600">−1h</button><button data-sim="clock" data-d="-60">−1m</button><button data-sim="clock" data-d="60">+1m</button><button data-sim="clock" data-d="3600">+1h</button><button data-sim="jump" data-to="maghrib">→ Maghrib −10s</button><button data-sim="jump" data-to="fajr">→ Fajr −10s</button><button data-sim="reset">reset clock</button></div>
+    <div class="sim">GPS: ${["granted","denied","unavailable"].map((x) => `<button data-sim="locate" data-v="${x}" class="${S.simLocate === x ? "on" : ""}">${x}</button>`).join("")}</div>
+    <div class="sim"><button data-sim="savefail" class="${S.simSaveFail ? "on" : ""}">log save fails</button><button data-sim="searchfail" class="${S.simSearchFail ? "on" : ""}">search fails</button><button data-sim="hideall">hide all times</button></div>
+  </details>`;
+}
+
+// ── Render ──
+const phone = document.getElementById("phone");
+let lastKey = "";
+function render() {
+  document.documentElement.dataset.theme = S.theme;
+  document.documentElement.lang = S.lang;
+  phone.dir = S.lang === "ar" ? "rtl" : "ltr";
+  phone.lang = S.lang;
+  const prev = phone.querySelector(".scroll"), top = prev ? prev.scrollTop : 0;
+  const sheetPrev = phone.querySelector(".sheet-body"), sheetTop = sheetPrev ? sheetPrev.scrollTop : 0;
+  const body = S.variant === "A" ? renderA() : S.variant === "B" ? renderB() : renderC();
+  phone.innerHTML = `${statusBar()}<div class="scroll">${body}</div>${tabBar()}${sheetHtml()}${alertHtml()}${S.toast ? `<div class="toast" role="status">${esc(S.toast)}</div>` : ""}`;
+  const sc = phone.querySelector(".scroll"); if (sc) sc.scrollTop = top;
+  const sb = phone.querySelector(".sheet-body"); if (sb && S.sheet && S.sheet._keep) sb.scrollTop = sheetTop;
+  if (S.sheet) S.sheet._keep = true;
+  const v = VARIANTS.find((x) => x.key === S.variant);
+  document.getElementById("sw-label").textContent = `${v.key} · ${v.name}`;
+  document.getElementById("sw-theme").textContent = S.theme === "dark" ? "☀ light" : "☾ dark";
+  document.getElementById("sw-lang").textContent = S.lang === "ar" ? "EN" : "عربي";
+  renderSide();
+  const nc = nextAndCurrent();
+  lastKey = `${Math.floor(nowSec() / 60)}|${nc.next && nc.next.name}`;
+}
+function syncUrl() {
+  const p = new URLSearchParams(location.search);
+  p.set("variant", S.variant); p.set("lang", S.lang); p.set("theme", S.theme);
+  history.replaceState(null, "", `${location.pathname}?${p}`);
+}
+function toast(msg) { S.toast = msg; render(); clearTimeout(toast.h); toast.h = setTimeout(() => { S.toast = null; render(); }, 1800); }
+
+// Live tick: countdown text every second; full render when the minute or next time changes.
+setInterval(() => {
+  const nc = nextAndCurrent();
+  const key = `${Math.floor(nowSec() / 60)}|${nc.next && nc.next.name}`;
+  const typing = document.activeElement && phone.contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if (key !== lastKey && !typing) { render(); return; }
+  if (nc.next) {
+    phone.querySelectorAll('[data-live="cd"]').forEach((el) => { el.textContent = fmtCountdown(nc.left); });
+    phone.querySelectorAll('[data-live="fill"]').forEach((el) => { el.style.width = `${Math.min(100, (1 - nc.left / nc.span) * 100)}%`; });
+  }
+  phone.querySelectorAll('[data-live="rel"]').forEach((el) => {
+    const delta = Number(el.dataset.at) - nowSec();
+    el.textContent = delta > 0 ? t("next.remaining", { countdown: fmtCountdown(delta) }) : `${fmtCountdown(-delta)} ${t("proto.ago")}`;
+  });
+  const sc = document.getElementById("side-clock");
+  if (sc) { const n = nowSec(); sc.textContent = `${String(Math.floor(n / 3600)).padStart(2, "0")}:${String(Math.floor(n / 60) % 60).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`; }
+}, 1000);
+
+// ── Actions ──
+function toggleSalah(day, salah) {
+  if (day > 0) return;
+  if (performed(day).has(salah)) { S.alert = { kind:"untick", day, salah }; render(); return; }
+  if (S.simSaveFail) { S.saveFailed = true; render(); return; }
+  S.saveFailed = false; performed(day).add(salah); render();
+}
+phone.addEventListener("click", (e) => {
+  const summary = e.target.closest("summary[data-acc]");
+  if (summary) { e.preventDefault(); const id = summary.dataset.acc; S.openAcc = S.openAcc === id ? null : id; render(); return; }
+  const el = e.target.closest("[data-act]");
+  if (!el || el.disabled) return;
+  const a = el.dataset.act, d = el.dataset;
+  switch (a) {
+    case "tab": if (d.tab !== "prayer") toast(t("proto.opens", { route: t(`tabs.${d.tab}`) })); break;
+    case "qibla": toast(t("proto.opens", { route: "/qibla" })); break;
+    case "assistant": toast(t("proto.opens", { route: "/prayer-assistant" + (d.salah ? ` · ${nm(d.salah)}` : "") })); break;
+    case "settings": S.sheet = { type:"settings" }; render(); break;
+    case "acc": S.openAcc = d.id; render(); document.getElementById(d.id)?.scrollIntoView({ behavior:"smooth", block:"start" }); break;
+    case "jump": document.getElementById(d.to)?.scrollIntoView({ behavior:"smooth", block:"start" }); break;
+    case "reminder": S.sheet = { type:"reminder", name:d.name }; render(); break;
+    case "remToggle": S.reminders[d.name].enabled = !S.reminders[d.name].enabled; render(); break;
+    case "remVoice": S.reminders[d.name].voice = !S.reminders[d.name].voice; if (S.reminders[d.name].voice) S.reminders[d.name].muted = false; render(); break;
+    case "remSet": { const r = S.reminders[S.sheet.name]; r[d.k] = !r[d.k]; if (d.k === "voice" && r.voice) r.muted = false; if (d.k === "muted" && r.muted) r.voice = false; render(); break; }
+    case "remMin": { const r = S.reminders[S.sheet.name]; r.minutesBefore = Math.max(0, Math.min(60, r.minutesBefore + Number(d.d))); render(); break; }
+    case "remSound": S.reminders[S.sheet.name].sound = d.k; render(); break;
+    case "tick": toggleSalah(Number(d.day), d.salah); break;
+    case "day": S.logDay = Math.min(0, S.logDay + Number(d.d)); S.saveFailed = false; render(); break;
+    case "today": S.logDay = 0; S.weekEnd = 0; S.saveFailed = false; render(); break;
+    case "pickday": S.logDay = Number(d.d); render(); break;
+    case "week": S.weekEnd = Math.min(0, S.weekEnd + Number(d.d)); S.logDay = S.weekEnd; render(); break;
+    case "bsel": S.bSelected = d.name; render(); break;
+    case "khushu": { const k = S.khushu[`${d.day}:${d.salah}`]; S.sheet = { type:"khushu", day:Number(d.day), salah:d.salah, draft:{ level:k ? k.level : 5, distractions:new Set(k ? k.distractions : []), custom:k ? k.custom : "" } }; render(); break; }
+    case "kdist": { const s = S.sheet.draft.distractions; s.has(d.k) ? s.delete(d.k) : s.add(d.k); render(); break; }
+    case "ksave": S.khushu[`${S.sheet.day}:${S.sheet.salah}`] = { ...S.sheet.draft }; S.sheet = null; render(); break;
+    case "kremove": S.alert = { kind:"khushuRemove", day:S.sheet.day, salah:S.sheet.salah }; render(); break;
+    case "closeSheet": S.sheet = null; render(); break;
+    case "alertCancel": S.alert = null; render(); break;
+    case "alertConfirm":
+      if (S.alert.kind === "untick") { performed(S.alert.day).delete(S.alert.salah); delete S.khushu[`${S.alert.day}:${S.alert.salah}`]; }
+      else { delete S.khushu[`${S.alert.day}:${S.alert.salah}`]; S.sheet = null; }
+      S.alert = null; render(); break;
+    case "fmt": S.timeFormat = d.f; render(); break;
+    case "imsak": S.imsakMinutes = Math.max(0, Math.min(MAX_IMSAK, S.imsakMinutes + Number(d.d))); render(); break;
+    case "hide": S.hidden.has(d.name) ? S.hidden.delete(d.name) : S.hidden.add(d.name); render(); break;
+    case "locate":
+      S.locate = "locating"; render();
+      setTimeout(() => { if (S.simLocate === "granted") { S.locate = "idle"; S.loc = { cityIndex:0, follows:true }; } else S.locate = S.simLocate; render(); }, 1200);
+      break;
+    case "search":
+      if (!S.search.query.trim()) break;
+      S.search.status = "searching"; render();
+      setTimeout(() => { S.search.status = S.simSearchFail ? "failed" : "done"; render(); }, 700);
+      break;
+    case "choose": S.loc = { cityIndex:Number(d.i), follows:false }; S.search = { query:"", status:"idle" }; S.locate = "idle"; render(); break;
+  }
+});
+phone.addEventListener("input", (e) => {
+  const k = e.target.dataset.input;
+  if (k === "search") {
+    S.search.query = e.target.value; S.search.status = "idle";
+    document.getElementById("loc-results").innerHTML = locationResults();
+    const b = document.getElementById("loc-btn"); if (b) b.disabled = e.target.value.trim() === "";
+    renderSide();
+  } else if (k === "klevel") { S.sheet.draft.level = Number(e.target.value); const b = e.target.previousElementSibling.querySelector("b"); b.textContent = `${digits(S.sheet.draft.level)}/${digits(MAX_KHUSHU)}`; }
+  else if (k === "kcustom") S.sheet.draft.custom = e.target.value;
+});
+phone.addEventListener("change", (e) => {
+  if (e.target.dataset.input === "imsak") {
+    const n = parseInt(e.target.value.replace(/[٠-٩]/g, (c) => "٠١٢٣٤٥٦٧٨٩".indexOf(c)), 10);
+    if (Number.isInteger(n)) S.imsakMinutes = Math.max(0, Math.min(MAX_IMSAK, n));
+    render();
+  }
+});
+phone.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.dataset.input === "search") phone.querySelector('[data-act="search"]')?.click();
+  if (e.key === "Escape" && (S.sheet || S.alert)) { S.alert ? (S.alert = null) : (S.sheet = null); render(); }
+});
+
+document.getElementById("side").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-sim]"); if (!b) return;
+  const k = b.dataset.sim;
+  if (k === "clock") S.offsetSec += Number(b.dataset.d);
+  if (k === "reset") S.offsetSec = 0;
+  if (k === "jump") S.offsetSec += (times()[b.dataset.to] * 60 - 10) - nowSec();
+  if (k === "locate") S.simLocate = b.dataset.v;
+  if (k === "savefail") S.simSaveFail = !S.simSaveFail;
+  if (k === "searchfail") S.simSearchFail = !S.simSearchFail;
+  if (k === "hideall") S.hidden = S.hidden.size === PRAYER_TIMES.length ? new Set(["sunset"]) : new Set(PRAYER_TIMES);
+  render();
+});
+
+// ── Switcher ──
+function cycle(step) {
+  const i = VARIANTS.findIndex((v) => v.key === S.variant);
+  S.variant = VARIANTS[(i + step + VARIANTS.length) % VARIANTS.length].key;
+  S.sheet = null; S.alert = null; syncUrl(); render();
+}
+document.getElementById("sw-prev").onclick = () => cycle(-1);
+document.getElementById("sw-next").onclick = () => cycle(1);
+document.getElementById("sw-theme").onclick = () => { S.theme = S.theme === "dark" ? "light" : "dark"; syncUrl(); render(); };
+document.getElementById("sw-lang").onclick = () => { S.lang = S.lang === "ar" ? "en" : "ar"; syncUrl(); render(); };
+document.addEventListener("keydown", (e) => {
+  const a = document.activeElement;
+  if (a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.isContentEditable)) return;
+  if (e.key === "ArrowLeft") cycle(-1);
+  if (e.key === "ArrowRight") cycle(1);
+});
+
+syncUrl();
+render();
+</script>
+</body>
+</html>

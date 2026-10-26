@@ -14,6 +14,8 @@ export default defineConfig({
     ...(core.ignorePatterns ?? []),
     ".agents/skills/**",
     ".claude/skills/**",
+    // Throwaway HTML prototypes (prototype branches only).
+    "apps/native/prototypes/**",
   ],
   rules: {
     // React Navigation and expo-router take render functions as options
