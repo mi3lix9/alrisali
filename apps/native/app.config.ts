@@ -83,11 +83,14 @@ const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
       "expo-notifications",
       {
         // Reminders are local notifications (ADR-0003); these are the tones
-        // and the Adhan voice they can play (features/reminders).
+        // and the Adhan recordings they can play (features/reminders).
         sounds: [
           "./assets/sounds/chime.wav",
           "./assets/sounds/bell.wav",
           "./assets/sounds/adhan.wav",
+          "./assets/sounds/adhan_hatamzadeh_full.ogg",
+          "./assets/sounds/adhan_sobhdel_takbeer.wav",
+          "./assets/sounds/adhan_sobhdel_full.ogg",
         ],
       },
     ],

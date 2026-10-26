@@ -1,4 +1,5 @@
 import { createReminderSettingsRepository } from "@alrisali/db-user/reminders";
+import { applyReminderSettingsChange } from "@alrisali/domain/reminders";
 import type {
   ReminderSettings,
   ReminderSettingsChange,
@@ -27,13 +28,36 @@ export const useReminderSettings = () =>
     },
   });
 
-/** Saves a change; the scheduler reschedules as soon as the data changes. */
+/**
+ * Saves a change; the scheduler reschedules as soon as the data changes. The
+ * change shows at once and is undone if saving fails, so a control that
+ * reads the settings never lags behind the Believer's tap.
+ */
 export const useUpdateReminderSettings = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    // Settings changes apply in the order made, one at a time.
+    scope: { id: "reminder-settings" },
     mutationFn: async (change: ReminderSettingsChange) => {
       const reminders = await repository();
       return reminders.update(change);
+    },
+    onMutate: async (change) => {
+      await queryClient.cancelQueries({ queryKey: SETTINGS_QUERY_KEY });
+      const previous =
+        queryClient.getQueryData<ReminderSettings>(SETTINGS_QUERY_KEY);
+      if (previous) {
+        queryClient.setQueryData(
+          SETTINGS_QUERY_KEY,
+          applyReminderSettingsChange(previous, change)
+        );
+      }
+      return { previous };
+    },
+    onError: (_error, _change, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(SETTINGS_QUERY_KEY, context.previous);
+      }
     },
     onSuccess: (settings) => {
       queryClient.setQueryData(SETTINGS_QUERY_KEY, settings);

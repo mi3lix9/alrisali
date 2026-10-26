@@ -197,7 +197,14 @@ describe(planReminders, () => {
     it("plays the voice instead of the sound", () => {
       expect(fajrWith({ voice: true })?.alert).toStrictEqual({
         kind: "voice",
+        adhan: "hatamzadeh-takbeer",
       });
+    });
+
+    it("plays the Adhan the rule chose", () => {
+      expect(
+        fajrWith({ voice: true, adhan: "sobhdel-full" })?.alert
+      ).toStrictEqual({ kind: "voice", adhan: "sobhdel-full" });
     });
 
     it("keeps a muted Salah silent, even with the voice on", () => {

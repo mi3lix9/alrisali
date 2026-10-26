@@ -9,8 +9,9 @@ const {
 
 /** @type {import('expo/metro-config').MetroConfig} */
 const config = getSentryExpoConfig(__dirname);
-// The Prayer Assistant's MoveNet pose model ships as an asset.
-config.resolver.assetExts.push("tflite");
+// The Prayer Assistant's MoveNet pose model and the full Adhan recordings
+// (Ogg Vorbis, previewed on the Reminder sheet) ship as assets.
+config.resolver.assetExts.push("tflite", "ogg");
 
 const uniwindConfig = withUniwindConfig(wrapWithReanimatedMetroConfig(config), {
   cssEntryFile: "./global.css",

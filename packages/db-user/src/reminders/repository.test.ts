@@ -23,6 +23,7 @@ const rule = (enabled: boolean, minutesBefore = 5) => ({
   sound: "default",
   muted: false,
   voice: false,
+  adhan: "hatamzadeh-takbeer",
 });
 
 /** A new Believer: Fajr, Dhuhr and Maghrib on; Asr, Isha and Imsak off. */
@@ -83,6 +84,24 @@ describe(createReminderSettingsRepository, () => {
       imsak: { ...rule(true, 0), muted: true },
       quietHours: { enabled: true, start: 1320, end: 300 },
     });
+  });
+
+  it("keeps every change when updates run at the same time", async () => {
+    const first = createReminderSettingsRepository(database.db);
+    const second = createReminderSettingsRepository(database.db);
+
+    await Promise.all([
+      first.update({ salah: { dhuhr: { enabled: false } } }),
+      second.update({ salah: { maghrib: { enabled: false } } }),
+      first.update({ salah: { fajr: { enabled: false } } }),
+    ]);
+
+    const { salah } = await first.get();
+    expect([
+      salah.fajr.enabled,
+      salah.dhuhr.enabled,
+      salah.maghrib.enabled,
+    ]).toStrictEqual([false, false, false]);
   });
 
   it("rejects minutes before outside 0–60, an unknown sound or a time past midnight", async () => {

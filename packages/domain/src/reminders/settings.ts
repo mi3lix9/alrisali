@@ -1,5 +1,8 @@
 import { z } from "zod";
 
+import { ADHAN_IDS, DEFAULT_ADHAN } from "./adhan";
+import type { AdhanId } from "./adhan";
+
 /** The five Salah, each with its own Reminder rule. */
 export const SALAH = ["fajr", "dhuhr", "asr", "maghrib", "isha"] as const;
 
@@ -27,12 +30,14 @@ export interface ReminderRule {
   muted: boolean;
   /** Plays the recorded Adhan voice instead of the tone. */
   voice: boolean;
+  /** The recording `voice` plays. */
+  adhan: AdhanId;
 }
 
 /** What the Reminder sounds like, after the rule's precedence. */
 export type ReminderAlert =
   | { kind: "sound"; sound: ReminderSound }
-  | { kind: "voice" }
+  | { kind: "voice"; adhan: AdhanId }
   | { kind: "silent" };
 
 /** The alert a rule makes, or null when it is disabled. */
@@ -44,7 +49,7 @@ export const reminderAlert = (rule: ReminderRule): ReminderAlert | null => {
     return { kind: "silent" };
   }
   if (rule.voice) {
-    return { kind: "voice" };
+    return { kind: "voice", adhan: rule.adhan };
   }
   return { kind: "sound", sound: rule.sound };
 };
@@ -76,6 +81,7 @@ const salahRule = (enabled: boolean): ReminderRule => ({
   sound: "default",
   muted: false,
   voice: false,
+  adhan: DEFAULT_ADHAN,
 });
 
 /**
@@ -113,6 +119,7 @@ const ruleShape = {
   sound: z.enum(REMINDER_SOUNDS),
   muted: z.boolean(),
   voice: z.boolean(),
+  adhan: z.enum(ADHAN_IDS),
 };
 
 const quietHoursShape = {

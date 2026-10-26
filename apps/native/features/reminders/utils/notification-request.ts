@@ -1,5 +1,10 @@
-import { classicSayingById } from "@alrisali/domain/reminders";
+import {
+  ADHAN_IDS,
+  classicSayingById,
+  takbeerOf,
+} from "@alrisali/domain/reminders";
 import type {
+  AdhanId,
   HabitReminderMessage,
   PlannedReminder,
   PrayerReminderMessage,
@@ -7,15 +12,10 @@ import type {
 } from "@alrisali/domain/reminders";
 import type { Language } from "@alrisali/i18n";
 import type { TFunction } from "i18next";
+import { Platform } from "react-native";
 
-import { formatNumber } from "@/shared/lib/numbers";
-
-/** Where each alert's sound comes from; the files are in assets/sounds. */
-const SOUND_FILES = {
-  chime: "chime.wav",
-  bell: "bell.wav",
-  voice: "adhan.wav",
-} as const;
+import { minutesPhrase } from "./minutes-phrase";
+import { ADHAN_FILES, SOUND_FILES } from "./sound-files";
 
 /**
  * One Android channel per alert: Android fixes a channel's sound when the
@@ -25,11 +25,21 @@ export const REMINDER_CHANNELS = [
   { id: "reminder-default", sound: "default" },
   { id: "reminder-chime", sound: SOUND_FILES.chime },
   { id: "reminder-bell", sound: SOUND_FILES.bell },
-  { id: "reminder-voice", sound: SOUND_FILES.voice },
+  ...ADHAN_IDS.map((adhan) => ({
+    id: `reminder-adhan-${adhan}`,
+    sound: ADHAN_FILES[adhan],
+  })),
   { id: "reminder-silent", sound: null },
 ] as const;
 
 type ChannelId = (typeof REMINDER_CHANNELS)[number]["id"];
+
+/**
+ * iOS plays a notification sound for 30 seconds at most, so the full Adhan
+ * would be cut short there: it plays the same muezzin's takbeer instead.
+ */
+const playableAdhan = (adhan: AdhanId): AdhanId =>
+  Platform.OS === "ios" ? takbeerOf(adhan) : adhan;
 
 const alertSound = (
   alert: ReminderAlert
@@ -39,7 +49,11 @@ const alertSound = (
       return { channelId: "reminder-silent", sound: null };
     }
     case "voice": {
-      return { channelId: "reminder-voice", sound: SOUND_FILES.voice };
+      const adhan = playableAdhan(alert.adhan);
+      return {
+        channelId: `reminder-adhan-${adhan}`,
+        sound: ADHAN_FILES[adhan],
+      };
     }
     default: {
       return alert.sound === "default"
@@ -63,17 +77,6 @@ export interface ReminderRequest {
   channelId: ChannelId;
   sound: string | null;
 }
-
-const minutesPhrase = (
-  t: TFunction<"reminders">,
-  language: Language,
-  count: number
-): string => {
-  const form = new Intl.PluralRules(language).select(count);
-  return t(`minutes.${form}`, {
-    count: formatNumber(count),
-  });
-};
 
 /** A Prayer Time Reminder's title and body. */
 const prayerTimeWording = (
