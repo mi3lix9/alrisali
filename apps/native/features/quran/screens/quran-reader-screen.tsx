@@ -34,7 +34,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions } from "../components/ayah-sheet";
-import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
 import { QuranSearchSheet } from "../components/quran-search-sheet";
@@ -173,7 +172,7 @@ const Reader = ({
     }
   };
   const jumpTo = (to: JumpTarget) => move({ type: "jump", to });
-  const openSheet = (kind: "index" | "page-jump" | "search") =>
+  const openSheet = (kind: "index" | "search") =>
     send({ type: "open-sheet", sheet: { kind } });
   const closeSheet = () => send({ type: "close-sheet" });
 
@@ -299,14 +298,11 @@ const Reader = ({
       />
       <QuranIndexSheet
         open={chrome.sheet?.kind === "index"}
-        current={{ surah: state.currentSurah, juz: position.juz }}
-        onSelect={jumpTo}
-        onPageJump={() => openSheet("page-jump")}
-        onClose={closeSheet}
-      />
-      <PageJumpSheet
-        open={chrome.sheet?.kind === "page-jump"}
-        initialPage={state.currentPage}
+        current={{
+          surah: state.currentSurah,
+          juz: position.juz,
+          page: state.currentPage,
+        }}
         onSelect={jumpTo}
         onClose={closeSheet}
       />

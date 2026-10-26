@@ -81,7 +81,6 @@ export const QuranLibraryCard = () => {
       <QuranIndexSheet
         open={sheet === "index"}
         onSelect={select}
-        onPageJump={() => setSheet("page-jump")}
         onClose={close}
       />
       <PageJumpSheet

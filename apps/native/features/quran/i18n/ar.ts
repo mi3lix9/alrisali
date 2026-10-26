@@ -70,6 +70,7 @@ export const ar = {
     search: "البحث في القرآن",
     surahs: "السور",
     juz: "الأجزاء",
+    page: "صفحة",
     juzTitle: "الجزء {{juz}}",
     current: "الحالي",
     surahMeta_one: "آية واحدة · ص {{page}}",

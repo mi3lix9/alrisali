@@ -75,6 +75,7 @@ export const en: Catalog<typeof ar> = {
     search: "Search the Quran",
     surahs: "Surahs",
     juz: "Juz",
+    page: "Page",
     juzTitle: "Juz {{juz}}",
     current: "Current",
     surahMeta_one: "{{ayat}} ayah · p. {{page}}",
