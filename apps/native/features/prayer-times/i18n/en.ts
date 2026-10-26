@@ -14,6 +14,12 @@ export const en: Catalog<typeof ar> = {
     isha: "Isha",
     midnight: "Midnight",
   },
+  header: {
+    settings: "Location and Prayer Times options: {{place}}",
+  },
+  settings: {
+    title: "Location and options",
+  },
   timetable: {
     title: "Today's Prayer Times",
     notReached: "Not today",
@@ -31,7 +37,6 @@ export const en: Catalog<typeof ar> = {
     pick: "Pick a date",
     hijri: "Hijri date",
     timetableTitle: "Prayer Times for {{date}}",
-    countdown: "{{name}} in {{countdown}}",
   },
   next: {
     title: "Next Prayer Time",

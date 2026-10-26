@@ -1,6 +1,7 @@
 import "../i18n";
 import type { PrayerTimeName } from "@alrisali/domain/shared";
 import { locationTimeZone } from "@alrisali/domain/shared";
+import { useIsFocused } from "expo-router";
 import { Spinner } from "panelui-native";
 import { useState } from "react";
 import type { ReactNode } from "react";
@@ -9,10 +10,10 @@ import type { Temporal } from "temporal-polyfill";
 import { useBelieverSettings } from "@/shared/lib/believer-settings";
 import { Screen } from "@/shared/ui/screen";
 
-import { DayNavigationCard } from "../components/day-navigation-card";
 import { HighLatitudePrompt } from "../components/high-latitude-prompt";
-import { LocationCard } from "../components/location-card";
-import { OptionsCard } from "../components/options-card";
+import { NextPrayerHero } from "../components/next-prayer-hero";
+import { PrayerHeader } from "../components/prayer-header";
+import { PrayerSettingsSheet } from "../components/prayer-settings-sheet";
 import { PrayerTimesWarning } from "../components/prayer-times-warning";
 import { TimetableCard } from "../components/timetable-card";
 import { useFollowDeviceLocation } from "../hooks/use-device-location";
@@ -24,7 +25,9 @@ import type { SharedTimes } from "../utils/shared-times";
 const MINUTE_MS = 60_000;
 
 /**
- * The Prayer tab: the timetable of today or any day the Believer moves to, its location and its options.
+ * The Prayer tab: a header with the shown day and the location, the next
+ * Prayer Time's countdown, the timetable of today or any day the Believer
+ * moves to, and the location and options in a sheet.
  * `children` (another feature's card, from the route) shows under the
  * timetable; `timetableRowActions` ends each timetable row and
  * `timetableShare` shares today's times.
@@ -41,7 +44,9 @@ export const PrayerTimesScreen = ({
   useFollowDeviceLocation();
   const view = usePrayerTimesView();
   const { data: believer } = useBelieverSettings();
-  const now = useNow(MINUTE_MS);
+  const focused = useIsFocused();
+  const now = useNow(MINUTE_MS, focused);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   // null is today, so midnight at the location carries the screen along.
   const [shown, setShown] = useState<Temporal.PlainDate | null>(null);
 
@@ -58,39 +63,44 @@ export const PrayerTimesScreen = ({
     ? locationToday(now, locationTimeZone(settings.coordinates))
     : null;
   return (
-    <Screen>
-      {settings && today ? (
-        <>
-          <DayNavigationCard
-            view={{ ...view, settings }}
-            today={today}
-            shown={shown}
-            onShow={setShown}
-          />
-          <PrayerTimesWarning
-            view={{ ...view, settings }}
-            date={shown ?? today}
-          />
-          <HighLatitudePrompt coordinates={settings.coordinates} />
-          <TimetableCard
-            view={{ ...view, settings }}
-            date={shown ?? today}
-            rowActions={timetableRowActions}
-            placeName={believer.location?.name}
-            shareAction={timetableShare}
-          />
-        </>
-      ) : null}
-      {children}
-      <LocationCard
+    <>
+      <Screen>
+        <PrayerHeader
+          today={today}
+          shown={shown}
+          location={believer.location}
+          onShow={setShown}
+          onOpenSettings={() => setSettingsOpen(true)}
+        />
+        <NextPrayerHero view={view} active={focused} />
+        {settings && today ? (
+          <>
+            <PrayerTimesWarning
+              view={{ ...view, settings }}
+              date={shown ?? today}
+            />
+            <HighLatitudePrompt coordinates={settings.coordinates} />
+            <TimetableCard
+              view={{ ...view, settings }}
+              date={shown ?? today}
+              rowActions={timetableRowActions}
+              placeName={believer.location?.name}
+              shareAction={timetableShare}
+              active={focused}
+            />
+          </>
+        ) : null}
+        {children}
+      </Screen>
+      <PrayerSettingsSheet
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
         location={believer.location}
         followsDevice={believer.locationFollowsDevice}
-      />
-      <OptionsCard
         timeFormat={view.timeFormat}
         imsakMinutes={believer.imsakMinutes}
         hidden={view.hidden}
       />
-    </Screen>
+    </>
   );
 };

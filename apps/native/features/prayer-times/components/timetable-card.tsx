@@ -24,7 +24,7 @@ const MINUTE_MS = 60_000;
 
 /**
  * The visible Prayer Times of `date` (today when omitted) on the location's
- * clock, with the one in progress marked on today only. `rowActions` (another feature's control, from the route)
+ * clock, with the one in progress marked and the ones gone by dimmed on today only. `rowActions` (another feature's control, from the route)
  * ends each row.
  */
 export const TimetableCard = ({
@@ -33,6 +33,7 @@ export const TimetableCard = ({
   rowActions,
   placeName,
   shareAction,
+  active,
 }: {
   view: PrayerTimesView & {
     settings: NonNullable<PrayerTimesView["settings"]>;
@@ -43,9 +44,11 @@ export const TimetableCard = ({
   placeName?: string | null | undefined;
   /** Another feature's control (from the route) that shares the shown day's times. */
   shareAction?: ((times: SharedTimes) => ReactNode) | undefined;
+  /** False while the tab is out of focus, which stops the clock ticking. */
+  active: boolean;
 }) => {
   const { t } = useTranslation("prayer-times");
-  const now = useNow(MINUTE_MS);
+  const now = useNow(MINUTE_MS, active);
   const { settings, hidden, timeFormat } = view;
   const timeZone = locationTimeZone(settings.coordinates);
   const today = locationToday(now, timeZone);
@@ -56,6 +59,12 @@ export const TimetableCard = ({
   const shown = PRAYER_TIMES.filter((name) => !hidden.includes(name));
   const isCurrent = (name: PrayerTimeName) =>
     isToday && current?.name === name && current.at.toPlainDate().equals(day);
+  // Today's times already gone by are dimmed, the one in progress is not.
+  const isPast = (name: PrayerTimeName, time: Temporal.ZonedDateTime | null) =>
+    isToday &&
+    time !== null &&
+    !isCurrent(name) &&
+    time.epochMilliseconds < now.epochMilliseconds;
 
   const sharedTimes: SharedTimes | null = shareAction
     ? {
@@ -109,6 +118,7 @@ export const TimetableCard = ({
                   {index > 0 && <Item.Separator />}
                   <Item
                     size="sm"
+                    className={isPast(name, time) ? "opacity-60" : ""}
                     accessible
                     {...(time
                       ? {}

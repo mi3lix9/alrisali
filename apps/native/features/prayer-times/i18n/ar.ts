@@ -10,6 +10,12 @@ export const ar = {
     isha: "العشاء",
     midnight: "منتصف الليل",
   },
+  header: {
+    settings: "الموقع والمواقيت: {{place}}",
+  },
+  settings: {
+    title: "الموقع والخيارات",
+  },
   timetable: {
     title: "مواقيت اليوم",
     notReached: "لا يحين اليوم",
@@ -26,7 +32,6 @@ export const ar = {
     pick: "اختر تاريخًا",
     hijri: "التاريخ الهجري",
     timetableTitle: "مواقيت {{date}}",
-    countdown: "{{name}} بعد {{countdown}}",
   },
   next: {
     title: "الصلاة القادمة",
