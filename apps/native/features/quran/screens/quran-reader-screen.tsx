@@ -31,7 +31,6 @@ import { useUniwind } from "uniwind";
 import { AyahSheet } from "../components/ayah-sheet";
 import type { AyahActions, AyahSheetMove } from "../components/ayah-sheet";
 import { PageColorsProvider } from "../components/page-colors";
-import { PageJumpSheet } from "../components/page-jump-sheet";
 import { PageMode } from "../components/page-mode";
 import { PlayToSheet } from "../components/play-to-sheet";
 import { QuranIndexSheet } from "../components/quran-index-sheet";
@@ -194,7 +193,7 @@ const Reader = ({
     }
   };
   const jumpTo = (to: JumpTarget) => move({ type: "jump", to });
-  const openSheet = (kind: "index" | "page-jump" | "search" | "returns") =>
+  const openSheet = (kind: "index" | "search" | "returns") =>
     send({ type: "open-sheet", sheet: { kind } });
   const closeSheet = () => send({ type: "close-sheet" });
   /** Brings the page or surah behind to an ayah when it is off screen. */
@@ -376,15 +375,12 @@ const Reader = ({
         />
         <QuranIndexSheet
           open={chrome.sheet?.kind === "index"}
-          current={{ surah: state.currentSurah, juz: position.juz }}
+          current={{
+            surah: state.currentSurah,
+            juz: position.juz,
+            page: state.currentPage,
+          }}
           savedFavorites={savedFavorites}
-          onSelect={jumpTo}
-          onPageJump={() => openSheet("page-jump")}
-          onClose={closeSheet}
-        />
-        <PageJumpSheet
-          open={chrome.sheet?.kind === "page-jump"}
-          initialPage={state.currentPage}
           onSelect={jumpTo}
           onClose={closeSheet}
         />

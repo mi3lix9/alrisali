@@ -14,7 +14,7 @@ interface PageJumpFormProps {
   onSelect: (target: JumpTarget) => void;
 }
 
-const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
+export const PageJumpForm = ({ initialPage, onSelect }: PageJumpFormProps) => {
   const { t, i18n } = useTranslation("quran");
   // Starts in the interface's digits; parsePage reads Western or
   // Arabic-Indic, whichever the keyboard types.

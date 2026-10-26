@@ -12,7 +12,13 @@ const numbers = (sort: Parameters<typeof sortSurahs>[0], language = "en") =>
 
 describe("the Quran index", () => {
   it("has Surahs, Juz, Quarters and Saved tabs, Saved filtering ribbons, favorites and notes", () => {
-    expect(INDEX_TABS).toStrictEqual(["surahs", "juz", "quarters", "saved"]);
+    expect(INDEX_TABS).toStrictEqual([
+      "surahs",
+      "juz",
+      "page",
+      "quarters",
+      "saved",
+    ]);
     expect(SAVED_FILTERS).toStrictEqual(["ribbons", "favorites", "notes"]);
   });
 

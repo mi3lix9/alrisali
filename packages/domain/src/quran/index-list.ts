@@ -5,7 +5,13 @@ import { ayatOfSurah, findAyah, JUZ_COUNT } from "./mushaf";
 import type { Ayah } from "./mushaf";
 
 /** The Quran index's tabs, in order. */
-export const INDEX_TABS = ["surahs", "juz", "quarters", "saved"] as const;
+export const INDEX_TABS = [
+  "surahs",
+  "juz",
+  "page",
+  "quarters",
+  "saved",
+] as const;
 export type IndexTab = (typeof INDEX_TABS)[number];
 
 /** What the Saved tab can filter to. */

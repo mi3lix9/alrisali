@@ -39,7 +39,7 @@ test(
     // Go to the page through the index's page jump.
     await showControls(screen, 1);
     await screen.getByTestId("quran-reader-index").tap();
-    await screen.getByTestId("quran-index-page-jump").tap();
+    await screen.getByTestId("quran-index-tab-page").tap();
     await screen.getByTestId("quran-page-jump-input").fill(String(PAGE));
     await screen.getByTestId("quran-page-jump-open").tap();
     await expect(screen.getByTestId(`quran-page-${PAGE}`)).toBeVisible();

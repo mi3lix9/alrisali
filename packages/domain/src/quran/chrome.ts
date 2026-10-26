@@ -12,9 +12,8 @@ export const CHROME_IDLE_MS = 4000;
 export type ReaderSheet =
   | { kind: "ayah"; ayah: AyahKey }
   | { kind: "settings" }
-  /** The Surah and Juz index. */
+  /** The Surah and Juz index, with its page jump. */
   | { kind: "index" }
-  | { kind: "page-jump" }
   | { kind: "search" }
   /** Play To: pick where recitation stops, starting at this ayah. */
   | { kind: "play-to"; ayah: AyahKey }
