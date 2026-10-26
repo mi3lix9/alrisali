@@ -103,7 +103,6 @@ export const QuranLibraryCard = ({
         open={sheet === "index"}
         savedFavorites={savedFavorites}
         onSelect={select}
-        onPageJump={() => setSheet("page-jump")}
         onClose={close}
       />
       <PageJumpSheet

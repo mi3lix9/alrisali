@@ -127,6 +127,7 @@ export const en: Catalog<typeof ar> = {
     search: "Search the Quran",
     surahs: "Surahs",
     juz: "Juz",
+    page: "Page",
     quarters: "Quarters",
     saved: "Saved",
     sortLabel: "Sort surahs",

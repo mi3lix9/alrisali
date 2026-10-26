@@ -164,7 +164,9 @@ export const en: Catalog<typeof ar> = {
       everyayah:
         "Recitations of reciters alquran.cloud lacks, such as Minshawi and Abdul Basit (Mujawwad), via EveryAyah.com. The recordings' copyrights belong to the reciters.",
       "adhan-recording":
-        "The Adhan voice of Prayer Time Reminders: the opening of a Shia Adhan recorded by Saeed Hatamzadeh-Varmazyar, from Wikimedia Commons, under CC BY-SA 4.0, shortened and converted to WAV.",
+        "The Adhan voice of Prayer Time Reminders: a Shia Adhan in the Mahur dastgah recorded by Saeed Hatamzadeh-Varmazyar, from Wikimedia Commons, under CC BY-SA 4.0, as its opening takbeer and in full, shortened and converted.",
+      "adhan-sobhdel":
+        "The Adhan voice of Prayer Time Reminders: a Shia Adhan by the late muezzin Hajj Hussein Sobhdel (a Koorosh Orooj video), from Wikimedia Commons, under CC BY-SA 4.0, as its opening takbeer and in full, with the audio extracted, trimmed and converted.",
       tanzil:
         "Where each hizb quarter begins, from Tanzil's Quran metadata, corrected to the quarter signs in the KFGQPC text.",
       wmm: "The magnetic declination that corrects the Qibla compass to true north, from the World Magnetic Model WMM2025 by NOAA and the British Geological Survey, in the public domain.",

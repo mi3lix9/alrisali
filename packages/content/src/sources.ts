@@ -63,7 +63,16 @@ export const CONTENT_SOURCES = [
     name: "“AzaanMaahur.ogg” by Saeed Hatamzadeh-Varmazyar, Wikimedia Commons",
     url: "https://commons.wikimedia.org/wiki/File:AzaanMaahur.ogg",
     licence: {
-      name: "CC BY-SA 4.0 (opening excerpt, converted to WAV)",
+      name: "CC BY-SA 4.0 (opening excerpt and full recording, converted)",
+      url: "https://creativecommons.org/licenses/by-sa/4.0/",
+    },
+  },
+  {
+    id: "adhan-sobhdel",
+    name: "“اذان حسین صبحدل” (Adhan of Master Hussein Sobhdel), Wikimedia Commons",
+    url: "https://commons.wikimedia.org/wiki/File:%D8%A7%D8%B0%D8%A7%D9%86_%D8%AD%D8%B3%DB%8C%D9%86_%D8%B5%D8%A8%D8%AD%D8%AF%D9%84.webm",
+    licence: {
+      name: "CC BY-SA 4.0 (audio extracted, trimmed and converted)",
       url: "https://creativecommons.org/licenses/by-sa/4.0/",
     },
   },

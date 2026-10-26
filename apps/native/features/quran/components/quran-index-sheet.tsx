@@ -12,12 +12,11 @@ import type { IndexTab, JumpTarget, SurahSort } from "@alrisali/domain/quran";
 import {
   Badge,
   BottomSheet,
-  Button,
   Item,
   ToggleButton,
   ToggleButtonGroup,
 } from "panelui-native";
-import { ChevronDownIcon, ChevronUpIcon, FileIcon } from "panelui-native/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "panelui-native/icons";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -25,6 +24,7 @@ import { View } from "react-native";
 import { formatNumber } from "@/shared/lib/numbers";
 
 import { hizbLabel, surahName } from "../utils/format";
+import { PageJumpForm } from "./page-jump-sheet";
 import { SavedList } from "./saved-list";
 import type { SavedFavorites } from "./saved-list";
 
@@ -34,11 +34,10 @@ const JUZ = Array.from({ length: JUZ_COUNT }, (_, index) => index + 1);
 interface QuranIndexSheetProps {
   open: boolean;
   /** Marks the surah and juz in view; none outside the reader. */
-  current?: { surah: number; juz: number };
+  current?: { surah: number; juz: number; page: number };
   /** The Favorites its Saved tab lists, drawn by the route. */
   savedFavorites?: SavedFavorites | undefined;
   onSelect: (target: JumpTarget) => void;
-  onPageJump: () => void;
   onClose: () => void;
 }
 
@@ -51,7 +50,6 @@ export const QuranIndexSheet = ({
   current,
   savedFavorites,
   onSelect,
-  onPageJump,
   onClose,
 }: QuranIndexSheetProps) => {
   const { t, i18n } = useTranslation("quran");
@@ -77,9 +75,8 @@ export const QuranIndexSheet = ({
     >
       <BottomSheet.Content size="full">
         <BottomSheet.Header title={t("navigation.index")}>
-          <View className="flex-row items-center gap-2 pt-2">
+          <View className="pt-2">
             <ToggleButtonGroup
-              className="flex-1"
               selectionMode="single"
               size="sm"
               accessibilityLabel={t("navigation.index")}
@@ -103,18 +100,15 @@ export const QuranIndexSheet = ({
                 </ToggleButton>
               ))}
             </ToggleButtonGroup>
-            <Button
-              size="sm"
-              variant="outline"
-              startContent={<FileIcon size={16} />}
-              testID="quran-index-page-jump"
-              onPress={onPageJump}
-            >
-              {t("navigation.pageJump")}
-            </Button>
           </View>
         </BottomSheet.Header>
-        <BottomSheet.Body className="pb-6">
+        <BottomSheet.Body className="pb-6" keyboardShouldPersistTaps="handled">
+          {tab === "page" ? (
+            <PageJumpForm
+              initialPage={current?.page ?? 1}
+              onSelect={onSelect}
+            />
+          ) : null}
           {tab === "surahs" ? (
             <View className="gap-2">
               <ToggleButtonGroup

@@ -154,7 +154,8 @@ export interface ReminderRequest {
   } | null;
 }
 
-const minutesPhrase = (
+/** "5 minutes" in the plural form `language` uses for the count. */
+export const minutesPhrase = (
   t: TFunction<"reminders">,
   language: Language,
   count: number

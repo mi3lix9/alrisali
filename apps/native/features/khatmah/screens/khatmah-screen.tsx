@@ -9,6 +9,7 @@ import { Alert, View } from "react-native";
 
 import { formatNumber } from "@/shared/lib/numbers";
 import { useToday } from "@/shared/lib/today";
+import { HeaderButton } from "@/shared/ui/header-button";
 import { Screen } from "@/shared/ui/screen";
 
 import { CelebrationCard } from "../components/celebration-card";
@@ -247,11 +248,12 @@ export const KhatmahScreen = ({
     <>
       <Stack.Screen options={{ title: t("title") }} />
       {active ? (
-        <Stack.Toolbar placement="right">
-          <Stack.Toolbar.Button onPress={() => router.push("/khatmah-new")}>
-            {t("manage.startOver")}
-          </Stack.Toolbar.Button>
-        </Stack.Toolbar>
+        <HeaderButton
+          placement="right"
+          label={t("manage.startOver")}
+          symbol="arrow.counterclockwise"
+          onPress={() => router.push("/khatmah-new")}
+        />
       ) : null}
       {body}
     </>

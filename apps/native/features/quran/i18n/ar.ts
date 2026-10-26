@@ -122,6 +122,7 @@ export const ar = {
     search: "البحث في القرآن",
     surahs: "السور",
     juz: "الأجزاء",
+    page: "صفحة",
     quarters: "الأرباع",
     saved: "المحفوظات",
     sortLabel: "ترتيب السور",

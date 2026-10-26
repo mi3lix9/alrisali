@@ -94,6 +94,24 @@ describe(createReminderSettingsRepository, () => {
     });
   });
 
+  it("keeps every change when updates run at the same time", async () => {
+    const first = createReminderSettingsRepository(database.db);
+    const second = createReminderSettingsRepository(database.db);
+
+    await Promise.all([
+      first.update({ salah: { dhuhr: { enabled: false } } }),
+      second.update({ salah: { maghrib: { enabled: false } } }),
+      first.update({ salah: { fajr: { enabled: false } } }),
+    ]);
+
+    const { salah } = await first.get();
+    expect([
+      salah.fajr.enabled,
+      salah.dhuhr.enabled,
+      salah.maghrib.enabled,
+    ]).toStrictEqual([false, false, false]);
+  });
+
   it("rejects minutes before outside 0–60, an unknown sound or a time past midnight", async () => {
     const reminders = createReminderSettingsRepository(database.db);
 

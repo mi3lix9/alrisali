@@ -31,6 +31,9 @@ export const useReminderSettings = () =>
 export const useUpdateReminderSettings = () => {
   const queryClient = useQueryClient();
   return useMutation({
+    // Changes save one after another, so quick toggles never overwrite each
+    // other's result in the cache.
+    scope: { id: "reminder-settings" },
     mutationFn: async (change: ReminderSettingsChange) => {
       const reminders = await repository();
       return reminders.update(change);
