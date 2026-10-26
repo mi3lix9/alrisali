@@ -11,20 +11,11 @@ export const stopAdhan = (): void => {
   player = null;
 };
 
-/**
- * Plays a downloaded adhan recording in the app (the editor's Test, or the
- * full adhan when an At-Time Alert is opened on iOS), replacing any other.
- * False when the file is not on the device.
- */
-export const playAdhan = (file: string, onEnd?: () => void): boolean => {
-  const uri = adhanFileUri(file);
-  if (uri === null) {
-    return false;
-  }
+const start = (source: string | number, onEnd?: () => void): void => {
   stopAdhan();
   // The Believer asked for it: play with the ringer off too.
   void setAudioModeAsync({ playsInSilentMode: true });
-  const audio = createAudioPlayer(uri);
+  const audio = createAudioPlayer(source);
   player = audio;
   audio.addListener("playbackStatusUpdate", (status) => {
     if (status.didJustFinish && player === audio) {
@@ -33,5 +24,23 @@ export const playAdhan = (file: string, onEnd?: () => void): boolean => {
     }
   });
   audio.play();
+};
+
+/**
+ * Plays a downloaded adhan recording in the app (a preview, or the full
+ * adhan when an At-Time Alert is opened on iOS), replacing any other. False
+ * when the file is not on the device.
+ */
+export const playAdhan = (file: string, onEnd?: () => void): boolean => {
+  const uri = adhanFileUri(file);
+  if (uri === null) {
+    return false;
+  }
+  start(uri, onEnd);
   return true;
+};
+
+/** Plays a bundled tone (a Reminder's sound) in the app, replacing any other. */
+export const playTone = (asset: number, onEnd?: () => void): void => {
+  start(asset, onEnd);
 };

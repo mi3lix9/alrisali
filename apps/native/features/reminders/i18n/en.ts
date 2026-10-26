@@ -168,20 +168,6 @@ export const en: Catalog<typeof ar> = {
       body: "Your alerts are arriving.",
     },
   },
-  rule: {
-    enabled: "Remind me",
-    minutesBefore: "Minutes before",
-    sound: "Sound",
-    muted: "Silent",
-    mutedHint: "Shows the Reminder without a sound.",
-    voice: "Adhan voice",
-    voiceHint: "Plays the Adhan instead of the tone.",
-    sounds: {
-      default: "System sound",
-      chime: "Chime",
-      bell: "Bell",
-    },
-  },
   quietHours: {
     title: "Quiet hours",
     description:
@@ -241,12 +227,9 @@ export const en: Catalog<typeof ar> = {
     },
   },
   editor: {
-    title: "{{name}} alert",
-    atTimeSection: "At the Prayer Time",
     adhanUnavailable:
-      "Download an adhan voice in the Sound section below to make the full adhan available offline.",
+      "Download an adhan voice on the Adhan voice page to make the full adhan available offline.",
     adhanOnOpen: "The full adhan plays when you open the notification",
-    soundSection: "Sound",
     systemSound: "Your device's notification sound",
     systemSoundHint:
       "No adhan voices are published yet, so your device's notification sound plays.",
@@ -263,27 +246,52 @@ export const en: Catalog<typeof ar> = {
       failed: "Download failed",
     },
     takbirFromVoice: "The short takbir is a cut of the chosen voice.",
-    optionsSection: "Options",
-    before: "Reminder before",
     beforeHint: "Separate from the At-Time Alert.",
     minutesBefore: "Minutes before",
     ramadanOnly: "Only in Ramadan",
     ramadanOnlyHint: "The Imsak alert comes on the days of Ramadan alone.",
     iosLimit:
       "iOS plays at most {{seconds}} seconds of a notification sound: you hear the short takbir with the notification, and the full adhan plays when you open it.",
-    testTitle: "Test your choice",
-    testHint: "Tests the current choice, even before saving.",
-    testNoSound: "This choice makes no sound.",
     testNotification: "Test: {{name}} alert",
     testDenied: "Allow notifications to hear the notification sound.",
-    test: "Test",
-    stop: "Stop",
-    save: "Save",
-    cancel: "Cancel",
-    saved: "{{name}} alert saved: {{alert}}",
     permissionTitle: "Notifications are needed",
     permissionReason:
-      "Alerts arrive as notifications from your device. Saving or testing an alert asks to allow them.",
+      "Alerts arrive as notifications from your device. Changing an alert or playing its sound asks to allow them.",
+  },
+  tones: {
+    default: {
+      title: "System sound",
+      hint: "Your device's notification sound",
+    },
+    chime: { title: "Chime", hint: "A soft chime" },
+    bell: { title: "Bell", hint: "A bell" },
+    voice: { title: "Adhan voice", hint: "A short takbir instead of a tone" },
+    silent: { title: "Silent", hint: "Shows the Reminder without a sound" },
+  },
+  sheet: {
+    back: "Back",
+    atTime: "At the Prayer Time",
+    voice: "Adhan voice",
+    before: "Reminder before",
+    off: "Off",
+    beforeValue: "{{minutes}} before",
+    onTime: "At the Prayer Time",
+    preview: "Play {{sound}}",
+    stopPreview: "Stop {{sound}}",
+  },
+  summary: {
+    atTime: {
+      off: "Nothing at {{name}}",
+      silent: "A silent notification at {{name}}",
+      takbirSystem: "Your device's notification sound at {{name}}",
+      takbir: "{{voice}}'s takbir at {{name}}",
+      adhan: "{{voice}}'s full adhan at {{name}}",
+    },
+    before: {
+      off: "No reminder before",
+      at: "{{tone}} when it begins",
+      on: "{{tone}}, {{minutes}} before",
+    },
   },
   storage: {
     title: "Downloaded adhans",

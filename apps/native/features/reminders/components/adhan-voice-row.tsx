@@ -20,20 +20,26 @@ import { launchLanguage } from "@/shared/lib/preferences";
 
 import { adhanJobId, downloadAdhan } from "../data/adhan-downloads";
 import { useAdhanVoices } from "../hooks/use-adhan-voices";
+import { SoundPreviewButton } from "./sound-preview-button";
 
 /**
- * One voice of the adhan catalogue in the editor's Sound section: choosable
- * once it is downloaded, with the download (or its progress, pause and
- * resume) beside it until then. An undownloaded voice cannot be chosen.
+ * One voice of the adhan catalogue on the Adhan voice page: choosable
+ * once it is downloaded (with a play button for its takbir), with the
+ * download (or its progress, pause and resume) beside it until then. An undownloaded voice cannot be chosen.
  */
 export const AdhanVoiceRow = ({
   entry,
   selected,
+  playing,
   onSelect,
+  onPreview,
 }: {
   entry: AdhanCatalogueEntry;
   selected: boolean;
+  /** Its takbir is playing as a preview. */
+  playing: boolean;
   onSelect: () => void;
+  onPreview: () => void;
 }) => {
   const { t } = useTranslation("reminders");
   const formatSize = useFormatSize();
@@ -70,7 +76,17 @@ export const AdhanVoiceRow = ({
 
   const action = (() => {
     if (downloaded) {
-      return selected ? <CheckIcon size={20} /> : null;
+      return (
+        <>
+          <SoundPreviewButton
+            testID={`${testID}-preview`}
+            soundName={name}
+            playing={playing}
+            onPress={onPreview}
+          />
+          {selected ? <CheckIcon size={20} /> : null}
+        </>
+      );
     }
     if (running || waiting) {
       return (
